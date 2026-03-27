@@ -1,6 +1,6 @@
 let inventario = []; let carrito = {}; let favoritos = JSON.parse(localStorage.getItem('gc_favs')) || []; 
 let tasaOficial = 36.25; let totalCarrito = 0; let categoriaActual = 'LICORES'; let debounceTimer; 
-let isTiendaAbierta = true;
+let isTiendaAbierta = true; let codigosRecomendados = []; 
 let productosFiltradosGlobal = []; let itemsPorPagina = 30; let paginaActual = 1;
 
 if(localStorage.getItem('gc_dark') === 'true') document.body.classList.add('dark-mode');
@@ -41,12 +41,21 @@ function checkHorario() {
 }
 checkHorario(); setInterval(checkHorario, 60000);
 
-async function obtenerTasaBaseDatos() {
+// NUEVA FUNCIÓN: Ahora lee la Tasa y los Recomendados al mismo tiempo
+async function obtenerArchivosExternos() {
     try {
-        let res = await fetch('tasa.txt?v=' + new Date().getTime());
-        if (res.ok) { let texto = await res.text(); tasaOficial = parseFloat(texto.replace(',', '.')); }
-    } catch (error) { console.log("Usando tasa predeterminada de respaldo."); }
+        let resTasa = await fetch('tasa.txt?v=' + new Date().getTime());
+        if (resTasa.ok) { let texto = await resTasa.text(); tasaOficial = parseFloat(texto.replace(',', '.')); }
+    } catch (error) { console.log("Usando tasa predeterminada."); }
     document.getElementById('tasaValor').innerText = tasaOficial.toFixed(2) + " Bs";
+
+    try {
+        let resRec = await fetch('recomendados.txt?v=' + new Date().getTime());
+        if (resRec.ok) { 
+            let textoRec = await resRec.text(); 
+            codigosRecomendados = textoRec.split(/[\n,]+/).map(c => c.trim()).filter(c => c !== ""); 
+        }
+    } catch (error) { console.log("No se encontró recomendados.txt"); }
 }
 
 function imgFallback(imgElement, codigoProducto) {
@@ -61,7 +70,7 @@ const fetchCSV = (u) => new Promise((resolve, reject) => { Papa.parse(u, { downl
 function limpiarCategoria(texto) { if(!texto) return "Otros"; return texto.trim().replace(/\s+/g, ' ').toUpperCase(); }
 
 async function cargarInventario() {
-    await obtenerTasaBaseDatos(); toggleDireccion();
+    await obtenerArchivosExternos(); toggleDireccion();
     try {
         const [pRaw, sRaw] = await Promise.all([ fetchCSV("Inventario Fisico general precio por unidad.csv"), fetchCSV("inventario por existencia.csv") ]);
         let mapa = {};
@@ -258,8 +267,17 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false) {
     }
 }
 
+// NUEVA LÓGICA: Ahora lee los códigos del archivo recomendados.txt
 function sugerirAcompañante() {
-    let sugerencias = inventario.filter(p => (p.Nombre.includes("HIELO") || p.Nombre.includes("COLA") || p.Nombre.includes("REFRESCO")) && p.StockNum > 0).slice(0, 3);
+    let sugerencias = [];
+    
+    // Si el archivo tiene códigos, los busca. Si está vacío, busca Hielo y Refresco por defecto.
+    if(codigosRecomendados.length > 0) {
+        sugerencias = inventario.filter(p => codigosRecomendados.includes(p.codigo) && p.StockNum > 0).slice(0, 3);
+    } else {
+        sugerencias = inventario.filter(p => (p.Nombre.includes("HIELO") || p.Nombre.includes("COLA") || p.Nombre.includes("REFRESCO")) && p.StockNum > 0).slice(0, 3);
+    }
+
     if(sugerencias.length > 0) {
         let cont = document.getElementById('cross-sell-items'); cont.innerHTML = '';
         sugerencias.forEach(p => {
@@ -294,7 +312,6 @@ function repetirPedido(index) {
 function renderizarCarrito() {
     const lista = document.getElementById('lista-carrito'); lista.innerHTML = ''; totalCarrito = 0;
     
-    // ILUSTRACIÓN DE CARRITO VACÍO
     if(Object.keys(carrito).length === 0) {
         lista.innerHTML = `
             <div style="text-align: center; padding: 60px 20px; color: var(--texto-claro);">
@@ -303,11 +320,11 @@ function renderizarCarrito() {
                 <p style="font-size: 13px; margin-top: 5px;">Agrega unas bebidas para empezar la fiesta.</p>
                 <button onclick="cerrarModal('modal-cart', 'nav-home')" class="btn-enviar" style="width: auto; padding: 12px 30px; margin-top: 25px; display: inline-block;">Ir a comprar</button>
             </div>`;
-        document.getElementById('checkout-sections').style.display = 'none'; // Ocultar checkout si está vacío
+        document.getElementById('checkout-sections').style.display = 'none'; 
         return;
     }
     
-    document.getElementById('checkout-sections').style.display = 'block'; // Mostrar si hay cosas
+    document.getElementById('checkout-sections').style.display = 'block'; 
     
     for(let nombre in carrito) {
         let item = carrito[nombre]; let sub = item.precio * item.cantidad; totalCarrito += sub;
