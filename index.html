@@ -271,11 +271,12 @@
             </div>
             <div class="checkout-box">
                 <p class="box-title">Método de Pago</p>
-                <select id="metodoPagoSelect" class="input-select" onchange="actualizarMetodoPago()">
+               <select id="metodoPagoSelect" class="input-select" onchange="actualizarMetodoPago()">
                     <option value="Efectivo">💵 Efectivo</option>
                     <option value="Pago Movil">📱 Pago Móvil</option>
                     <option value="Zelle">🟣 Zelle</option>
                 </select>
+                
                 <div id="box-efectivo" style="margin-top: 15px; text-align: center;">
                     <p style="font-size: 11px; color: var(--texto-claro); margin-bottom: 5px;">¿Con cuánto vas a pagar?</p>
                     <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
@@ -283,6 +284,21 @@
                         <input type="number" id="montoPago" class="vuelto-input" placeholder="0.00" onkeyup="calcularVuelto()">
                     </div>
                     <p id="res-vuelto" style="font-size:12px; margin-top:5px; display:none; font-weight:bold;"></p>
+                </div>
+
+                <div id="box-pagomovil" style="margin-top: 15px; display:none; background: var(--item-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--borde-color); text-align: left;">
+                    <p style="font-size: 11px; color: var(--texto-claro); margin-bottom: 8px; text-transform: uppercase; font-weight: bold;">Datos Pago Móvil</p>
+                    <p style="font-size: 13px; margin-bottom: 4px;"><b>Banco:</b> Mercantil</p>
+                    <p style="font-size: 13px; margin-bottom: 4px;"><b>Teléfono:</b> 0414-3732274</p>
+                    <p style="font-size: 13px; margin-bottom: 8px;"><b>Cédula/RIF:</b> V:22582611</p>
+                    <p style="font-size: 11px; color: var(--dorado); font-weight: bold; text-align: center; margin-top: 10px;"><i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp al enviar el pedido</p>
+                </div>
+
+                <div id="box-zelle" style="margin-top: 15px; display:none; background: var(--item-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--borde-color); text-align: center;">
+                    <p style="font-size: 11px; color: var(--texto-claro); margin-bottom: 8px; text-transform: uppercase; font-weight: bold;">Datos Zelle</p>
+                    <p style="font-size: 14px; margin-bottom: 4px; font-weight: bold; color: #741b88;">grancatadorcorp@gmail.com</p>
+                    <p style="font-size: 12px; margin-bottom: 8px;">A nombre de: <b>Ariadna Silva</b></p>
+                    <p style="font-size: 11px; color: var(--dorado); font-weight: bold; margin-top: 10px;"><i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp al enviar el pedido</p>
                 </div>
             </div>
             <div class="total-container">
@@ -303,7 +319,7 @@
         <div class="checkout-box">
             <p class="box-title">Tus Datos</p>
             <p style="font-size: 12px; color: var(--texto-claro); margin-bottom: 15px;">Guarda tu información para compras rápidas.</p>
-            <label style="font-size: 12px; font-weight: bold;">Nombre o Apodo</label>
+            <label style="font-size: 12px; font-weight: bold;">Nombre o y Apalleido</label>
             <input type="text" id="perfilNombre" class="input-text" placeholder="Ej: Juan Pérez" style="margin-bottom: 15px;">
             <label style="font-size: 12px; font-weight: bold;">Dirección de Delivery</label>
             <input type="text" id="perfilDireccion" class="input-text" placeholder="Ej: Av. Principal, Casa #10">
