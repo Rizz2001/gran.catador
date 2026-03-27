@@ -50,8 +50,7 @@
         .marquee-container { background: var(--dorado); color: black; padding: 5px 0; font-size: 11px; font-weight: bold; white-space: nowrap; overflow: hidden; position: relative; z-index: 5; margin-top: -10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-transform: uppercase;}
         .marquee-text { display: inline-block; padding-left: 100%; animation: marquee 20s linear infinite; }
         @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
-
-    /* --- BANNERS DINÁMICOS Y RESPONSIVOS --- */
+/* --- BANNERS DINÁMICOS Y RESPONSIVOS --- */
         .banners-container { display: flex; overflow-x: auto; gap: 15px; padding: 20px 20px 5px 20px; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; }
         .banners-container::-webkit-scrollbar { display: none; }
         
@@ -76,6 +75,7 @@
             .bottom-nav { display: none; } /* Ocultamos menú inferior */
             body { padding-bottom: 20px; }
         }
+        
         .tools-container { margin: 15px 20px; display: flex; flex-direction: column; gap: 10px; z-index: 10; position: relative; }
         .search-container { background: white; border-radius: 12px; padding: 12px 15px; display: flex; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid var(--borde-color); transition: 0.2s; position: relative;}
         .search-container input { background: transparent; border: none; outline: none; width: 100%; margin-left: 10px; font-size: 14px; color: var(--texto-oscuro); font-weight: 500; }
