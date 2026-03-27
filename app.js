@@ -1,5 +1,5 @@
 let inventario = []; let carrito = {}; let favoritos = JSON.parse(localStorage.getItem('gc_favs')) || []; 
-let tasaOficial = 36.25; let totalCarrito = 0; let categoriaActual = 'Todos'; let debounceTimer; 
+let tasaOficial = 36.25; let totalCarrito = 0; let categoriaActual = 'LICORES'; let debounceTimer; 
 let isTiendaAbierta = true;
 
 let productosFiltradosGlobal = [];
