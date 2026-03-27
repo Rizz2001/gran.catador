@@ -46,9 +46,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; }
         body { background-color: var(--fondo); color: var(--texto-oscuro); padding-bottom: 90px; transition: background 0.3s, color 0.3s; scroll-behavior: smooth; }
 
-        /* ELIMINAR FLECHAS FEAS DE LOS INPUTS DE NÚMERO */
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
         body.dark-mode .producto-card, body.dark-mode .search-container, body.dark-mode .cat-btn, body.dark-mode .checkout-box, body.dark-mode .cart-item, body.dark-mode .filtro-select, body.dark-mode .cross-modal-content { background: #1f2937; color: white; border-color: rgba(255,255,255,0.08); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
@@ -65,12 +63,7 @@
         .age-btn:active { transform: scale(0.95); }
         .age-error { color: #ea4335; font-size: 12px; margin-top: 10px; display: none; font-weight: bold; }
 
-        header { 
-            background-color: var(--azul-rey);
-            padding: 25px 20px 45px 20px; text-align: center; color: white; 
-            border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; 
-            transition: 0.3s; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+        header { background-color: var(--azul-rey); padding: 25px 20px 45px 20px; text-align: center; color: white; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; transition: 0.3s; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         header h1 { font-size: 26px; font-weight: 800; letter-spacing: 1px; }
         header p { font-size: 12px; color: var(--dorado); letter-spacing: 2px; text-transform: uppercase; font-weight: 600; margin-top: 2px;}
         .tasa-bcv { background: rgba(255,255,255,0.1); padding: 5px 15px; border-radius: 20px; font-size: 11px; display: inline-block; margin-top: 10px; border: 1px solid rgba(245, 167, 0, 0.5); cursor: pointer; }
@@ -93,7 +86,6 @@
         .search-container:focus-within { border-color: var(--dorado); }
         .search-container input { background: transparent; border: none; outline: none; width: 100%; margin-left: 10px; font-size: 14px; color: var(--texto-oscuro); font-weight: 500; }
         
-        /* CORRECCIÓN: Z-INDEX ALTO PARA QUE NO SE ESCONDA EL BUSCADOR */
         #search-suggestions { position: absolute; top: 55px; left: 0; width: 100%; background: white; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25); display: none; overflow: hidden; z-index: 1000; max-height: 250px; overflow-y: auto; }
         body.dark-mode #search-suggestions { background: #1f2937; border: 1px solid rgba(255,255,255,0.08); }
         .suggestion-item { padding: 12px 15px; border-bottom: 1px solid var(--borde-color); font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 10px; }
@@ -138,9 +130,12 @@
         .ig-section { text-align: center; padding: 20px; margin-bottom: 20px; }
         .ig-btn { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white; padding: 12px 25px; border-radius: 30px; text-decoration: none; font-weight: bold; font-size: 14px; box-shadow: 0 4px 15px rgba(220, 39, 67, 0.4); }
 
-        .cart-float { position: fixed; bottom: 90px; right: 20px; background: var(--dorado); color: black; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 12px rgba(245, 167, 0, 0.4); z-index: 99; cursor: pointer; transition: 0.2s; }
+        .cart-float { position: fixed; bottom: 90px; right: 20px; background: var(--dorado); color: black; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: 0 4px 12px rgba(245, 167, 0, 0.4); z-index: 99; cursor: pointer; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .cart-badge { position: absolute; top: -3px; right: -3px; background: #ea4335; color: white; font-size: 11px; font-weight: bold; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
         
+        /* CSS PARA LA ANIMACIÓN DE LA BOTELLA VOLADORA */
+        .flying-img { position: fixed; width: 50px; height: 50px; object-fit: contain; z-index: 5000; transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); pointer-events: none; }
+
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 15px 0 20px 0; box-shadow: 0 -2px 15px rgba(0,0,0,0.05); border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 100; border-top: 1px solid rgba(255,255,255,0.3); }
         body.dark-mode .bottom-nav { background: rgba(31, 41, 55, 0.9); border-top: 1px solid rgba(255,255,255,0.05); }
         .bottom-nav a { color: var(--texto-claro); font-size: 22px; text-decoration: none; transition: 0.2s; }
@@ -152,7 +147,7 @@
         .cart-header h2 { color: var(--azul-rey); font-size: 20px; font-weight: bold; }
         body.dark-mode .cart-header h2 { color: var(--dorado); }
         
-        .checkout-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid var(--borde-color); }
+        .checkout-box { background: white; padding: 15px; border-radius: 15px; margin-top: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid var(--borde-color); transition: 0.2s;}
         .box-title { font-size: 11px; color: var(--texto-claro); font-weight: bold; margin-bottom: 10px; letter-spacing: 1px; text-transform: uppercase; }
         .cart-item { background: white; padding: 10px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border: 1px solid var(--borde-color); }
         .cart-item-info { flex-grow: 1; } .cart-item-title { font-size: 13px; font-weight: 600; } .cart-item-price { color: var(--dorado); font-weight: bold; font-size: 14px; }
@@ -246,9 +241,7 @@
     <div class="categorias-scroll" id="contenedorCategorias"></div>
 
     <div class="productos-grid" id="lista-productos">
-        <div class="skeleton-card"><div class="skeleton-box s-img"></div><div class="skeleton-box s-text"></div><div class="skeleton-box s-text-short"></div><div class="skeleton-box s-btn"></div></div>
-        <div class="skeleton-card"><div class="skeleton-box s-img"></div><div class="skeleton-box s-text"></div><div class="skeleton-box s-text-short"></div><div class="skeleton-box s-btn"></div></div>
-    </div>
+        </div>
     
     <button id="btn-cargar-mas" class="btn-cargar-mas" onclick="cargarMasProductos()">Cargar más productos...</button>
 
@@ -257,7 +250,7 @@
         <a href="https://instagram.com/tu-perfil" target="_blank" class="ig-btn"><i class="fa-brands fa-instagram" style="font-size:16px;"></i> @GranCatador</a>
     </div>
 
-    <div class="cart-float" onclick="abrirCarrito()">
+    <div class="cart-float" id="icono-carrito-flotante" onclick="abrirCarrito()">
         <i class="fa-solid fa-cart-shopping"></i>
         <div class="cart-badge" id="cart-count">0</div>
     </div>
@@ -325,7 +318,7 @@
                 <div class="total-usd" id="totalUsdModal">$0.00</div>
                 <div class="total-bs" id="totalBsModal">0,00 Bs</div>
             </div>
-            <button id="btn-whatsapp" class="btn-enviar" onclick="enviarPedido()"><i class="fa-brands fa-whatsapp"></i> Enviar Pedido por WhatsApp</button>
+            <button id="btn-whatsapp" class="btn-enviar" onclick="enviarPedido()"><i class="fa-brands fa-whatsapp"></i> Enviar Pedido</button>
             <p id="msg-cerrado" style="text-align:center; color:#ea4335; font-size:11px; font-weight:bold; display:none; margin-top:10px;">La tienda está cerrada en este momento.</p>
         </div>
     </div>
@@ -355,11 +348,33 @@
             <h2>Ajustes</h2>
             <i class="fa-solid fa-xmark" onclick="cerrarModal('modal-ajustes', 'nav-home')" style="font-size: 24px; cursor: pointer;"></i>
         </div>
+        
         <div class="checkout-box" style="display:flex; justify-content:space-between; align-items:center;">
             <span style="font-weight:600; font-size: 14px;">🌙 Modo Oscuro</span>
             <input type="checkbox" id="toggleDarkMode" onchange="toggleDark()" style="width:20px; height:20px; accent-color: var(--dorado);">
         </div>
-        <p style="text-align: center; margin-top: 30px; font-size: 12px; color: var(--texto-claro);">Gran Catador App - Versión 6.3 (Blindada)</p>
+
+        <div class="checkout-box" style="margin-top:15px; cursor:pointer;" onclick="abrirLegales()">
+            <span style="font-weight:600; font-size: 14px; display:flex; align-items:center;"><i class="fa-solid fa-scale-balanced" style="margin-right:10px; color: var(--dorado); font-size: 18px;"></i> Políticas y Soporte</span>
+        </div>
+
+        <p style="text-align: center; margin-top: 30px; font-size: 12px; color: var(--texto-claro);">Gran Catador App - Versión 7.0 (Enterprise)</p>
+    </div>
+
+    <div id="modal-legales" class="modal-fullscreen" style="z-index: 2500;">
+        <div class="cart-header">
+            <h2>Legal y Soporte</h2>
+            <i class="fa-solid fa-arrow-left" onclick="cerrarModal('modal-legales', 'modal-ajustes')" style="font-size: 22px; cursor: pointer; color: var(--texto-claro);"></i>
+        </div>
+        <div class="checkout-box">
+            <p style="font-size: 13px; font-weight: bold; color: var(--azul-rey);">1. Zonas de Delivery (Barinas)</p>
+            <p style="font-size: 12px; color: var(--texto-claro); margin-bottom:10px;">Llegamos a gran parte de la ciudad. Ciertas zonas periféricas pueden tener recargo o no estar cubiertas por seguridad.</p>
+            <p style="font-size: 13px; font-weight: bold; color: var(--azul-rey);">2. Edad Mínima</p>
+            <p style="font-size: 12px; color: var(--texto-claro); margin-bottom:10px;">Prohibida la venta de licores a menores de 18 años. El repartidor podrá exigir documento de identidad en la entrega.</p>
+            <p style="font-size: 13px; font-weight: bold; color: var(--azul-rey);">3. Políticas de Garantía</p>
+            <p style="font-size: 12px; color: var(--texto-claro);">Revise su pedido al momento de recibirlo. No aceptamos devoluciones de botellas abiertas o con sellos fiscales rotos.</p>
+        </div>
+        <button onclick="abrirSoporteWhatsApp()" style="background:#25D366; color:white; border:none; padding:15px; width:100%; border-radius:12px; font-weight:bold; font-size:14px; margin-top:15px; cursor:pointer;"><i class="fa-brands fa-whatsapp" style="font-size: 16px;"></i> Chatear con Soporte</button>
     </div>
 
     <script src="app.js"></script>
