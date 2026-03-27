@@ -1,14 +1,10 @@
 let inventario = []; let carrito = {}; let favoritos = JSON.parse(localStorage.getItem('gc_favs')) || []; 
 let tasaOficial = 36.25; let totalCarrito = 0; let categoriaActual = 'LICORES'; let debounceTimer; 
 let isTiendaAbierta = true;
-
-let productosFiltradosGlobal = [];
-let itemsPorPagina = 30;
-let paginaActual = 1;
+let productosFiltradosGlobal = []; let itemsPorPagina = 30; let paginaActual = 1;
 
 if(localStorage.getItem('gc_dark') === 'true') document.body.classList.add('dark-mode');
 
-// --- PWA ---
 let promptInstalacion;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault(); promptInstalacion = e;
@@ -19,7 +15,6 @@ function instalarApp() {
 }
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); }); }
 
-// --- EDAD Y HORA ---
 if (localStorage.getItem('ageVerified') === 'true') document.getElementById('age-gate').style.display = 'none';
 function verificarEdad() {
     let d = document.getElementById('age-d').value, m = document.getElementById('age-m').value, y = document.getElementById('age-y').value, err = document.getElementById('age-error');
@@ -35,7 +30,6 @@ function checkHorario() {
     let d = new Date();
     let formatter = new Intl.DateTimeFormat('es-VE', { hour: 'numeric', hour12: false, timeZone: 'America/Caracas' });
     let horaCaracas = parseInt(formatter.format(d));
-
     let badge = document.getElementById('store-status'), btnWs = document.getElementById('btn-whatsapp'), msgCerrado = document.getElementById('msg-cerrado');
     if(horaCaracas >= 8 && horaCaracas < 21) {
         isTiendaAbierta = true; badge.innerHTML = "🟢 ABIERTO"; badge.style.background = "rgba(37, 211, 102, 0.2)"; badge.style.color = "#25D366";
@@ -47,7 +41,6 @@ function checkHorario() {
 }
 checkHorario(); setInterval(checkHorario, 60000);
 
-// --- DATOS Y ARCHIVOS ---
 async function obtenerTasaBaseDatos() {
     try {
         let res = await fetch('tasa.txt?v=' + new Date().getTime());
@@ -76,15 +69,9 @@ async function cargarInventario() {
             if (r.length >= 5) {
                 let cod = r[r.length-4]?.trim(), usd = r[r.length-1]?.trim();
                 let catLimpia = limpiarCategoria(r[r.length-5]);
-
                 if (catLimpia === "CHARCUTERIA" || catLimpia === "FRUTERIA") return; 
-
                 if (cod && !isNaN(cod) && usd?.includes(',')) {
-                    mapa[cod] = {
-                        codigo: cod, Nombre: r[r.length-3]?.trim(), Cat: catLimpia,
-                        PrecioStr: usd, PrecioNum: parseFloat(usd.replace('.','').replace(',','.')),
-                        StockNum: 0, StockStr: "0,00"
-                    };
+                    mapa[cod] = { codigo: cod, Nombre: r[r.length-3]?.trim(), Cat: catLimpia, PrecioStr: usd, PrecioNum: parseFloat(usd.replace('.','').replace(',','.')), StockNum: 0, StockStr: "0,00" };
                 }
             }
         });
@@ -100,23 +87,17 @@ async function cargarInventario() {
             }
         });
 
-        // --- TRUCO: PRODUCTOS SIEMPRE DISPONIBLES ---
-        let siempreDisponibles = ["000233", "7591031001959"]; // Aquí pones los códigos de los productos que no se agotan
-        
+        // TRUCO: AQUI VAN LOS CÓDIGOS DE PRODUCTOS QUE NUNCA SE AGOTAN
+        let siempreDisponibles = ["000233", "7591031001959"]; 
         Object.values(mapa).forEach(prod => {
-            if (siempreDisponibles.includes(prod.codigo)) {
-                prod.StockNum = 999; 
-                prod.StockStr = "Disponible"; 
-            }
+            if (siempreDisponibles.includes(prod.codigo)) { prod.StockNum = 999; prod.StockStr = "Disponible"; }
         });
-        // ----------------------------------------------
 
         inventario = Object.values(mapa).filter(p => p.Nombre);
         generarCategorias(); aplicarFiltros(); 
     } catch(e) { document.getElementById('lista-productos').innerHTML = '<p style="text-align:center; grid-column:span 2; color: red; margin-top: 20px;">Error al leer archivos.</p>'; }
 }
 
-// --- FILTROS Y BÚSQUEDA ---
 function levenshtein(a,b){const m=[];for(let i=0;i<=b.length;i++)m[i]=[i];for(let j=0;j<=a.length;j++)m[0][j]=j;for(let i=1;i<=b.length;i++){for(let j=1;j<=a.length;j++){if(b.charAt(i-1)===a.charAt(j-1)){m[i][j]=m[i-1][j-1];}else{m[i][j]=Math.min(m[i-1][j-1]+1,Math.min(m[i][j-1]+1,m[i-1][j]+1));}}}return m[b.length][a.length];}
 function quitarAcentos(texto) { return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
 function debounceFiltros() { clearTimeout(debounceTimer); debounceTimer = setTimeout(aplicarFiltros, 300); }
@@ -131,7 +112,6 @@ function aplicarFiltros() {
     let resultado = inventario;
 
     if (!verAgotados) resultado = resultado.filter(p => p.StockNum > 0);
-
     if (categoriaActual === 'Favoritos') resultado = resultado.filter(p => favoritos.includes(p.codigo));
     else if (categoriaActual !== 'Todos') resultado = resultado.filter(p => p.Cat === categoriaActual);
 
@@ -168,7 +148,6 @@ function renderizarPagina() {
     pedazo.forEach(p => {
         const isFav = favoritos.includes(p.codigo); const isAgotado = p.StockNum <= 0; 
         const d = document.createElement('div'); d.className = `producto-card ${isAgotado ? 'agotado' : ''}`;
-        
         d.innerHTML = `
             ${isAgotado ? '<div class="badge-agotado">AGOTADO</div>' : ''}
             <i class="fa-${isFav ? 'solid' : 'regular'} fa-heart btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${p.codigo}')"></i>
@@ -184,18 +163,48 @@ function renderizarPagina() {
 }
 
 function cargarMasProductos() { paginaActual++; renderizarPagina(); }
+
 function generarCategorias() {
     const cont = document.getElementById('contenedorCategorias');
     let categorias = [...new Set(inventario.map(p => p.Cat))].sort(); 
-    let btnTodos = document.createElement('button'); btnTodos.className = "cat-btn active"; btnTodos.innerText = "Todos"; btnTodos.onclick = function() { filtrarCategoria('Todos', this); };
-    let btnFav = document.createElement('button'); btnFav.className = "cat-btn"; btnFav.innerHTML = "❤️ Favoritos"; btnFav.style.borderColor = "#ff4757"; btnFav.style.color = "#ff4757"; btnFav.onclick = function() { filtrarCategoria('Favoritos', this); };
+    
+    let btnTodos = document.createElement('button'); 
+    btnTodos.className = (categoriaActual === 'Todos') ? "cat-btn active" : "cat-btn"; 
+    btnTodos.innerText = "Todos"; 
+    btnTodos.onclick = function() { filtrarCategoria('Todos', this); };
+    
+    let btnFav = document.createElement('button'); 
+    btnFav.className = (categoriaActual === 'Favoritos') ? "cat-btn active" : "cat-btn"; 
+    btnFav.innerHTML = "❤️ Favoritos"; btnFav.style.borderColor = "#ff4757"; btnFav.style.color = "#ff4757"; 
+    btnFav.onclick = function() { filtrarCategoria('Favoritos', this); };
+    
     cont.innerHTML = ''; cont.appendChild(btnTodos); cont.appendChild(btnFav);
-    categorias.forEach(c => { let b = document.createElement('button'); b.className = "cat-btn"; b.innerText = c; b.onclick = function() { filtrarCategoria(c, this); }; cont.appendChild(b); });
+    
+    categorias.forEach(c => { 
+        let b = document.createElement('button'); 
+        b.className = (c === categoriaActual) ? "cat-btn active" : "cat-btn"; 
+        b.innerText = c; 
+        b.onclick = function() { filtrarCategoria(c, this); }; 
+        cont.appendChild(b); 
+    });
+
+    setTimeout(() => {
+        let activeBtn = cont.querySelector('.active');
+        if(activeBtn) activeBtn.scrollIntoView({behavior: "smooth", inline: "center", block: "nearest"});
+    }, 100);
 }
 
-// --- NAVEGACIÓN Y PERFIL (HISTORIAL) ---
 function setActiveNav(id) { document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.remove('active')); document.getElementById(id).classList.add('active'); }
-function irInicio() { setActiveNav('nav-home'); window.scrollTo({top: 0, behavior: 'smooth'}); document.getElementById('buscador').value = ''; document.getElementById('chkAgotados').checked = false; filtrarCategoria('Todos', document.querySelector('.cat-btn')); }
+
+function irInicio() { 
+    setActiveNav('nav-home'); 
+    window.scrollTo({top: 0, behavior: 'smooth'}); 
+    document.getElementById('buscador').value = ''; 
+    document.getElementById('chkAgotados').checked = false; 
+    let botones = document.querySelectorAll('.cat-btn');
+    let btnLicores = Array.from(botones).find(b => b.innerText === 'LICORES') || botones[0];
+    filtrarCategoria('LICORES', btnLicores); 
+}
 
 function abrirPerfil() { 
     setActiveNav('nav-user'); document.getElementById('modal-perfil').style.display = 'flex'; 
@@ -228,11 +237,9 @@ function abrirAjustes() { setActiveNav('nav-settings'); document.getElementById(
 function toggleDark() { document.body.classList.toggle('dark-mode'); localStorage.setItem('gc_dark', document.body.classList.contains('dark-mode')); }
 function cerrarModal(modalId, lastNavId) { document.getElementById(modalId).style.display = 'none'; setActiveNav('nav-home'); }
 
-// --- CARRITO Y VENTAS CRUZADAS ---
 function agregarAlCarrito(nombre, precio, btnElement, isCross = false) {
     if(carrito[nombre]) carrito[nombre].cantidad++; else carrito[nombre] = { precio: precio, cantidad: 1 };
     actualizarCartCount(); 
-    
     if(btnElement) {
         let iconoOriginal = btnElement.innerHTML; btnElement.innerHTML = '<i class="fa-solid fa-check"></i>'; btnElement.style.background = "#fff"; btnElement.style.color = "var(--verde-btn)"; 
         setTimeout(() => { btnElement.innerHTML = iconoOriginal; btnElement.style.background = "var(--verde-btn)"; btnElement.style.color = "#fff"; }, 500);
@@ -242,9 +249,7 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false) {
         let prod = inventario.find(x => x.Nombre === nombre);
         if(prod) {
             let c = prod.Cat.toUpperCase();
-            if(c.includes("RON") || c.includes("WHISKY") || c.includes("VODKA") || c.includes("GINEBRA") || c.includes("LICOR") || c.includes("TEQUILA")) {
-                sugerirAcompañante();
-            }
+            if(c.includes("RON") || c.includes("WHISKY") || c.includes("VODKA") || c.includes("GINEBRA") || c.includes("LICOR") || c.includes("TEQUILA")) { sugerirAcompañante(); }
         }
     }
 }
@@ -275,8 +280,7 @@ function abrirCarrito() { if(Object.keys(carrito).length === 0) return mostrarTo
 function repetirPedido(index) {
     let hist = JSON.parse(localStorage.getItem('gc_historial')) || [];
     let ped = hist[index]; if(!ped) return;
-    carrito = {};
-    ped.items.forEach(i => { carrito[i.nombre] = { precio: i.precio, cantidad: i.cantidad }; });
+    carrito = {}; ped.items.forEach(i => { carrito[i.nombre] = { precio: i.precio, cantidad: i.cantidad }; });
     actualizarCartCount(); cerrarModal('modal-perfil', 'nav-home'); abrirCarrito(); mostrarToast("Pedido cargado con éxito");
 }
 
@@ -290,7 +294,6 @@ function renderizarCarrito() {
 }
 function cambiarCant(n, delta) { carrito[n].cantidad += delta; if(carrito[n].cantidad <= 0) delete carrito[n]; actualizarCartCount(); if(Object.keys(carrito).length === 0) cerrarModal('modal-cart', 'nav-cart'); else renderizarCarrito(); }
 
-// --- CHECKOUT ---
 function toggleDireccion() { let met = document.querySelector('input[name="metodoEntrega"]:checked').value; let dirInput = document.getElementById('direccionDelivery'); let btnMap = document.getElementById('btnMap'); if(met === 'Delivery') { dirInput.style.display = 'block'; btnMap.style.display = 'none'; if(localStorage.getItem('gc_direccion') && !dirInput.value) dirInput.value = localStorage.getItem('gc_direccion'); } else { dirInput.style.display = 'none'; btnMap.style.display = 'block'; } }
 function abrirMapa() { window.open('http://googleusercontent.com/maps.google.com/2', '_blank'); }
 function actualizarMetodoPago() { let val = document.getElementById('metodoPagoSelect').value; document.getElementById('box-efectivo').style.display = (val === 'Efectivo') ? 'block' : 'none'; }
@@ -299,13 +302,9 @@ function mostrarToast(msg) { const cont = document.getElementById('toast-contain
 
 function enviarPedido() {
     if(!isTiendaAbierta) return alert("Lo sentimos, la tienda se encuentra cerrada en este momento.");
-    
-    let historial = JSON.parse(localStorage.getItem('gc_historial')) || [];
-    let fechaDate = new Date();
-    let fechaStr = fechaDate.toLocaleDateString('es-VE') + " - " + fechaDate.toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'});
+    let historial = JSON.parse(localStorage.getItem('gc_historial')) || []; let fechaDate = new Date(); let fechaStr = fechaDate.toLocaleDateString('es-VE') + " - " + fechaDate.toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'});
     let nuevoPedido = { fecha: fechaStr, total: totalCarrito, items: Object.keys(carrito).map(k => ({ nombre: k, precio: carrito[k].precio, cantidad: carrito[k].cantidad })) };
-    historial.unshift(nuevoPedido); if(historial.length > 5) historial.pop(); 
-    localStorage.setItem('gc_historial', JSON.stringify(historial));
+    historial.unshift(nuevoPedido); if(historial.length > 5) historial.pop(); localStorage.setItem('gc_historial', JSON.stringify(historial));
 
     let nombreUser = localStorage.getItem('gc_nombre') || 'un cliente'; let msg = `Hola Gran Catador, soy ${nombreUser}. Quiero hacer el siguiente pedido:%0A%0A`;
     for(let nombre in carrito) { msg += `▪ ${carrito[nombre].cantidad}x ${nombre} - $${(carrito[nombre].precio * carrito[nombre].cantidad).toFixed(2)}%0A`; }
@@ -315,7 +314,6 @@ function enviarPedido() {
     let metodo = document.getElementById('metodoPagoSelect').value; msg += `%0A💳 *Método de Pago:* ${metodo}`;
     if(metodo === 'Efectivo') { let pago = parseFloat(document.getElementById('montoPago').value) || 0; if(pago > totalCarrito) { msg += `%0A💵 _Pagaré con $${pago}_%0A🟢 _Requiero vuelto de: $${(pago - totalCarrito).toFixed(2)}_`; } } else { msg += `%0A📎 _[Te adjunto el capture]_`; }
     msg += `%0A%0A*TOTAL:* $${totalCarrito.toFixed(2)} (Tasa BCV: ${tasaOficial.toFixed(2)})`; 
-    
     carrito = {}; actualizarCartCount(); cerrarModal('modal-cart', 'nav-cart');
     window.open(`https://wa.me/584245496366?text=${msg}`, '_blank');
 }
