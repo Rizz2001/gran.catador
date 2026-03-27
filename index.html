@@ -52,9 +52,27 @@
         @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
         /* --- NUEVO ESTILO DE BANNERS DINÁMICOS --- */
+       /* --- BANNERS DINÁMICOS Y RESPONSIVOS --- */
         .banners-container { display: flex; overflow-x: auto; gap: 15px; padding: 20px 20px 5px 20px; scroll-snap-type: x mandatory; scrollbar-width: none; -ms-overflow-style: none; }
-        .promo-banner { min-width: 85%; height: 130px; border-radius: 15px; scroll-snap-align: center; display: block; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; background: var(--item-bg); flex-shrink: 0;}
-        .promo-banner img { width: 100%; height: 100%; object-fit: cover; } /* object-fit: cover hace que la foto rellene el cuadro sin deformarse */
+        .banners-container::-webkit-scrollbar { display: none; }
+        
+        .promo-banner { 
+            min-width: 85%; 
+            max-width: 800px; 
+            aspect-ratio: 8 / 3; /* ¡LA MAGIA! Fuerza la proporción 800x300 sin importar la pantalla */
+            height: auto; /* Eliminamos el alto fijo que te cortaba la foto */
+            border-radius: 15px; scroll-snap-align: center; display: block; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); position: relative; background: var(--item-bg); flex-shrink: 0;
+        }
+        .promo-banner img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* --- OPTIMIZACIÓN EXCLUSIVA PARA PC DE ESCRITORIO --- */
+        @media (min-width: 768px) {
+            .promo-banner { min-width: 450px; } /* En PC, muestra varios banners uno al lado del otro */
+            .productos-grid { grid-template-columns: repeat(4, 1fr); gap: 20px; } /* Muestra 4 botellas por fila en vez de 2 */
+            .search-container { max-width: 500px; margin: 0 auto; } /* Centra el buscador para que no se estire feo */
+            .bottom-nav { display: none; } /* Ocultamos el menú de abajo en PC porque se usa el mouse */
+            body { padding-bottom: 20px; }
+        }
 
         .tools-container { margin: 15px 20px; display: flex; flex-direction: column; gap: 10px; z-index: 10; position: relative; }
         .search-container { background: white; border-radius: 12px; padding: 12px 15px; display: flex; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 1px solid var(--borde-color); transition: 0.2s; position: relative;}
