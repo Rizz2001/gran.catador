@@ -182,7 +182,7 @@ function renderizarCarrito() {
 
 function cambiarCant(n, delta) { carrito[n].cantidad += delta; if(carrito[n].cantidad <= 0) delete carrito[n]; guardarCarritoLS(); actualizarCartCount(); renderizarCarrito(); }
 function toggleDireccion() { let met = document.querySelector('input[name="metodoEntrega"]:checked').value; let dirInput = document.getElementById('direccionDelivery'), btnMap = document.getElementById('btnMap'); if(met === 'Delivery') { dirInput.style.display = 'block'; btnMap.style.display = 'none'; if(localStorage.getItem('gc_direccion') && !dirInput.value) dirInput.value = localStorage.getItem('gc_direccion'); } else { dirInput.style.display = 'none'; btnMap.style.display = 'block'; } }
-function abrirMapa() { window.open('https://maps.app.goo.gl/3X5v2X5x2X5x2X5x2', '_blank'); } 
+function abrirMapa() { window.open('https://www.google.com/maps/place/Gran+Catador/@8.6033569,-70.2421571,17z/data=!3m1!4b1!4m6!3m5!1s0x8e7b579b3f702c99:0x93d268a3afb51527!8m2!3d8.6033569!4d-70.2421571!16s%2Fg%2F11sqyv8ynk?entry=ttu&g_ep=EgoyMDI2MDMyNC4wIKXMDSoASAFQAw%3D%3D', '_blank'); } 
 function actualizarMetodoPago() { 
     let val = document.getElementById('metodoPagoSelect').value; 
     document.getElementById('box-efectivo').style.display = (val === 'Efectivo') ? 'block' : 'none'; 
