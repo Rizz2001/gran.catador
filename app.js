@@ -5,6 +5,18 @@ let tasaOficial = 36.25; let totalCarrito = 0; let categoriaActual = 'LICORES'; 
 let isTiendaAbierta = true; let codigosRecomendados = []; let siempreDisponibles = []; 
 let productosFiltradosGlobal = []; let itemsPorPagina = 30; let paginaActual = 1;
 
+// NUEVO: Estado global para saber qué está viendo el cliente
+let modoVistaGlobal = 'unidad'; 
+
+// NUEVO: Inyectar el diseño del interruptor sin tocar el HTML
+const styleT = document.createElement('style');
+styleT.innerHTML = `
+    .toggle-modo-container { display: flex; justify-content: center; margin: 15px 0 10px 0; background: var(--item-bg); border-radius: 12px; padding: 5px; border: 1px solid var(--borde-color); }
+    .btn-modo { flex: 1; padding: 10px 0; text-align: center; font-size: 13px; font-weight: bold; color: var(--texto-claro); border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 5px;}
+    .btn-modo.active { background: var(--dorado); color: black; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+`;
+document.head.appendChild(styleT);
+
 if(localStorage.getItem('gc_dark') === 'true') document.body.classList.add('dark-mode');
 
 let promptInstalacion;
@@ -60,21 +72,40 @@ function imgFallback(imgElement, codigoProducto) {
 const fetchCSV = (u) => new Promise((resolve, reject) => { Papa.parse(u, { download: true, encoding: "latin-1", complete: (r) => resolve(r.data), error: (err) => reject(err) }) });
 function limpiarCategoria(texto) { if(!texto) return "Otros"; return texto.trim().replace(/\s+/g, ' ').toUpperCase(); }
 
-// CEREBRO MATEMÁTICO: Divide la caja para sacar el precio de la unidad sin mostrar cantidades locas
 function obtenerCantCaja(categoria, nombre) {
     let cat = categoria.toUpperCase(); let nom = nombre.toUpperCase();
     if (nom.includes("COMBO") || nom.includes("VASO") || nom.includes("HIELO") || nom.includes("BOTELLA")) return 1;
     if (cat.includes("CERVEZA") || nom.includes("POLAR") || nom.includes("ZULIA")) return 36;
     if (cat.includes("VINO")) return 6;
-    if (cat.includes("AGUA") || cat.includes("REFRESCO")) {
-        if (nom.includes("1.5") || nom.includes("2 L") || nom.includes("1.50") || nom.includes("2L")) return 6;
-        return 24;
+    if (cat.includes("AGUA") || cat.includes("REFRESCO")) { if (nom.includes("1.5") || nom.includes("2 L") || nom.includes("1.50") || nom.includes("2L")) return 6; return 24; }
+    return 12; 
+}
+
+// NUEVO: Función para cambiar el interruptor
+function cambiarModoVista(modo) {
+    modoVistaGlobal = modo;
+    document.getElementById('btn-modo-unidad').classList.remove('active');
+    document.getElementById('btn-modo-caja').classList.remove('active');
+    document.getElementById('btn-modo-' + modo).classList.add('active');
+    renderizarPagina(); // Recarga los precios en tiempo real
+}
+
+function inyectarInterruptor() {
+    let cont = document.querySelector('.tools-container');
+    if(cont && !document.getElementById('toggle-modo-global')) {
+        let div = document.createElement('div');
+        div.id = 'toggle-modo-global';
+        div.className = 'toggle-modo-container';
+        div.innerHTML = `
+            <div class="btn-modo active" id="btn-modo-unidad" onclick="cambiarModoVista('unidad')">🍾 Por Unidad</div>
+            <div class="btn-modo" id="btn-modo-caja" onclick="cambiarModoVista('caja')">📦 Por Caja</div>
+        `;
+        cont.insertBefore(div, cont.children[1]);
     }
-    return 12; // Estándar general
 }
 
 async function cargarInventario() {
-    await obtenerArchivosExternos(); toggleDireccion(); 
+    await obtenerArchivosExternos(); toggleDireccion(); inyectarInterruptor();
     try {
         const [pRaw, sRaw] = await Promise.all([ fetchCSV("listadepreciosporgrupo.csv"), fetchCSV("inventario por existencia.csv") ]); let mapa = {};
         
@@ -86,22 +117,21 @@ async function cargarInventario() {
                 let catLimpia = limpiarCategoria(catBruto); 
                 if (catLimpia === "CHARCUTERIA" || catLimpia === "FRUTERIA") return; 
                 
-                // Leemos el precio que viene del CSV (Que resulta ser el de la Caja)
                 let bsCajaNum = parseFloat(bsStr.replace(/\./g,'').replace(',','.'));
                 let usdCajaNum = bsCajaNum / tasaOficial;
 
-                // Calculamos cuánto vale la unidad dividiendo el precio de la caja
                 let cantCaja = obtenerCantCaja(catLimpia, nombreBruto);
                 let usdUnidadNum = usdCajaNum / cantCaja;
                 let bsUnidadNum = bsCajaNum / cantCaja;
 
                 mapa[cod] = { 
                     codigo: cod, Nombre: nombreBruto, Cat: catLimpia, 
-                    PrecioStr: usdUnidadNum.toFixed(2), // PRECIO PRINCIPAL AHORA ES UNIDAD
+                    PrecioStr: usdUnidadNum.toFixed(2), 
                     PrecioNum: usdUnidadNum, 
                     PrecioBsStr: bsUnidadNum.toLocaleString('es-VE', {minimumFractionDigits:2, maximumFractionDigits:2}), 
-                    PrecioCajaUsd: usdCajaNum.toFixed(2), // PRECIO DE CAJA SE GUARDA SEPARADO
+                    PrecioCajaUsd: usdCajaNum.toFixed(2), 
                     PrecioCajaNum: usdCajaNum,
+                    PrecioCajaBsStr: bsCajaNum.toLocaleString('es-VE', {minimumFractionDigits:2, maximumFractionDigits:2}), // Guardamos el Bs de la caja
                     StockNum: 0, StockStr: "0,00" 
                 }; 
             } 
@@ -154,6 +184,15 @@ function renderizarPagina() {
     pedazo.forEach(p => {
         const isFav = favoritos.includes(p.codigo); const isAgotado = p.StockNum <= 0; const d = document.createElement('div'); d.className = `producto-card ${isAgotado ? 'agotado' : ''}`; let nombreB64 = codificarNombre(p.Nombre);
         
+        // NUEVO: Variables dinámicas según el interruptor
+        let esModoCaja = (modoVistaGlobal === 'caja');
+        let precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;
+        let precioBsDin = esModoCaja ? p.PrecioCajaBsStr : p.PrecioBsStr;
+        let iconoBtn = esModoCaja ? '📦' : '🍾';
+        let colorBtn = esModoCaja ? 'var(--dorado)' : 'var(--verde-btn)';
+        let colorTexto = esModoCaja ? 'black' : 'white';
+        let etiquetaModo = esModoCaja ? 'Precio por Caja' : 'Precio por Unidad';
+
         d.innerHTML = `
             ${isAgotado ? '<div class="badge-agotado">AGOTADO</div>' : ''}
             <i class="fa-${isFav ? 'solid' : 'regular'} fa-heart btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${p.codigo}')"></i>
@@ -161,15 +200,12 @@ function renderizarPagina() {
             <h3 class="producto-titulo">${p.Nombre}</h3>
             <p class="producto-stock" style="margin-bottom:2px;">Disp: ${p.StockStr}</p>
             
-            <p class="producto-precio">$${p.PrecioStr} <span style="font-size:11px; color:var(--texto-claro); display:inline-block; font-weight:500;">/ ${p.PrecioBsStr} Bs</span></p>
+            <p class="producto-precio">$${precioUsdDin} <span style="font-size:11px; color:var(--texto-claro); display:inline-block; font-weight:500;">/ ${precioBsDin} Bs</span></p>
+            <p style="font-size:10px; color:var(--texto-claro); font-weight:bold; margin-top:2px; margin-bottom: 30px;">${etiquetaModo}</p>
             
-            <p style="font-size:11px; color:var(--dorado); font-weight:bold; margin-top:2px; margin-bottom: 30px;">📦 Caja: $${p.PrecioCajaUsd}</p>
+            <button class="btn-share" style="bottom: 12px; right: 50px;" onclick="compartirProductoB64('${nombreB64}', '${precioUsdDin}')"><i class="fa-solid fa-share-nodes"></i></button>
             
-            <button class="btn-share" style="bottom: 12px; right: 90px;" onclick="compartirProductoB64('${nombreB64}', '${p.PrecioStr}')"><i class="fa-solid fa-share-nodes"></i></button>
-            
-            <button class="btn-add ${isAgotado ? 'disabled' : ''}" style="width: 32px; border-radius: 8px; right: 50px; font-size: 13px;" title="Agregar Unidad" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, false, 'img/${p.codigo}.webp', false)"`}>🍾</button>
-            
-            <button class="btn-add ${isAgotado ? 'disabled' : ''}" style="width: 32px; border-radius: 8px; right: 12px; background: var(--dorado); color: black; font-size: 13px;" title="Agregar Caja" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioCajaNum}, this, false, 'img/${p.codigo}.webp', true)"`}>📦</button>
+            <button class="btn-add ${isAgotado ? 'disabled' : ''}" style="width: 32px; border-radius: 8px; right: 12px; background: ${colorBtn}; color: ${colorTexto}; font-size: 13px;" title="Agregar" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${esModoCaja ? p.PrecioCajaNum : p.PrecioNum}, this, false, 'img/${p.codigo}.webp', ${esModoCaja})"`}>${iconoBtn}</button>
         `;
         fragmento.appendChild(d);
     });
@@ -210,7 +246,6 @@ function animarAlCarrito(btnElement, imgSrc) {
     setTimeout(() => { flyingImg.remove(); cartIcon.style.transform = 'scale(1.2) rotate(-10deg)'; setTimeout(() => cartIcon.style.transform = 'scale(1) rotate(0)', 200); }, 600);
 }
 
-// LOGICA DE CARRITO: SEPARA PRODUCTO EN "(UNIDAD)" O "(CAJA)"
 function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = '', esCaja = false) {
     let nombreFinal = esCaja ? `${nombre} (CAJA)` : `${nombre} (UNIDAD)`;
     
