@@ -63,9 +63,40 @@ function limpiarCategoria(texto) { if(!texto) return "Otros"; return texto.trim(
 async function cargarInventario() {
     await obtenerArchivosExternos(); toggleDireccion(); 
     try {
-        // MUCHO CUIDADO: Estos nombres deben coincidir EXACTO con los de GitHub
-        const [pRaw, sRaw] = await Promise.all([ fetchCSV("Inventario Fisico general precio por unidad.csv"), fetchCSV("inventario por existencia.csv") ]); let mapa = {};
-        pRaw.forEach(r => { if (r.length >= 5) { let cod = r[r.length-4]?.trim(), usd = r[r.length-1]?.trim(); let catLimpia = limpiarCategoria(r[r.length-5]); if (catLimpia === "CHARCUTERIA" || catLimpia === "FRUTERIA") return; if (cod && usd?.includes(',')) { mapa[cod] = { codigo: cod, Nombre: r[r.length-3]?.trim(), Cat: catLimpia, PrecioStr: usd, PrecioNum: parseFloat(usd.replace('.','').replace(',','.')), StockNum: 0, StockStr: "0,00" }; } } });
+        // LECTURA DEL NUEVO ARCHIVO listadepreciosporgrupo.csv
+        const [pRaw, sRaw] = await Promise.all([ fetchCSV("listadepreciosporgrupo.csv"), fetchCSV("inventario por existencia.csv") ]); let mapa = {};
+        
+        pRaw.forEach(r => { 
+            if (r.length >= 4) { 
+                let catBruto = r[r.length-4];
+                let cod = r[r.length-3]?.trim();
+                let nombreBruto = r[r.length-2]?.trim();
+                let bsStr = r[r.length-1]?.trim(); 
+                
+                // Evitamos líneas vacías o de encabezado
+                if (!cod || !bsStr || cod === "Código" || !bsStr.includes(',')) return;
+
+                let catLimpia = limpiarCategoria(catBruto); 
+                if (catLimpia === "CHARCUTERIA" || catLimpia === "FRUTERIA") return; 
+                
+                // CONVERSIÓN DE BS A DÓLARES AUTOMÁTICA
+                let bsNum = parseFloat(bsStr.replace(/\./g,'').replace(',','.'));
+                let usdNum = bsNum / tasaOficial;
+                let usdStr = usdNum.toFixed(2);
+
+                mapa[cod] = { 
+                    codigo: cod, 
+                    Nombre: nombreBruto, 
+                    Cat: catLimpia, 
+                    PrecioStr: usdStr,    // Mantenemos el USD como principal
+                    PrecioNum: usdNum,    // Mantenemos el USD como principal
+                    PrecioBsStr: bsStr,   // Guardamos el Bs original
+                    StockNum: 0, 
+                    StockStr: "0,00" 
+                }; 
+            } 
+        });
+        
         sRaw.forEach(r => { let i = r.indexOf("Existencia"); if (i !== -1 && r.length > i + 8) { let cod = r[i+2]?.trim(); if (mapa[cod]) { mapa[cod].StockStr = r[i+8]?.trim(); mapa[cod].StockNum = parseFloat(mapa[cod].StockStr.replace('.','').replace(',','.')); } } });
         Object.values(mapa).forEach(prod => { if (siempreDisponibles.includes(prod.codigo)) { prod.StockNum = 999; prod.StockStr = "Disponible"; } });
         inventario = Object.values(mapa).filter(p => p.Nombre);
@@ -75,7 +106,7 @@ async function cargarInventario() {
         actualizarCartCount(); generarCategorias(); aplicarFiltros(); 
     } catch(e) { 
         console.log("Error crítico leyendo CSV:", e);
-        document.getElementById('lista-productos').innerHTML = '<div style="grid-column: span 2; text-align: center; padding: 30px; border: 1px solid red; border-radius: 10px;"><h3 style="color:red;">Error de Conexión</h3><p style="font-size:12px; margin-top:10px;">Asegúrate de que los archivos CSV estén subidos a GitHub con los nombres exactos (respetando mayúsculas y espacios).</p></div>'; 
+        document.getElementById('lista-productos').innerHTML = '<div style="grid-column: span 2; text-align: center; padding: 30px; border: 1px solid red; border-radius: 10px;"><h3 style="color:red;">Error de Conexión</h3><p style="font-size:12px; margin-top:10px;">Asegúrate de que el archivo listadepreciosporgrupo.csv esté subido a GitHub.</p></div>'; 
     }
 }
 
@@ -113,7 +144,8 @@ function renderizarPagina() {
     const fragmento = document.createDocumentFragment();
     pedazo.forEach(p => {
         const isFav = favoritos.includes(p.codigo); const isAgotado = p.StockNum <= 0; const d = document.createElement('div'); d.className = `producto-card ${isAgotado ? 'agotado' : ''}`; let nombreB64 = codificarNombre(p.Nombre);
-        d.innerHTML = `${isAgotado ? '<div class="badge-agotado">AGOTADO</div>' : ''}<i class="fa-${isFav ? 'solid' : 'regular'} fa-heart btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${p.codigo}')"></i><img loading="lazy" src="img/${p.codigo}.webp" data-attempts="0" onerror="imgFallback(this, '${p.codigo}')" alt="${p.Nombre}"><h3 class="producto-titulo">${p.Nombre}</h3><p class="producto-stock">Disp: ${p.StockStr}</p><p class="producto-precio">$${p.PrecioStr}</p><button class="btn-share" onclick="compartirProductoB64('${nombreB64}', '${p.PrecioStr}')"><i class="fa-solid fa-share-nodes"></i></button><button class="btn-add ${isAgotado ? 'disabled' : ''}" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, false, 'img/${p.codigo}.webp')"`}><i class="fa-solid fa-plus"></i></button>`;
+        // SE AGREGA EL PRECIO EN BS DEBAJO DEL PRECIO EN USD
+        d.innerHTML = `${isAgotado ? '<div class="badge-agotado">AGOTADO</div>' : ''}<i class="fa-${isFav ? 'solid' : 'regular'} fa-heart btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${p.codigo}')"></i><img loading="lazy" src="img/${p.codigo}.webp" data-attempts="0" onerror="imgFallback(this, '${p.codigo}')" alt="${p.Nombre}"><h3 class="producto-titulo">${p.Nombre}</h3><p class="producto-stock">Disp: ${p.StockStr}</p><p class="producto-precio">$${p.PrecioStr} <span style="font-size:11px; color:var(--texto-claro); display:block; font-weight:500;">${p.PrecioBsStr} Bs</span></p><button class="btn-share" onclick="compartirProductoB64('${nombreB64}', '${p.PrecioStr}')"><i class="fa-solid fa-share-nodes"></i></button><button class="btn-add ${isAgotado ? 'disabled' : ''}" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, false, 'img/${p.codigo}.webp')"`}><i class="fa-solid fa-plus"></i></button>`;
         fragmento.appendChild(d);
     });
     cont.appendChild(fragmento); if (fin < productosFiltradosGlobal.length) document.getElementById('btn-cargar-mas').style.display = 'block'; else document.getElementById('btn-cargar-mas').style.display = 'none';
@@ -163,7 +195,9 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = 
 function sugerirAcompañante() {
     let sugerencias = [];
     if(codigosRecomendados.length > 0) { sugerencias = inventario.filter(p => codigosRecomendados.includes(p.codigo) && p.StockNum > 0).slice(0, 3); } else { sugerencias = inventario.filter(p => (p.Nombre.includes("HIELO") || p.Nombre.includes("COLA") || p.Nombre.includes("REFRESCO")) && p.StockNum > 0).slice(0, 3); }
-    if(sugerencias.length > 0) { let cont = document.getElementById('cross-sell-items'); cont.innerHTML = ''; sugerencias.forEach(p => { let nombreB64 = codificarNombre(p.Nombre); cont.innerHTML += `<div style="min-width:110px; border:1px solid var(--borde-color); border-radius:12px; padding:10px; text-align:center; background:var(--item-bg);"><img src="img/${p.codigo}.webp" onerror="imgFallback(this, '${p.codigo}')" style="height:55px; object-fit:contain; margin-bottom:5px;"><p style="font-size:10px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--texto-oscuro);">${p.Nombre}</p><p style="font-size:13px; color:var(--dorado); font-weight:bold;">$${p.PrecioStr}</p><button onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, 'img/${p.codigo}.webp'); cerrarCrossSell();" style="background:var(--verde-btn); color:white; border:none; padding:8px; border-radius:8px; font-size:11px; font-weight:bold; width:100%; margin-top:5px; cursor:pointer;"><i class="fa-solid fa-plus"></i> Añadir</button></div>`; }); document.getElementById('modal-cross-sell').style.display = 'flex'; }
+    if(sugerencias.length > 0) { let cont = document.getElementById('cross-sell-items'); cont.innerHTML = ''; sugerencias.forEach(p => { let nombreB64 = codificarNombre(p.Nombre); 
+        // MOSTRAR PRECIO EN BS EN LOS ACOMPAÑANTES TAMBIÉN
+        cont.innerHTML += `<div style="min-width:110px; border:1px solid var(--borde-color); border-radius:12px; padding:10px; text-align:center; background:var(--item-bg);"><img src="img/${p.codigo}.webp" onerror="imgFallback(this, '${p.codigo}')" style="height:55px; object-fit:contain; margin-bottom:5px;"><p style="font-size:10px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--texto-oscuro);">${p.Nombre}</p><p style="font-size:13px; color:var(--dorado); font-weight:bold;">$${p.PrecioStr}</p><p style="font-size:10px; color:var(--texto-claro); margin-top:-2px;">${p.PrecioBsStr} Bs</p><button onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, 'img/${p.codigo}.webp'); cerrarCrossSell();" style="background:var(--verde-btn); color:white; border:none; padding:8px; border-radius:8px; font-size:11px; font-weight:bold; width:100%; margin-top:5px; cursor:pointer;"><i class="fa-solid fa-plus"></i> Añadir</button></div>`; }); document.getElementById('modal-cross-sell').style.display = 'flex'; }
 }
 
 function cerrarCrossSell() { document.getElementById('modal-cross-sell').style.display = 'none'; }
@@ -176,13 +210,17 @@ function renderizarCarrito() {
     const lista = document.getElementById('lista-carrito'); lista.innerHTML = ''; totalCarrito = 0;
     if(Object.keys(carrito).length === 0) { lista.innerHTML = `<div style="text-align: center; padding: 50px 20px; color: var(--texto-claro);"><i class="fa-solid fa-cart-shopping" style="font-size: 60px; opacity: 0.2; margin-bottom: 20px;"></i><h3 style="color: var(--texto-oscuro); font-size: 16px; font-weight: bold;">Tu carrito está vacío</h3><p style="font-size: 13px; margin-top: 5px;">Agrega unas botellas para empezar.</p><button onclick="cerrarModal('modal-cart', 'nav-home')" class="btn-enviar" style="width: auto; padding: 10px 25px; margin-top: 20px; display: inline-block;">Ir a la tienda</button></div>`; document.getElementById('checkout-sections').style.display = 'none'; return; }
     document.getElementById('checkout-sections').style.display = 'block'; 
-    for(let nombre in carrito) { let nombreB64 = codificarNombre(nombre); let item = carrito[nombre]; let sub = item.precio * item.cantidad; totalCarrito += sub; lista.innerHTML += `<div class="cart-item"><div class="cart-item-info"><p class="cart-item-title">${nombre}</p><p class="cart-item-price">$${item.precio.toFixed(2)}</p></div><div class="cart-controls"><button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">-</button><span style="font-size:13px; font-weight:bold; width:15px; text-align:center;">${item.cantidad}</span><button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', 1)">+</button></div></div>`; }
+    for(let nombre in carrito) { 
+        let nombreB64 = codificarNombre(nombre); let item = carrito[nombre]; let sub = item.precio * item.cantidad; totalCarrito += sub; 
+        // MOSTRAR TASA EN EL CARRITO
+        lista.innerHTML += `<div class="cart-item"><div class="cart-item-info"><p class="cart-item-title">${nombre}</p><p class="cart-item-price">$${item.precio.toFixed(2)} <span style="font-size:11px; color:var(--texto-claro); font-weight:normal;">/ ${(item.precio * tasaOficial).toLocaleString('es-VE', {minimumFractionDigits:2})} Bs</span></p></div><div class="cart-controls"><button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">-</button><span style="font-size:13px; font-weight:bold; width:15px; text-align:center;">${item.cantidad}</span><button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', 1)">+</button></div></div>`; 
+    }
     document.getElementById('totalUsdModal').innerText = `$${totalCarrito.toFixed(2)}`; document.getElementById('totalBsModal').innerText = `${(totalCarrito * tasaOficial).toLocaleString('es-VE', {minimumFractionDigits:2})} Bs`; calcularVuelto();
 }
 
 function cambiarCant(n, delta) { carrito[n].cantidad += delta; if(carrito[n].cantidad <= 0) delete carrito[n]; guardarCarritoLS(); actualizarCartCount(); renderizarCarrito(); }
 function toggleDireccion() { let met = document.querySelector('input[name="metodoEntrega"]:checked').value; let dirInput = document.getElementById('direccionDelivery'), btnMap = document.getElementById('btnMap'); if(met === 'Delivery') { dirInput.style.display = 'block'; btnMap.style.display = 'none'; if(localStorage.getItem('gc_direccion') && !dirInput.value) dirInput.value = localStorage.getItem('gc_direccion'); } else { dirInput.style.display = 'none'; btnMap.style.display = 'block'; } }
-function abrirMapa() { window.open('https://www.google.com/maps/place/Gran+Catador/@8.6033569,-70.2421571,17z/data=!3m1!4b1!4m6!3m5!1s0x8e7b579b3f702c99:0x93d268a3afb51527!8m2!3d8.6033569!4d-70.2421571!16s%2Fg%2F11sqyv8ynk?entry=ttu&g_ep=EgoyMDI2MDMyNC4wIKXMDSoASAFQAw%3D%3D', '_blank'); } 
+function abrirMapa() { window.open('https://maps.app.goo.gl/3X5v2X5x2X5x2X5x2', '_blank'); } 
 function actualizarMetodoPago() { 
     let val = document.getElementById('metodoPagoSelect').value; 
     document.getElementById('box-efectivo').style.display = (val === 'Efectivo') ? 'block' : 'none'; 
