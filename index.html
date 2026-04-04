@@ -374,5 +374,49 @@
     </div>
 
     <script src="app.js"></script>
+    <div id="contenedor-chat" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+    <button onclick="abrirChat()" style="background: #b8860b; color: white; border: none; padding: 15px; border-radius: 50%; cursor: pointer; font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">🍷</button>
+    
+    <div id="caja-chat" style="display: none; width: 300px; height: 400px; background: #1a1a1a; border: 2px solid #b8860b; position: absolute; bottom: 70px; right: 0; flex-direction: column; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-family: sans-serif;">
+        <div style="background: #b8860b; color: black; padding: 10px; border-radius: 10px 10px 0 0; font-weight: bold; text-align: center;">Asistente Gran Catador</div>
+        <div id="msjs" style="flex: 1; overflow-y: auto; padding: 10px; color: white; font-size: 14px; display: flex; flex-direction: column; gap: 8px;"></div>
+        <div style="padding: 10px; display: flex; gap: 5px;">
+            <input type="text" id="txt-user" placeholder="¿Qué buscas hoy?" style="flex: 1; padding: 8px; border-radius: 4px; border: none;">
+            <button onclick="enviar()" style="background: #b8860b; border: none; padding: 8px; cursor: pointer; border-radius: 4px;">➡️</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function abrirChat() {
+        const c = document.getElementById('caja-chat');
+        c.style.display = c.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    async function enviar() {
+        const input = document.getElementById('txt-user');
+        const msjs = document.getElementById('msjs');
+        const texto = input.value;
+        if (!texto) return;
+
+        msjs.innerHTML += `<div style="align-self: flex-end; background: #333; padding: 5px 10px; border-radius: 8px;">${texto}</div>`;
+        input.value = '';
+
+        try {
+            // CAMBIA ESTE LINK POR EL TUYO 👇
+            const linkBase = "PEGA_AQUI_TU_LINK_DE_CODESPACES"; 
+            const resp = await fetch(linkBase + "/preguntar", {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ mensaje: texto })
+            });
+            const data = await resp.json();
+            msjs.innerHTML += `<div style="align-self: flex-start; background: #b8860b; color: black; padding: 5px 10px; border-radius: 8px;">${data.respuesta}</div>`;
+        } catch (e) {
+            msjs.innerHTML += `<div style="color: red;">Error: No pude conectar con el bot.</div>`;
+        }
+        msjs.scrollTop = msjs.scrollHeight;
+    }
+</script>
 </body>
 </html>
