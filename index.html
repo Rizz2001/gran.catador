@@ -73,6 +73,14 @@
 
         .filtro-secundario { display: flex; justify-content: space-between; align-items: center; padding: 0 5px; }
         .filtro-select { background: white; border: 1px solid var(--borde-color); border-radius: 10px; padding: 8px 10px; font-size: 12px; font-weight: 600; color: var(--texto-oscuro); cursor: pointer; outline: none;}
+        
+        /* Botones Modo Vista (Caja/Unidad) */
+        .toggle-modo-container { display: flex; gap: 10px; padding: 0 5px; justify-content: center; }
+        .btn-modo { background: white; border: 1px solid var(--borde-color); border-radius: 10px; padding: 8px 12px; font-size: 12px; font-weight: 600; color: var(--texto-claro); cursor: pointer; transition: all 0.2s; flex: 1; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .btn-modo:hover { background: var(--item-bg);}
+        .btn-modo.active { background: var(--dorado); color: black; border-color: var(--dorado); box-shadow: 0 4px 10px rgba(245, 167, 0, 0.3); }
+        body.dark-mode .btn-modo { background: #1f2937; color: #9ca3af; border-color: rgba(255,255,255,0.08); }
+        body.dark-mode .btn-modo.active { background: var(--dorado); color: black; border-color: var(--dorado); }
         .chk-agotados { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--texto-claro); }
 
         .categorias-scroll { display: flex; overflow-x: auto; padding: 0 20px 15px; gap: 10px; scrollbar-width: none; scroll-behavior: smooth; }
@@ -253,10 +261,21 @@
 
     <div class="categoria-panel" id="categoria-panel">
         <div class="categoria-panel-header">
-            <span>Categorías</span>
+            <span>Menú de Categorías</span>
             <button class="close-categories" onclick="closeCategorias()"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="categorias-scroll" id="contenedorCategorias"></div>
+        
+        <!-- Categorías Principales -->
+        <div class="categoria-section">
+            <div class="categoria-label">PRODUCTOS</div>
+            <div class="categorias-scroll" id="contenedorCategorias"></div>
+        </div>
+        
+        <!-- Subcategorías (solo LICORES) -->
+        <div class="subcategoria-section" id="subcategoria-section-main" style="display:none;">
+            <div class="categoria-label">TIPOS DE LICORES</div>
+            <div class="categorias-scroll" id="contenedorSubcategorias"></div>
+        </div>
     </div>
     <div class="categoria-overlay" id="categoria-overlay" onclick="closeCategorias()"></div>
 

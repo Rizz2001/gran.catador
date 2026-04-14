@@ -6,14 +6,9 @@ let isTiendaAbierta = true; let codigosRecomendados = []; let siempreDisponibles
 let productosFiltradosGlobal = []; let itemsPorPagina = 30; let paginaActual = 1;
 
 let modoVistaGlobal = 'unidad'; 
-
-const styleT = document.createElement('style');
-styleT.innerHTML = `
-    .toggle-modo-container { display: flex; justify-content: center; margin: 15px 0 10px 0; background: var(--item-bg); border-radius: 12px; padding: 5px; border: 1px solid var(--borde-color); }
-    .btn-modo { flex: 1; padding: 10px 0; text-align: center; font-size: 13px; font-weight: bold; color: var(--texto-claro); border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 5px;}
-    .btn-modo.active { background: var(--dorado); color: black; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-`;
-document.head.appendChild(styleT);
+let subcategoriasLicores = {};
+let mapaCodToSubcategoria = {};
+let subcategoriaActual = null;
 
 if(localStorage.getItem('gc_dark') === 'true') document.body.classList.add('dark-mode');
 
@@ -65,6 +60,23 @@ async function obtenerArchivosExternos() {
     
     try { let resRec = await fetch('recomendados.txt?v=' + new Date().getTime()); if (resRec.ok) { let textoRec = await resRec.text(); codigosRecomendados = textoRec.split(/[\n,]+/).map(c => c.trim()).filter(c => c !== ""); } } catch (error) {}
     try { let resDisp = await fetch('disponibles.txt?v=' + new Date().getTime()); if (resDisp.ok) { let textoDisp = await resDisp.text(); siempreDisponibles = textoDisp.split(/[\n,]+/).map(c => c.trim()).filter(c => c !== ""); } } catch (error) {}
+    
+    // Cargar subcategorías de licores
+    try {
+        const categoriasArchivos = ['AGUARDIENTE.csv', 'ANIS.csv', 'BEBIDA_SECA.csv', 'BRANDY.csv', 'CERVEZA.csv', 'COCTELERIA_ADICIONAL.csv', 'COCUY.csv', 'COÑAC.csv', 'GINEBRA.csv', 'JARABE_GOMA.csv', 'LICOR SECO.csv', 'LICOR_DULCE.csv', 'RON.csv', 'SANGRIA.csv', 'TEQUILA.csv', 'VINO_ESPUMANTE.csv', 'VINO_IMPORTADO.csv', 'VINO_NACIONAL.csv', 'VODKA.csv', 'WHISKY_IMPORTADO.csv', 'WHISKY_NACIONAL.csv'];
+        
+        for (let archivo of categoriasArchivos) {
+            try {
+                const nombre = archivo.replace('.csv', '').replace(/_/g, ' ');
+                const data = await fetchCSV(`CATEGORIA_LICORES/${archivo}`);
+                const codigos = data.filter(r => r.length >= 13 && r[12] && r[12].trim()).map(r => r[12].trim());
+                if (codigos.length > 0) {
+                    subcategoriasLicores[nombre] = codigos;
+                    codigos.forEach(cod => mapaCodToSubcategoria[cod] = nombre);
+                }
+            } catch (e) {}
+        }
+    } catch (error) { console.log("No se pudieron cargar subcategorías de licores"); }
     
     try { 
         let resBan = await fetch('banners.txt?v=' + new Date().getTime()); 
@@ -280,7 +292,28 @@ function mostrarSugerencias(q) {
 function cerrarSugerencias() { document.getElementById('search-suggestions').style.display = 'none'; }
 document.addEventListener('click', (e) => { if(!e.target.closest('.search-container')) cerrarSugerencias(); });
 
-function filtrarCategoria(cat, btn) { categoriaActual = cat; document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); if(btn) btn.classList.add('active'); aplicarFiltros(); closeCategorias(); }
+function filtrarCategoria(cat, btn) {
+    categoriaActual = cat;
+    subcategoriaActual = null;
+    
+    // Limpiar subcategorías si no es LICORES
+    let subcatSection = document.getElementById('subcategoria-section-main');
+    if (cat !== 'LICORES' && subcatSection) { 
+        subcatSection.style.display = 'none';
+    }
+    
+    // Desactivar todos los botones
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    
+    // Generar subcategorías si es LICORES
+    if (cat === 'LICORES') { 
+        generarSubcategoriasLicores(); 
+    }
+    
+    aplicarFiltros();
+    closeCategorias();
+}
 function toggleCategorias() { const panel = document.getElementById('categoria-panel'); const overlay = document.getElementById('categoria-overlay'); if(!panel || !overlay) return; const isOpen = panel.classList.toggle('open'); overlay.style.display = isOpen ? 'block' : 'none'; }
 function closeCategorias() { const panel = document.getElementById('categoria-panel'); const overlay = document.getElementById('categoria-overlay'); if(panel) panel.classList.remove('open'); if(overlay) overlay.style.display = 'none'; }
 function toggleFav(codigo) { let index = favoritos.indexOf(codigo); if(index === -1) { favoritos.push(codigo); mostrarToast("Agregado a favoritos ❤️"); } else { favoritos.splice(index, 1); } localStorage.setItem('gc_favs', JSON.stringify(favoritos)); aplicarFiltros(); }
@@ -316,13 +349,21 @@ function aplicarFiltros() {
     if (categoriaActual === 'Favoritos') resultado = resultado.filter(p => favoritos.includes(p.codigo)); 
     else if (categoriaActual !== 'Todos') resultado = resultado.filter(p => p.Cat === categoriaActual);
     
+    // Filtrar por subcategoría si está activa
+    if (subcategoriaActual && categoriaActual === 'LICORES') {
+        const codigosSubcat = subcategoriasLicores[subcategoriaActual] || [];
+        resultado = resultado.filter(p => codigosSubcat.includes(p.codigo));
+    }
+    
     if (q !== '') { 
         let terms = q.split(' ').filter(t => t.length > 0).map(t => diccionarioSinonimos[t] || t);
         resultado = resultado.filter(p => { 
-            let textoCompleto = p.TextoBusquedaLimpio; 
-            let words = textoCompleto.split(' ');
+            let textoCompleto = p.TextoBusquedaLimpio;
+            let subcatTexto = mapaCodToSubcategoria[p.codigo] || '';
+            let textoConSubcat = textoCompleto + ' ' + quitarAcentos(subcatTexto);
+            let words = textoConSubcat.split(' ');
             return terms.every(term => { 
-                if (textoCompleto.includes(term)) return true; 
+                if (textoConSubcat.includes(term)) return true; 
                 if (term.length >= 4) return words.some(w => levenshtein(term, w) <= (term.length >= 6 ? 2 : 1));
                 return false;
             }); 
@@ -393,15 +434,90 @@ function renderizarPagina() {
 function cargarMasProductos() { paginaActual++; renderizarPagina(); }
 
 function generarCategorias() {
-    const cont = document.getElementById('contenedorCategorias'); let categorias = [...new Set(inventario.map(p => p.Cat))].sort(); cont.innerHTML = '';
-    let btnTodos = document.createElement('button'); btnTodos.className = (categoriaActual === 'Todos') ? "cat-btn active" : "cat-btn"; btnTodos.innerText = "Todos"; btnTodos.onclick = function() { filtrarCategoria('Todos', this); }; cont.appendChild(btnTodos);
-    let btnFav = document.createElement('button'); btnFav.className = (categoriaActual === 'Favoritos') ? "cat-btn active" : "cat-btn"; btnFav.innerHTML = "❤️ Mis Favoritos"; btnFav.style.borderColor = "#ff4757"; btnFav.style.color = "#ff4757"; btnFav.onclick = function() { filtrarCategoria('Favoritos', this); }; cont.appendChild(btnFav);
-    categorias.forEach(c => { let b = document.createElement('button'); b.className = (c === categoriaActual) ? "cat-btn active" : "cat-btn"; b.innerText = c; b.onclick = function() { filtrarCategoria(c, this); }; cont.appendChild(b); });
+    const cont = document.getElementById('contenedorCategorias'); 
+    let categorias = [...new Set(inventario.map(p => p.Cat))].sort(); 
+    cont.innerHTML = '';
+    
+    // Botón Inicio
+    let btnInicio = document.createElement('button'); 
+    btnInicio.className = (categoriaActual === 'Todos') ? "cat-btn active" : "cat-btn"; 
+    btnInicio.innerHTML = "🏠 Inicio"; 
+    btnInicio.onclick = function() { irInicio(); }; 
+    cont.appendChild(btnInicio);
+    
+    // Botón Favoritos
+    let btnFav = document.createElement('button'); 
+    btnFav.className = (categoriaActual === 'Favoritos') ? "cat-btn active" : "cat-btn"; 
+    btnFav.innerHTML = "❤️ Mis Favoritos"; 
+    btnFav.style.borderColor = "#ff4757"; 
+    btnFav.style.color = "#ff4757"; 
+    btnFav.onclick = function() { filtrarCategoria('Favoritos', this); }; 
+    cont.appendChild(btnFav);
+    
+    // Categorías principales
+    categorias.forEach(c => { 
+        let b = document.createElement('button'); 
+        b.className = (c === categoriaActual) ? "cat-btn active" : "cat-btn"; 
+        b.innerText = c; 
+        b.onclick = function() { filtrarCategoria(c, this); }; 
+        cont.appendChild(b);
+    });
+    
+    // Mostrar/ocultar subcategorías
+    if (categoriaActual === 'LICORES') { 
+        generarSubcategoriasLicores(); 
+    } else {
+        document.getElementById('subcategoria-section-main').style.display = 'none';
+    }
+    
     setTimeout(() => { let activeBtn = cont.querySelector('.active'); if(activeBtn) activeBtn.scrollIntoView({behavior: "smooth", inline: "center", block: "nearest"}); }, 150);
 }
 
+function generarSubcategoriasLicores() {
+    let subcatSection = document.getElementById('subcategoria-section-main');
+    let subcatContainer = document.getElementById('contenedorSubcategorias');
+    
+    if (!subcatSection || !subcatContainer) return;
+    
+    subcatSection.style.display = 'block';
+    subcatContainer.innerHTML = '';
+    
+    // Botón "Todos los Licores"
+    let btnLimpiar = document.createElement('button');
+    btnLimpiar.className = (!subcategoriaActual) ? "cat-btn active" : "cat-btn";
+    btnLimpiar.innerText = "📋 Todos";
+    btnLimpiar.onclick = function() { subcategoriaActual = null; aplicarFiltros(); };
+    subcatContainer.appendChild(btnLimpiar);
+    
+    // Botones para cada subcategoría
+    Object.keys(subcategoriasLicores).forEach(subcat => {
+        let btn = document.createElement('button');
+        btn.className = (subcat === subcategoriaActual) ? "cat-btn active" : "cat-btn";
+        btn.innerText = subcat;
+        btn.onclick = function() { subcategoriaActual = subcat; aplicarFiltros(); };
+        subcatContainer.appendChild(btn);
+    });
+}
+
 function setActiveNav(id) { document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.remove('active')); const el = document.getElementById(id); if(el) el.classList.add('active'); }
-function irInicio() { cerrarModal('all'); setActiveNav('nav-home'); window.scrollTo({top: 0, behavior: 'smooth'}); document.getElementById('buscador').value = ''; document.getElementById('chkAgotados').checked = false; cerrarSugerencias(); const btnLicores = Array.from(document.querySelectorAll('.cat-btn')).find(b => b.innerText === 'LICORES'); if(btnLicores) filtrarCategoria('LICORES', btnLicores); else filtrarCategoria('Todos', document.querySelectorAll('.cat-btn')[0]); }
+function irInicio() { 
+    cerrarModal('all'); 
+    setActiveNav('nav-home'); 
+    window.scrollTo({top: 0, behavior: 'smooth'}); 
+    document.getElementById('buscador').value = ''; 
+    document.getElementById('chkAgotados').checked = false; 
+    cerrarSugerencias(); 
+    subcategoriaActual = null; 
+    
+    // Ocultar subcategorías
+    let subcatSection = document.getElementById('subcategoria-section-main');
+    if(subcatSection) subcatSection.style.display = 'none';
+    
+    // Click en botón Inicio
+    let btnInicio = Array.from(document.querySelectorAll('.cat-btn')).find(b => b.innerText.includes('Inicio')); 
+    if(btnInicio) filtrarCategoria('Todos', btnInicio); 
+    else filtrarCategoria('Todos', document.querySelectorAll('.cat-btn')[0]); 
+}
 function abrirLegales() { document.getElementById('modal-legales').style.display = 'flex'; }
 function abrirSoporteWhatsApp() { let msg = "Hola, necesito ayuda con la plataforma de Gran Catador."; window.open(`https://wa.me/584245496366?text=${encodeURIComponent(msg)}`, '_blank'); }
 
