@@ -580,14 +580,26 @@ function renderizarCarrito() {
 
 function cambiarCant(n, delta) { carrito[n].cantidad += delta; if(carrito[n].cantidad <= 0) delete carrito[n]; guardarCarritoLS(); actualizarCartCount(); renderizarCarrito(); }
 function toggleDireccion() { let met = document.querySelector('input[name="metodoEntrega"]:checked').value; let dirInput = document.getElementById('direccionDelivery'), btnMap = document.getElementById('btnMap'); if(met === 'Delivery') { dirInput.style.display = 'block'; btnMap.style.display = 'none'; if(localStorage.getItem('gc_direccion') && !dirInput.value) dirInput.value = localStorage.getItem('gc_direccion'); } else { dirInput.style.display = 'none'; btnMap.style.display = 'block'; } }
-function abrirMapa() { window.open('https://maps.app.goo.gl/3X5v2X5x2X5x2X5x2', '_blank'); } 
+function abrirMapa() { window.open('https://maps.app.goo.gl/8w6P5j9K7hQ3mN2R9', '_blank'); } 
 function actualizarMetodoPago() { 
     let val = document.getElementById('metodoPagoSelect').value; 
     document.getElementById('box-efectivo').style.display = (val === 'Efectivo') ? 'block' : 'none'; 
     let boxPm = document.getElementById('box-pagomovil'); if(boxPm) boxPm.style.display = (val === 'Pago Movil') ? 'block' : 'none';
     let boxZ = document.getElementById('box-zelle'); if(boxZ) boxZ.style.display = (val === 'Zelle') ? 'block' : 'none';
 }
-function calcularVuelto() { let pago = parseFloat(document.getElementById('montoPago').value) || 0; let res = document.getElementById('res-vuelto'); if(pago > totalCarrito) { let vUsd = pago - totalCarrito; let vBs = vUsd * tasaOficial; res.style.display = 'block'; res.style.color = 'var(--verde-btn)'; res.innerHTML = `Vuelto: $${vUsd.toFixed(2)} / ${vBs.toLocaleString('es-VE', {minimumFractionDigits:2})} Bs`; } else { res.style.display = 'none'; } }
+function calcularVuelto() { 
+    let pago = parseFloat(document.getElementById('montoPago').value) || 0; 
+    let res = document.getElementById('res-vuelto'); 
+    if(pago > 0 && pago > totalCarrito) { 
+        let vUsd = pago - totalCarrito; 
+        let vBs = vUsd * tasaOficial; 
+        res.style.display = 'block'; 
+        res.style.color = 'var(--verde-btn)'; 
+        res.innerHTML = `Vuelto: $${vUsd.toFixed(2)} / ${vBs.toLocaleString('es-VE', {minimumFractionDigits:2})} Bs`; 
+    } else { 
+        res.style.display = 'none'; 
+    } 
+}
 function mostrarToast(msg) { const cont = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = msg; cont.appendChild(t); setTimeout(() => t.remove(), 2500); }
 
 function enviarPedido() {
