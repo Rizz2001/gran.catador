@@ -242,7 +242,7 @@ async function cargarInventario() {
 
                 let catLimpia = limpiarCategoria(catBruto); 
                 let catValidacion = quitarAcentos(catLimpia).toUpperCase();
-                if (catValidacion === "CHARCUTERIA" || catValidacion === "FRUTERIA" || catValidacion === "MATERIALES DE OFICINA") return; 
+                if (["CHARCUTERIA", "FRUTERIA", "MATERIALES DE OFICINA", "MATERIAL DE OFICINA", "UNICO", "VIVERES"].includes(catValidacion)) return; 
                 
                 let usdNum = parseFloat(usdStr.replace(/\./g,'').replace(',','.'));
                 
@@ -277,7 +277,7 @@ async function cargarInventario() {
                 } else {
                     let catLimpia = limpiarCategoria(catBruto); 
                     let catValidacion = quitarAcentos(catLimpia).toUpperCase();
-                    if (catValidacion === "CHARCUTERIA" || catValidacion === "FRUTERIA" || catValidacion === "MATERIALES DE OFICINA") return; 
+                    if (["CHARCUTERIA", "FRUTERIA", "MATERIALES DE OFICINA", "MATERIAL DE OFICINA", "UNICO", "VIVERES"].includes(catValidacion)) return; 
 
                     mapa[cod] = { 
                         codigo: cod, Nombre: nombreBruto, Cat: catLimpia, 
@@ -320,7 +320,7 @@ async function cargarInventario() {
         });
         
         Object.values(mapa).forEach(prod => { if (siempreDisponibles.includes(prod.codigo)) { prod.StockNum = 999; prod.StockStr = "Disponible"; } });
-        inventario = Object.values(mapa).filter(p => p.Nombre && !["CHARCUTERIA", "FRUTERIA", "MATERIALES DE OFICINA"].includes(quitarAcentos(p.Cat).toUpperCase()));
+        inventario = Object.values(mapa).filter(p => p.Nombre && !["CHARCUTERIA", "FRUTERIA", "MATERIALES DE OFICINA", "MATERIAL DE OFICINA", "UNICO", "VIVERES"].includes(quitarAcentos(p.Cat).toUpperCase()));
         
         inventario.forEach(p => {
             if (p.Cat === 'LICORES') p.SubCat = mapaCodToSubcategoria[p.codigo] || 'OTROS LICORES';
@@ -340,22 +340,31 @@ async function cargarInventario() {
 function levenshtein(a,b){const m=[];for(let i=0;i<=b.length;i++)m[i]=[i];for(let j=0;j<=a.length;j++)m[0][j]=j;for(let i=1;i<=b.length;i++){for(let j=1;j<=a.length;j++){if(b.charAt(i-1)===a.charAt(j-1)){m[i][j]=m[i-1][j-1];}else{m[i][j]=Math.min(m[i-1][j-1]+1,Math.min(m[i][j-1]+1,m[i-1][j]+1));}}}return m[b.length][a.length];}
 function debounceBusqueda(event) { clearTimeout(debounceTimer); const query = event.target.value.trim(); if(query.length < 2) { cerrarSugerencias(); aplicarFiltros(); return; } debounceTimer = setTimeout(() => { aplicarFiltros(); mostrarSugerencias(query); }, 300); }
 
-const diccionarioSinonimos = { 'birra': 'cerveza', 'birras': 'cerveza', 'curda': 'licor', 'cana': 'ron', 'pasapalo': 'snack', 'pasapalos': 'snack', 'soda': 'refresco', 'fresco': 'refresco', 'chuche': 'snack', 'chucheria': 'snack' };
+const diccionarioSinonimos = { 'birra': 'cerveza', 'curda': 'licor', 'cana': 'ron', 'pasapalo': 'snack', 'soda': 'refresco', 'fresco': 'refresco', 'chuche': 'snack', 'chucheria': 'snack', 'champagne': 'espumante', 'champaña': 'espumante', 'vinito': 'vino', 'roncito': 'ron', 'aguardiente': 'licor' };
+// Cerebro para detectar plurales (Ej: rones -> ron, cervezas -> cerveza)
+function procesarTermino(t) { let sin = diccionarioSinonimos[t] || t; if (sin.length > 3 && sin !== 'anis' && sin.endsWith('s')) { return sin.endsWith('es') ? sin.slice(0, -2) : sin.slice(0, -1); } return sin; }
 
 function mostrarSugerencias(q) {
     let qLimpio = quitarAcentos(q);
-    let terminos = qLimpio.split(' ').filter(t => t.length > 0).map(t => diccionarioSinonimos[t] || t);
+    let terminos = qLimpio.split(' ').filter(t => t.length > 0).map(procesarTermino);
     
     let coincidencias = inventario.filter(p => {
         if(p.StockNum <= 0) return false;
         let textoCompleto = p.TextoBusquedaLimpio; 
         let words = textoCompleto.split(' ');
-        return terminos.every(term => {
+        let coincide = terminos.every(term => {
             if (textoCompleto.includes(term)) return true;
             if (term.length >= 4) return words.some(w => levenshtein(term, w) <= (term.length >= 6 ? 2 : 1));
             return false;
         });
-    }).slice(0, 5);
+        if(coincide) {
+            let nLimpio = quitarAcentos(p.Nombre); let wNombre = nLimpio.split(' '); p.TempScore = 0;
+            terminos.forEach(t => { if(wNombre.includes(t)) p.TempScore += 50; else if(nLimpio.includes(t)) p.TempScore += 25; else p.TempScore += 10; });
+        }
+        return coincide;
+    });
+    coincidencias.sort((a,b) => b.TempScore - a.TempScore);
+    coincidencias = coincidencias.slice(0, 5);
     
     const cont = document.getElementById('search-suggestions');
     if(coincidencias.length === 0) { cerrarSugerencias(); aplicarFiltros(); return; }
@@ -445,22 +454,29 @@ function aplicarFiltros() {
     }
     
     if (q !== '') { 
-        let terms = q.split(' ').filter(t => t.length > 0).map(t => diccionarioSinonimos[t] || t);
-        resultado = resultado.filter(p => { 
-            let textoCompleto = p.TextoBusquedaLimpio;
-            let textoConSubcat = textoCompleto + ' ' + quitarAcentos(p.Cat || '') + ' ' + quitarAcentos(p.SubCat || '');
-            let words = textoConSubcat.split(' ');
-            return terms.every(term => { 
-                if (textoConSubcat.includes(term)) return true; 
-                if (term.length >= 4) return words.some(w => levenshtein(term, w) <= (term.length >= 6 ? 2 : 1));
+        let terms = q.split(' ').filter(t => t.length > 0).map(procesarTermino);
+        let resultPuntuado = [];
+        resultado.forEach(p => { 
+            let nombreLimpio = quitarAcentos(p.Nombre); let wordsNombre = nombreLimpio.split(' ');
+            let textoConSubcat = p.TextoBusquedaLimpio + ' ' + quitarAcentos(p.Cat || '') + ' ' + quitarAcentos(p.SubCat || '');
+            let wordsAll = textoConSubcat.split(' ');
+            let score = 0;
+            
+            let coincide = terms.every(term => { 
+                if (nombreLimpio.includes(term)) { score += wordsNombre.includes(term) ? 50 : 25; return true; }
+                if (textoConSubcat.includes(term)) { score += 10; return true; }
+                if (term.length >= 4 && wordsAll.some(w => levenshtein(term, w) <= (term.length >= 6 ? 2 : 1))) { score += 5; return true; }
                 return false;
             }); 
+            if (coincide) { p.ScoreBusqueda = score; resultPuntuado.push(p); }
         }); 
+        resultado = resultPuntuado;
     }
     
     if(sortOption === 'menor') resultado.sort((a,b) => a.PrecioNum - b.PrecioNum); 
     else if(sortOption === 'mayor') resultado.sort((a,b) => b.PrecioNum - a.PrecioNum); 
     else if(sortOption === 'az') resultado.sort((a,b) => a.Nombre.localeCompare(b.Nombre));
+    else if(q !== '') resultado.sort((a,b) => (b.ScoreBusqueda || 0) - (a.ScoreBusqueda || 0));
     
     productosFiltradosGlobal = resultado; 
     paginaActual = 1; 
@@ -690,7 +706,15 @@ function sugerirAcompañante() {
 
 function cerrarCrossSell() { document.getElementById('modal-cross-sell').style.display = 'none'; }
 function actualizarCartCount() { let t = 0; for(let k in carrito) t += carrito[k].cantidad; document.getElementById('cart-count').innerText = t; }
-function vaciarCarrito() { if(confirm("¿Estás seguro de vaciar tu pedido?")) { carrito = {}; guardarCarritoLS(); actualizarCartCount(); cerrarModal('modal-cart', 'nav-home'); mostrarToast("Pedido vaciado"); } }
+function vaciarCarrito() {
+    if(confirm("¿Estás seguro de vaciar tu pedido?")) {
+        carrito = {};
+        guardarCarritoLS();
+        actualizarCartCount();
+        cerrarModal('modal-cart', 'nav-home');
+        mostrarToast("Pedido vaciado");
+    }
+}
 function abrirCarrito() { cerrarModal('all'); setActiveNav('nav-cart'); document.getElementById('modal-cart').style.display = 'flex'; renderizarCarrito(); }
 function repetirPedido(index) { let hist = JSON.parse(localStorage.getItem('gc_historial')) || []; let ped = hist[index]; if(!ped) return; carrito = {}; ped.items.forEach(i => { carrito[i.nombre] = { precio: i.precio, cantidad: i.cantidad }; }); guardarCarritoLS(); actualizarCartCount(); cerrarModal('modal-perfil', 'nav-home'); abrirCarrito(); mostrarToast("Pedido cargado"); }
 
@@ -742,7 +766,7 @@ function enviarPedido() {
     let notas = document.getElementById('notasPedido').value.trim(); if(notas) msg += `📝 *Notas:* ${notas}\n`;
     let metodo = document.getElementById('metodoPagoSelect').value; msg += `💳 *Método de Pago:* ${metodo}\n`;
     if(metodo === 'Efectivo') { let pago = parseFloat(document.getElementById('montoPago').value) || 0; if(pago > totalCarrito) { msg += `💵 _Paga con $${pago.toFixed(2)}_\n🟢 _Requiere vuelto: $${(pago - totalCarrito).toFixed(2)}_\n`; } } else { msg += `📎 _[Capture adjunto en el siguiente mensaje]_\n`; }
-    msg += `\n💰 *TOTAL A PAGAR: $${totalCarrito.toFixed(2)}*\n💱 _(Tasa BCV: ${tasaOficial.toFixed(2)} Bs)_`; 
+    msg += `\n💰 *TOTAL A PAGAR: $${totalCarrito.toFixed(2)}*\n💱 _(Tasa BCV: ${tasaOficial.toFixed(2)} Bs)_`;
     
     localStorage.removeItem('gc_inv_time_v3');
     
