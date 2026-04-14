@@ -113,27 +113,26 @@ async function obtenerArchivosExternos() {
     try {
         const categoriasArchivos = ['AGUARDIENTE.csv', 'ANIS.csv', 'BEBIDA_SECA.csv', 'BRANDY.csv', 'CERVEZA.csv', 'COCTELERIA_ADICIONAL.csv', 'COCUY.csv', 'COÑAC.csv', 'GINEBRA.csv', 'JARABE_GOMA.csv', 'LICOR SECO.csv', 'LICOR_DULCE.csv', 'RON.csv', 'SANGRIA.csv', 'TEQUILA.csv', 'VINO_ESPUMANTE.csv', 'VINO_IMPORTADO.csv', 'VINO_NACIONAL.csv', 'VODKA.csv', 'WHISKY_IMPORTADO.csv', 'WHISKY_NACIONAL.csv'];
         
-        for (let archivo of categoriasArchivos) {
+        await Promise.all(categoriasArchivos.map(async (archivo) => {
             try {
                 const nombre = archivo.replace('.csv', '').replace(/_/g, ' ');
                 const response = await fetch(`CATEGORIA_LICORES/${archivo}?v=${new Date().getTime()}`);
                 const text = await response.text();
                 
-                // Extraer todos los códigos de 13 dígitos (formato EAN/GTIN)
-                const codigosSet = new Set();
                 const matches = text.match(/\d{13}/g);
                 if (matches) {
+                    const codigosSet = new Set();
                     matches.forEach(cod => codigosSet.add(cod.trim()));
-                }
-                
-                const codigos = Array.from(codigosSet);
-                if (codigos.length > 0) {
-                    subcategoriasLicores[nombre] = codigos;
-                    codigos.forEach(cod => mapaCodToSubcategoria[cod] = nombre);
-                    console.log(`✓ Cargados ${codigos.length} códigos para ${nombre}`);
+                    
+                    const codigos = Array.from(codigosSet);
+                    if (codigos.length > 0) {
+                        subcategoriasLicores[nombre] = codigos;
+                        codigos.forEach(cod => mapaCodToSubcategoria[cod] = nombre);
+                        console.log(`✓ Cargados ${codigos.length} códigos para ${nombre}`);
+                    }
                 }
             } catch (e) { console.log(`Error cargando ${archivo}:`, e.message); }
-        }
+        }));
         console.log("✓ Subcategorías de licores cargadas:", Object.keys(subcategoriasLicores).length);
     } catch (error) { console.log("Error crítico en subcategorías:", error); }
     
@@ -242,7 +241,8 @@ async function cargarInventario() {
                 if (!cod || cod === "Código" || !usdStr || !usdStr.includes(',')) return;
 
                 let catLimpia = limpiarCategoria(catBruto); 
-                if (catLimpia === "CHARCUTERIA" || catLimpia === "FRUTERIA" || catLimpia === "MATERIALES DE OFICINA") return; 
+                let catValidacion = quitarAcentos(catLimpia).toUpperCase();
+                if (catValidacion === "CHARCUTERIA" || catValidacion === "FRUTERIA" || catValidacion === "MATERIALES DE OFICINA") return; 
                 
                 let usdNum = parseFloat(usdStr.replace(/\./g,'').replace(',','.'));
                 
@@ -276,7 +276,8 @@ async function cargarInventario() {
                     mapa[cod].PrecioCajaBsStr = bsStr; 
                 } else {
                     let catLimpia = limpiarCategoria(catBruto); 
-                    if (catLimpia === "CHARCUTERIA" || catLimpia === "FRUTERIA" || catLimpia === "MATERIALES DE OFICINA") return; 
+                    let catValidacion = quitarAcentos(catLimpia).toUpperCase();
+                    if (catValidacion === "CHARCUTERIA" || catValidacion === "FRUTERIA" || catValidacion === "MATERIALES DE OFICINA") return; 
 
                     mapa[cod] = { 
                         codigo: cod, Nombre: nombreBruto, Cat: catLimpia, 
@@ -319,7 +320,7 @@ async function cargarInventario() {
         });
         
         Object.values(mapa).forEach(prod => { if (siempreDisponibles.includes(prod.codigo)) { prod.StockNum = 999; prod.StockStr = "Disponible"; } });
-        inventario = Object.values(mapa).filter(p => p.Nombre);
+        inventario = Object.values(mapa).filter(p => p.Nombre && !["CHARCUTERIA", "FRUTERIA", "MATERIALES DE OFICINA"].includes(quitarAcentos(p.Cat).toUpperCase()));
         
         inventario.forEach(p => {
             if (p.Cat === 'LICORES') p.SubCat = mapaCodToSubcategoria[p.codigo] || 'OTROS LICORES';
@@ -386,10 +387,12 @@ function filtrarCategoria(cat, btn) {
     if (cat === 'LICORES') { 
         console.log("🥃 Generando subcategorías reales para LICORES...");
         generarSubcategoriasLicores(); 
+        aplicarFiltros();
+        // No cerramos el menú para permitir al usuario elegir una subcategoría
+    } else {
+        aplicarFiltros();
+        closeCategorias();
     }
-    
-    aplicarFiltros();
-    closeCategorias();
 }
 function toggleCategorias() { const panel = document.getElementById('categoria-panel'); const overlay = document.getElementById('categoria-overlay'); if(!panel || !overlay) return; const isOpen = panel.classList.toggle('open'); overlay.style.display = isOpen ? 'block' : 'none'; }
 function closeCategorias() { const panel = document.getElementById('categoria-panel'); const overlay = document.getElementById('categoria-overlay'); if(panel) panel.classList.remove('open'); if(overlay) overlay.style.display = 'none'; }
@@ -588,11 +591,15 @@ function generarSubcategoriasLicores() {
     subcatSection.style.display = 'block';
     subcatContainer.innerHTML = '';
     
+    // Colores variados y elegantes para las subcategorías
+    const coloresSubcat = ['#d35400', '#8e44ad', '#2980b9', '#16a085', '#c0392b', '#27ae60', '#f39c12', '#34495e', '#e67e22'];
+    let colorIndex = 0;
+
     // Botón "Todos los Licores"
     let btnLimpiar = document.createElement('button');
     btnLimpiar.className = (!subcategoriaActual) ? "cat-btn active" : "cat-btn";
     btnLimpiar.innerText = "📋 Todos los Licores";
-    btnLimpiar.onclick = function() { subcategoriaActual = null; aplicarFiltros(); };
+    btnLimpiar.onclick = function() { subcategoriaActual = null; aplicarFiltros(); closeCategorias(); };
     subcatContainer.appendChild(btnLimpiar);
     
     // Crear botones para cada subcategoría (Ron, Vodka...)
@@ -600,8 +607,22 @@ function generarSubcategoriasLicores() {
         let btn = document.createElement('button');
         btn.className = (subcat === subcategoriaActual) ? "cat-btn active" : "cat-btn";
         btn.innerText = subcat;
-        btn.onclick = function() { subcategoriaActual = subcat; aplicarFiltros(); };
+        
+        // Aplicar colores personalizados
+        let colorBase = coloresSubcat[colorIndex % coloresSubcat.length];
+        if (subcat === subcategoriaActual) {
+            btn.style.backgroundColor = colorBase;
+            btn.style.borderColor = colorBase;
+            btn.style.color = "white";
+        } else {
+            btn.style.borderColor = colorBase;
+            btn.style.color = colorBase;
+            btn.style.backgroundColor = "transparent";
+        }
+
+        btn.onclick = function() { subcategoriaActual = subcat; aplicarFiltros(); closeCategorias(); };
         subcatContainer.appendChild(btn);
+        colorIndex++;
     });
 }
 
