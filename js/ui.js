@@ -3,18 +3,49 @@
  */
 
 // --- VERIFICACIÓN DE EDAD Y HORARIO ---
-if (localStorage.getItem('ageVerified') === 'true') { let ag = document.getElementById('age-gate'); if(ag) ag.style.display = 'none'; }
-function verificarEdad() {
-    let d = document.getElementById('age-d').value, m = document.getElementById('age-m').value, y = document.getElementById('age-y').value, err = document.getElementById('age-error');
-    let dia = Number(d), mes = Number(m), ano = Number(y);
-    if(!dia || !mes || !ano || dia > 31 || mes > 12 || ano < 1900) { err.innerText = "Ingresa una fecha válida."; err.style.display = "block"; return; }
-    let birth = new Date(ano, mes - 1, dia);
-    if (birth.getFullYear() !== ano || birth.getMonth() !== mes - 1 || birth.getDate() !== dia) { err.innerText = "Ingresa una fecha válida."; err.style.display = "block"; return; }
-    let today = new Date(); let age = today.getFullYear() - birth.getFullYear(), mDiff = today.getMonth() - birth.getMonth();
-    if (mDiff < 0 || (mDiff === 0 && today.getDate() < birth.getDate())) age--;
-    if(age >= 18) { localStorage.setItem('ageVerified', 'true'); document.getElementById('age-gate').style.display = 'none'; } else { err.innerText = "Lo sentimos, debes ser mayor de 18 años."; err.style.display = "block"; }
+if (localStorage.getItem('ageVerified') === 'true') { 
+    let ag = document.getElementById('age-gate'); 
+    if (ag) ag.style.display = 'none'; 
 }
 
+/** Valida si el usuario cumple con la edad mínima (18 años) */
+function verificarEdad() {
+    let d = document.getElementById('age-d').value;
+    let m = document.getElementById('age-m').value;
+    let y = document.getElementById('age-y').value;
+    let err = document.getElementById('age-error');
+    
+    let dia = Number(d), mes = Number(m), ano = Number(y);
+    
+    if (!dia || !mes || !ano || dia > 31 || mes > 12 || ano < 1900) { 
+        err.innerText = "Ingresa una fecha válida."; 
+        err.style.display = "block"; 
+        return; 
+    }
+    
+    let birth = new Date(ano, mes - 1, dia);
+    if (birth.getFullYear() !== ano || birth.getMonth() !== mes - 1 || birth.getDate() !== dia) { 
+        err.innerText = "Ingresa una fecha válida."; 
+        err.style.display = "block"; 
+        return; 
+    }
+    
+    let today = new Date(); 
+    let age = today.getFullYear() - birth.getFullYear();
+    let mDiff = today.getMonth() - birth.getMonth();
+    
+    if (mDiff < 0 || (mDiff === 0 && today.getDate() < birth.getDate())) age--;
+    
+    if (age >= 18) { 
+        localStorage.setItem('ageVerified', 'true'); 
+        document.getElementById('age-gate').style.display = 'none'; 
+    } else { 
+        err.innerText = "Lo sentimos, debes ser mayor de 18 años."; 
+        err.style.display = "block"; 
+    }
+}
+
+/** Verifica si la tienda se encuentra en horario laboral */
 function checkHorario() {
     try {
         let d = new Date();
@@ -45,18 +76,101 @@ function checkHorario() {
         }
     } catch(e) { console.log("Error en horario"); }
 }
-checkHorario(); setInterval(checkHorario, 60000);
+
+checkHorario(); 
+setInterval(checkHorario, 60000);
 
 // --- NAVEGACIÓN Y MODALES ---
-function setActiveNav(id) { document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.remove('active')); const el = document.getElementById(id); if(el) el.classList.add('active'); }
-function irInicio() { cerrarModal('all'); setActiveNav('nav-home'); window.scrollTo({top: 0, behavior: 'smooth'}); document.getElementById('buscador').value = ''; document.getElementById('chkAgotados').checked = false; cerrarSugerencias(); subcategoriaActual = null; let subcatSection = document.getElementById('subcategoria-section-main'); if(subcatSection) subcatSection.style.display = 'none'; let btnInicio = Array.from(document.querySelectorAll('.cat-btn')).find(b => b.innerText.includes('Inicio')); if(btnInicio) filtrarCategoria('Todos', btnInicio); else filtrarCategoria('Todos', document.querySelectorAll('.cat-btn')[0]); }
-function abrirLegales() { document.getElementById('modal-legales').style.display = 'flex'; }
-function abrirSoporteWhatsApp() { let msg = "Hola, necesito ayuda con la plataforma de Gran Catador."; window.open(`https://wa.me/584245496366?text=${encodeURIComponent(msg)}`, '_blank'); }
-function abrirPerfil() { cerrarModal('all'); setActiveNav('nav-user'); document.getElementById('modal-perfil').style.display = 'flex'; document.getElementById('perfilNombre').value = localStorage.getItem('gc_nombre') || ''; document.getElementById('perfilDireccion').value = localStorage.getItem('gc_direccion') || ''; let hist = JSON.parse(localStorage.getItem('gc_historial')) || []; let listCont = document.getElementById('historial-lista'); if(hist.length === 0) { listCont.innerHTML = '<p style="font-size:12px; color:gray; text-align:center;">Aún no tienes pedidos registrados.</p>'; } else { listCont.innerHTML = ''; hist.forEach((ped, index) => { let itemsT = ped.items.map(i => `${i.cantidad}x ${i.nombre}`).join(', '); listCont.innerHTML += `<div style="border:1px solid var(--borde-color); padding:10px; border-radius:12px; margin-bottom:10px;"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span style="font-size:11px; font-weight:bold; color:var(--dorado);">${ped.fecha}</span><span style="font-size:13px; font-weight:bold;">$${ped.total.toFixed(2)}</span></div><p style="font-size:11px; color:var(--texto-claro); margin-bottom:10px;">${itemsT}</p><button onclick="repetirPedido(${index})" style="background:var(--azul-rey); color:white; border:none; padding:8px; width:100%; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;"><i class="fa-solid fa-rotate-right"></i> Repetir este pedido</button></div>`; }); } }
-function guardarPerfil() { localStorage.setItem('gc_nombre', document.getElementById('perfilNombre').value); localStorage.setItem('gc_direccion', document.getElementById('perfilDireccion').value); mostrarToast("Datos guardados ✅"); cerrarModal('modal-perfil', 'nav-home'); }
-function abrirAjustes() { cerrarModal('all'); setActiveNav('nav-settings'); document.getElementById('modal-ajustes').style.display = 'flex'; document.getElementById('toggleDarkMode').checked = document.body.classList.contains('dark-mode'); }
-function toggleDark() { document.body.classList.toggle('dark-mode'); localStorage.setItem('gc_dark', document.body.classList.contains('dark-mode')); }
-function cerrarModal(modalId, navAnterior = 'nav-home') { if(modalId === 'all') { document.querySelectorAll('.modal-fullscreen').forEach(m => m.style.display = 'none'); return; } const m = document.getElementById(modalId); if(m) m.style.display = 'none'; if(navAnterior === 'modal-ajustes') { abrirAjustes(); } else { setActiveNav(navAnterior); } }
+/** Marca como activo el ícono correspondiente en la barra de navegación inferior */
+function setActiveNav(id) { 
+    document.querySelectorAll('.bottom-nav a').forEach(a => a.classList.remove('active')); 
+    const el = document.getElementById(id); 
+    if(el) el.classList.add('active'); 
+}
+
+/** Restablece la vista al menú principal (Inicio) */
+function irInicio() { 
+    cerrarModal('all'); 
+    setActiveNav('nav-home'); 
+    window.scrollTo({top: 0, behavior: 'smooth'}); 
+    
+    document.getElementById('buscador').value = ''; 
+    document.getElementById('chkAgotados').checked = false; 
+    cerrarSugerencias(); 
+    subcategoriaActual = null; 
+    
+    let subcatSection = document.getElementById('subcategoria-section-main'); 
+    if(subcatSection) subcatSection.style.display = 'none'; 
+    
+    let btnInicio = Array.from(document.querySelectorAll('.cat-btn')).find(b => b.innerText.includes('Inicio')); 
+    if(btnInicio) filtrarCategoria('Todos', btnInicio); 
+    else filtrarCategoria('Todos', document.querySelectorAll('.cat-btn')[0]); 
+    
+    let mTitle = document.getElementById('mobile-header-title');
+    if(mTitle) mTitle.innerText = 'Inicio';
+}
+
+function abrirLegales() { 
+    document.getElementById('modal-legales').style.display = 'flex'; 
+}
+
+function abrirSoporteWhatsApp() { 
+    let msg = "Hola, necesito ayuda con la plataforma de Gran Catador."; 
+    window.open(`https://wa.me/584245496366?text=${encodeURIComponent(msg)}`, '_blank'); 
+}
+
+/** Abre la vista de perfil y dibuja el historial de pedidos */
+function abrirPerfil() { 
+    cerrarModal('all'); 
+    setActiveNav('nav-user'); 
+    document.getElementById('modal-perfil').style.display = 'flex'; 
+    document.getElementById('perfilNombre').value = localStorage.getItem('gc_nombre') || ''; 
+    document.getElementById('perfilDireccion').value = localStorage.getItem('gc_direccion') || ''; 
+    
+    let hist = JSON.parse(localStorage.getItem('gc_historial')) || []; 
+    let listCont = document.getElementById('historial-lista'); 
+    
+    if (hist.length === 0) { 
+        listCont.innerHTML = '<p style="font-size:12px; color:gray; text-align:center;">Aún no tienes pedidos registrados.</p>'; 
+    } else { 
+        let htmlHistorial = '';
+        hist.forEach((ped, index) => { 
+            let itemsT = ped.items.map(i => `${i.cantidad}x ${i.nombre}`).join(', '); 
+            htmlHistorial += `
+                <div class="historial-item" style="border:1px solid var(--borde-color); padding:10px; border-radius:12px; margin-bottom:10px;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                        <span style="font-size:11px; font-weight:bold; color:var(--dorado);">${ped.fecha}</span>
+                        <span style="font-size:13px; font-weight:bold;">$${ped.total.toFixed(2)}</span>
+                    </div>
+                    <p style="font-size:11px; color:var(--texto-claro); margin-bottom:10px;">${itemsT}</p>
+                    <button onclick="repetirPedido(${index})" style="background:var(--azul-rey); color:white; border:none; padding:8px; width:100%; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;">
+                        <i class="fa-solid fa-rotate-right"></i> Repetir este pedido
+                    </button>
+                </div>`; 
+        }); 
+        listCont.innerHTML = htmlHistorial;
+    } 
+}
+
+/** Guarda las preferencias del perfil del usuario */
+function guardarPerfil() { 
+    localStorage.setItem('gc_nombre', document.getElementById('perfilNombre').value); 
+    localStorage.setItem('gc_direccion', document.getElementById('perfilDireccion').value); 
+    mostrarToast("Datos guardados ✅"); 
+    cerrarModal('modal-perfil', 'nav-home'); 
+}
+
+function abrirAjustes() { 
+    cerrarModal('all'); 
+    setActiveNav('nav-settings'); 
+    document.getElementById('modal-ajustes').style.display = 'flex'; 
+    document.getElementById('toggleDarkMode').checked = document.body.classList.contains('dark-mode'); 
+}
+
+function toggleDark() { 
+    document.body.classList.toggle('dark-mode'); 
+    localStorage.setItem('gc_dark', document.body.classList.contains('dark-mode')); 
+}
 function mostrarToast(msg) { const cont = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = msg; cont.appendChild(t); setTimeout(() => t.remove(), 2500); }
 
 // --- VISTAS Y CATEGORÍAS ---
@@ -92,6 +206,10 @@ function filtrarCategoria(cat, btn) {
     categoriaActual = cat; subcategoriaActual = null;
     let subcatSection = document.getElementById('subcategoria-section-main'); if (cat !== 'LICORES' && subcatSection) { subcatSection.style.display = 'none'; }
     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active')); if(btn) btn.classList.add('active');
+    
+    let mTitle = document.getElementById('mobile-header-title');
+    if(mTitle) mTitle.innerText = (cat === 'Todos') ? 'Inicio' : (cat === 'LICORES' ? 'Licores' : cat);
+    
     if (cat === 'LICORES') { generarSubcategoriasLicores(); aplicarFiltros(); } else { aplicarFiltros(); closeCategorias(); }
 }
 function toggleCategorias() { const panel = document.getElementById('categoria-panel'); const overlay = document.getElementById('categoria-overlay'); if(!panel || !overlay) return; const isOpen = panel.classList.toggle('open'); overlay.style.display = isOpen ? 'block' : 'none'; }
@@ -129,26 +247,44 @@ function crearHTMLProducto(p) {
     const esModoCaja = (modoVistaGlobal === 'caja');
     const precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;
     const precioBsDin = esModoCaja ? p.PrecioCajaBsStr : p.PrecioBsStr;
-    const iconoBtn = esModoCaja ? '📦' : '🍾';
-    const colorBtn = esModoCaja ? 'var(--dorado)' : 'var(--verde-btn)';
-    const colorTexto = esModoCaja ? 'black' : 'white';
-    const etiquetaModo = esModoCaja ? 'Precio por Caja' : 'Precio por Unidad';
     const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
+    
+    let badgeHTML = '';
+    if (isAgotado) {
+        badgeHTML = `<div class="product-badge badge-agotado">AGOTADO</div>`;
+    } else if (p.StockNum > 0 && p.StockNum <= 15) {
+        badgeHTML = `<div class="product-badge badge-orange">STOCK BAJO</div>`;
+    } else if (p.PrecioNum < 5) {
+        badgeHTML = `<div class="product-badge badge-green">OFERTA</div>`;
+    }
 
     return `
         <div class="producto-card ${isAgotado ? 'agotado' : ''}">
-            ${isAgotado ? '<div class="badge-agotado">AGOTADO</div>' : ''}
-            <i class="fa-${isFav ? 'solid' : 'regular'} fa-heart btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${p.codigo}')"></i>
-            <img loading="lazy" src="assets/img/${p.codigo}.webp" data-attempts="0" onerror="imgFallback(this, '${p.codigo}')" alt="${p.Nombre}">
-            <h3 class="producto-titulo">${p.Nombre}</h3>
-            <p class="producto-stock" style="margin-bottom:2px;">Disp: ${p.StockStr}</p>
             
-            <p class="producto-precio">$${precioUsdDin} <span style="font-size:11px; color:var(--texto-claro); display:inline-block; font-weight:500;">/ ${precioBsDin} Bs</span></p>
-            <p style="font-size:10px; color:var(--texto-claro); font-weight:bold; margin-top:2px; margin-bottom: 30px;">${etiquetaModo}</p>
+            ${badgeHTML}
+            <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${p.codigo}')" aria-label="Favorito">
+                <i class="fa-${isFav ? 'solid' : 'regular'} fa-heart"></i>
+            </button>
             
-            <button class="btn-share" style="bottom: 12px; right: 50px;" onclick="compartirProductoB64('${nombreB64}', '${precioUsdDin}')"><i class="fa-solid fa-share-nodes"></i></button>
+            <div class="product-img-container">
+                <!-- 🖼️ IMAGEN DEL PRODUCTO: AQUÍ PUEDES CAMBIAR LA URL -->
+                <!-- Actualmente busca el codigo.webp en la ruta predefinida -->
+                <img loading="lazy" src="assets/img/${p.codigo}.webp" data-attempts="0" onerror="imgFallback(this, '${p.codigo}')" alt="${p.Nombre}">
+            </div>
             
-            <button class="btn-add ${isAgotado ? 'disabled' : ''}" style="width: 32px; border-radius: 8px; right: 12px; background: ${colorBtn}; color: ${colorTexto}; font-size: 13px;" title="Agregar" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${p.codigo}.webp', ${esModoCaja})"`}>${iconoBtn}</button>
+            <h3 class="producto-titulo" title="${p.Nombre}">${p.Nombre}</h3>
+            <p class="producto-stock">Disp: ${p.StockStr}</p>
+            
+            <div class="product-bottom">
+                <div class="product-price-container">
+                    <span class="product-price">$${precioUsdDin}</span>
+                    <span class="product-price-bs">${precioBsDin} Bs</span>
+                </div>
+                
+                <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${p.codigo}.webp', ${esModoCaja})"`}>
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
         </div>
     `;
 }
@@ -160,9 +296,15 @@ function renderizarPagina() {
     let inicio = (paginaActual - 1) * itemsPorPagina, fin = paginaActual * itemsPorPagina; 
     let pedazo = productosFiltradosGlobal.slice(inicio, fin);
     
-    if(productosFiltradosGlobal.length === 0) { 
-        if(paginaActual === 1) {
-            cont.innerHTML = `<div style="grid-column: span 2; text-align: center; padding: 40px 20px; color: var(--texto-claro);"><i class="fa-solid fa-wine-bottle" style="font-size: 60px; opacity: 0.3; margin-bottom: 15px;"></i><h3 style="color: var(--texto-oscuro); font-size: 16px; font-weight: bold;">¿Aún no tienes sed?</h3><p style="font-size: 13px; margin-top: 5px;">No encontramos botellas con esa descripción.</p><button onclick="irInicio()" class="cat-btn active" style="margin: 20px auto 0 auto; padding: 10px 20px;">Ver todo el catálogo</button></div>`; 
+    if (productosFiltradosGlobal.length === 0) { 
+        if (paginaActual === 1) {
+            cont.innerHTML = `
+                <div style="grid-column: span 2; text-align: center; padding: 40px 20px; color: var(--texto-claro);">
+                    <i class="fa-solid fa-wine-bottle" style="font-size: 60px; opacity: 0.3; margin-bottom: 15px;"></i>
+                    <h3 style="color: var(--texto-oscuro); font-size: 16px; font-weight: bold;">¿Aún no tienes sed?</h3>
+                    <p style="font-size: 13px; margin-top: 5px;">No encontramos botellas con esa descripción.</p>
+                    <button onclick="irInicio()" class="cat-btn active" style="margin: 20px auto 0 auto; padding: 10px 20px;">Ver todo el catálogo</button>
+                </div>`; 
             document.getElementById('btn-cargar-mas').style.display = 'none'; 
         }
         return; 
@@ -171,8 +313,14 @@ function renderizarPagina() {
     const html = pedazo.map(crearHTMLProducto).join('');
     cont.insertAdjacentHTML('beforeend', html);
     
-    if (fin < productosFiltradosGlobal.length) document.getElementById('btn-cargar-mas').style.display = 'block'; 
-    else document.getElementById('btn-cargar-mas').style.display = 'none';
+    if (fin < productosFiltradosGlobal.length) {
+        document.getElementById('btn-cargar-mas').style.display = 'block'; 
+    } else {
+        document.getElementById('btn-cargar-mas').style.display = 'none';
+    }
 }
 
-function cargarMasProductos() { paginaActual++; renderizarPagina(); }
+function cargarMasProductos() { 
+    paginaActual++; 
+    renderizarPagina(); 
+}

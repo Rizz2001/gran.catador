@@ -1,7 +1,8 @@
-const CACHE_NAME = 'grancatador-v13'; // Actualizado con ui.js
+const CACHE_NAME = 'grancatador-v16';
 const urlsToCache = [
-  './',
   './index.html',
+  './assets/css/main.css',
+  './assets/css/responsive.css',
   './js/utils.js',
   './js/state.js',
   './js/cart.js',
@@ -9,10 +10,8 @@ const urlsToCache = [
   './js/app.js',
   './logo.png',
   './manifest.json',
-  'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+  'https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@400;500;600&display=swap'
 ];
-
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
   self.skipWaiting();

@@ -12,7 +12,7 @@ let subcategoriaActual = null;
 
 if(localStorage.getItem('gc_dark') === 'true') document.body.classList.add('dark-mode');
 
-if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(reg => { console.log("PWA Ok"); }).catch(err => console.log("SW Error", err)); }); }
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(reg => { reg.update(); console.log("PWA Ok"); }).catch(err => console.log("SW Error", err)); }); }
 
 if (localStorage.getItem('ageVerified') === 'true') { let ag = document.getElementById('age-gate'); if(ag) ag.style.display = 'none'; }
 function verificarEdad() {
@@ -206,8 +206,10 @@ async function cargarInventario() {
     toggleDireccion(); 
     inyectarInterruptor();
     
+    localStorage.removeItem('gc_inv_time_v3'); // Forzar limpieza de versión anterior
+    
     let ahora = new Date().getTime();
-    let cacheTime = localStorage.getItem('gc_inv_time_v3');
+    let cacheTime = localStorage.getItem('gc_inv_time_v4');
     let cacheData = localStorage.getItem('gc_inv_data');
     
     if (cacheTime && cacheData && (ahora - parseInt(cacheTime)) < 3600000) {
@@ -329,7 +331,7 @@ async function cargarInventario() {
         if(inventario.length === 0) throw new Error("Inventario vacío");
         
         localStorage.setItem('gc_inv_data', JSON.stringify(inventario));
-        localStorage.setItem('gc_inv_time_v3', ahora.toString());
+        localStorage.setItem('gc_inv_time_v4', ahora.toString());
         
         actualizarCartCount(); generarCategorias(); aplicarFiltros(); 
     } catch(e) { 
@@ -742,7 +744,7 @@ function enviarPedido() {
     if(metodo === 'Efectivo') { let pago = parseFloat(document.getElementById('montoPago').value) || 0; if(pago > totalCarrito) { msg += `💵 _Paga con $${pago.toFixed(2)}_\n🟢 _Requiere vuelto: $${(pago - totalCarrito).toFixed(2)}_\n`; } } else { msg += `📎 _[Capture adjunto en el siguiente mensaje]_\n`; }
     msg += `\n💰 *TOTAL A PAGAR: $${totalCarrito.toFixed(2)}*\n💱 _(Tasa BCV: ${tasaOficial.toFixed(2)} Bs)_`;
     
-    localStorage.removeItem('gc_inv_time_v3');
+    localStorage.removeItem('gc_inv_time_v4');
     
     carrito = {}; guardarCarritoLS(); actualizarCartCount(); cerrarModal('modal-cart', 'nav-home'); window.open(`https://wa.me/584245496366?text=${encodeURIComponent(msg)}`, '_blank');
 }
@@ -751,6 +753,6 @@ function agregarAlCarritoB64(b64, p, btn, c = false, img = '', esCaja = false) {
 function compartirProductoB64(b64, p) { compartirProducto(decodificarNombre(b64), p); }
 function cambiarCantB64(b64, d) { cambiarCant(decodificarNombre(b64), d); }
 
-window.limpiarCacheAdmin = function() { localStorage.removeItem('gc_inv_time_v3'); localStorage.removeItem('gc_inv_data'); alert('Caché limpiada.'); location.reload(); }
+window.limpiarCacheAdmin = function() { localStorage.clear(); sessionStorage.clear(); if ('caches' in window) { caches.keys().then(n => n.forEach(c => caches.delete(c))); } if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(r => r.forEach(s => s.unregister())); } alert('Toda la memoria y caché eliminados.'); window.location.href = window.location.pathname + '?v=' + new Date().getTime(); }
 
 window.onload = cargarInventario;

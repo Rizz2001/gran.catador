@@ -11,7 +11,7 @@ let subcategoriaActual = null;
 
 if(localStorage.getItem('gc_dark') === 'true') document.body.classList.add('dark-mode');
 
-if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(reg => { console.log("PWA Ok"); }).catch(err => console.log("SW Error", err)); }); }
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(reg => { reg.update(); console.log("PWA Ok"); }).catch(err => console.log("SW Error", err)); }); }
 
 async function obtenerTasaDolar() {
     try {
@@ -151,8 +151,10 @@ async function cargarInventario() {
     toggleDireccion(); 
     inyectarInterruptor();
     
+    localStorage.removeItem('gc_inv_time_v3'); // Forzar limpieza de versión anterior
+    
     let ahora = new Date().getTime();
-    let cacheTime = localStorage.getItem('gc_inv_time_v3');
+    let cacheTime = localStorage.getItem('gc_inv_time_v4');
     let cacheData = localStorage.getItem('gc_inv_data');
     
     if (cacheTime && cacheData && (ahora - parseInt(cacheTime)) < 3600000) {
@@ -274,7 +276,7 @@ async function cargarInventario() {
         if(inventario.length === 0) throw new Error("Inventario vacío");
         
         localStorage.setItem('gc_inv_data', JSON.stringify(inventario));
-        localStorage.setItem('gc_inv_time_v3', ahora.toString());
+        localStorage.setItem('gc_inv_time_v4', ahora.toString());
         
         actualizarCartCount(); generarCategorias(); aplicarFiltros(); 
     } catch(e) { 
@@ -282,7 +284,15 @@ async function cargarInventario() {
     }
 }
 
-function debounceBusqueda(event) { clearTimeout(debounceTimer); const query = event.target.value.trim(); if(query.length < 2) { cerrarSugerencias(); aplicarFiltros(); return; } debounceTimer = setTimeout(() => { aplicarFiltros(); mostrarSugerencias(query); }, 300); }
+function debounceBusqueda(event) { 
+    clearTimeout(debounceTimer); 
+    const query = event.target.value; 
+    if (event.target.id === 'buscador') { let dSearch = document.getElementById('buscador-desktop'); if(dSearch) dSearch.value = query; }
+    else if (event.target.id === 'buscador-desktop') { let mSearch = document.getElementById('buscador'); if(mSearch) mSearch.value = query; }
+    
+    if(query.trim().length < 2) { cerrarSugerencias(); aplicarFiltros(); return; } 
+    debounceTimer = setTimeout(() => { aplicarFiltros(); mostrarSugerencias(query.trim()); }, 300); 
+}
 
 function mostrarSugerencias(q) {
     let qLimpio = quitarAcentos(q);
@@ -332,6 +342,10 @@ function filtrarCategoria(cat, btn) {
     document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
     if(btn) btn.classList.add('active');
     
+    // Actualizar título de la versión móvil
+    let mTitle = document.getElementById('mobile-header-title');
+    if(mTitle) mTitle.innerText = (cat === 'Todos') ? 'Inicio' : (cat === 'LICORES' ? 'Licores' : cat);
+    
     // Generar subcategorías si es LICORES
     if (cat === 'LICORES') { 
         console.log("🥃 Generando subcategorías reales para LICORES...");
@@ -372,7 +386,7 @@ function fallbackCopyText(text) {
 }
 
 function aplicarFiltros() {
-    let q = quitarAcentos(document.getElementById('buscador').value.trim()); 
+    let q = quitarAcentos((document.getElementById('buscador')?.value || '').trim()); 
     let sortOption = document.getElementById('ordenarSelect').value; 
     let verAgotados = document.getElementById('chkAgotados').checked; 
     let resultado = inventario;
@@ -439,35 +453,48 @@ function renderizarPagina() {
         return; 
     }
     
-    const fragmento = document.createDocumentFragment();
-    pedazo.forEach(p => {
-        const isFav = favoritos.includes(p.codigo); const isAgotado = p.StockNum <= 0; const d = document.createElement('div'); d.className = `producto-card ${isAgotado ? 'agotado' : ''}`; let nombreB64 = codificarNombre(p.Nombre);
+    const html = pedazo.map(p => {
+        const isFav = favoritos.includes(p.codigo); 
+        const isAgotado = p.StockNum <= 0; 
+        const nombreB64 = codificarNombre(p.Nombre);
+        const esModoCaja = (modoVistaGlobal === 'caja');
+        const precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;
+        const precioBsDin = esModoCaja ? p.PrecioCajaBsStr : p.PrecioBsStr;
+        const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
         
-        let esModoCaja = (modoVistaGlobal === 'caja');
-        let precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;
-        let precioBsDin = esModoCaja ? p.PrecioCajaBsStr : p.PrecioBsStr;
-        let iconoBtn = esModoCaja ? '📦' : '🍾';
-        let colorBtn = esModoCaja ? 'var(--dorado)' : 'var(--verde-btn)';
-        let colorTexto = esModoCaja ? 'black' : 'white';
-        let etiquetaModo = esModoCaja ? 'Precio por Caja' : 'Precio por Unidad';
+        let badgeHTML = '';
+        if (isAgotado) { badgeHTML = `<div class="product-badge badge-agotado">AGOTADO</div>`; }
+        else if (p.StockNum > 0 && p.StockNum <= 15) { badgeHTML = `<div class="product-badge badge-orange">STOCK BAJO</div>`; }
+        else if (p.PrecioNum < 5) { badgeHTML = `<div class="product-badge badge-green">OFERTA</div>`; }
 
-        d.innerHTML = `
-            ${isAgotado ? '<div class="badge-agotado">AGOTADO</div>' : ''}
-            <i class="fa-${isFav ? 'solid' : 'regular'} fa-heart btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${p.codigo}')"></i>
-            <img loading="lazy" src="assets/img/${p.codigo}.webp" data-attempts="0" onerror="imgFallback(this, '${p.codigo}')" alt="${p.Nombre}">
-            <h3 class="producto-titulo">${p.Nombre}</h3>
-            <p class="producto-stock" style="margin-bottom:2px;">Disp: ${p.StockStr}</p>
-            
-            <p class="producto-precio">$${precioUsdDin} <span style="font-size:11px; color:var(--texto-claro); display:inline-block; font-weight:500;">/ ${precioBsDin} Bs</span></p>
-            <p style="font-size:10px; color:var(--texto-claro); font-weight:bold; margin-top:2px; margin-bottom: 30px;">${etiquetaModo}</p>
-            
-            <button class="btn-share" style="bottom: 12px; right: 50px;" onclick="compartirProductoB64('${nombreB64}', '${precioUsdDin}')"><i class="fa-solid fa-share-nodes"></i></button>
-            
-            <button class="btn-add ${isAgotado ? 'disabled' : ''}" style="width: 32px; border-radius: 8px; right: 12px; background: ${colorBtn}; color: ${colorTexto}; font-size: 13px;" title="Agregar" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${esModoCaja ? p.PrecioCajaNum : p.PrecioNum}, this, false, 'assets/img/${p.codigo}.webp', ${esModoCaja})"`}>${iconoBtn}</button>
+        return `
+            <div class="producto-card ${isAgotado ? 'agotado' : ''}">
+                ${badgeHTML}
+                <button class="btn-fav ${isFav ? 'active' : ''}" onclick="toggleFav('${p.codigo}')" aria-label="Favorito">
+                    <i class="fa-${isFav ? 'solid' : 'regular'} fa-heart"></i>
+                </button>
+                
+                <div class="product-img-container">
+                    <img loading="lazy" src="assets/img/${p.codigo}.webp" data-attempts="0" onerror="imgFallback(this, '${p.codigo}')" alt="${p.Nombre}">
+                </div>
+                
+                <h3 class="producto-titulo" title="${p.Nombre}">${p.Nombre}</h3>
+                <p class="producto-stock">Disp: ${p.StockStr}</p>
+                
+                <div class="product-bottom">
+                    <div class="product-price-container">
+                        <span class="product-price">$${precioUsdDin}</span>
+                        <span class="product-price-bs">${precioBsDin} Bs</span>
+                    </div>
+                    <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${p.codigo}.webp', ${esModoCaja})"`}>
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            </div>
         `;
-        fragmento.appendChild(d);
-    });
-    cont.appendChild(fragmento); 
+    }).join('');
+    cont.insertAdjacentHTML('beforeend', html);
+    
     if (fin < productosFiltradosGlobal.length) document.getElementById('btn-cargar-mas').style.display = 'block'; 
     else document.getElementById('btn-cargar-mas').style.display = 'none';
 }
@@ -597,6 +624,10 @@ function irInicio() {
     let btnInicio = Array.from(document.querySelectorAll('.cat-btn')).find(b => b.innerText.includes('Inicio')); 
     if(btnInicio) filtrarCategoria('Todos', btnInicio); 
     else filtrarCategoria('Todos', document.querySelectorAll('.cat-btn')[0]); 
+    
+    // Restablecer el título móvil
+    let mTitle = document.getElementById('mobile-header-title');
+    if(mTitle) mTitle.innerText = 'Inicio';
 }
 function abrirLegales() { document.getElementById('modal-legales').style.display = 'flex'; }
 function abrirSoporteWhatsApp() { let msg = "Hola, necesito ayuda con la plataforma de Gran Catador."; window.open(`https://wa.me/584245496366?text=${encodeURIComponent(msg)}`, '_blank'); }
@@ -615,6 +646,6 @@ function cerrarModal(modalId, navAnterior = 'nav-home') { if(modalId === 'all') 
 function mostrarToast(msg) { const cont = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = msg; cont.appendChild(t); setTimeout(() => t.remove(), 2500); }
 function compartirProductoB64(b64, p) { compartirProducto(decodificarNombre(b64), p); }
 
-window.limpiarCacheAdmin = function() { localStorage.removeItem('gc_inv_time_v3'); localStorage.removeItem('gc_inv_data'); alert('Caché limpiada.'); location.reload(); }
+window.limpiarCacheAdmin = function() { localStorage.clear(); sessionStorage.clear(); if ('caches' in window) { caches.keys().then(n => n.forEach(c => caches.delete(c))); } if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(r => r.forEach(s => s.unregister())); } alert('Toda la memoria y caché eliminados.'); window.location.href = window.location.pathname + '?v=' + new Date().getTime(); }
 
 window.onload = cargarInventario;
