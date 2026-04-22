@@ -84,10 +84,12 @@ async function obtenerArchivosExternos() {
     // Obtener tasa de dólares
     await obtenerTasaDolar();
     let tasaEl = document.getElementById('tasaValor'); if(tasaEl) tasaEl.innerText = tasaOficial.toFixed(2) + " Bs";
+    let tasaElMob = document.getElementById('tasaValorMobile'); if(tasaElMob) tasaElMob.innerText = tasaOficial.toFixed(2) + " Bs";
     
     // Obtener tasa de euros
     await obtenerTasaEuro();
     let tasaEuroEl = document.getElementById('tasaEuroValor'); if(tasaEuroEl) tasaEuroEl.innerText = tasaEuro.toFixed(2) + " Bs";
+    let tasaEuroElMob = document.getElementById('tasaEuroValorMobile'); if(tasaEuroElMob) tasaEuroElMob.innerText = tasaEuro.toFixed(2) + " Bs";
     
     try { let resRec = await fetch('data/config/recomendados.txt?v=' + new Date().getTime()); if (resRec.ok) { let textoRec = await resRec.text(); codigosRecomendados = textoRec.split(/[\n,]+/).map(c => c.trim()).filter(c => c !== ""); appState.codigosRecomendados = codigosRecomendados; } } catch (error) {}
     try { let resDisp = await fetch('data/config/disponibles.txt?v=' + new Date().getTime()); if (resDisp.ok) { let textoDisp = await resDisp.text(); siempreDisponibles = textoDisp.split(/[\n,]+/).map(c => c.trim()).filter(c => c !== ""); appState.siempreDisponibles = siempreDisponibles; } } catch (error) {}

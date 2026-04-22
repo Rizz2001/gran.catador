@@ -89,8 +89,8 @@ body.dark-mode .age-box { background: #1f2937; color: white; }
 .location-label { font-size: 10px; color: var(--color-text-muted); }
 .location-value { font-size: 12px; font-weight: 600; color: var(--color-text); }
 .header-center { flex: 1; min-width: 0; display: flex; justify-content: center; align-items: center; margin: 0 10px; }
-.search-pill { background-color: var(--item-bg); border-radius: var(--radius-full); display: flex; align-items: center; padding: 10px 20px; transition: 0.2s; border: 1px solid var(--color-border); position: relative; width: 100%; max-width: 600px; }
-.search-pill:focus-within { background-color: var(--color-white); border-color: var(--color-primary); box-shadow: 0 0 0 3px rgba(10, 93, 58, 0.1); }
+.search-pill { background-color: var(--color-bg); border-radius: var(--radius-md); display: flex; align-items: center; padding: 8px 15px; transition: border-color 0.2s; border: 1px solid var(--color-border); position: relative; width: 100%; max-width: 500px; }
+.search-pill:focus-within { background-color: var(--color-white); border-color: var(--color-primary); }
 .search-icon { color: var(--color-text-muted); font-size: 15px; margin-right: 12px; }
 .search-pill input { flex: 1; border: none; background: transparent; outline: none; font-size: 14px; color: var(--color-text); font-family: inherit; width: 100%; }
 .header-right { display: flex; align-items: center; gap: 10px; }
@@ -110,7 +110,8 @@ body.dark-mode .age-box { background: #1f2937; color: white; }
 body.dark-mode .site-header, body.dark-mode .header-main-bar, body.dark-mode .header-nav-bar { background-color: #1f2937; border-color: #374151; }
 body.dark-mode .header-top-bar { background-color: var(--color-primary-dark); }
 body.dark-mode .brand-text, body.dark-mode .location-value { color: var(--color-white); }
-body.dark-mode .search-pill { background-color: #374151; }
+body.dark-mode .search-pill { background-color: #374151; border-color: #4b5563; }
+body.dark-mode .search-pill:focus-within { background-color: #1f2937; border-color: var(--color-accent); }
 body.dark-mode .search-pill input { color: var(--color-white); }
 body.dark-mode .icon-btn { background-color: #374151; color: var(--color-white); }
 body.dark-mode .icon-btn:hover { background-color: var(--color-primary); }
