@@ -501,6 +501,24 @@ function renderizarPagina() {
 
 function cargarMasProductos() { paginaActual++; renderizarPagina(); }
 
+function getIconForCategory(cat) {
+    if (!cat) return 'fa-box-open';
+    let c = cat.toUpperCase();
+    if (c.includes('INICIO') || c === 'TODOS') return 'fa-shop';
+    if (c.includes('FAVORITOS')) return 'fa-heart';
+    if (c.includes('LICOR')) return 'fa-martini-glass-citrus';
+    if (c.includes('CERVEZA')) return 'fa-beer-mug-empty';
+    if (c.includes('VINO')) return 'fa-wine-glass';
+    if (c.includes('RON')) return 'fa-bottle-droplet';
+    if (c.includes('WHISKY')) return 'fa-glass-water';
+    if (c.includes('VODKA') || c.includes('GINEBRA') || c.includes('ANIS') || c.includes('TEQUILA') || c.includes('COCUY')) return 'fa-wine-bottle';
+    if (c.includes('SNACK') || c.includes('CHUCHERIA')) return 'fa-cookie-bite';
+    if (c.includes('AGUA') || c.includes('BEBIDA') || c.includes('REFRESCO') || c.includes('JUGO')) return 'fa-bottle-water';
+    if (c.includes('HIELO')) return 'fa-cubes';
+    if (c.includes('CIGARRO') || c.includes('TABACO')) return 'fa-smoking';
+    return 'fa-box-open';
+}
+
 function generarCategorias() {
     const cont = document.getElementById('contenedorCategorias'); 
     let categorias = [...new Set(inventario.map(p => p.Cat))].sort(); 
@@ -509,16 +527,14 @@ function generarCategorias() {
     // Botón Inicio
     let btnInicio = document.createElement('button'); 
     btnInicio.className = (categoriaActual === 'Todos') ? "cat-btn active" : "cat-btn"; 
-    btnInicio.innerHTML = "🏠 Inicio"; 
+    btnInicio.innerHTML = `<i class="fa-solid fa-shop"></i><span>Inicio</span>`; 
     btnInicio.onclick = function() { irInicio(); }; 
     cont.appendChild(btnInicio);
     
     // Botón Favoritos
     let btnFav = document.createElement('button'); 
     btnFav.className = (categoriaActual === 'Favoritos') ? "cat-btn active" : "cat-btn"; 
-    btnFav.innerHTML = "❤️ Mis Favoritos"; 
-    btnFav.style.borderColor = "#ff4757"; 
-    btnFav.style.color = "#ff4757"; 
+    btnFav.innerHTML = `<i class="fa-solid fa-heart" style="${categoriaActual !== 'Favoritos' ? 'color: #ff4757;' : ''}"></i><span>Favoritos</span>`; 
     btnFav.onclick = function() { filtrarCategoria('Favoritos', this); }; 
     cont.appendChild(btnFav);
     
@@ -526,7 +542,8 @@ function generarCategorias() {
     categorias.forEach(c => {
         let b = document.createElement('button'); 
         b.className = (c === categoriaActual) ? "cat-btn active" : "cat-btn"; 
-        b.innerText = (c === 'LICORES') ? "🍸 LICORES" : c; 
+        let nombreMostrar = (c === 'LICORES') ? "Licores" : c;
+        b.innerHTML = `<i class="fa-solid ${getIconForCategory(c)}"></i><span>${nombreMostrar}</span>`; 
         b.onclick = function() { filtrarCategoria(c, this); }; 
         cont.appendChild(b);
     });
@@ -571,14 +588,10 @@ function generarSubcategoriasLicores() {
     subcatSection.style.display = 'block';
     subcatContainer.innerHTML = '';
     
-    // Colores variados y elegantes para las subcategorías
-    const coloresSubcat = ['#d35400', '#8e44ad', '#2980b9', '#16a085', '#c0392b', '#27ae60', '#f39c12', '#34495e', '#e67e22'];
-    let colorIndex = 0;
-
     // Botón "Todos los Licores"
     let btnLimpiar = document.createElement('button');
     btnLimpiar.className = (!subcategoriaActual) ? "cat-btn active" : "cat-btn";
-    btnLimpiar.innerText = "📋 Todos los Licores";
+    btnLimpiar.innerHTML = `<i class="fa-solid fa-list"></i><span>Todos</span>`;
     btnLimpiar.onclick = function() { subcategoriaActual = null; aplicarFiltros(); closeCategorias(); };
     subcatContainer.appendChild(btnLimpiar);
     
@@ -586,23 +599,9 @@ function generarSubcategoriasLicores() {
     Array.from(subcategoriasDisponibles).sort().forEach(subcat => {
         let btn = document.createElement('button');
         btn.className = (subcat === subcategoriaActual) ? "cat-btn active" : "cat-btn";
-        btn.innerText = subcat;
-        
-        // Aplicar colores personalizados
-        let colorBase = coloresSubcat[colorIndex % coloresSubcat.length];
-        if (subcat === subcategoriaActual) {
-            btn.style.backgroundColor = colorBase;
-            btn.style.borderColor = colorBase;
-            btn.style.color = "white";
-        } else {
-            btn.style.borderColor = colorBase;
-            btn.style.color = colorBase;
-            btn.style.backgroundColor = "transparent";
-        }
-
+        btn.innerHTML = `<i class="fa-solid ${getIconForCategory(subcat)}"></i><span>${subcat}</span>`;
         btn.onclick = function() { subcategoriaActual = subcat; aplicarFiltros(); closeCategorias(); };
         subcatContainer.appendChild(btn);
-        colorIndex++;
     });
 }
 
@@ -636,7 +635,7 @@ function abrirPerfil() {
     cerrarModal('all'); setActiveNav('nav-user'); document.getElementById('modal-perfil').style.display = 'flex'; document.getElementById('perfilNombre').value = localStorage.getItem('gc_nombre') || ''; document.getElementById('perfilDireccion').value = localStorage.getItem('gc_direccion') || ''; 
     let hist = JSON.parse(localStorage.getItem('gc_historial')) || []; let listCont = document.getElementById('historial-lista');
     if(hist.length === 0) { listCont.innerHTML = '<p style="font-size:12px; color:gray; text-align:center;">Aún no tienes pedidos registrados.</p>'; } 
-    else { listCont.innerHTML = ''; hist.forEach((ped, index) => { let itemsT = ped.items.map(i => `${i.cantidad}x ${i.nombre}`).join(', '); listCont.innerHTML += `<div style="border:1px solid var(--borde-color); padding:10px; border-radius:12px; margin-bottom:10px;"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span style="font-size:11px; font-weight:bold; color:var(--dorado);">${ped.fecha}</span><span style="font-size:13px; font-weight:bold;">$${ped.total.toFixed(2)}</span></div><p style="font-size:11px; color:var(--texto-claro); margin-bottom:10px;">${itemsT}</p><button onclick="repetirPedido(${index})" style="background:var(--azul-rey); color:white; border:none; padding:8px; width:100%; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;"><i class="fa-solid fa-rotate-right"></i> Repetir este pedido</button></div>`; }); }
+    else { listCont.innerHTML = ''; hist.forEach((ped, index) => { let itemsT = ped.items.map(i => `${i.cantidad}x ${i.nombre}`).join(', '); listCont.innerHTML += `<div style="border:1px solid var(--color-border); background:var(--color-card); box-shadow:var(--shadow-sm); padding:15px; border-radius:var(--radius-md); margin-bottom:12px;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="font-size:12px; font-weight:600; color:var(--color-primary);">${ped.fecha}</span><span style="font-size:15px; font-weight:700; color:var(--color-text); font-family:'Inter',sans-serif;">$${ped.total.toFixed(2)}</span></div><p style="font-size:12px; color:var(--color-text-muted); margin-bottom:15px; line-height:1.4;">${itemsT}</p><button onclick="repetirPedido(${index})" style="background:rgba(30,58,138,0.1); color:var(--color-primary); border:none; padding:10px; width:100%; border-radius:var(--radius-full); font-size:13px; font-weight:700; cursor:pointer; transition:0.2s;"><i class="fa-solid fa-rotate-right"></i> Repetir pedido</button></div>`; }); }
 }
 function guardarPerfil() { localStorage.setItem('gc_nombre', document.getElementById('perfilNombre').value); localStorage.setItem('gc_direccion', document.getElementById('perfilDireccion').value); mostrarToast("Datos guardados ✅"); cerrarModal('modal-perfil', 'nav-home'); }
 function abrirAjustes() { cerrarModal('all'); setActiveNav('nav-settings'); document.getElementById('modal-ajustes').style.display = 'flex'; document.getElementById('toggleDarkMode').checked = document.body.classList.contains('dark-mode'); }

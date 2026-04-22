@@ -137,14 +137,14 @@ function abrirPerfil() {
         hist.forEach((ped, index) => { 
             let itemsT = ped.items.map(i => `${i.cantidad}x ${i.nombre}`).join(', '); 
             htmlHistorial += `
-                <div class="historial-item" style="border:1px solid var(--borde-color); padding:10px; border-radius:12px; margin-bottom:10px;">
-                    <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-                        <span style="font-size:11px; font-weight:bold; color:var(--dorado);">${ped.fecha}</span>
-                        <span style="font-size:13px; font-weight:bold;">$${ped.total.toFixed(2)}</span>
+                <div class="historial-item" style="border:1px solid var(--color-border); background:var(--color-card); box-shadow:var(--shadow-sm); padding:15px; border-radius:var(--radius-md); margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span style="font-size:12px; font-weight:600; color:var(--color-primary);">${ped.fecha}</span>
+                        <span style="font-size:15px; font-weight:700; color:var(--color-text); font-family:'Inter',sans-serif;">$${ped.total.toFixed(2)}</span>
                     </div>
-                    <p style="font-size:11px; color:var(--texto-claro); margin-bottom:10px;">${itemsT}</p>
-                    <button onclick="repetirPedido(${index})" style="background:var(--azul-rey); color:white; border:none; padding:8px; width:100%; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;">
-                        <i class="fa-solid fa-rotate-right"></i> Repetir este pedido
+                    <p style="font-size:12px; color:var(--color-text-muted); margin-bottom:15px; line-height:1.4;">${itemsT}</p>
+                    <button onclick="repetirPedido(${index})" style="background:rgba(30,58,138,0.1); color:var(--color-primary); border:none; padding:10px; width:100%; border-radius:var(--radius-full); font-size:13px; font-weight:700; cursor:pointer; transition:0.2s;">
+                        <i class="fa-solid fa-rotate-right"></i> Repetir pedido
                     </button>
                 </div>`; 
         }); 
@@ -177,11 +177,29 @@ function mostrarToast(msg) { const cont = document.getElementById('toast-contain
 function cambiarModoVista(modo) { modoVistaGlobal = modo; document.getElementById('btn-modo-unidad').classList.remove('active'); document.getElementById('btn-modo-caja').classList.remove('active'); document.getElementById('btn-modo-' + modo).classList.add('active'); aplicarFiltros(); }
 function inyectarInterruptor() { let cont = document.querySelector('.tools-container'); if(cont && !document.getElementById('toggle-modo-global')) { let div = document.createElement('div'); div.id = 'toggle-modo-global'; div.className = 'toggle-modo-container'; div.innerHTML = `<div class="btn-modo active" id="btn-modo-unidad" onclick="cambiarModoVista('unidad')">🍾 Por Unidad</div><div class="btn-modo" id="btn-modo-caja" onclick="cambiarModoVista('caja')">📦 Por Caja</div>`; cont.insertBefore(div, cont.children[1]); } }
 
+function getIconForCategory(cat) {
+    if (!cat) return 'fa-box-open';
+    let c = cat.toUpperCase();
+    if (c.includes('INICIO') || c === 'TODOS') return 'fa-shop';
+    if (c.includes('FAVORITOS')) return 'fa-heart';
+    if (c.includes('LICOR')) return 'fa-martini-glass-citrus';
+    if (c.includes('CERVEZA')) return 'fa-beer-mug-empty';
+    if (c.includes('VINO')) return 'fa-wine-glass';
+    if (c.includes('RON')) return 'fa-bottle-droplet';
+    if (c.includes('WHISKY')) return 'fa-glass-water';
+    if (c.includes('VODKA') || c.includes('GINEBRA') || c.includes('ANIS') || c.includes('TEQUILA') || c.includes('COCUY')) return 'fa-wine-bottle';
+    if (c.includes('SNACK') || c.includes('CHUCHERIA')) return 'fa-cookie-bite';
+    if (c.includes('AGUA') || c.includes('BEBIDA') || c.includes('REFRESCO') || c.includes('JUGO')) return 'fa-bottle-water';
+    if (c.includes('HIELO')) return 'fa-cubes';
+    if (c.includes('CIGARRO') || c.includes('TABACO')) return 'fa-smoking';
+    return 'fa-box-open';
+}
+
 function generarCategorias() {
     const cont = document.getElementById('contenedorCategorias'); let categorias = [...new Set(inventario.map(p => p.Cat))].sort(); cont.innerHTML = '';
-    let btnInicio = document.createElement('button'); btnInicio.className = (categoriaActual === 'Todos') ? "cat-btn active" : "cat-btn"; btnInicio.innerHTML = "🏠 Inicio"; btnInicio.onclick = function() { irInicio(); }; cont.appendChild(btnInicio);
-    let btnFav = document.createElement('button'); btnFav.className = (categoriaActual === 'Favoritos') ? "cat-btn active" : "cat-btn"; btnFav.innerHTML = "❤️ Mis Favoritos"; btnFav.style.borderColor = "#ff4757"; btnFav.style.color = "#ff4757"; btnFav.onclick = function() { filtrarCategoria('Favoritos', this); }; cont.appendChild(btnFav);
-    categorias.forEach(c => { let b = document.createElement('button'); b.className = (c === categoriaActual) ? "cat-btn active" : "cat-btn"; b.innerText = (c === 'LICORES') ? "🍸 LICORES" : c; b.onclick = function() { filtrarCategoria(c, this); }; cont.appendChild(b); });
+    let btnInicio = document.createElement('button'); btnInicio.className = (categoriaActual === 'Todos') ? "cat-btn active" : "cat-btn"; btnInicio.innerHTML = `<i class="fa-solid fa-shop"></i><span>Inicio</span>`; btnInicio.onclick = function() { irInicio(); }; cont.appendChild(btnInicio);
+    let btnFav = document.createElement('button'); btnFav.className = (categoriaActual === 'Favoritos') ? "cat-btn active" : "cat-btn"; btnFav.innerHTML = `<i class="fa-solid fa-heart" style="${categoriaActual !== 'Favoritos' ? 'color: #ff4757;' : ''}"></i><span>Favoritos</span>`; btnFav.onclick = function() { filtrarCategoria('Favoritos', this); }; cont.appendChild(btnFav);
+    categorias.forEach(c => { let b = document.createElement('button'); b.className = (c === categoriaActual) ? "cat-btn active" : "cat-btn"; let nombreMostrar = (c === 'LICORES') ? "Licores" : c; b.innerHTML = `<i class="fa-solid ${getIconForCategory(c)}"></i><span>${nombreMostrar}</span>`; b.onclick = function() { filtrarCategoria(c, this); }; cont.appendChild(b); });
     if (categoriaActual === 'LICORES') { generarSubcategoriasLicores(); } else { let subcatSection = document.getElementById('subcategoria-section-main'); if(subcatSection) subcatSection.style.display = 'none'; }
     setTimeout(() => { let activeBtn = cont.querySelector('.active'); if(activeBtn) activeBtn.scrollIntoView({behavior: "smooth", inline: "center", block: "nearest"}); }, 150);
 }
@@ -192,13 +210,9 @@ function generarSubcategoriasLicores() {
     const subcategoriasDisponibles = new Set(); inventario.forEach(p => { if(p.Cat === 'LICORES' && p.SubCat) { subcategoriasDisponibles.add(p.SubCat); } });
     if (subcategoriasDisponibles.size === 0) { subcatSection.style.display = 'none'; return; }
     subcatSection.style.display = 'block'; subcatContainer.innerHTML = '';
-    const coloresSubcat = ['#d35400', '#8e44ad', '#2980b9', '#16a085', '#c0392b', '#27ae60', '#f39c12', '#34495e', '#e67e22']; let colorIndex = 0;
-    let btnLimpiar = document.createElement('button'); btnLimpiar.className = (!subcategoriaActual) ? "cat-btn active" : "cat-btn"; btnLimpiar.innerText = "📋 Todos los Licores"; btnLimpiar.onclick = function() { subcategoriaActual = null; aplicarFiltros(); closeCategorias(); }; subcatContainer.appendChild(btnLimpiar);
+    let btnLimpiar = document.createElement('button'); btnLimpiar.className = (!subcategoriaActual) ? "cat-btn active" : "cat-btn"; btnLimpiar.innerHTML = `<i class="fa-solid fa-list"></i><span>Todos</span>`; btnLimpiar.onclick = function() { subcategoriaActual = null; aplicarFiltros(); closeCategorias(); }; subcatContainer.appendChild(btnLimpiar);
     Array.from(subcategoriasDisponibles).sort().forEach(subcat => {
-        let btn = document.createElement('button'); btn.className = (subcat === subcategoriaActual) ? "cat-btn active" : "cat-btn"; btn.innerText = subcat;
-        let colorBase = coloresSubcat[colorIndex % coloresSubcat.length];
-        if (subcat === subcategoriaActual) { btn.style.backgroundColor = colorBase; btn.style.borderColor = colorBase; btn.style.color = "white"; } else { btn.style.borderColor = colorBase; btn.style.color = colorBase; btn.style.backgroundColor = "transparent"; }
-        btn.onclick = function() { subcategoriaActual = subcat; aplicarFiltros(); closeCategorias(); }; subcatContainer.appendChild(btn); colorIndex++;
+        let btn = document.createElement('button'); btn.className = (subcat === subcategoriaActual) ? "cat-btn active" : "cat-btn"; btn.innerHTML = `<i class="fa-solid ${getIconForCategory(subcat)}"></i><span>${subcat}</span>`; btn.onclick = function() { subcategoriaActual = subcat; aplicarFiltros(); closeCategorias(); }; subcatContainer.appendChild(btn);
     });
 }
 

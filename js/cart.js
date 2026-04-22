@@ -11,7 +11,15 @@ function guardarCarritoLS() {
 function animarAlCarrito(btnElement, imgSrc) {
     if (!btnElement || !imgSrc) return; 
     
-    const cartIcon = document.getElementById('icono-carrito-flotante'); 
+    // Buscar el icono del carrito activo (header en PC, nav en móvil)
+    let cartIcon = document.querySelector('.header-right .icon-btn[aria-label="Carrito"]');
+    const navCart = document.getElementById('nav-cart');
+    const bottomNav = document.querySelector('.bottom-nav');
+    
+    if (navCart && bottomNav && getComputedStyle(bottomNav).display !== 'none') {
+        cartIcon = navCart;
+    }
+
     if (!cartIcon) return;
     
     const btnRect = btnElement.getBoundingClientRect(); 
@@ -25,8 +33,8 @@ function animarAlCarrito(btnElement, imgSrc) {
     document.body.appendChild(flyingImg);
     
     setTimeout(() => { 
-        flyingImg.style.left = `${cartRect.left + 15}px`; 
-        flyingImg.style.top = `${cartRect.top + 15}px`; 
+        flyingImg.style.left = `${cartRect.left + (cartRect.width / 2) - 7.5}px`; 
+        flyingImg.style.top = `${cartRect.top + (cartRect.height / 2) - 7.5}px`; 
         flyingImg.style.width = '15px'; 
         flyingImg.style.height = '15px'; 
         flyingImg.style.opacity = '0.3'; 
@@ -34,8 +42,8 @@ function animarAlCarrito(btnElement, imgSrc) {
     
     setTimeout(() => { 
         flyingImg.remove(); 
-        cartIcon.style.transform = 'scale(1.2) rotate(-10deg)'; 
-        setTimeout(() => cartIcon.style.transform = 'scale(1) rotate(0)', 200); 
+        cartIcon.style.transform = 'scale(1.2)'; 
+        setTimeout(() => cartIcon.style.transform = 'scale(1)', 200); 
     }, 600);
 }
 
@@ -102,11 +110,11 @@ function sugerirAcompañante() {
         cont.innerHTML = sugerencias.map(p => {
             let nombreB64 = codificarNombre(p.Nombre); 
             return `
-                <div class="cross-sell-item">
-                    <img src="assets/img/${p.codigo}.webp" onerror="imgFallback(this, '${p.codigo}')" class="cross-sell-img">
-                    <p class="cross-sell-title">${p.Nombre}</p>
-                    <p class="cross-sell-price-usd">$${p.PrecioStr}</p><p class="cross-sell-price-bs">${p.PrecioBsStr} Bs</p>
-                    <button onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, 'assets/img/${p.codigo}.webp', false); cerrarCrossSell();" class="cross-sell-add-btn"><i class="fa-solid fa-plus"></i> Añadir</button>
+                <div style="min-width:130px; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:12px; text-align:center; background:var(--color-card); box-shadow:var(--shadow-sm);">
+                    <img src="assets/img/${p.codigo}.webp" onerror="imgFallback(this, '${p.codigo}')" style="height:60px; width:100%; object-fit:contain; margin-bottom:8px; mix-blend-mode:multiply;">
+                    <p style="font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--color-text); font-family:'Inter',sans-serif;">${p.Nombre}</p>
+                    <p style="font-size:15px; color:var(--color-text); font-weight:700; font-family:'Inter',sans-serif; margin-top:2px;">$${p.PrecioStr}</p>
+                    <button onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, 'assets/img/${p.codigo}.webp', false); cerrarCrossSell();" style="background:var(--color-primary); color:white; border:none; padding:8px; border-radius:var(--radius-full); font-size:12px; font-weight:700; width:100%; margin-top:8px; cursor:pointer; transition:0.2s;"><i class="fa-solid fa-plus"></i> Añadir</button>
                 </div>`;
         }).join('');
         
