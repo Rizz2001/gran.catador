@@ -111,10 +111,10 @@ function sugerirAcompañante() {
             let nombreB64 = codificarNombre(p.Nombre); 
             return `
                 <div style="min-width:130px; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:12px; text-align:center; background:var(--color-card); box-shadow:var(--shadow-sm);">
-                    <img src="assets/img/${p.codigo}.webp" onerror="imgFallback(this, '${p.codigo}')" style="height:60px; width:100%; object-fit:contain; margin-bottom:8px; mix-blend-mode:multiply;">
+                    <img src="assets/img/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" style="height:60px; width:100%; object-fit:contain; margin-bottom:8px; mix-blend-mode:multiply;">
                     <p style="font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--color-text); font-family:'Inter',sans-serif;">${p.Nombre}</p>
                     <p style="font-size:15px; color:var(--color-text); font-weight:700; font-family:'Inter',sans-serif; margin-top:2px;">$${p.PrecioStr}</p>
-                    <button onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, 'assets/img/${p.codigo}.webp', false); cerrarCrossSell();" style="background:var(--color-primary); color:white; border:none; padding:8px; border-radius:var(--radius-full); font-size:12px; font-weight:700; width:100%; margin-top:8px; cursor:pointer; transition:0.2s;"><i class="fa-solid fa-plus"></i> Añadir</button>
+                    <button onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, 'assets/img/${p.codigo}/1.webp', false); cerrarCrossSell();" style="background:var(--color-primary); color:white; border:none; padding:8px; border-radius:var(--radius-full); font-size:12px; font-weight:700; width:100%; margin-top:8px; cursor:pointer; transition:0.2s;"><i class="fa-solid fa-plus"></i> Añadir</button>
                 </div>`;
         }).join('');
         
@@ -195,7 +195,7 @@ function renderizarCarrito() {
         appState.totalCarrito += subTotalItem; 
         
         let imgHTML = item.codigo 
-            ? `<img src="assets/img/${item.codigo}.webp" onerror="imgFallback(this, '${item.codigo}')" class="cart-item-img">` 
+            ? `<img src="assets/img/${item.codigo}/1.webp" data-codigo="${item.codigo}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" class="cart-item-img">` 
             : `<div class="cart-item-img-placeholder"><i class="fa-solid fa-wine-bottle"></i></div>`;
             
         let btnMinus = item.cantidad > 1 ? '-' : '<i class="fa-solid fa-trash-can cart-btn-trash-icon"></i>';

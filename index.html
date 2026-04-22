@@ -43,9 +43,16 @@
 
     <header class="site-header">
         <!-- Nivel 1: Barra Superior (Promo) -->
-        <div class="header-top-bar">
-            <div class="container">
-                <span>🔥 Promo VIP: Envío gratis en Barinas en compras mayores a $20</span>
+        <style>
+            .marquee-container { overflow: hidden; white-space: nowrap; width: 100%; display: flex; align-items: center; }
+            .marquee-text { display: inline-block; animation: marquee-scroll 20s linear infinite; padding-left: 100%; }
+            @keyframes marquee-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        </style>
+        <div class="header-top-bar marquee-container">
+            <div class="marquee-text">
+                <span style="font-weight: 600; letter-spacing: 0.5px;">
+                    🕒 Horarios: Lunes a Domingos de 8:00 AM a 9:00 PM &nbsp;|&nbsp; Gran Catador Supermercado y Bodegón
+                </span>
             </div>
         </div>
 
@@ -101,9 +108,21 @@
         <div class="header-nav-bar desktop-only">
             <div class="container header-nav-container">
                 <div class="nav-links-left">
-                    <a href="#" class="nav-link active" onclick="irInicio()">Productos</a>
+                    <a href="#" class="nav-link active" onclick="irInicio()">Inicio</a>
+                    <a href="#" class="nav-link" onclick="filtrarCategoria('LICORES', null)">Licores</a>
+                    <a href="#" class="nav-link" onclick="irInicio(); document.getElementById('buscador').value='Cerveza'; aplicarFiltros();">Cervezas</a>
+                    <a href="#" class="nav-link" onclick="irInicio(); document.getElementById('buscador').value='Vino'; aplicarFiltros();">Vinos</a>
+                    <a href="#" class="nav-link" onclick="irInicio(); document.getElementById('buscador').value='Ron'; aplicarFiltros();">Ron</a>
+                    <a href="#" class="nav-link" onclick="irInicio(); document.getElementById('buscador').value='Whisky'; aplicarFiltros();">Whisky</a>
+                    <a href="#" class="nav-link" onclick="irInicio(); document.getElementById('buscador').value='Refresco'; aplicarFiltros();">Refrescos</a>
+                    <a href="#" class="nav-link" onclick="irInicio(); document.getElementById('buscador').value='Snack'; aplicarFiltros();">Snacks</a>
                 </div>
-                <div class="nav-links-right">
+                <div class="nav-links-right" style="display: flex; align-items: center; gap: 15px;">
+                    <div style="color: var(--dorado); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; background: rgba(212, 175, 55, 0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.2);" title="Tasas Oficiales BCV">
+                        <span style="display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-dollar-sign"></i> <span id="tasaValor">...</span></span>
+                        <span style="opacity: 0.3;">|</span>
+                        <span style="display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-euro-sign"></i> <span id="tasaEuroValor">...</span></span>
+                    </div>
                     <button class="btn-support" onclick="abrirSoporteWhatsApp()">
                         <i class="fa-brands fa-whatsapp"></i> Soporte
                     </button>
@@ -113,7 +132,6 @@
 
         <!-- Elementos JS ocultos temporalmente -->
         <span id="store-status" style="display:none;"></span>
-        <button class="tasa-bcv" id="tasa-btn-hidden" style="display:none;"><b id="tasaValor"></b></button>
     </header>
     
     <div class="banners-container" id="contenedorBanners">

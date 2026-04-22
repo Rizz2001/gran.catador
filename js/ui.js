@@ -242,7 +242,7 @@ function mostrarSugerencias(q) {
     const cont = document.getElementById('search-suggestions');
     if(coincidencias.length === 0) { cerrarSugerencias(); aplicarFiltros(); return; }
     cont.innerHTML = '';
-    coincidencias.forEach(p => { const div = document.createElement('div'); div.className = 'suggestion-item'; div.innerHTML = `<img src="assets/img/${p.codigo}.webp" onerror="imgFallback(this, '${p.codigo}')"><span>${p.Nombre}</span>`; div.onclick = () => { document.getElementById('buscador').value = p.Nombre; cerrarSugerencias(); aplicarFiltros(); }; cont.appendChild(div); });
+    coincidencias.forEach(p => { const div = document.createElement('div'); div.className = 'suggestion-item'; div.innerHTML = `<img src="assets/img/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)"><span>${p.Nombre}</span>`; div.onclick = () => { document.getElementById('buscador').value = p.Nombre; cerrarSugerencias(); aplicarFiltros(); }; cont.appendChild(div); });
     cont.style.display = 'block'; aplicarFiltros();
 }
 function cerrarSugerencias() { document.getElementById('search-suggestions').style.display = 'none'; }
@@ -280,10 +280,10 @@ function crearHTMLProducto(p) {
                 <i class="fa-${isFav ? 'solid' : 'regular'} fa-heart"></i>
             </button>
             
-            <div class="product-img-container">
-                <!-- 🖼️ IMAGEN DEL PRODUCTO: AQUÍ PUEDES CAMBIAR LA URL -->
-                <!-- Actualmente busca el codigo.webp en la ruta predefinida -->
-                <img loading="lazy" src="assets/img/${p.codigo}.webp" data-attempts="0" onerror="imgFallback(this, '${p.codigo}')" alt="${p.Nombre}">
+        <div class="product-img-container" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 8px;">
+            <style>.product-img-container::-webkit-scrollbar { display: none; }</style>
+            <img loading="lazy" src="assets/img/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; object-fit: contain;">
+            <img loading="lazy" src="assets/img/${p.codigo}/2.webp" data-codigo="${p.codigo}" data-index="2" data-attempts="0" onerror="imgFallbackFolder(this)" alt="Vista 2" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; object-fit: contain;">
             </div>
             
             <h3 class="producto-titulo" title="${p.Nombre}">${p.Nombre}</h3>
@@ -295,7 +295,7 @@ function crearHTMLProducto(p) {
                     <span class="product-price-bs">${precioBsDin} Bs</span>
                 </div>
                 
-                <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${p.codigo}.webp', ${esModoCaja})"`}>
+            <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${p.codigo}/1.webp', ${esModoCaja})"`}>
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </div>

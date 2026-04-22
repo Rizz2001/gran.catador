@@ -1,6 +1,6 @@
 let inventario = []; 
 let favoritos = JSON.parse(localStorage.getItem('gc_favs')) || []; 
-let tasaOficial = 36.25; let categoriaActual = 'LICORES'; let debounceTimer; 
+let tasaOficial = 36.25; let tasaEuro = 40.00; let categoriaActual = 'LICORES'; let debounceTimer; 
 let isTiendaAbierta = true; let codigosRecomendados = []; let siempreDisponibles = []; 
 let productosFiltradosGlobal = []; let itemsPorPagina = 30; let paginaActual = 1;
 
@@ -56,10 +56,35 @@ async function obtenerTasaDolar() {
     return false;
 }
 
+async function obtenerTasaEuro() {
+    try {
+        const response = await fetch('https://ve.dolarapi.com/v1/euros');
+        if (response.ok) {
+            const data = await response.json();
+            if (data && Array.isArray(data) && data.length > 0) {
+                const tasaPromedio = data[0].promedio || data[0].precio || 40.00;
+                tasaEuro = parseFloat(tasaPromedio);
+                console.log(`💶 Tasa Euro API: ${tasaEuro.toFixed(2)} Bs`);
+                localStorage.setItem('tasaEuro', tasaEuro.toString());
+                return true;
+            }
+        }
+    } catch (error) { 
+        console.log("⚠️ Error obteniendo tasa euro:", error.message);
+        const tasaGuardada = localStorage.getItem('tasaEuro');
+        if (tasaGuardada) tasaEuro = parseFloat(tasaGuardada);
+    }
+    return false;
+}
+
 async function obtenerArchivosExternos() {
     // Obtener tasa de dólares
     await obtenerTasaDolar();
     let tasaEl = document.getElementById('tasaValor'); if(tasaEl) tasaEl.innerText = tasaOficial.toFixed(2) + " Bs";
+    
+    // Obtener tasa de euros
+    await obtenerTasaEuro();
+    let tasaEuroEl = document.getElementById('tasaEuroValor'); if(tasaEuroEl) tasaEuroEl.innerText = tasaEuro.toFixed(2) + " Bs";
     
     try { let resRec = await fetch('data/config/recomendados.txt?v=' + new Date().getTime()); if (resRec.ok) { let textoRec = await resRec.text(); codigosRecomendados = textoRec.split(/[\n,]+/).map(c => c.trim()).filter(c => c !== ""); } } catch (error) {}
     try { let resDisp = await fetch('data/config/disponibles.txt?v=' + new Date().getTime()); if (resDisp.ok) { let textoDisp = await resDisp.text(); siempreDisponibles = textoDisp.split(/[\n,]+/).map(c => c.trim()).filter(c => c !== ""); } } catch (error) {}
@@ -319,7 +344,7 @@ function mostrarSugerencias(q) {
     const cont = document.getElementById('search-suggestions');
     if(coincidencias.length === 0) { cerrarSugerencias(); aplicarFiltros(); return; }
     cont.innerHTML = '';
-    coincidencias.forEach(p => { const div = document.createElement('div'); div.className = 'suggestion-item'; div.innerHTML = `<img src="assets/img/${p.codigo}.webp" onerror="imgFallback(this, '${p.codigo}')"><span>${p.Nombre}</span>`; div.onclick = () => { document.getElementById('buscador').value = p.Nombre; cerrarSugerencias(); aplicarFiltros(); }; cont.appendChild(div); });
+    coincidencias.forEach(p => { const div = document.createElement('div'); div.className = 'suggestion-item'; div.innerHTML = `<img src="assets/img/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)"><span>${p.Nombre}</span>`; div.onclick = () => { document.getElementById('buscador').value = p.Nombre; cerrarSugerencias(); aplicarFiltros(); }; cont.appendChild(div); });
     cont.style.display = 'block';
     aplicarFiltros();
 }
@@ -474,8 +499,9 @@ function renderizarPagina() {
                     <i class="fa-${isFav ? 'solid' : 'regular'} fa-heart"></i>
                 </button>
                 
-                <div class="product-img-container">
-                    <img loading="lazy" src="assets/img/${p.codigo}.webp" data-attempts="0" onerror="imgFallback(this, '${p.codigo}')" alt="${p.Nombre}">
+                <div class="product-img-container" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none;">
+                    <img loading="lazy" src="assets/img/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; object-fit: contain;">
+                    <img loading="lazy" src="assets/img/${p.codigo}/2.webp" data-codigo="${p.codigo}" data-index="2" data-attempts="0" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; object-fit: contain;">
                 </div>
                 
                 <h3 class="producto-titulo" title="${p.Nombre}">${p.Nombre}</h3>
@@ -486,7 +512,7 @@ function renderizarPagina() {
                         <span class="product-price">$${precioUsdDin}</span>
                         <span class="product-price-bs">${precioBsDin} Bs</span>
                     </div>
-                    <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${p.codigo}.webp', ${esModoCaja})"`}>
+                    <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${p.codigo}/1.webp', ${esModoCaja})"`}>
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>

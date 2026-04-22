@@ -29,3 +29,16 @@ function imgFallback(imgElement, codigoProducto) {
     let attempts = imgElement.dataset.attempts ? parseInt(imgElement.dataset.attempts) : 0; const formatos = ['webp', 'jpg', 'png', 'jpeg']; attempts++;
     if (attempts < formatos.length) { imgElement.dataset.attempts = attempts; imgElement.src = `assets/img/${codigoProducto}.${formatos[attempts]}`; } else { imgElement.src = 'logo.png'; imgElement.onerror = null; }
 }
+
+function imgFallbackFolder(imgElement) {
+    let attempts = imgElement.dataset.attempts ? parseInt(imgElement.dataset.attempts) : 0; 
+    let codigo = imgElement.dataset.codigo; let index = imgElement.dataset.index || "1";
+    const formatos = ['webp', 'jpg', 'png', 'jpeg']; attempts++;
+    if (attempts < formatos.length) { 
+        imgElement.dataset.attempts = attempts; 
+        imgElement.src = `assets/img/${codigo}/${index}.${formatos[attempts]}`; 
+    } else { 
+        if (index === "1") { imgElement.src = 'logo.png'; } else { imgElement.style.display = 'none'; }
+        imgElement.onerror = null; 
+    }
+}
