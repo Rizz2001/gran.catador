@@ -337,7 +337,7 @@ body.dark-mode .total-usd { color: var(--color-accent); }
     .search-container { max-width: 500px; margin: 0 auto; } 
     .bottom-nav { display: none; } 
     body { padding-bottom: 20px; }
-    .main-footer { padding-bottom: 40px; }
+    .main-footer-new { padding-bottom: 40px; }
     
     /* --- AJUSTES DEL HEADER EN PC --- */
     .mobile-only { display: none !important; }
