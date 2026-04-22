@@ -1,0 +1,13 @@
+{
+  "name": "gran-catadorca-site-lite",
+  "version": "1.0.0",
+  "description": "Catálogo Online de Gran Catador",
+  "private": true,
+  "scripts": {
+    "dev": "live-server",
+    "start": "live-server"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}
