@@ -280,11 +280,9 @@ function crearHTMLProducto(p) {
         badgeHTML = `<div class="product-badge badge-agotado">AGOTADO</div>`;
     }
 
-    // Generar hasta 6 imágenes dinámicamente. Las que no existan se ocultarán solas sin dar error.
-    let galeriasHTML = '';
-    for (let i = 1; i <= 6; i++) {
-        galeriasHTML += `<img loading="lazy" src="assets/img/${carpeta}/${p.codigo}/${i}.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="${i}" data-attempts="0" onerror="imgFallbackFolder(this)" alt="Vista ${i}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; object-fit: contain; ${i > 1 ? 'display: none;' : ''}" onload="this.style.display='block'">\n`;
-    }
+    // OPTIMIZACIÓN DE RENDIMIENTO: Solo cargamos la foto 1 en la cuadrícula.
+    // Las otras 5 fotos se buscarán automáticamente solo cuando el cliente abra los detalles.
+    let galeriasHTML = `<img loading="lazy" src="assets/img/${carpeta}/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; object-fit: contain;">`;
 
     return `
         <div class="producto-card ${isAgotado ? 'agotado' : ''}">
@@ -294,7 +292,7 @@ function crearHTMLProducto(p) {
                 <i class="fa-${isFav ? 'solid' : 'regular'} fa-heart"></i>
             </button>
             
-            <div onclick="abrirDetalleProducto('${p.codigo}')" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;">
+            <div onclick="abrirDetalleProducto('${p.codigo}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); abrirDetalleProducto('${p.codigo}'); }" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;" role="button" tabindex="0" aria-label="Ver detalles de ${p.Nombre}">
                 <div class="product-img-container" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 8px;">
                     <style>.product-img-container::-webkit-scrollbar { display: none; }</style>
                     ${galeriasHTML}
@@ -303,7 +301,7 @@ function crearHTMLProducto(p) {
                 <h3 class="producto-titulo" title="${p.Nombre}">${p.Nombre}</h3>
             </div>
             <p class="producto-stock" style="font-size: 12.5px; margin-top: 4px; margin-bottom: 8px; color: var(--color-text);">
-                ${p.StockStr.toString().toLowerCase() === 'disponible' ? '<b>Stock Disponible</b>' : `<b>${p.StockNum} und disponibles</b>`}
+                ${(p.StockStr || '').toString().toLowerCase() === 'disponible' ? '<b>Stock Disponible</b>' : `<b style="${p.StockNum > 0 && p.StockNum <= 5 ? 'color: #ea4335;' : ''}">${p.StockNum} und disponibles</b>`}
             </p>
             
             <div class="product-bottom">
@@ -312,7 +310,7 @@ function crearHTMLProducto(p) {
                     <span class="product-price-bs" style="font-size: 13px;">${precioBsDin} Bs</span>
                 </div>
                 
-            <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${carpeta}/${p.codigo}/1.webp', ${esModoCaja})"`}>
+            <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" aria-label="Agregar ${p.Nombre} al carrito" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${carpeta}/${p.codigo}/1.webp', ${esModoCaja})"`}>
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
@@ -342,8 +340,13 @@ async function abrirDetalleProducto(codigo) {
     if (p.StockNum <= 0) {
         stockBadge.innerText = "AGOTADO"; stockBadge.style.background = "rgba(234, 67, 53, 0.1)"; stockBadge.style.color = "#ea4335";
     } else {
-        let stockText = p.StockStr.toString().toLowerCase() === 'disponible' ? 'Stock Disponible' : `${p.StockNum} und disponibles`;
-        stockBadge.innerText = stockText; stockBadge.style.background = "rgba(37, 211, 102, 0.1)"; stockBadge.style.color = "#25D366";
+        let stockText = (p.StockStr || '').toString().toLowerCase() === 'disponible' ? 'Stock Disponible' : `${p.StockNum} und disponibles`;
+        stockBadge.innerText = stockText;
+        if (p.StockNum > 0 && p.StockNum <= 5 && (p.StockStr || '').toString().toLowerCase() !== 'disponible') {
+            stockBadge.style.background = "rgba(234, 67, 53, 0.1)"; stockBadge.style.color = "#ea4335";
+        } else {
+            stockBadge.style.background = "rgba(37, 211, 102, 0.1)"; stockBadge.style.color = "#25D366";
+        }
     }
     
     let imgContainer = document.getElementById('detalle-img-container');

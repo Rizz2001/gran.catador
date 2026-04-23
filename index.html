@@ -266,22 +266,22 @@
 
     <div id="modal-cart" class="modal-fullscreen">
         <div class="cart-header">
-            <h2>Tu Pedido</h2>
+            <h2>Mi Pedido</h2>
             <div style="display:flex; gap:10px;">
                 <button class="btn-trash" onclick="vaciarCarrito()" aria-label="Vaciar carrito de compras"><i class="fa-solid fa-trash-can"></i></button>
-                <button onclick="cerrarModal('modal-cart', 'nav-home')" aria-label="Cerrar carrito" style="background:var(--item-bg); border:none; width:40px; height:40px; border-radius:50%; font-size: 20px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-xmark"></i></button>
+                <button onclick="cerrarModal('modal-cart', 'nav-home')" aria-label="Cerrar carrito" style="background:var(--color-card); border:1px solid var(--color-border); width:40px; height:40px; border-radius:50%; font-size: 18px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-xmark"></i></button>
             </div>
         </div>
         <div id="lista-carrito" style="flex-grow: 1;"></div>
         
         <div id="checkout-sections">
             <div class="checkout-box">
-                <p class="box-title">Entrega</p>
+                <p class="box-title"><i class="fa-solid fa-truck-fast"></i> Opciones de Entrega</p>
                 <div class="delivery-toggles">
                     <input type="radio" id="ret" name="metodoEntrega" value="Retiro" checked onchange="toggleDireccion()">
-                    <label for="ret" class="toggle-btn"><i class="fa-solid fa-shop"></i> Retiro Local</label>
+                    <label for="ret" class="toggle-btn">Retiro Local</label>
                     <input type="radio" id="del" name="metodoEntrega" value="Delivery" onchange="toggleDireccion()">
-                    <label for="del" class="toggle-btn"><i class="fa-solid fa-motorcycle"></i> Delivery</label>
+                    <label for="del" class="toggle-btn">Delivery</label>
                 </div>
                 <input type="text" id="direccionDelivery" class="input-text" placeholder="Ingresa tu dirección exacta..." style="display:none;">
                 <button id="btnMap" class="btn-maps" onclick="abrirMapa()"><i class="fa-solid fa-location-dot"></i> Ver ruta a la tienda</button>
@@ -289,7 +289,7 @@
             </div>
             
             <div class="checkout-box">
-                <p class="box-title">Método de Pago</p>
+                <p class="box-title"><i class="fa-regular fa-credit-card"></i> Método de Pago</p>
                 <select id="metodoPagoSelect" class="input-select" onchange="actualizarMetodoPago()">
                     <option value="Efectivo">💵 Efectivo</option>
                     <option value="Pago Movil">📱 Pago Móvil</option>
@@ -322,11 +322,13 @@
             </div>
 
             <div class="total-container">
-                <p style="font-size: 12px; font-weight: bold;">TOTAL A PAGAR</p>
-                <div class="total-usd" id="totalUsdModal">$0.00</div>
-                <div class="total-bs" id="totalBsModal">0,00 Bs</div>
+                <p style="font-size: 15px; font-weight: 700; color: var(--color-text); margin: 0;">Total a pagar</p>
+                <div>
+                    <div class="total-usd" id="totalUsdModal">$0.00</div>
+                    <div class="total-bs" id="totalBsModal">0,00 Bs</div>
+                </div>
             </div>
-            <button id="btn-whatsapp" class="btn-enviar" onclick="enviarPedido()"><i class="fa-brands fa-whatsapp"></i> Enviar Pedido</button>
+            <button id="btn-whatsapp" class="btn-enviar" onclick="enviarPedido()"><i class="fa-brands fa-whatsapp" style="font-size: 20px;"></i> Enviar Pedido a WhatsApp</button>
             <p id="msg-cerrado" style="text-align:center; color:#ea4335; font-size:11px; font-weight:bold; display:none; margin-top:10px;">La tienda está cerrada en este momento.</p>
         </div>
     </div>

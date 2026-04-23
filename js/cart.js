@@ -180,11 +180,11 @@ function renderizarCarrito() {
     
     if (Object.keys(appState.carrito).length === 0) { 
         lista.innerHTML = `
-            <div class="empty-cart-container">
-                <i class="fa-solid fa-cart-shopping empty-cart-icon"></i>
-                <h3 class="empty-cart-title">Tu carrito está vacío</h3>
-                <p class="empty-cart-text">Agrega unas botellas para empezar.</p>
-                <button onclick="cerrarModal('modal-cart', 'nav-home')" class="btn-enviar empty-cart-button">Ir a la tienda</button>
+            <div style="text-align: center; padding: 60px 20px; color: var(--color-text-muted); display: flex; flex-direction: column; align-items: center;">
+                <div style="width: 80px; height: 80px; background: var(--item-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;"><i class="fa-solid fa-basket-shopping" style="font-size: 32px; color: var(--color-text-muted); opacity: 0.5;"></i></div>
+                <h3 style="color: var(--color-text); font-size: 18px; font-weight: 800; letter-spacing: -0.5px;">Tu carrito está vacío</h3>
+                <p style="font-size: 14px; margin-top: 8px; line-height: 1.5;">Agrega unas botellas para que empiece la fiesta.</p>
+                <button onclick="cerrarModal('modal-cart', 'nav-home')" class="btn-enviar" style="width: auto; padding: 12px 30px; margin-top: 25px; border-radius: var(--radius-full);">Explorar Catálogo</button>
             </div>`; 
         document.getElementById('checkout-sections').style.display = 'none'; 
         return; 
@@ -204,7 +204,7 @@ function renderizarCarrito() {
             ? `<img src="assets/img/${carpeta}/${item.codigo}/1.webp" data-codigo="${item.codigo}" data-categoria="${item.categoria || ''}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" class="cart-item-img">` 
             : `<div class="cart-item-img-placeholder"><i class="fa-solid fa-wine-bottle"></i></div>`;
             
-        let btnMinus = item.cantidad > 1 ? '-' : '<i class="fa-solid fa-trash-can cart-btn-trash-icon"></i>';
+        let btnMinus = item.cantidad > 1 ? '<i class="fa-solid fa-minus"></i>' : '<i class="fa-solid fa-trash-can" style="color: var(--color-danger);"></i>';
         
         renderHTML += `
             <div class="cart-item">
@@ -213,7 +213,7 @@ function renderizarCarrito() {
                     <p class="cart-item-title">${nombre}</p>
                     <p class="cart-item-price">$${item.precio.toFixed(2)} <span class="cart-item-price-bs">/ ${(item.precio * appState.tasaOficial).toLocaleString('es-VE', {minimumFractionDigits:2})} Bs</span></p>
                 </div>
-                <div class="cart-controls"><button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button><span style="font-size:13px; font-weight:bold; width:15px; text-align:center;">${item.cantidad}</span><button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', 1)">+</button></div>
+                <div class="cart-controls"><button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button><span style="font-size:13px; font-weight:800; width:18px; text-align:center;">${item.cantidad}</span><button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', 1)"><i class="fa-solid fa-plus"></i></button></div>
             </div>`; 
     }
     
