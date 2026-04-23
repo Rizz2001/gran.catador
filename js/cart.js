@@ -60,7 +60,8 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = 
         appState.carrito[nombreFinal] = { 
             precio: precio, 
             cantidad: 1, 
-            codigo: prodObj ? prodObj.codigo : '' 
+            codigo: prodObj ? prodObj.codigo : '',
+            categoria: prodObj ? prodObj.Cat : ''
         };
     }
     
@@ -112,12 +113,13 @@ function sugerirAcompañante() {
         let cont = document.getElementById('cross-sell-items'); 
         cont.innerHTML = sugerencias.map(p => {
             let nombreB64 = codificarNombre(p.Nombre); 
+            let carpeta = getCategoriaFolder(p.Cat);
             return `
                 <div style="min-width:130px; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:12px; text-align:center; background:var(--color-card); box-shadow:var(--shadow-sm);">
-                    <img src="assets/img/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" style="height:60px; width:100%; object-fit:contain; margin-bottom:8px; mix-blend-mode:multiply;">
+                    <img src="assets/img/${carpeta}/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" style="height:60px; width:100%; object-fit:contain; margin-bottom:8px; mix-blend-mode:multiply;">
                     <p style="font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--color-text); font-family:'Inter',sans-serif;">${p.Nombre}</p>
                     <p style="font-size:15px; color:var(--color-text); font-weight:700; font-family:'Inter',sans-serif; margin-top:2px;">$${p.PrecioStr}</p>
-                    <button onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, 'assets/img/${p.codigo}/1.webp', false); cerrarCrossSell();" style="background:var(--color-primary); color:white; border:none; padding:8px; border-radius:var(--radius-full); font-size:12px; font-weight:700; width:100%; margin-top:8px; cursor:pointer; transition:0.2s;"><i class="fa-solid fa-plus"></i> Añadir</button>
+                    <button onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, 'assets/img/${carpeta}/${p.codigo}/1.webp', false); cerrarCrossSell();" style="background:var(--color-primary); color:white; border:none; padding:8px; border-radius:var(--radius-full); font-size:12px; font-weight:700; width:100%; margin-top:8px; cursor:pointer; transition:0.2s;"><i class="fa-solid fa-plus"></i> Añadir</button>
                 </div>`;
         }).join('');
         
@@ -161,7 +163,7 @@ function repetirPedido(index) {
     
     appState.carrito = {}; 
     ped.items.forEach(i => { 
-        appState.carrito[i.nombre] = { precio: i.precio, cantidad: i.cantidad, codigo: i.codigo || '' }; 
+        appState.carrito[i.nombre] = { precio: i.precio, cantidad: i.cantidad, codigo: i.codigo || '', categoria: i.categoria || '' }; 
     }); 
     
     guardarCarritoLS(); 
@@ -197,8 +199,9 @@ function renderizarCarrito() {
         let subTotalItem = item.precio * item.cantidad; 
         appState.totalCarrito += subTotalItem; 
         
+        let carpeta = getCategoriaFolder(item.categoria);
         let imgHTML = item.codigo 
-            ? `<img src="assets/img/${item.codigo}/1.webp" data-codigo="${item.codigo}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" class="cart-item-img">` 
+            ? `<img src="assets/img/${carpeta}/${item.codigo}/1.webp" data-codigo="${item.codigo}" data-categoria="${item.categoria || ''}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" class="cart-item-img">` 
             : `<div class="cart-item-img-placeholder"><i class="fa-solid fa-wine-bottle"></i></div>`;
             
         let btnMinus = item.cantidad > 1 ? '-' : '<i class="fa-solid fa-trash-can cart-btn-trash-icon"></i>';
@@ -296,7 +299,8 @@ function enviarPedido() {
             nombre: k, 
             precio: appState.carrito[k].precio, 
             cantidad: appState.carrito[k].cantidad, 
-            codigo: appState.carrito[k].codigo 
+            codigo: appState.carrito[k].codigo,
+            categoria: appState.carrito[k].categoria 
         })) 
     }; 
     

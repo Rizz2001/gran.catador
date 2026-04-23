@@ -253,7 +253,7 @@ function mostrarSugerencias(q) {
     const cont = document.getElementById('search-suggestions');
     if(coincidencias.length === 0) { cerrarSugerencias(); aplicarFiltros(); return; }
     cont.innerHTML = '';
-    coincidencias.forEach(p => { const div = document.createElement('div'); div.className = 'suggestion-item'; div.innerHTML = `<img src="assets/img/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)"><span>${p.Nombre}</span>`; div.onclick = () => { document.getElementById('buscador').value = p.Nombre; cerrarSugerencias(); aplicarFiltros(); }; cont.appendChild(div); });
+    coincidencias.forEach(p => { let carpeta = getCategoriaFolder(p.Cat); const div = document.createElement('div'); div.className = 'suggestion-item'; div.innerHTML = `<img src="assets/img/${carpeta}/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)"><span>${p.Nombre}</span>`; div.onclick = () => { document.getElementById('buscador').value = p.Nombre; cerrarSugerencias(); aplicarFiltros(); }; cont.appendChild(div); });
     cont.style.display = 'block'; aplicarFiltros();
 }
 function cerrarSugerencias() { document.getElementById('search-suggestions').style.display = 'none'; }
@@ -273,6 +273,7 @@ function crearHTMLProducto(p) {
     const precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;
     const precioBsDin = esModoCaja ? p.PrecioCajaBsStr : p.PrecioBsStr;
     const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
+    const carpeta = getCategoriaFolder(p.Cat);
     
     let badgeHTML = '';
     if (isAgotado) {
@@ -283,6 +284,12 @@ function crearHTMLProducto(p) {
         badgeHTML = `<div class="product-badge badge-green">OFERTA</div>`;
     }
 
+    // Generar hasta 6 imágenes dinámicamente. Las que no existan se ocultarán solas sin dar error.
+    let galeriasHTML = '';
+    for (let i = 1; i <= 6; i++) {
+        galeriasHTML += `<img loading="lazy" src="assets/img/${carpeta}/${p.codigo}/${i}.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="${i}" data-attempts="0" onerror="imgFallbackFolder(this)" alt="Vista ${i}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; object-fit: contain; ${i > 1 ? 'display: none;' : ''}" onload="this.style.display='block'">\n`;
+    }
+
     return `
         <div class="producto-card ${isAgotado ? 'agotado' : ''}">
             
@@ -291,13 +298,14 @@ function crearHTMLProducto(p) {
                 <i class="fa-${isFav ? 'solid' : 'regular'} fa-heart"></i>
             </button>
             
-        <div class="product-img-container" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 8px;">
-            <style>.product-img-container::-webkit-scrollbar { display: none; }</style>
-            <img loading="lazy" src="assets/img/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; object-fit: contain;">
-            <img loading="lazy" src="assets/img/${p.codigo}/2.webp" data-codigo="${p.codigo}" data-index="2" data-attempts="0" onerror="imgFallbackFolder(this)" alt="Vista 2" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; object-fit: contain;">
+            <div onclick="abrirDetalleProducto('${p.codigo}')" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;">
+                <div class="product-img-container" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 8px;">
+                    <style>.product-img-container::-webkit-scrollbar { display: none; }</style>
+                    ${galeriasHTML}
+                </div>
+                
+                <h3 class="producto-titulo" title="${p.Nombre}">${p.Nombre}</h3>
             </div>
-            
-            <h3 class="producto-titulo" title="${p.Nombre}">${p.Nombre}</h3>
             <p class="producto-stock">Disp: ${p.StockStr}</p>
             
             <div class="product-bottom">
@@ -306,12 +314,58 @@ function crearHTMLProducto(p) {
                     <span class="product-price-bs">${precioBsDin} Bs</span>
                 </div>
                 
-            <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${p.codigo}/1.webp', ${esModoCaja})"`}>
+            <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${carpeta}/${p.codigo}/1.webp', ${esModoCaja})"`}>
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
         </div>
     `;
+}
+
+async function abrirDetalleProducto(codigo) {
+    let p = inventario.find(x => x.codigo === codigo);
+    if (!p) return;
+    
+    const carpeta = getCategoriaFolder(p.Cat);
+    const esModoCaja = (modoVistaGlobal === 'caja');
+    const precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;
+    const precioBsDin = esModoCaja ? p.PrecioCajaBsStr : p.PrecioBsStr;
+    const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
+    const nombreB64 = codificarNombre(p.Nombre);
+    
+    document.getElementById('detalle-titulo').innerText = p.Nombre;
+    document.getElementById('detalle-precio-usd').innerText = `$${precioUsdDin}`;
+    document.getElementById('detalle-precio-bs').innerText = `${precioBsDin} Bs`;
+    
+    let stockBadge = document.getElementById('detalle-stock');
+    if (p.StockNum <= 0) {
+        stockBadge.innerText = "AGOTADO"; stockBadge.style.background = "rgba(234, 67, 53, 0.1)"; stockBadge.style.color = "#ea4335";
+    } else {
+        stockBadge.innerText = `Disp: ${p.StockStr}`; stockBadge.style.background = "rgba(37, 211, 102, 0.1)"; stockBadge.style.color = "#25D366";
+    }
+    
+    let imgContainer = document.getElementById('detalle-img-container');
+    let galeriasHTML = '';
+    for (let i = 1; i <= 6; i++) {
+        galeriasHTML += `<img loading="lazy" src="assets/img/${carpeta}/${p.codigo}/${i}.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="${i}" data-attempts="0" onerror="imgFallbackFolder(this)" alt="Vista ${i}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain; ${i > 1 ? 'display: none;' : ''}" onload="this.style.display='block'">`;
+    }
+    imgContainer.innerHTML = galeriasHTML;
+    
+    let btnContainer = document.getElementById('detalle-btn-add');
+    if (p.StockNum <= 0) {
+        btnContainer.innerHTML = `<button class="btn-enviar" style="background: var(--color-border); color: var(--color-text-muted); cursor: not-allowed;" disabled>Agotado</button>`;
+    } else {
+        btnContainer.innerHTML = `<button class="btn-enviar" onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${carpeta}/${p.codigo}/1.webp', ${esModoCaja}); document.getElementById('modal-producto').style.display='none';" style="background: var(--color-primary);"><i class="fa-solid fa-cart-shopping"></i> Agregar al carrito</button>`;
+    }
+    
+    let descContainer = document.getElementById('detalle-descripcion');
+    descContainer.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Buscando información...';
+    document.getElementById('modal-producto').style.display = 'flex';
+    
+    try {
+        let res = await fetch(`assets/img/${carpeta}/${p.codigo}/desc.txt`);
+        if (res.ok) { let text = await res.text(); descContainer.innerText = text; } else { descContainer.innerText = "Sin descripción adicional."; }
+    } catch (e) { descContainer.innerText = "Sin descripción adicional."; }
 }
 
 function renderizarPagina() {

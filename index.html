@@ -104,7 +104,6 @@
                 </div>
             </div>
         </div>
-
         <!-- Nivel 2.5: Tasas Móvil -->
         <div class="mobile-only" style="background: rgba(245, 158, 11, 0.05); border-bottom: 1px solid var(--color-border); padding: 8px 0; justify-content: center; color: var(--dorado); font-size: 12px; font-weight: 600; gap: 15px;">
             <span style="display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-dollar-sign"></i> <span id="tasaValorMobile">...</span></span>
@@ -144,7 +143,7 @@
     
     <div class="banners-container" id="contenedorBanners">
         <div class="promo-banner" style="background: var(--item-bg); display:flex; align-items:center; justify-content:center; color:var(--texto-claro); font-size:12px; font-weight:500; text-align:center; padding:20px; border: 1px solid var(--borde-color);">
-            Espacio para Banners VIP<br>Carga tus fotos en la carpeta /banners
+            Espacio para Banners VIP<br>Cargando
         </div>
     </div>
 
@@ -327,6 +326,29 @@
             </div>
             <button id="btn-whatsapp" class="btn-enviar" onclick="enviarPedido()"><i class="fa-brands fa-whatsapp"></i> Enviar Pedido</button>
             <p id="msg-cerrado" style="text-align:center; color:#ea4335; font-size:11px; font-weight:bold; display:none; margin-top:10px;">La tienda está cerrada en este momento.</p>
+        </div>
+    </div>
+
+    <div id="modal-producto" class="modal-fullscreen" style="z-index: 3000;">
+        <div class="cart-header">
+            <h2>Detalles</h2>
+            <button onclick="document.getElementById('modal-producto').style.display='none'" aria-label="Cerrar detalle" style="background:var(--item-bg); border:none; width:40px; height:40px; border-radius:50%; font-size: 20px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        </div>
+        <div class="checkout-box" style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
+            <div id="detalle-img-container" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 8px; width: 100%; height: 250px; align-items: center; justify-content: center;"></div>
+            <h3 id="detalle-titulo" style="font-size: 20px; font-weight: 800; color: var(--color-text); margin-top: 5px;"></h3>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <p id="detalle-precio-usd" style="font-size: 22px; font-weight: 800; color: var(--color-primary);"></p>
+                    <p id="detalle-precio-bs" style="font-size: 14px; color: var(--color-text-muted);"></p>
+                </div>
+                <div id="detalle-stock" style="font-size: 13px; font-weight: 600; padding: 5px 10px; border-radius: 8px;"></div>
+            </div>
+            <div style="border-top: 1px solid var(--color-border); padding-top: 15px; margin-top: 5px;">
+                <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--color-text);">Descripción</h4>
+                <p id="detalle-descripcion" style="font-size: 14px; color: var(--color-text-muted); line-height: 1.6; white-space: pre-wrap;"></p>
+            </div>
+            <div id="detalle-btn-add" style="margin-top: 10px;"></div>
         </div>
     </div>
 
