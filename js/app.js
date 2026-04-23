@@ -151,11 +151,33 @@ async function obtenerArchivosExternos() {
     } catch (error) { console.log("Sin banners.txt"); }
 }
 
+async function mostrarFechaActualizacion() {
+    let dateStr = "recientemente";
+    try {
+        let resHead = await fetch("data/inventario/Inventario Fisico general precio por unidad.csv", { method: 'HEAD', cache: 'no-cache' });
+        let lastMod = resHead.headers.get('Last-Modified');
+        if (lastMod) {
+            let d = new Date(lastMod);
+            dateStr = d.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        } else {
+            let d = new Date();
+            dateStr = d.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+    } catch(e) {
+        let d = new Date();
+        dateStr = d.toLocaleDateString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+    let alertEl = document.getElementById('alert-actualizacion');
+    if (alertEl) { alertEl.innerHTML = `<i class="fa-solid fa-circle-info" style="color: var(--dorado); margin-right: 5px;"></i> Precios y Productos actualizados el día <b>${dateStr}</b>.<br>Antes de cancelar preguntar si hay disponibilidad.`; alertEl.style.display = 'block'; }
+}
+
 async function cargarInventario() {
     console.log("🔄 Iniciando carga de inventario...");
     await obtenerArchivosExternos(); 
     console.log("✓ Archivos externos cargados. Subcategorías:", Object.keys(subcategoriasLicores).length);
     
+    mostrarFechaActualizacion();
+
     toggleDireccion(); 
     inyectarInterruptor();
     
