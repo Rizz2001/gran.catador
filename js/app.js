@@ -105,43 +105,20 @@ async function obtenerArchivosExternos() {
     let tasaEuroEl = document.getElementById('tasaEuroValor'); if (tasaEuroEl) tasaEuroEl.innerText = tasaEuro.toFixed(2) + " Bs";
     let tasaEuroElMob = document.getElementById('tasaEuroValorMobile'); if (tasaEuroElMob) tasaEuroElMob.innerText = tasaEuro.toFixed(2) + " Bs";
 
-    if (appSettings.useApi && appSettings.apiType === 'mysql') {
-        try {
-            await cargarConfiguracionDesdeAPI();
-        } catch (e) {
-            console.log("⚠️ Error cargando config desde API, usando archivos locales:", e.message);
+    if (appSettings.useApi) {
+        if (appSettings.apiType === 'mysql') {
+            try {
+                await cargarConfiguracionDesdeAPI();
+            } catch (e) {
+                console.log("⚠️ Error cargando config desde API, usando archivos locales:", e.message);
+                await cargarConfiguracionDesdeArchivos();
+            }
+        } else if (appSettings.apiType === 'smartventas') {
             await cargarConfiguracionDesdeArchivos();
         }
     } else {
         await cargarConfiguracionDesdeArchivos();
     }
-
-    // Cargar subcategorías de licores
-    try {
-        const categoriasArchivos = ['AGUARDIENTE.csv', 'ANIS.csv', 'BEBIDA_SECA.csv', 'BRANDY.csv', 'CERVEZA.csv', 'COCTELERIA_ADICIONAL.csv', 'COCUY.csv', 'COÑAC.csv', 'GINEBRA.csv', 'JARABE_GOMA.csv', 'LICOR SECO.csv', 'LICOR_DULCE.csv', 'RON.csv', 'SANGRIA.csv', 'TEQUILA.csv', 'VINO_ESPUMANTE.csv', 'VINO_IMPORTADO.csv', 'VINO_NACIONAL.csv', 'VODKA.csv', 'WHISKY_IMPORTADO.csv', 'WHISKY_NACIONAL.csv'];
-
-        await Promise.all(categoriasArchivos.map(async (archivo) => {
-            try {
-                const nombre = archivo.replace('.csv', '').replace(/_/g, ' ');
-                const response = await fetch(`data/inventario/CATEGORIA_LICORES/${archivo}?v=${new Date().getTime()}`);
-                const text = await response.text();
-
-                const matches = text.match(/\d{13}/g);
-                if (matches) {
-                    const codigosSet = new Set();
-                    matches.forEach(cod => codigosSet.add(cod.trim()));
-
-                    const codigos = Array.from(codigosSet);
-                    if (codigos.length > 0) {
-                        subcategoriasLicores[nombre] = codigos;
-                        codigos.forEach(cod => mapaCodToSubcategoria[cod] = nombre);
-                        console.log(`✓ Cargados ${codigos.length} códigos para ${nombre}`);
-                    }
-                }
-            } catch (e) { console.log(`Error cargando ${archivo}:`, e.message); }
-        }));
-        console.log("✓ Subcategorías de licores cargadas:", Object.keys(subcategoriasLicores).length);
-    } catch (error) { console.log("Error crítico en subcategorías:", error); }
 
     try {
         let resBan = await fetch('data/config/banners.txt?v=' + new Date().getTime());
@@ -222,7 +199,7 @@ async function cargarConfiguracionDesdeAPI() {
 }
 
 async function cargarInventario() {
-    console.log("🔄 Iniciando carga de sistema...");
+    console.log("🚀 Iniciando carga desde API SmartVentas...");
     await loadAppSettings();
     await obtenerArchivosExternos();
 
@@ -230,48 +207,82 @@ async function cargarInventario() {
     toggleDireccion();
     inyectarInterruptor();
 
-    let ahora = new Date().getTime();
-    let cacheTime = localStorage.getItem('gc_inv_time_v4');
-    let cacheData = localStorage.getItem('gc_inv_data');
-
-    if (cacheTime && cacheData && (ahora - parseInt(cacheTime)) < 3600000) {
-        inventario = JSON.parse(cacheData);
-        appState.inventario = inventario;
-        inventario.forEach(p => {
-            if (p.Cat === 'LICORES') p.SubCat = mapaCodToSubcategoria[p.codigo] || 'OTROS LICORES';
-        });
-
-        actualizarCartCount();
-        generarCategorias();
-        aplicarFiltros();
-        console.log("⚡ Inventario desde caché.");
-        return;
-    }
-
     try {
         await cargarInventarioDesdeAPI();
 
-        // if (inventario.length === 0) throw new Error("Inventario vacío"); // Comentado temporalmente hasta tener el endpoint de artículos
+        actualizarCartCount(); 
+        generarCategorias(); 
+        aplicarFiltros();
 
-        localStorage.setItem('gc_inv_data', JSON.stringify(inventario));
-        localStorage.setItem('gc_inv_time_v4', ahora.toString());
-
-        actualizarCartCount(); generarCategorias(); aplicarFiltros();
+        iniciarAutoActualizacion(); 
     } catch (e) {
         console.error("Error cargando inventario:", e);
-        document.getElementById('lista-productos').innerHTML = `<div style="grid-column: span 2; text-align: center; padding: 30px; border: 1px solid red; border-radius: 10px;"><h3 style="color:red;">Error de Conexión</h3><p style="font-size:12px; margin-top:10px;">${e.message || 'Verifica la configuración de la API o los archivos CSV.'}</p></div>`;
+        document.getElementById('lista-productos').innerHTML = `<div style="grid-column: span 2; text-align: center; padding: 30px; border: 1px solid red; border-radius: 10px;"><h3 style="color:red;">Error de Conexión</h3><p style="font-size:12px; margin-top:10px;">${e.message || 'Verifica la configuración de la API.'}</p></div>`;
     }
 }
 
+function iniciarAutoActualizacion() {
+    // Evitar que se creen múltiples temporizadores paralelos
+    if (window.autoSyncTimer) clearInterval(window.autoSyncTimer);
+
+    // Ejecutar silenciosamente cada 1 hora (3600000 ms)
+    window.autoSyncTimer = setInterval(async () => {
+        console.log("⏱️ Sincronizando con SmartVentas en segundo plano...");
+        try {
+            await cargarInventarioDesdeAPI();
+            localStorage.setItem('gc_inv_time_v4', new Date().getTime().toString());
+            aplicarFiltros(); // Refresca la vista automáticamente si detecta un cambio de precio/stock
+        } catch (e) { console.log("⚠️ Error en sincronización silenciosa:", e.message); }
+    }, 3600000);
+}
+
 async function getSmartVentasToken() {
+    // --- MODO PRUEBA: TOKEN MANUAL ---
+    // Si tienes un token manual, colócalo aquí para saltarte el PHP temporalmente
+    const manualToken = 'eyJhbGciOiJSUzI1NiIsImtpZCI6IkEzQzAwMzgzMzMwMDE5OUJEMDNFNTE4MzE2MkNDM0RGIiwidHlwIjoiYXQrand0In0.eyJpc3MiOiJodHRwczovL2F1dGguZm94ZGF0YS5hcHAiLCJuYmYiOjE3NzcyMzUzNDEsImlhdCI6MTc3NzIzNTM0MSwiZXhwIjoxNzc3MjM4OTQxLCJhdWQiOiJodHRwczovL2F1dGguZm94ZGF0YS5hcHAvcmVzb3VyY2VzIiwic2NvcGUiOlsic21hcnR2ZW50YXMtYXBpIiwic21hcnR2ZW50YXMuc2VydmljZS5yZWFkIiwic21hcnR2ZW50YXMuc2VydmljZS53cml0ZSJdLCJjbGllbnRfaWQiOiJzbXZ0LWFwaXdlYi1DMDAwNiIsIkVtcHJlc2FJRCI6IkMwMDA2IiwiY2xpZW50X3R5cGUiOiJzZXJ2aWNlIiwiRW1wcmVzYU5vbWJyZSI6IkdSQU4gQ0FUQURPUiwgQy5BLiIsImp0aSI6IjdDQzUyNUNBREZCQUVCQjgxMkQxNkY3MDUyOTQxOTE1In0.WGOZRFMMdfir7K4DegeGJURxkgpRrvBfiMTzEiINf8O9F7iFE8LlCaIoskfDiu5XnbJjCcv0jgsAUicKftnLvFhGjXuW3stg8eXyu90LDDJl7TqVm30duFrt8CrfyX2eh1BjDCj5sDDko5fiOVLmMkzeQg5trdmhytQHC0E_FTcZg5kXs5Q5kxszBtUE1WArJQ8ko-1-I4ItOrj9GO5uy9R6RbfxyY3V4pLb11gU3Ndx4VLyVCjXixZyhVyMJnWY6xtI7ychBAtsTmD4QuOiT8W7AcMaYUDmstYfujDnBKYSMg2aQeXHS4iFPHquOXTG50uRNmSPpzhJOKhLlGJTcw';
+    
+    if (manualToken) {
+        console.log("🎫 Usando Token Manual proporcionado...");
+        return manualToken;
+    }
+
+    let cachedToken = localStorage.getItem('gc_sv_token');
+    let tokenTime = localStorage.getItem('gc_sv_token_time');
+    let now = new Date().getTime();
+
+    // Si el token tiene menos de 55 minutos (3300000 ms), lo reutilizamos
+    if (cachedToken && tokenTime && (now - parseInt(tokenTime)) < 3300000) {
+        console.log("🔑 Usando Token Bearer guardado en caché...");
+        return cachedToken;
+    }
+
     try {
+        console.log("🔄 Solicitando un nuevo Token Bearer al servidor...");
         const response = await fetch('api/get_token.php');
         if (!response.ok) throw new Error("Error obteniendo token desde el servidor local");
-        const data = await response.json();
+
+        const textRaw = await response.text();
+        let data;
+        try {
+            data = JSON.parse(textRaw);
+            console.log("📦 Respuesta JSON recibida del servidor:", data);
+        } catch (parseError) {
+            console.error("❌ El servidor no devolvió JSON válido. Respuesta cruda:", textRaw);
+            if (textRaw.includes('<?php')) throw new Error("Tu servidor no está procesando PHP (como Live Server). Necesitas XAMPP o un hosting real.");
+            throw new Error("Respuesta inválida de get_token.php: " + textRaw.substring(0, 60));
+        }
 
         if (data.error) {
             throw new Error(data.error);
         }
+
+        if (!data.access_token) {
+            throw new Error("El JSON es válido pero no contiene 'access_token'. Respuesta: " + JSON.stringify(data));
+        }
+
+        // Guardamos el nuevo token y la hora exacta en que se obtuvo
+        localStorage.setItem('gc_sv_token', data.access_token);
+        localStorage.setItem('gc_sv_token_time', now.toString());
 
         return data.access_token;
     } catch (e) {
@@ -283,13 +294,13 @@ async function getSmartVentasToken() {
 async function cargarInventarioDesdeAPI() {
     console.log("📡 Conectando con API SmartVentas...");
 
-    console.log("🔄 Obteniendo token de acceso...");
     let token = await getSmartVentasToken();
 
     if (!token) throw new Error("No se pudo obtener el token de acceso.");
 
     // Consultamos el endpoint de Grupos de Inventario
-    const apiUrl = 'https://apismartventas.foxdata.app/api/v1/syn/gruposinv';
+    // MODO PRUEBA: Usando proxy para saltar el bloqueo de CORS en local
+    const apiUrl = 'https://cors-anywhere.herokuapp.com/https://apismartventas.foxdata.app/api/v1/syn/gruposinv';
     console.log("Consultando endpoint:", apiUrl);
 
     const response = await fetch(apiUrl, {
@@ -304,13 +315,29 @@ async function cargarInventarioDesdeAPI() {
         throw new Error("Error en la respuesta de la API (" + response.status + ")");
     }
 
-    const data = await response.json();
-    console.log("✅ Datos recibidos de Grupos de Inventario:", data);
-    if (typeof mostrarToast === 'function') mostrarToast("✅ API SmartVentas conectada: " + data.length + " grupos recibidos.");
+    const dataRaw = await response.json();
+    console.log("✅ Datos recibidos de la API:", dataRaw);
 
-    // Por ahora solo recibimos los grupos. Dejamos el inventario de productos vacío hasta tener los artículos.
-    inventario = [];
-    appState.inventario = inventario;
+    // Intentamos extraer el array de grupos, ya que a veces viene envuelto en .data, .grupos, etc.
+    let grupos = [];
+    if (Array.isArray(dataRaw)) {
+        grupos = dataRaw;
+    } else if (dataRaw.data && Array.isArray(dataRaw.data)) {
+        grupos = dataRaw.data;
+    } else if (dataRaw.grupos && Array.isArray(dataRaw.grupos)) {
+        grupos = dataRaw.grupos;
+    } else if (dataRaw.result && Array.isArray(dataRaw.result)) {
+        grupos = dataRaw.result;
+    }
+
+    if (grupos.length > 0) {
+        appState.gruposInventario = grupos;
+        console.log("📂 Grupos procesados correctamente:", grupos.length);
+        if (typeof mostrarToast === 'function') mostrarToast("✅ API SmartVentas: " + grupos.length + " grupos recibidos.");
+    } else {
+        console.warn("⚠️ La API respondió pero no se encontró un listado de grupos válido.", dataRaw);
+        if (typeof mostrarToast === 'function') mostrarToast("⚠️ API conectada, pero no se encontraron grupos.");
+    }
 }
 
 function debounceBusqueda(event) {

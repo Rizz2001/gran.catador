@@ -207,12 +207,59 @@ function getIconForCategory(cat) {
 }
 
 function generarCategorias() {
-    const cont = document.getElementById('contenedorCategorias'); let categorias = [...new Set(inventario.map(p => p.Cat))].sort(); cont.innerHTML = '';
-    let btnInicio = document.createElement('button'); btnInicio.className = (categoriaActual === 'Todos') ? "cat-btn active" : "cat-btn"; btnInicio.innerHTML = `<i class="fa-solid fa-shop"></i><span>Inicio</span>`; btnInicio.onclick = function() { irInicio(); }; cont.appendChild(btnInicio);
-    let btnFav = document.createElement('button'); btnFav.className = (categoriaActual === 'Favoritos') ? "cat-btn active" : "cat-btn"; btnFav.innerHTML = `<i class="fa-solid fa-heart" style="${categoriaActual !== 'Favoritos' ? 'color: #ff4757;' : ''}"></i><span>Favoritos</span>`; btnFav.onclick = function() { filtrarCategoria('Favoritos', this); }; cont.appendChild(btnFav);
-    categorias.forEach(c => { let b = document.createElement('button'); b.className = (c === categoriaActual) ? "cat-btn active" : "cat-btn"; let nombreMostrar = (c === 'LICORES') ? "Licores" : c; b.innerHTML = `<i class="fa-solid ${getIconForCategory(c)}"></i><span>${nombreMostrar}</span>`; b.onclick = function() { filtrarCategoria(c, this); }; cont.appendChild(b); });
-    if (categoriaActual === 'LICORES') { generarSubcategoriasLicores(); } else { let subcatSection = document.getElementById('subcategoria-section-main'); if(subcatSection) subcatSection.style.display = 'none'; }
-    setTimeout(() => { let activeBtn = cont.querySelector('.active'); if(activeBtn) activeBtn.scrollIntoView({behavior: "smooth", inline: "center", block: "nearest"}); }, 150);
+    const cont = document.getElementById('contenedorCategorias'); 
+    if (!cont) return;
+    
+    cont.innerHTML = '';
+    
+    // Botón Inicio
+    let btnInicio = document.createElement('button'); 
+    btnInicio.className = (categoriaActual === 'Todos') ? "cat-btn active" : "cat-btn"; 
+    btnInicio.innerHTML = `<i class="fa-solid fa-shop"></i><span>Inicio</span>`; 
+    btnInicio.onclick = function() { irInicio(); }; 
+    cont.appendChild(btnInicio);
+    
+    // Botón Favoritos
+    let btnFav = document.createElement('button'); 
+    btnFav.className = (categoriaActual === 'Favoritos') ? "cat-btn active" : "cat-btn"; 
+    btnFav.innerHTML = `<i class="fa-solid fa-heart" style="${categoriaActual !== 'Favoritos' ? 'color: #ff4757;' : ''}"></i><span>Favoritos</span>`; 
+    btnFav.onclick = function() { filtrarCategoria('Favoritos', this); }; 
+    cont.appendChild(btnFav);
+    
+    console.log("🛠️ Generando Grupos. Grupos API:", appState.gruposInventario?.length);
+
+    // Categorías de la API SmartVentas
+    if (appState.gruposInventario && appState.gruposInventario.length > 0) {
+        appState.gruposInventario.forEach(g => {
+            let nombre = g.Nombre || g.nombre || g.Descripcion || g.descripcion || g.NombreGrupo || g.desc_grupo;
+            if (nombre) {
+                let b = document.createElement('button');
+                b.className = (nombre === categoriaActual) ? "cat-btn active" : "cat-btn";
+                b.innerHTML = `<i class="fa-solid ${getIconForCategory(nombre)}"></i><span>${nombre}</span>`;
+                b.onclick = function() { filtrarCategoria(nombre, this); };
+                cont.appendChild(b);
+            }
+        });
+    } else {
+        // Si no hay grupos, mostrar un mensaje de ayuda
+        let p = document.createElement('p');
+        p.style.fontSize = '11px'; p.style.color = 'gray'; p.style.padding = '10px';
+        p.innerText = 'No se encontraron grupos en la API.';
+        cont.appendChild(p);
+    }
+
+    // Manejo de subcategorías y scroll
+    if (categoriaActual === 'LICORES') { 
+        generarSubcategoriasLicores(); 
+    } else { 
+        let subcatSection = document.getElementById('subcategoria-section-main'); 
+        if(subcatSection) subcatSection.style.display = 'none'; 
+    }
+    
+    setTimeout(() => { 
+        let activeBtn = cont.querySelector('.active'); 
+        if(activeBtn) activeBtn.scrollIntoView({behavior: "smooth", inline: "center", block: "nearest"}); 
+    }, 150);
 }
 
 function generarSubcategoriasLicores() {

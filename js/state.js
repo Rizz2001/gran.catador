@@ -4,6 +4,7 @@
 const appState = {
     // Datos de Inventario
     inventario: [],
+    gruposInventario: [],
     productosFiltrados: [],
     subcategoriasLicores: {},
     mapaCodToSubcategoria: {},

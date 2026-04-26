@@ -1,10 +1,10 @@
 <?php
 /**
- * get_token.php - Puente seguro para obtener el token de acceso a la API
+ * get_token.php - El puente
  */
 
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *'); // Ajustar por seguridad según sea necesario
+header('Access-Control-Allow-Origin: *'); //
 
 // 1. Credenciales de la API SmartVentas
 $tokenUrl = 'https://auth.foxdata.app/connect/token';
@@ -25,6 +25,8 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
 curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // 
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
 $response = curl_exec($ch);
 
