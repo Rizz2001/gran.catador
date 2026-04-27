@@ -236,97 +236,16 @@ function iniciarAutoActualizacion() {
     }, 3600000);
 }
 
-async function getSmartVentasToken() {
-    // --- MODO PRUEBA: TOKEN MANUAL ---
-    // Si tienes un token manual, colócalo aquí para saltarte el PHP temporalmente
-    const manualToken = '';
-
-    if (manualToken) {
-        console.log("🎫 Usando Token Manual proporcionado...");
-        return manualToken;
-    }
-
-    let cachedToken = localStorage.getItem('gc_sv_token');
-    let tokenTime = localStorage.getItem('gc_sv_token_time');
-    let now = new Date().getTime();
-
-    // Si el token tiene menos de 55 minutos (3300000 ms), lo reutilizamos
-    if (cachedToken && tokenTime && (now - parseInt(tokenTime)) < 3300000) {
-        console.log("🔑 Usando Token Bearer guardado en caché...");
-        return cachedToken;
-    }
-
-    try {
-        console.log("🔄 Solicitando un nuevo Token Bearer directamente a la API...");
-
-        const bodyParams = new URLSearchParams({
-            'grant_type': 'client_credentials',
-            'client_id': 'smvt-apiweb-C0006',
-            'client_secret': 'i84so7BEzsUo',
-            'scope': 'smartventas-api smartventas.service.read smartventas.service.write'
-        });
-
-        const targetUrl = 'https://auth.foxdata.app/connect/token';
-        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
-
-        const response = await fetch(proxyUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Accept': 'application/json'
-            },
-            body: bodyParams
-        });
-
-        if (!response.ok) throw new Error("Error en la conexión con la API de autenticación HTTP " + response.status);
-
-        const data = await response.json();
-
-        if (data.error) {
-            throw new Error(data.error);
-        }
-
-        if (!data.access_token) {
-            throw new Error("El JSON es válido pero no contiene 'access_token'. Respuesta: " + JSON.stringify(data));
-        }
-
-        // Guardamos el nuevo token y la hora exacta en que se obtuvo
-        localStorage.setItem('gc_sv_token', data.access_token);
-        localStorage.setItem('gc_sv_token_time', now.toString());
-
-        return data.access_token;
-    } catch (e) {
-        console.error("Error en autenticación SmartVentas:", e);
-        throw e;
-    }
-}
-
 async function cargarInventarioDesdeAPI() {
-    console.log("📡 Conectando con API SmartVentas...");
+    // En tu entorno local de Cloudflare (o en la URL de GitHub/Pages), llamamos a la ruta /api/proxy
+    const respuesta = await fetch('https://gran-catador.pages.dev/api/proxy');
 
-    let token = await getSmartVentasToken();
-
-    if (!token) throw new Error("Token vacío recibido del servidor.");
-
-    // Consultamos el endpoint de Grupos de Inventario
-    const targetUrl = 'https://apismartventas.foxdata.app/api/v1/syn/gruposinv';
-    const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(targetUrl);
-    console.log("Consultando endpoint:", targetUrl);
-
-    const response = await fetch(proxyUrl, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
-    });
-
-    if (!response.ok) {
-        if (response.status === 401) throw new Error("Token inválido o expirado.");
-        throw new Error("Error en la respuesta de la API (" + response.status + ")");
+    if (!respuesta.ok) {
+        throw new Error(`Error en el servidor: ${respuesta.status}`);
     }
 
-    const dataRaw = await response.json();
-    console.log("✅ Datos recibidos de la API:", dataRaw);
+    const dataRaw = await respuesta.json();
+    console.log("¡Datos obtenidos con éxito burlando el CORS!", dataRaw);
 
     // Intentamos extraer el array de grupos, ya que a veces viene envuelto en .data, .grupos, etc.
     let grupos = [];
