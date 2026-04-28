@@ -265,3 +265,43 @@ textarea {
     box-shadow: none;
     /* Sin sombra para no recargar la vista */
 }
+
+/* --- FLECHAS DE SCROLL (Solo PC) --- */
+.scroll-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(calc(-50% - 5px));
+    /* Ajuste fino por el padding inferior */
+    width: 32px;
+    height: 32px;
+    background: var(--item-bg, #fff);
+    border: 1px solid var(--borde-color, #ddd);
+    border-radius: 50%;
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.scroll-arrow:hover {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+.left-arrow {
+    left: -15px;
+}
+
+.right-arrow {
+    right: -15px;
+}
+
+/* Ocultar en dispositivos móviles y tablets pequeñas */
+@media (max-width: 1024px) {
+    .scroll-arrow {
+        display: none !important;
+    }
+}

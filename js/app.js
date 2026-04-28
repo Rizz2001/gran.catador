@@ -209,11 +209,11 @@ function iniciarAutoActualizacion() {
 }
 
 async function cargarInventarioDesdeAPI() {
-    // Ruta inteligente: Si la página está alojada en Cloudflare usa ruta relativa, 
-    // de lo contrario (Localhost, GitHub Pages, Hostinger) usa la ruta absoluta.
+    // Ruta inteligente: Si estamos en Cloudflare Pages usamos el worker,
+    // de lo contrario (Laragon, XAMPP, cPanel, Hostinger) usamos el proxy en PHP.
     const proxyBaseUrl = window.location.hostname.includes('pages.dev')
         ? '/api/proxy'
-        : 'https://gran-catador.pages.dev/api/proxy';
+        : 'functions/api/proxy.php';
 
     console.log("📡 Consultando API mediante Proxy Cloudflare...");
 

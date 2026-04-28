@@ -4,11 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gran Catador - Catálogo Online 🚚 Delivery Barinas</title>
+    <title>Gran Catador Supermercado y Bodegón</title>
 
-    <meta property="og:title" content="Gran Catador - Bodegón VIP Barinas">
-    <meta property="og:description"
-        content="Catálogo Online de Licores Premium. Delivery rápido en Barinas. ¡Pide ahora!">
+    <meta property="og:title" content="Gran Catador Supermercado y Bodegón">
+    <meta property="og:description" content="Catálogo Online de Gran Catador Supermercado y Bodegón.">
     <meta property="og:image" content="https://rizz2001.github.io/gran-catadorca-site-lite/logo.png">
     <meta property="og:url" content="https://rizz2001.github.io/gran-catadorca-site-lite/">
     <meta property="og:type" content="website">
@@ -198,15 +197,27 @@
     <div class="container tools-container">
         <h2 class="section-title">Todos los productos</h2>
 
-        <!-- NUEVO: Menú Deslizable de Grupos -->
-        <div class="horizontal-scroll-wrapper" style="margin-bottom: 10px; width: 100%; overflow: hidden;">
-            <div class="categorias-scroll horizontal-filters" id="contenedorCategorias"></div>
+        <!-- Menú Deslizable de Grupos -->
+        <div class="scroll-container-wrapper" style="position: relative; margin-bottom: 10px;">
+            <button class="scroll-arrow left-arrow" onclick="scrollHorizontal('contenedorCategorias', -300)"
+                aria-label="Desplazar a la izquierda"><i class="fa-solid fa-chevron-left"></i></button>
+            <div class="horizontal-scroll-wrapper" style="width: 100%; overflow: hidden;">
+                <div class="categorias-scroll horizontal-filters" id="contenedorCategorias"></div>
+            </div>
+            <button class="scroll-arrow right-arrow" onclick="scrollHorizontal('contenedorCategorias', 300)"
+                aria-label="Desplazar a la derecha"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
 
-        <!-- NUEVO: Menú Deslizable de Subcategorías (Oculto por defecto) -->
-        <div class="horizontal-scroll-wrapper" id="subcategoria-section-main"
-            style="display:none; margin-bottom: 15px; width: 100%; overflow: hidden;">
-            <div class="categorias-scroll horizontal-filters" id="contenedorSubcategorias"></div>
+        <!-- Menú Deslizable de Subcategorías (Oculto por defecto) -->
+        <div class="scroll-container-wrapper" id="subcategoria-section-main"
+            style="display:none; position: relative; margin-bottom: 15px;">
+            <button class="scroll-arrow left-arrow" onclick="scrollHorizontal('contenedorSubcategorias', -300)"
+                aria-label="Desplazar a la izquierda"><i class="fa-solid fa-chevron-left"></i></button>
+            <div class="horizontal-scroll-wrapper" style="width: 100%; overflow: hidden;">
+                <div class="categorias-scroll horizontal-filters" id="contenedorSubcategorias"></div>
+            </div>
+            <button class="scroll-arrow right-arrow" onclick="scrollHorizontal('contenedorSubcategorias', 300)"
+                aria-label="Desplazar a la derecha"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
 
         <div class="filters-row-container">
@@ -242,7 +253,7 @@
         <div class="container footer-container">
             <div class="footer-col">
                 <img src="logo.png" alt="Logo Gran Catador" class="footer-logo" onerror="this.style.display='none'">
-                <p class="footer-desc">Tu Bodegón VIP con Delivery Express en Barinas. Licores premium y más.</p>
+                <p class="footer-desc">Gran Catador Supermercado y Bodegón.</p>
                 <div class="footer-social-new">
                     <a href="#" target="_blank" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
                     <a href="#" target="_blank" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>

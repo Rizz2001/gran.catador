@@ -253,7 +253,9 @@ function generarCategorias() {
         cargarSubcategoriasAPI(categoriaActual);
     } else {
         let subcatSection = document.getElementById('subcategoria-section-main');
+        let subcatContainer = document.getElementById('contenedorSubcategorias');
         if (subcatSection) subcatSection.style.display = 'none';
+        if (subcatContainer) subcatContainer.innerHTML = '';
     }
 
     setTimeout(() => {
@@ -267,9 +269,9 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
     let subcatContainer = document.getElementById('contenedorSubcategorias');
     if (!subcatSection || !subcatContainer) return;
 
-    // Mostrar visualmente que está cargando para que sepas que el clic funcionó
+    // Mostrar visualmente que está cargando
     subcatSection.style.display = 'block';
-    subcatContainer.innerHTML = '<div style="padding: 10px 15px; font-size: 13px; color: var(--color-primary); font-weight: 600;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando subgrupos...</div>';
+    subcatContainer.innerHTML = '<div style="padding: 10px 5px; font-size: 13px; color: var(--color-primary); font-weight: 600; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando subgrupos...</div>';
 
     // Buscar el código del grupo de forma segura
     let grupo = null;
@@ -358,6 +360,7 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
         subcatContainer.scrollLeft = 0;
     } else {
         subcatSection.style.display = 'none';
+        subcatContainer.innerHTML = '';
         console.warn(`❌ El grupo "${nombreCategoria}" no tiene subgrupos asignados en la base de datos.`);
     }
 }
@@ -365,7 +368,9 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
 function filtrarCategoria(cat, btn) {
     categoriaActual = cat; subcategoriaActual = null;
     let subcatSection = document.getElementById('subcategoria-section-main');
-    if (subcatSection) { subcatSection.style.display = 'none'; }
+    let subcatContainer = document.getElementById('contenedorSubcategorias');
+    if (subcatSection) subcatSection.style.display = 'none';
+    if (subcatContainer) subcatContainer.innerHTML = '';
 
     document.querySelectorAll('#contenedorCategorias .cat-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
@@ -550,3 +555,11 @@ function cargarMasProductos() {
     paginaActual++;
     renderizarPagina();
 }
+
+// --- FUNCIÓN PARA FLECHAS DE SCROLL EN PC ---
+window.scrollHorizontal = function (containerId, amount) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        container.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+};
