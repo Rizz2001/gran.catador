@@ -15,7 +15,15 @@ export async function onRequest(context) {
         // Determinar qué endpoint quiere consultar la app (gruposinv o articulos)
         const requestUrl = new URL(context.request.url);
         const endpoint = requestUrl.searchParams.get("endpoint") || "gruposinv";
-        const urlFoxdata = `https://apismartventas.foxdata.app/api/v1/syn/${endpoint}`;
+        let urlFoxdata = `https://apismartventas.foxdata.app/api/v1/syn/${endpoint}`;
+
+        // Pasar los parámetros extras de la URL original a Foxdata (como codSubgrupo)
+        const params = new URLSearchParams(requestUrl.searchParams);
+        params.delete("endpoint");
+        const extraQuery = params.toString();
+        if (extraQuery) {
+            urlFoxdata += (urlFoxdata.includes("?") ? "&" : "?") + extraQuery;
+        }
 
         // 2. OBTENER UN TOKEN FRESCO (Para que nunca expire)
         const authUrl = "https://auth.foxdata.app/connect/token";

@@ -389,6 +389,23 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
 
     // 3. Renderizar en la pantalla
     if (subcategorias.length > 0) {
+        // --- LÓGICA DE RESCATE AUTOMÁTICO ---
+        // Si SmartVentas devolvió 0 productos para el grupo principal, los extraemos forzosamente de los subgrupos.
+        let prodsGrupo = inventario.filter(p => p.CatId === codGrupo || p.Cat === limpiarCategoria(nombreCategoria));
+        if (prodsGrupo.length === 0) {
+            console.log(`⚠️ Grupo vacío. Rescatando productos automáticamente a través de sus ${subcategorias.length} subgrupos...`);
+            let promesas = subcategorias.map(sub => {
+                let nombreSub = sub.nombre || sub.descripcion || sub.Nombre || sub.desc_subgrupo || "Subgrupo";
+                let codSub = (sub.CodSubgrupo || sub.codsubgrupo || sub.Codsubgrupo || sub.cod_subgrupo || sub.cod_sub_grupo || sub.id_subgrupo || sub.id_sub_grupo || sub.Cod_subgrupo || sub.codigo || sub.id || sub.subgrupo || sub.Subgrupo || limpiarCategoria(nombreSub)).toString().trim();
+                if (codSub) return cargarProductosPorSubgrupo(codGrupo, codSub, nombreCategoria, nombreSub);
+            });
+
+            Promise.all(promesas).then(() => {
+                if (codGrupo && !appState.gruposCargados.includes(codGrupo)) appState.gruposCargados.push(codGrupo);
+                if (!subcategoriaActual && categoriaActual === nombreCategoria) aplicarFiltros(); // Refresca "Todos" mágicamente
+            });
+        }
+
         subcatContainer.innerHTML = '';
 
         let btnLimpiar = document.createElement('button');
@@ -398,13 +415,20 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
             subcategoriaActual = null;
             Array.from(subcatContainer.children).forEach(b => b.classList.remove('active'));
             this.classList.add('active');
+
+            // Si el usuario presiona "Todos" mientras ocurre el rescate, le mostramos el esqueleto de carga
+            let prods = inventario.filter(p => p.CatId === codGrupo || p.Cat === limpiarCategoria(nombreCategoria));
+            if (prods.length === 0) {
+                if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();
+            }
+
             aplicarFiltros();
         };
         subcatContainer.appendChild(btnLimpiar);
 
         subcategorias.forEach(sub => {
             let nombreSub = sub.nombre || sub.descripcion || sub.Nombre || sub.desc_subgrupo || "Subgrupo";
-            let codSub = (sub.CodSubgrupo || sub.codigo || sub.id || sub.subgrupo || sub.id_subgrupo || limpiarCategoria(nombreSub)).toString().trim();
+            let codSub = (sub.CodSubgrupo || sub.codsubgrupo || sub.Codsubgrupo || sub.cod_subgrupo || sub.cod_sub_grupo || sub.id_subgrupo || sub.id_sub_grupo || sub.Cod_subgrupo || sub.codigo || sub.id || sub.subgrupo || sub.Subgrupo || limpiarCategoria(nombreSub)).toString().trim();
 
             // Formatear Nombre (Capitalizar primera letra: "Whisky" en vez de "WHISKY")
             let nombreMostrado = nombreSub.charAt(0).toUpperCase() + nombreSub.slice(1).toLowerCase();
@@ -417,12 +441,13 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
                 Array.from(subcatContainer.children).forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
 
-                // --- LÓGICA DE API POR SUBGRUPO ---
-                appState.subgruposCargados = appState.subgruposCargados || [];
-                let cacheKey = `${codGrupo}-${codSub}`;
-                if (codGrupo && codSub && !appState.subgruposCargados.includes(cacheKey)) {
+                // Siempre llamamos a la API con ?codSubgrupo= para que los productos
+                // queden etiquetados con su SubCatId correcto antes de filtrar.
+                if (codGrupo && codSub) {
                     if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();
-                    if (typeof cargarProductosPorSubgrupo === 'function') await cargarProductosPorSubgrupo(codGrupo, codSub, nombreCategoria, nombreSub);
+                    if (typeof cargarProductosPorSubgrupo === 'function') {
+                        await cargarProductosPorSubgrupo(codGrupo, codSub, nombreCategoria, nombreSub);
+                    }
                 }
 
                 aplicarFiltros();
@@ -464,10 +489,13 @@ async function filtrarCategoria(cat, btn) {
 
     // --- LAZY LOADING: Asegurarnos de que el grupo seleccionado ya esté descargado ---
     if (cat !== 'Todos' && cat !== 'Favoritos' && appState.gruposInventario) {
-        let grupoMatch = appState.gruposInventario.find(g => limpiarCategoria(g.Nombre || g.nombre || g.Descripcion) === limpiarCategoria(cat));
+        let grupoMatch = appState.gruposInventario.find(g => {
+            let nom = g.Nombre || g.nombre || g.Descripcion || g.descripcion || g.NombreGrupo || g.desc_grupo || g.DescGrupo || "Grupo";
+            return limpiarCategoria(nom) === limpiarCategoria(cat);
+        });
         if (grupoMatch) {
-            let codGrupo = (grupoMatch.CodGrupo || grupoMatch.codigo || grupoMatch.id).toString().trim();
-            let nombreGrupo = grupoMatch.Nombre || grupoMatch.nombre || grupoMatch.Descripcion;
+            let codGrupo = (grupoMatch.CodGrupo || grupoMatch.codigo || grupoMatch.id || grupoMatch.Codigo || grupoMatch.Id || grupoMatch.id_grupo || grupoMatch.cod_grupo || grupoMatch.grupo || grupoMatch.Grupo || "").toString().trim();
+            let nombreGrupo = grupoMatch.Nombre || grupoMatch.nombre || grupoMatch.Descripcion || grupoMatch.descripcion || grupoMatch.NombreGrupo || grupoMatch.desc_grupo || grupoMatch.DescGrupo || "Grupo";
 
             if (appState.gruposCargados && !appState.gruposCargados.includes(codGrupo)) {
                 if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();

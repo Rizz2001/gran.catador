@@ -16,6 +16,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 $endpoint = isset($_GET['endpoint']) ? $_GET['endpoint'] : 'gruposinv';
 $urlFoxdata = 'https://apismartventas.foxdata.app/api/v1/syn/' . $endpoint;
 
+// Redirigir cualquier parámetro extra (como codSubgrupo) hacia la API destino
+$queryParams = $_GET;
+unset($queryParams['endpoint']);
+if (!empty($queryParams)) {
+    $separator = strpos($urlFoxdata, '?') !== false ? '&' : '?';
+    $urlFoxdata .= $separator . http_build_query($queryParams);
+}
+
 // 1. OBTENER UN TOKEN FRESCO
 $tokenUrl = 'https://auth.foxdata.app/connect/token';
 $body = [
