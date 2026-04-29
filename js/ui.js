@@ -564,6 +564,17 @@ function crearHTMLProducto(p) {
     const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
     const carpeta = getCategoriaFolder(p.Cat);
 
+    // --- LÓGICA DINÁMICA DE TEXTO DE UNIDAD ---
+    let textoUnidad = '';
+    if (esModoCaja) {
+        let undGrup = p.UnidadGrup ? p.UnidadGrup.toUpperCase() : 'CAJA';
+        let cant = p.CantidadGrup || 12;
+        textoUnidad = `POR ${undGrup} (x${cant})`;
+    } else {
+        let undSimp = p.UnidadSimple ? p.UnidadSimple.toUpperCase() : 'UNIDAD';
+        textoUnidad = `POR ${undSimp}`;
+    }
+
     let badgeHTML = '';
     if (isAgotado) {
         badgeHTML = `<div class="product-badge badge-agotado">AGOTADO</div>`;
@@ -595,6 +606,7 @@ function crearHTMLProducto(p) {
             
             <div class="product-bottom">
                 <div class="product-price-container">
+                    <span style="font-size: 10px; color: var(--color-primary); font-weight: 800; letter-spacing: 0.5px; margin-bottom: -2px; display: block;">${textoUnidad}</span>
                     <span class="product-price" style="font-size: 22px; font-weight: 900; line-height: 1.1;">$${precioUsdDin}</span>
                     <span class="product-price-bs" style="font-size: 13px;">${precioBsDin} Bs</span>
                 </div>
