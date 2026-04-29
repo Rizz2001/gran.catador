@@ -307,23 +307,29 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
             // Imprime en la consola el primer producto tal cual como lo envía la API Foxdata
             console.log(`📦 RAW Foxdata [Grupo: ${nombreGrupo}] - Muestra de producto:`, articulos[0]);
 
+            const parsePrecioExt = (val) => {
+                if (val == null) return 0;
+                let s = String(val).trim();
+                // Detecta inteligentemente si usa formato "1.200,50" o "15,50"
+                if (s.includes(',') && s.includes('.')) { let lc = s.lastIndexOf(','); let ld = s.lastIndexOf('.'); s = lc > ld ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, ''); }
+                else if (s.includes(',')) { s = s.replace(',', '.'); }
+                let n = parseFloat(s.replace(/[^\d.-]/g, ''));
+                return isNaN(n) ? 0 : n;
+            };
+
             let nuevosProductos = articulos.map(item => {
-                // Mapeo ultra-seguro de Precios (cubre variaciones de la API SmartVentas)
-                let precioRaw = item.precioVentDiv ?? item.precioVentDivisa ?? item.precio_divisa ?? item.precioVent ?? item.PrecioVent ?? item.precio_venta ?? item.precio ?? item.Precio ?? item.precio1 ?? item.Precio1 ?? item.precio_1 ?? item.precio_detal ?? item.monto ?? 0;
+                // Prioridad estricta solicitada: precioVentDiv para unidad (usando || para saltar vacíos o ceros erróneos)
+                let precioRaw = item.precioVentDiv || item.PrecioVentDiv || item.precioVentDivisa || item.precio_divisa || item.precioVent || item.PrecioVent || item.precio_venta || item.precio || item.Precio || item.precio1 || item.Precio1 || item.precio_1 || item.precio_detal || item.monto || 0;
+                let precioUsd = parsePrecioExt(precioRaw);
 
-                // Limpiamos el valor por si viene con comas en vez de puntos, o con símbolos de moneda ("$ 15,50")
-                let precioLimpio = String(precioRaw).replace(/[^\d.,-]/g, '').replace(',', '.');
-                let precioUsd = parseFloat(precioLimpio);
-                if (isNaN(precioUsd)) precioUsd = 0;
+                // Prioridad estricta solicitada: precioVentGrupDiv para Caja/Bulto
+                let cantidadGrupRaw = item.cantidadGrup || item.CantidadGrup || item.cant_caja || 12;
+                let cantidadGrup = parsePrecioExt(cantidadGrupRaw);
+                if (cantidadGrup <= 0) cantidadGrup = 12;
 
-                // Mapeo de precios por grupo (Caja/Bulto) y cantidades
-                let cantidadGrupRaw = item.cantidadGrup ?? item.CantidadGrup ?? item.cant_caja ?? 12;
-                let cantidadGrup = parseFloat(String(cantidadGrupRaw).replace(',', '.'));
-                if (isNaN(cantidadGrup)) cantidadGrup = 12;
-
-                let precioGrupRaw = item.precioVentGrupDiv ?? item.precio_mayor ?? item.precioVentGrup ?? (precioUsd * cantidadGrup);
-                let precioCajaNum = parseFloat(String(precioGrupRaw).replace(/[^\d.,-]/g, '').replace(',', '.'));
-                if (isNaN(precioCajaNum)) precioCajaNum = precioUsd * cantidadGrup;
+                let precioGrupRaw = item.precioVentGrupDiv || item.PrecioVentGrupDiv || item.precio_mayor || item.precioVentGrup || (precioUsd * cantidadGrup);
+                let precioCajaNum = parsePrecioExt(precioGrupRaw);
+                if (precioCajaNum <= 0) precioCajaNum = precioUsd * cantidadGrup;
 
                 // Mapeo ultra-seguro del Stock (asumimos 10 si la API no manda la propiedad para que no se oculten)
                 let stockRaw = item.existencia ?? item.Existencia ?? item.stock ?? item.Stock ?? item.cantidad ?? item.Cantidad;
