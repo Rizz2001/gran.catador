@@ -4,6 +4,8 @@
 const appState = {
     // Datos de Inventario
     inventario: [],
+    gruposInventario: [],
+    gruposCargados: [], // Registro de grupos ya descargados desde la API
     productosFiltrados: [],
 
     // Datos del Usuario

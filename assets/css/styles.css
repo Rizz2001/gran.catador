@@ -173,18 +173,21 @@ textarea {
 
 /* --- FILTROS HORIZONTALES (GRUPOS) --- */
 .horizontal-filters {
-    display: flex;
-    overflow-x: auto;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
     gap: 12px;
     padding: 5px 5px 15px 5px;
     /* Espacio extra para que no se corte la sombra */
     scrollbar-width: none;
     -ms-overflow-style: none;
-    white-space: nowrap;
+    white-space: nowrap !important;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     /* Momentum scroll nativo en iOS y Android */
     width: 100%;
+    align-items: center;
 }
 
 .horizontal-filters::-webkit-scrollbar {
@@ -197,6 +200,7 @@ textarea {
     flex: 0 0 auto !important;
     min-width: max-content !important;
     width: auto !important;
+    white-space: nowrap !important;
     border-radius: 25px !important;
     /* Más redondeados */
     padding: 10px 20px !important;
@@ -239,6 +243,7 @@ textarea {
     flex: 0 0 auto !important;
     min-width: max-content !important;
     width: auto !important;
+    white-space: nowrap !important;
     border-radius: 8px !important;
     /* Más cuadrados, menos de "píldora" */
     padding: 6px 14px !important;
@@ -304,4 +309,46 @@ textarea {
     .scroll-arrow {
         display: none !important;
     }
+}
+
+/* --- SKELETON LOADER PARA GRUPOS --- */
+@keyframes skeleton-pulse {
+    0% {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    50% {
+        background-color: rgba(0, 0, 0, 0.15);
+    }
+
+    100% {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+}
+
+@keyframes skeleton-pulse-dark {
+    0% {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    50% {
+        background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    100% {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+}
+
+.skeleton-chip {
+    flex: 0 0 auto !important;
+    height: 42px;
+    border-radius: 25px !important;
+    background-color: rgba(0, 0, 0, 0.1);
+    animation: skeleton-pulse 1.5s infinite ease-in-out;
+    border: 1px solid transparent !important;
+}
+
+.dark-mode .skeleton-chip {
+    animation: skeleton-pulse-dark 1.5s infinite ease-in-out;
 }

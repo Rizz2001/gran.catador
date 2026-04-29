@@ -206,6 +206,20 @@ function getIconForCategory(cat) {
     return 'fa-box-open';
 }
 
+window.mostrarSkeletonCategorias = function () {
+    const cont = document.getElementById('contenedorCategorias');
+    if (!cont) return;
+    cont.innerHTML = '';
+    // Anchos aleatorios para simular nombres de grupos de distintos tamaños
+    const widths = ['110px', '140px', '95px', '130px', '105px', '150px'];
+    for (let i = 0; i < 6; i++) {
+        let div = document.createElement('div');
+        div.className = 'skeleton-chip';
+        div.style.width = widths[i];
+        cont.appendChild(div);
+    }
+}
+
 function generarCategorias() {
     const cont = document.getElementById('contenedorCategorias');
     if (!cont) return;
@@ -289,7 +303,10 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
     if (codGrupo) {
         try {
             console.log(`📡 Consultando API para subgrupos del grupo: ${nombreCategoria} (ID: ${codGrupo})`);
-            const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy' : 'https://gran-catador.pages.dev/api/proxy';
+            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy'
+                : isLocalhost ? 'https://gran-catador.pages.dev/api/proxy'
+                    : 'functions/api/proxy.php';
             const res = await fetch(`${proxyBaseUrl}?endpoint=gruposinvsub/grupo/${encodeURIComponent(codGrupo)}`);
             if (res.ok) {
                 const data = await res.json();
@@ -365,7 +382,7 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
     }
 }
 
-function filtrarCategoria(cat, btn) {
+async function filtrarCategoria(cat, btn) {
     categoriaActual = cat; subcategoriaActual = null;
     let subcatSection = document.getElementById('subcategoria-section-main');
     let subcatContainer = document.getElementById('contenedorSubcategorias');
@@ -377,6 +394,20 @@ function filtrarCategoria(cat, btn) {
 
     let mTitle = document.getElementById('mobile-header-title');
     if (mTitle) mTitle.innerText = (cat === 'Todos') ? 'Inicio' : cat;
+
+    // --- LAZY LOADING: Asegurarnos de que el grupo seleccionado ya esté descargado ---
+    if (cat !== 'Todos' && cat !== 'Favoritos' && appState.gruposInventario) {
+        let grupoMatch = appState.gruposInventario.find(g => limpiarCategoria(g.Nombre || g.nombre || g.Descripcion) === limpiarCategoria(cat));
+        if (grupoMatch) {
+            let codGrupo = (grupoMatch.CodGrupo || grupoMatch.codigo || grupoMatch.id).toString().trim();
+            let nombreGrupo = grupoMatch.Nombre || grupoMatch.nombre || grupoMatch.Descripcion;
+
+            if (appState.gruposCargados && !appState.gruposCargados.includes(codGrupo)) {
+                // Forzamos la descarga en este momento si no se había descargado en segundo plano aún
+                await cargarProductosPorGrupo(codGrupo, nombreGrupo);
+            }
+        }
+    }
 
     aplicarFiltros();
 

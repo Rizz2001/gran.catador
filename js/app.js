@@ -179,6 +179,8 @@ async function cargarInventario() {
     toggleDireccion();
     inyectarInterruptor();
 
+    if (typeof mostrarSkeletonCategorias === 'function') mostrarSkeletonCategorias();
+
     try {
         await cargarInventarioDesdeAPI();
 
@@ -210,10 +212,12 @@ function iniciarAutoActualizacion() {
 
 async function cargarInventarioDesdeAPI() {
     // Ruta inteligente: Si estamos en Cloudflare Pages usamos el worker,
+    // si estamos en local usamos el proxy subido a Cloudflare,
     // de lo contrario (Laragon, XAMPP, cPanel, Hostinger) usamos el proxy en PHP.
-    const proxyBaseUrl = window.location.hostname.includes('pages.dev')
-        ? '/api/proxy'
-        : 'functions/api/proxy.php';
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy'
+        : isLocalhost ? 'https://gran-catador.pages.dev/api/proxy'
+            : 'functions/api/proxy.php';
 
     console.log("📡 Consultando API mediante Proxy Cloudflare...");
 
@@ -233,55 +237,109 @@ async function cargarInventarioDesdeAPI() {
     }
 
     // --- 2. DESCARGAR PRODUCTOS (ARTÍCULOS) ---
-    const resArticulos = await fetch(`${proxyBaseUrl}?endpoint=articulos`);
-    if (!resArticulos.ok) throw new Error(`Error servidor artículos: ${resArticulos.status}`);
-    const dataArticulos = await resArticulos.json();
+    appState.gruposCargados = appState.gruposCargados || [];
+    inventario = []; // Reiniciamos si estamos refrescando
 
-    let articulos = Array.isArray(dataArticulos) ? dataArticulos : (dataArticulos.data || dataArticulos.articulos || dataArticulos.result || []);
+    let grupoInicial = null;
 
-    if (articulos.length > 0) {
-        console.log(`📦 ${articulos.length} artículos recibidos. Mapeando al catálogo...`);
-
-        inventario = articulos.map(item => {
-            let precioUsd = parseFloat(item.precio || item.Precio || item.precio1 || item.Precio1 || 0);
-            let stock = parseFloat(item.existencia || item.Existencia || item.stock || item.Stock || 0);
-            let nombre = item.nombre || item.Nombre || item.descripcion || item.Descripcion || "Producto sin nombre";
-
-            // Extraer códigos exactos de la API
-            let codGrupo = (item.CodGrupo || item.grupo || item.Grupo || item.categoria || item.id_grupo || item.cod_grupo || "Otros").toString().trim();
-            let codSubgrupo = (item.CodSubgrupo || item.subgrupo || item.Subgrupo || item.subcategoria || item.Subcategoria || item.sub_grupo || item.id_subgrupo || item.cod_subgrupo || "").toString().trim();
-
-            // Traducir el código del grupo al Nombre Real (cruzándolo con gruposinv)
-            let matchGrupo = appState.gruposInventario.find(g => (g.CodGrupo || g.codigo || g.id || g.Codigo || g.Id || g.grupo || g.Grupo || "").toString().trim() === codGrupo);
-            let nombreGrupo = matchGrupo ? (matchGrupo.Nombre || matchGrupo.nombre || matchGrupo.descripcion || matchGrupo.Descripcion || matchGrupo.NombreGrupo || matchGrupo.DescGrupo) : codGrupo;
-            let nombreSubgrupo = item.desc_subgrupo || item.Desc_subgrupo || item.nombre_subgrupo || item.desc_sub_grupo || codSubgrupo;
-
-            return {
-                codigo: item.codigo || item.Codigo || item.id || item.Id || "",
-                Nombre: nombre,
-                CatId: codGrupo,
-                Cat: limpiarCategoria(nombreGrupo),
-                SubCatId: codSubgrupo,
-                SubCat: limpiarCategoria(nombreSubgrupo),
-                PrecioStr: precioUsd.toFixed(2),
-                PrecioNum: precioUsd,
-                PrecioBsStr: (precioUsd * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
-                PrecioCajaUsd: (precioUsd * 12).toFixed(2),
-                PrecioCajaNum: precioUsd * 12,
-                PrecioCajaBsStr: ((precioUsd * 12) * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
-                StockNum: stock,
-                StockStr: stock > 0 ? stock.toString() : "0",
-                TextoBusquedaLimpio: quitarAcentos(nombre) + " " + quitarAcentos(nombreGrupo) + " " + quitarAcentos(nombreSubgrupo)
-            };
-        }).filter(p => p.PrecioNum > 0);
-
-        appState.inventario = inventario;
-
-        // DEBUG: Imprimir los primeros 5 productos mapeados para verificar IDs
-        console.log("🕵️‍♂️ Muestra de productos mapeados (para debug):", JSON.parse(JSON.stringify(inventario.slice(0, 5))));
-
-        if (typeof mostrarToast === 'function') mostrarToast(`✅ API SmartVentas: ${grupos.length} Grupos y ${articulos.length} Productos sincronizados.`);
+    // Identificar el grupo actual de la interfaz para cargarlo primero
+    if (categoriaActual !== 'Todos' && categoriaActual !== 'Favoritos') {
+        grupoInicial = grupos.find(g => limpiarCategoria(g.Nombre || g.nombre || g.Descripcion) === limpiarCategoria(categoriaActual));
     }
+
+    // Fallback: Si no hay categoría actual o estamos en "Todos", cargamos el primero disponible
+    if (!grupoInicial && grupos.length > 0) {
+        grupoInicial = grupos[0];
+    }
+
+    if (grupoInicial) {
+        let codGrupo = (grupoInicial.CodGrupo || grupoInicial.codigo || grupoInicial.id || "").toString().trim();
+        let nombreGrupo = grupoInicial.Nombre || grupoInicial.nombre || grupoInicial.Descripcion || "Grupo";
+        await cargarProductosPorGrupo(codGrupo, nombreGrupo);
+    }
+
+    if (typeof mostrarToast === 'function') mostrarToast(`✅ API Conectada. Catálogo cargando...`);
+
+    // --- 3. INICIAR CARGA DE LOS DEMÁS GRUPOS EN SEGUNDO PLANO ---
+    cargarRestoDeGruposEnSegundoPlano(grupos);
+}
+
+async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
+    if (appState.gruposCargados && appState.gruposCargados.includes(codGrupo)) return false; // Ya fue cargado
+
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy'
+        : isLocalhost ? 'https://gran-catador.pages.dev/api/proxy'
+            : 'functions/api/proxy.php';
+    console.log(`📡 Consultando productos del grupo: ${nombreGrupo} (ID: ${codGrupo})`);
+
+    try {
+        const res = await fetch(`${proxyBaseUrl}?endpoint=articulos/grupo/${encodeURIComponent(codGrupo)}`);
+        if (!res.ok) return false;
+
+        const data = await res.json();
+        let articulos = Array.isArray(data) ? data : (data.data || data.articulos || data.result || []);
+
+        if (articulos.length > 0) {
+            let nuevosProductos = articulos.map(item => {
+                let precioUsd = parseFloat(item.precio || item.Precio || item.precio1 || item.Precio1 || 0);
+                let stock = parseFloat(item.existencia || item.Existencia || item.stock || item.Stock || 0);
+                let nombre = item.nombre || item.Nombre || item.descripcion || item.Descripcion || "Producto sin nombre";
+
+                let codSubgrupo = (item.CodSubgrupo || item.subgrupo || item.Subgrupo || item.subcategoria || item.Subcategoria || item.sub_grupo || item.id_subgrupo || item.cod_subgrupo || "").toString().trim();
+                let nombreSubgrupo = item.desc_subgrupo || item.Desc_subgrupo || item.nombre_subgrupo || item.desc_sub_grupo || codSubgrupo;
+
+                return {
+                    codigo: item.codigo || item.Codigo || item.id || item.Id || "",
+                    Nombre: nombre,
+                    CatId: codGrupo,
+                    Cat: limpiarCategoria(nombreGrupo),
+                    SubCatId: codSubgrupo,
+                    SubCat: limpiarCategoria(nombreSubgrupo),
+                    PrecioStr: precioUsd.toFixed(2),
+                    PrecioNum: precioUsd,
+                    PrecioBsStr: (precioUsd * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
+                    PrecioCajaUsd: (precioUsd * 12).toFixed(2),
+                    PrecioCajaNum: precioUsd * 12,
+                    PrecioCajaBsStr: ((precioUsd * 12) * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
+                    StockNum: stock,
+                    StockStr: stock > 0 ? stock.toString() : "0",
+                    TextoBusquedaLimpio: quitarAcentos(nombre) + " " + quitarAcentos(nombreGrupo) + " " + quitarAcentos(nombreSubgrupo)
+                };
+            }).filter(p => p.PrecioNum > 0);
+
+            inventario = [...inventario, ...nuevosProductos];
+            appState.inventario = inventario;
+            appState.gruposCargados.push(codGrupo);
+
+            console.log(`✅ ${nuevosProductos.length} productos agregados de ${nombreGrupo}`);
+            return true;
+        }
+    } catch (e) { console.error(`⚠️ Error cargando grupo ${codGrupo}:`, e); }
+
+    return false;
+}
+
+async function cargarRestoDeGruposEnSegundoPlano(grupos) {
+    console.log("🔄 Iniciando sincronización en segundo plano de todos los grupos para el buscador...");
+    let qInput = document.getElementById('buscador');
+
+    for (let grupo of grupos) {
+        let codGrupo = (grupo.CodGrupo || grupo.codigo || grupo.id || "").toString().trim();
+        let nombreGrupo = grupo.Nombre || grupo.nombre || grupo.Descripcion || grupo.descripcion || "Grupo";
+
+        if (codGrupo && (!appState.gruposCargados || !appState.gruposCargados.includes(codGrupo))) {
+            let fueCargado = await cargarProductosPorGrupo(codGrupo, nombreGrupo);
+
+            // Si el usuario está viendo "Todos" o está escribiendo en el buscador, refrescamos la vista dinámicamente
+            if (fueCargado && (categoriaActual === 'Todos' || (qInput && qInput.value.trim() !== ''))) {
+                aplicarFiltros();
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 300)); // Pequeña pausa para no saturar la API
+        }
+    }
+    console.log("✅ Todos los grupos han sido cargados en memoria.");
 }
 
 function debounceBusqueda(event) {
