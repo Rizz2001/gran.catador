@@ -304,17 +304,37 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
         let articulos = Array.isArray(data) ? data : (data.data || data.articulos || data.result || []);
 
         if (articulos.length > 0) {
+            // Imprime en la consola el primer producto tal cual como lo envía la API Foxdata
+            console.log(`📦 RAW Foxdata [Grupo: ${nombreGrupo}] - Muestra de producto:`, articulos[0]);
+
             let nuevosProductos = articulos.map(item => {
                 // Mapeo ultra-seguro de Precios (cubre variaciones de la API SmartVentas)
-                let precioRaw = item.precio ?? item.Precio ?? item.precio1 ?? item.Precio1 ?? item.precio_1 ?? item.precio_detal ?? item.monto ?? 0;
-                let precioUsd = parseFloat(precioRaw);
+                let precioRaw = item.precioVentDiv ?? item.precioVentDivisa ?? item.precio_divisa ?? item.precioVent ?? item.PrecioVent ?? item.precio_venta ?? item.precio ?? item.Precio ?? item.precio1 ?? item.Precio1 ?? item.precio_1 ?? item.precio_detal ?? item.monto ?? 0;
+
+                // Limpiamos el valor por si viene con comas en vez de puntos, o con símbolos de moneda ("$ 15,50")
+                let precioLimpio = String(precioRaw).replace(/[^\d.,-]/g, '').replace(',', '.');
+                let precioUsd = parseFloat(precioLimpio);
+                if (isNaN(precioUsd)) precioUsd = 0;
+
+                // Mapeo de precios por grupo (Caja/Bulto) y cantidades
+                let cantidadGrupRaw = item.cantidadGrup ?? item.CantidadGrup ?? item.cant_caja ?? 12;
+                let cantidadGrup = parseFloat(String(cantidadGrupRaw).replace(',', '.'));
+                if (isNaN(cantidadGrup)) cantidadGrup = 12;
+
+                let precioGrupRaw = item.precioVentGrupDiv ?? item.precio_mayor ?? item.precioVentGrup ?? (precioUsd * cantidadGrup);
+                let precioCajaNum = parseFloat(String(precioGrupRaw).replace(/[^\d.,-]/g, '').replace(',', '.'));
+                if (isNaN(precioCajaNum)) precioCajaNum = precioUsd * cantidadGrup;
 
                 // Mapeo ultra-seguro del Stock (asumimos 10 si la API no manda la propiedad para que no se oculten)
                 let stockRaw = item.existencia ?? item.Existencia ?? item.stock ?? item.Stock ?? item.cantidad ?? item.Cantidad;
                 let stock = parseFloat(stockRaw !== undefined && stockRaw !== null ? stockRaw : 10);
 
                 let nombre = item.nombre || item.Nombre || item.descripcion || item.Descripcion || "Producto sin nombre";
-                let codigo = item.codigo || item.Codigo || item.CodArticulo || item.codarticulo || item.cod_articulo || item.id || item.Id || "";
+                let codigo = item.codArticulo || item.codigo || item.Codigo || item.CodArticulo || item.codarticulo || item.cod_articulo || item.id || item.Id || "";
+
+                let medida = item.medida || item.Medida || "";
+                let unidadGrup = item.unidadGrup || item.UnidadGrup || "CAJA";
+                let unidadSimple = item.unidadSimple || item.UnidadSimple || "UNIDAD";
 
                 let codSubgrupo = (item.CodSubgrupo || item.codsubgrupo || item.Codsubgrupo || item.cod_subgrupo || item.cod_sub_grupo || item.id_subgrupo || item.id_sub_grupo || item.Cod_subgrupo || item.subgrupo || item.Subgrupo || item.subcategoria || item.Subcategoria || item.sub_grupo || "").toString().trim();
                 let nombreSubgrupo = item.desc_subgrupo || item.Desc_subgrupo || item.nombre_subgrupo || item.desc_sub_grupo || codSubgrupo;
@@ -331,12 +351,16 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
                     PrecioStr: precioUsd.toFixed(2),
                     PrecioNum: precioUsd,
                     PrecioBsStr: (precioUsd * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
-                    PrecioCajaUsd: (precioUsd * 12).toFixed(2),
-                    PrecioCajaNum: precioUsd * 12,
-                    PrecioCajaBsStr: ((precioUsd * 12) * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
+                    PrecioCajaUsd: precioCajaNum.toFixed(2),
+                    PrecioCajaNum: precioCajaNum,
+                    PrecioCajaBsStr: (precioCajaNum * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
                     StockNum: stock,
                     StockStr: stock > 0 ? stock.toString() : "0",
-                    TextoBusquedaLimpio: quitarAcentos(nombre) + " " + quitarAcentos(nombreGrupo) + " " + quitarAcentos(nombreSubgrupo)
+                    TextoBusquedaLimpio: quitarAcentos(nombre) + " " + quitarAcentos(nombreGrupo) + " " + quitarAcentos(nombreSubgrupo),
+                    CantidadGrup: cantidadGrup,
+                    Medida: medida,
+                    UnidadGrup: unidadGrup,
+                    UnidadSimple: unidadSimple
                 };
             }).filter(p => p.PrecioNum >= 0); // Permitimos precio 0 temporalmente para evitar que se oculten por fallos
 
@@ -406,13 +430,32 @@ async function cargarProductosPorSubgrupo(codGrupo, codSubgrupo, nombreGrupo, no
         let articulos = Array.isArray(data) ? data : (data.data || data.articulos || data.result || []);
 
         if (articulos.length > 0) {
+            // Imprime en la consola el primer producto tal cual como lo envía la API Foxdata
+            console.log(`📦 RAW Foxdata [Subgrupo: ${nombreSubgrupo}] - Muestra de producto:`, articulos[0]);
+
             let nuevosProductos = articulos.map(item => {
-                let precioRaw = item.precio ?? item.Precio ?? item.precio1 ?? item.Precio1 ?? item.precio_1 ?? item.precio_detal ?? item.monto ?? 0;
-                let precioUsd = parseFloat(precioRaw);
+                let precioRaw = item.precioVentDiv ?? item.precioVentDivisa ?? item.precio_divisa ?? item.precioVent ?? item.PrecioVent ?? item.precio_venta ?? item.precio ?? item.Precio ?? item.precio1 ?? item.Precio1 ?? item.precio_1 ?? item.precio_detal ?? item.monto ?? 0;
+
+                let precioLimpio = String(precioRaw).replace(/[^\d.,-]/g, '').replace(',', '.');
+                let precioUsd = parseFloat(precioLimpio);
+                if (isNaN(precioUsd)) precioUsd = 0;
+
+                let cantidadGrupRaw = item.cantidadGrup ?? item.CantidadGrup ?? item.cant_caja ?? 12;
+                let cantidadGrup = parseFloat(String(cantidadGrupRaw).replace(',', '.'));
+                if (isNaN(cantidadGrup)) cantidadGrup = 12;
+
+                let precioGrupRaw = item.precioVentGrupDiv ?? item.precio_mayor ?? item.precioVentGrup ?? (precioUsd * cantidadGrup);
+                let precioCajaNum = parseFloat(String(precioGrupRaw).replace(/[^\d.,-]/g, '').replace(',', '.'));
+                if (isNaN(precioCajaNum)) precioCajaNum = precioUsd * cantidadGrup;
+
                 let stockRaw = item.existencia ?? item.Existencia ?? item.stock ?? item.Stock ?? item.cantidad ?? item.Cantidad;
                 let stock = parseFloat(stockRaw !== undefined && stockRaw !== null ? stockRaw : 10);
                 let nombre = item.nombre || item.Nombre || item.descripcion || item.Descripcion || "Producto sin nombre";
-                let codigo = item.codigo || item.Codigo || item.CodArticulo || item.codarticulo || item.cod_articulo || item.id || item.Id || "";
+                let codigo = item.codArticulo || item.codigo || item.Codigo || item.CodArticulo || item.codarticulo || item.cod_articulo || item.id || item.Id || "";
+
+                let medida = item.medida || item.Medida || "";
+                let unidadGrup = item.unidadGrup || item.UnidadGrup || "CAJA";
+                let unidadSimple = item.unidadSimple || item.UnidadSimple || "UNIDAD";
 
                 // SubCatId siempre = codSubgrupo del parámetro (la API puede no devolverlo por artículo)
                 let codSubApi = (item.CodSubgrupo || item.codsubgrupo || item.Codsubgrupo || item.cod_subgrupo ||
@@ -429,10 +472,14 @@ async function cargarProductosPorSubgrupo(codGrupo, codSubgrupo, nombreGrupo, no
                     SubCat: limpiarCategoria(nombreSubFinal),
                     PrecioStr: precioUsd.toFixed(2), PrecioNum: precioUsd,
                     PrecioBsStr: (precioUsd * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
-                    PrecioCajaUsd: (precioUsd * 12).toFixed(2), PrecioCajaNum: precioUsd * 12,
-                    PrecioCajaBsStr: ((precioUsd * 12) * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
+                    PrecioCajaUsd: precioCajaNum.toFixed(2), PrecioCajaNum: precioCajaNum,
+                    PrecioCajaBsStr: (precioCajaNum * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
                     StockNum: stock, StockStr: stock > 0 ? stock.toString() : "0",
-                    TextoBusquedaLimpio: quitarAcentos(nombre) + " " + quitarAcentos(nombreGrupo) + " " + quitarAcentos(nombreSubFinal)
+                    TextoBusquedaLimpio: quitarAcentos(nombre) + " " + quitarAcentos(nombreGrupo) + " " + quitarAcentos(nombreSubFinal),
+                    CantidadGrup: cantidadGrup,
+                    Medida: medida,
+                    UnidadGrup: unidadGrup,
+                    UnidadSimple: unidadSimple
                 };
             }).filter(p => p.PrecioNum >= 0);
 
@@ -520,40 +567,42 @@ function aplicarFiltros() {
     const verAgotados = document.getElementById('chkAgotados')?.checked || false;
 
     // ── 1. Filtro de stock ────────────────────────────────────────────────────
-    let resultado = verAgotados ? inventario.slice() : inventario.filter(p => p.StockNum > 0);
+    let inventarioStock = verAgotados ? inventario.slice() : inventario.filter(p => p.StockNum > 0);
+    let resultado = inventarioStock.slice();
 
-    // ── 2. Filtro de categoría ────────────────────────────────────────────────
-    if (categoriaActual === 'Favoritos') {
-        resultado = resultado.filter(p => favoritos.includes(p.codigo));
-    } else if (categoriaActual !== 'Todos') {
-        resultado = resultado.filter(p =>
-            p.Cat === limpiarCategoria(categoriaActual) ||
-            compararIDs(p.CatId, categoriaActual)
-        );
-    }
+    // Solo aplicamos filtros de categoría si NO hay una búsqueda activa.
+    if (q.length === 0) {
+        // ── 2. Filtro de categoría ────────────────────────────────────────────────
+        if (categoriaActual === 'Favoritos') {
+            resultado = resultado.filter(p => favoritos.includes(p.codigo));
+        } else if (categoriaActual !== 'Todos') {
+            resultado = resultado.filter(p =>
+                p.Cat === limpiarCategoria(categoriaActual) ||
+                compararIDs(p.CatId, categoriaActual)
+            );
+        }
 
-    // ── 3. Filtro de subcategoría ─────────────────────────────────────────────
-    if (subcategoriaActual && categoriaActual !== 'Todos' && categoriaActual !== 'Favoritos') {
-        resultado = resultado.filter(p =>
-            compararIDs(p.SubCatId, subcategoriaActual) ||
-            p.SubCat === limpiarCategoria(subcategoriaActual) ||
-            limpiarCategoria(p.SubCat) === limpiarCategoria(subcategoriaActual)
-        );
+        // ── 3. Filtro de subcategoría ─────────────────────────────────────────────
+        if (subcategoriaActual && categoriaActual !== 'Todos' && categoriaActual !== 'Favoritos') {
+            resultado = resultado.filter(p =>
+                compararIDs(p.SubCatId, subcategoriaActual) ||
+                p.SubCat === limpiarCategoria(subcategoriaActual) ||
+                limpiarCategoria(p.SubCat) === limpiarCategoria(subcategoriaActual)
+            );
+        }
     }
 
     // ── 4. Búsqueda de texto — usa el índice invertido para mayor velocidad ───
     let resultadosFiltrados = resultado; // por si no hay query
 
     if (q.length > 0) {
-        // searchWithIndex trabaja sobre TODO el inventario (sin filtro previo de categoría)
-        // para que el usuario pueda encontrar productos de otros grupos escribiendo.
-        // Luego intersectamos con el resultado de categoría/stock.
-        const codigosCategoria = new Set(resultado.map(p => p.codigo));
+        // Hacemos que la búsqueda sea GLOBAL en el inventario que cumpla con el stock
+        const codigosStock = new Set(inventarioStock.map(p => p.codigo));
         const porIndice = searchWithIndex(q, inventario);
 
         resultadosFiltrados = [];
         porIndice.forEach(({ producto, score }) => {
-            if (codigosCategoria.has(producto.codigo)) {
+            if (codigosStock.has(producto.codigo)) {
                 producto.ScoreBusqueda = score;
                 resultadosFiltrados.push(producto);
             }

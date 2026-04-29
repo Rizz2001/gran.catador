@@ -54,6 +54,13 @@ function tokenizar(texto) {
     palabras.forEach(w => {
         tokens.add(w); // Palabra completa
         for (let i = 3; i < w.length; i++) tokens.add(w.slice(0, i)); // Prefijos
+
+        // Versión sin caracteres especiales (ej: "0.70L" o "0,70" -> "070l")
+        let alphaNum = w.replace(/[^a-z0-9]/g, '');
+        if (alphaNum !== w && alphaNum.length >= 2) {
+            tokens.add(alphaNum);
+            for (let i = 3; i < alphaNum.length; i++) tokens.add(alphaNum.slice(0, i));
+        }
     });
     return Array.from(tokens);
 }
@@ -70,11 +77,11 @@ function buildSearchIndex(lista) {
     const nuevoIndice = new Map();
     lista.forEach(p => {
         const texto = (p.TextoBusquedaLimpio || '') + ' ' +
-                      quitarAcentos(p.Cat || '') + ' ' +
-                      quitarAcentos(p.SubCat || '');
-        
+            quitarAcentos(p.Cat || '') + ' ' +
+            quitarAcentos(p.SubCat || '');
+
         const tokens = tokenizar(texto);
-        
+
         // Agregar siempre el código del producto para permitir escaneo con lectores de barras
         if (p.codigo) {
             tokens.push(quitarAcentos(p.codigo.toString().trim()));
@@ -139,7 +146,10 @@ function searchWithIndex(query, inventario) {
             if (!p) return;
             let score = 0;
             const nombreLimpio = quitarAcentos(p.Nombre);
-            const wordsNombre = nombreLimpio.split(/\s+/);
+            const wordsNombre = nombreLimpio.split(/\s+/).flatMap(w => {
+                let an = w.replace(/[^a-z0-9]/g, '');
+                return an !== w ? [w, an] : [w];
+            });
             const pCodigoLimpio = p.codigo ? quitarAcentos(p.codigo.toString().trim()) : "";
 
             terms.forEach(term => {
@@ -161,15 +171,27 @@ function searchWithIndex(query, inventario) {
 
         inventario.forEach(p => {
             const textoCompleto = (p.TextoBusquedaLimpio || '') + ' ' +
-                                  quitarAcentos(p.Cat || '') + ' ' +
-                                  quitarAcentos(p.SubCat || '');
-            const words = textoCompleto.split(/\s+/);
+                quitarAcentos(p.Cat || '') + ' ' +
+                quitarAcentos(p.SubCat || '');
+            const words = textoCompleto.split(/\s+/).flatMap(w => {
+                let an = w.replace(/[^a-z0-9]/g, '');
+                return an !== w ? [w, an] : [w];
+            });
             const nombreLimpio = quitarAcentos(p.Nombre);
-            const wordsNombre = nombreLimpio.split(/\s+/);
+            const wordsNombre = nombreLimpio.split(/\s+/).flatMap(w => {
+                let an = w.replace(/[^a-z0-9]/g, '');
+                return an !== w ? [w, an] : [w];
+            });
             let score = 0;
 
             const coincide = terms.every(term => {
-                if (term.length < 4) return false;
+                if (term.length < 4) {
+                    if (words.some(w => w === term || w.startsWith(term))) {
+                        score += 5;
+                        return true;
+                    }
+                    return false;
+                }
                 const maxDist = term.length >= 6 ? 2 : 1;
                 if (words.some(w => levenshtein(term, w) <= maxDist)) {
                     score += wordsNombre.some(w => levenshtein(term, w) <= maxDist) ? 15 : 5;

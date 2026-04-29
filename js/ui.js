@@ -672,11 +672,18 @@ function renderizarPagina() {
 
     if (productosFiltradosGlobal.length === 0) {
         if (paginaActual === 1) {
+            const queryRaw = (document.getElementById('buscador')?.value || '').trim();
+            let msjExtra = '';
+            if (queryRaw.length > 0 && categoriaActual !== 'Todos') {
+                msjExtra = `<br><span style="color: var(--color-primary); font-weight: 600; display: inline-block; margin-top: 10px; background: rgba(30,58,138,0.1); padding: 6px 12px; border-radius: 8px;"><i class="fa-solid fa-globe"></i> Se buscó en todo el catálogo</span>`;
+            }
+
             cont.innerHTML = `
-                <div style="grid-column: span 2; text-align: center; padding: 40px 20px; color: var(--texto-claro);">
+                <!-- grid-column: 1 / -1 permite que ocupe todo el ancho sea móvil o PC -->
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: var(--texto-claro);">
                     <i class="fa-solid fa-wine-bottle" style="font-size: 60px; opacity: 0.3; margin-bottom: 15px;"></i>
                     <h3 style="color: var(--texto-oscuro); font-size: 16px; font-weight: bold;">¿Aún no tienes sed?</h3>
-                    <p style="font-size: 13px; margin-top: 5px;">No encontramos botellas con esa descripción.</p>
+                    <p style="font-size: 13px; margin-top: 5px;">No encontramos botellas con esa descripción.${msjExtra}</p>
                     <button onclick="irInicio()" class="cat-btn active" style="margin: 20px auto 0 auto; padding: 10px 20px;">Ver todo el catálogo</button>
                 </div>`;
             document.getElementById('btn-cargar-mas').style.display = 'none';
@@ -686,6 +693,25 @@ function renderizarPagina() {
 
     // Usar DocumentFragment para evitar reflows intermedios
     const fragment = document.createDocumentFragment();
+
+    // --- INYECTAR AVISO VISUAL DE BÚSQUEDA GLOBAL ---
+    if (paginaActual === 1) {
+        const queryRaw = (document.getElementById('buscador')?.value || '').trim();
+        if (queryRaw.length > 0 && categoriaActual !== 'Todos' && categoriaActual !== 'Favoritos') {
+            const aviso = document.createElement('div');
+            aviso.style.gridColumn = '1 / -1'; // Ocupa todas las columnas del grid (Responsive)
+            aviso.style.padding = '10px 15px';
+            aviso.style.marginBottom = '15px';
+            aviso.style.backgroundColor = 'rgba(30, 58, 138, 0.08)';
+            aviso.style.color = 'var(--color-primary, #1E3A8A)';
+            aviso.style.borderRadius = 'var(--radius-md, 8px)';
+            aviso.style.fontSize = '12.5px';
+            aviso.style.fontWeight = '600';
+            aviso.innerHTML = `<i class="fa-solid fa-magnifying-glass-location" style="margin-right:6px;"></i> Mostrando resultados de todo el catálogo`;
+            fragment.appendChild(aviso);
+        }
+    }
+
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = pedazo.map(crearHTMLProducto).join('');
     while (tempDiv.firstChild) fragment.appendChild(tempDiv.firstChild);
