@@ -25,6 +25,26 @@ function compararIDs(id1, id2) {
     return false;
 }
 
+// Función universal y a prueba de errores para parsear números de Foxdata
+function parseFoxdataNumber(val) {
+    if (val == null || val === '') return 0;
+    if (typeof val === 'number') return val;
+    let s = String(val).trim();
+    // Detecta inteligentemente si usa formato "1.200,50" o "1,200.50"
+    if (s.includes(',') && s.includes('.')) {
+        let lastComma = s.lastIndexOf(',');
+        let lastDot = s.lastIndexOf('.');
+        if (lastComma > lastDot) {
+            s = s.replace(/\./g, '').replace(',', '.'); // 1.200,50 -> 1200.50
+        } else {
+            s = s.replace(/,/g, ''); // 1,200.50 -> 1200.50
+        }
+    }
+    else if (s.includes(',')) { s = s.replace(',', '.'); }
+    let n = parseFloat(s.replace(/[^\d.-]/g, ''));
+    return isNaN(n) ? 0 : n;
+}
+
 if (localStorage.getItem('gc_dark') === 'true') document.body.classList.add('dark-mode');
 
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(reg => { reg.update(); console.log("PWA Ok"); }).catch(err => console.log("SW Error", err)); }); }
@@ -304,46 +324,33 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
         let articulos = Array.isArray(data) ? data : (data.data || data.articulos || data.result || []);
 
         if (articulos.length > 0) {
-            // Imprime en la consola el primer producto tal cual como lo envía la API Foxdata
-            console.log(`📦 RAW Foxdata [Grupo: ${nombreGrupo}] - Muestra de producto:`, articulos[0]);
-
-            const parsePrecioExt = (val) => {
-                if (val == null) return 0;
-                let s = String(val).trim();
-                // Detecta inteligentemente si usa formato "1.200,50" o "15,50"
-                if (s.includes(',') && s.includes('.')) { let lc = s.lastIndexOf(','); let ld = s.lastIndexOf('.'); s = lc > ld ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, ''); }
-                else if (s.includes(',')) { s = s.replace(',', '.'); }
-                let n = parseFloat(s.replace(/[^\d.-]/g, ''));
-                return isNaN(n) ? 0 : n;
-            };
-
             let nuevosProductos = articulos.map(item => {
-                // Prioridad estricta solicitada: precioVentDiv para unidad (usando || para saltar vacíos o ceros erróneos)
-                let precioRaw = item.precioVentDiv || item.PrecioVentDiv || item.precioVentDivisa || item.precio_divisa || item.precioVent || item.PrecioVent || item.precio_venta || item.precio || item.Precio || item.precio1 || item.Precio1 || item.precio_1 || item.precio_detal || item.monto || 0;
-                let precioUsd = parsePrecioExt(precioRaw);
+                // Extracción de precios USD estrictos
+                let precioRaw = item.precioVentDiv ?? item.PrecioVentDiv ?? 0;
+                let precioUsd = parseFoxdataNumber(precioRaw);
 
-                // Prioridad estricta solicitada: precioVentGrupDiv para Caja/Bulto
-                let cantidadGrupRaw = item.cantidadGrup || item.CantidadGrup || item.cant_caja || 12;
-                let cantidadGrup = parsePrecioExt(cantidadGrupRaw);
+                // Extracción de cantidad para el cálculo de respaldo
+                let cantidadGrupRaw = item.cantidadGrup ?? item.CantidadGrup ?? item.cant_caja ?? 12;
+                let cantidadGrup = parseFoxdataNumber(cantidadGrupRaw);
                 if (cantidadGrup <= 0) cantidadGrup = 12;
 
-                let precioGrupRaw = item.precioVentGrupDiv || item.PrecioVentGrupDiv || item.precio_mayor || item.precioVentGrup || (precioUsd * cantidadGrup);
-                let precioCajaNum = parsePrecioExt(precioGrupRaw);
+                let precioGrupRaw = item.precioVentGrupDiv ?? item.PrecioVentGrupDiv ?? (precioUsd * cantidadGrup);
+                let precioCajaNum = parseFoxdataNumber(precioGrupRaw);
                 if (precioCajaNum <= 0) precioCajaNum = precioUsd * cantidadGrup;
 
                 // Mapeo ultra-seguro del Stock (asumimos 10 si la API no manda la propiedad para que no se oculten)
                 let stockRaw = item.existencia ?? item.Existencia ?? item.stock ?? item.Stock ?? item.cantidad ?? item.Cantidad;
                 let stock = parseFloat(stockRaw !== undefined && stockRaw !== null ? stockRaw : 10);
 
-                let nombre = item.nombre || item.Nombre || item.descripcion || item.Descripcion || "Producto sin nombre";
-                let codigo = item.codArticulo || item.codigo || item.Codigo || item.CodArticulo || item.codarticulo || item.cod_articulo || item.id || item.Id || "";
+                let nombre = item.nombre ?? item.Nombre ?? item.descripcion ?? item.Descripcion ?? "Producto sin nombre";
+                let codigo = item.codArticulo ?? item.codigo ?? item.Codigo ?? item.CodArticulo ?? item.cod_articulo ?? item.id ?? item.Id ?? "";
 
-                let medida = item.medida || item.Medida || "";
-                let unidadGrup = item.unidadGrup || item.UnidadGrup || "CAJA";
-                let unidadSimple = item.unidadSimple || item.UnidadSimple || "UNIDAD";
+                let medida = item.medida ?? item.Medida ?? "";
+                let unidadGrup = item.unidadGrup ?? item.UnidadGrup ?? "CAJA";
+                let unidadSimple = item.unidadSimple ?? item.UnidadSimple ?? "UNIDAD";
 
-                let codSubgrupo = (item.CodSubgrupo || item.codsubgrupo || item.Codsubgrupo || item.cod_subgrupo || item.cod_sub_grupo || item.id_subgrupo || item.id_sub_grupo || item.Cod_subgrupo || item.subgrupo || item.Subgrupo || item.subcategoria || item.Subcategoria || item.sub_grupo || "").toString().trim();
-                let nombreSubgrupo = item.desc_subgrupo || item.Desc_subgrupo || item.nombre_subgrupo || item.desc_sub_grupo || codSubgrupo;
+                let codSubgrupo = (item.codSubgrupo ?? item.CodSubgrupo ?? item.codsubgrupo ?? item.cod_subgrupo ?? item.id_subgrupo ?? item.subgrupo ?? item.subcategoria ?? "").toString().trim();
+                let nombreSubgrupo = item.desc_subgrupo ?? item.Desc_subgrupo ?? item.nombre_subgrupo ?? codSubgrupo;
 
                 if (appState.siempreDisponibles && appState.siempreDisponibles.includes(codigo)) stock = 999;
 
@@ -436,38 +443,32 @@ async function cargarProductosPorSubgrupo(codGrupo, codSubgrupo, nombreGrupo, no
         let articulos = Array.isArray(data) ? data : (data.data || data.articulos || data.result || []);
 
         if (articulos.length > 0) {
-            // Imprime en la consola el primer producto tal cual como lo envía la API Foxdata
-            console.log(`📦 RAW Foxdata [Subgrupo: ${nombreSubgrupo}] - Muestra de producto:`, articulos[0]);
-
             let nuevosProductos = articulos.map(item => {
-                let precioRaw = item.precioVentDiv ?? item.precioVentDivisa ?? item.precio_divisa ?? item.precioVent ?? item.PrecioVent ?? item.precio_venta ?? item.precio ?? item.Precio ?? item.precio1 ?? item.Precio1 ?? item.precio_1 ?? item.precio_detal ?? item.monto ?? 0;
+                // Extracción de precios USD estrictos
+                let precioRaw = item.precioVentDiv ?? item.PrecioVentDiv ?? 0;
+                let precioUsd = parseFoxdataNumber(precioRaw);
 
-                let precioLimpio = String(precioRaw).replace(/[^\d.,-]/g, '').replace(',', '.');
-                let precioUsd = parseFloat(precioLimpio);
-                if (isNaN(precioUsd)) precioUsd = 0;
-
+                // Extracción de cantidad para el cálculo de respaldo
                 let cantidadGrupRaw = item.cantidadGrup ?? item.CantidadGrup ?? item.cant_caja ?? 12;
-                let cantidadGrup = parseFloat(String(cantidadGrupRaw).replace(',', '.'));
-                if (isNaN(cantidadGrup)) cantidadGrup = 12;
+                let cantidadGrup = parseFoxdataNumber(cantidadGrupRaw);
+                if (cantidadGrup <= 0) cantidadGrup = 12;
 
-                let precioGrupRaw = item.precioVentGrupDiv ?? item.precio_mayor ?? item.precioVentGrup ?? (precioUsd * cantidadGrup);
-                let precioCajaNum = parseFloat(String(precioGrupRaw).replace(/[^\d.,-]/g, '').replace(',', '.'));
-                if (isNaN(precioCajaNum)) precioCajaNum = precioUsd * cantidadGrup;
+                let precioGrupRaw = item.precioVentGrupDiv ?? item.PrecioVentGrupDiv ?? (precioUsd * cantidadGrup);
+                let precioCajaNum = parseFoxdataNumber(precioGrupRaw);
+                if (precioCajaNum <= 0) precioCajaNum = precioUsd * cantidadGrup;
 
                 let stockRaw = item.existencia ?? item.Existencia ?? item.stock ?? item.Stock ?? item.cantidad ?? item.Cantidad;
                 let stock = parseFloat(stockRaw !== undefined && stockRaw !== null ? stockRaw : 10);
-                let nombre = item.nombre || item.Nombre || item.descripcion || item.Descripcion || "Producto sin nombre";
-                let codigo = item.codArticulo || item.codigo || item.Codigo || item.CodArticulo || item.codarticulo || item.cod_articulo || item.id || item.Id || "";
+                let nombre = item.nombre ?? item.Nombre ?? item.descripcion ?? item.Descripcion ?? "Producto sin nombre";
+                let codigo = item.codArticulo ?? item.codigo ?? item.Codigo ?? item.CodArticulo ?? item.cod_articulo ?? item.id ?? item.Id ?? "";
 
-                let medida = item.medida || item.Medida || "";
-                let unidadGrup = item.unidadGrup || item.UnidadGrup || "CAJA";
-                let unidadSimple = item.unidadSimple || item.UnidadSimple || "UNIDAD";
+                let medida = item.medida ?? item.Medida ?? "";
+                let unidadGrup = item.unidadGrup ?? item.UnidadGrup ?? "CAJA";
+                let unidadSimple = item.unidadSimple ?? item.UnidadSimple ?? "UNIDAD";
 
-                // SubCatId siempre = codSubgrupo del parámetro (la API puede no devolverlo por artículo)
-                let codSubApi = (item.CodSubgrupo || item.codsubgrupo || item.Codsubgrupo || item.cod_subgrupo ||
-                    item.cod_sub_grupo || item.id_subgrupo || item.Cod_subgrupo || "").toString().trim();
+                let codSubApi = (item.codSubgrupo ?? item.CodSubgrupo ?? item.codsubgrupo ?? item.cod_subgrupo ?? item.id_subgrupo ?? "").toString().trim();
                 let subCatIdFinal = codSubApi || codSubgrupo;
-                let nombreSubFinal = item.desc_subgrupo || item.Desc_subgrupo || item.nombre_subgrupo || nombreSubgrupo;
+                let nombreSubFinal = item.desc_subgrupo ?? item.Desc_subgrupo ?? item.nombre_subgrupo ?? nombreSubgrupo;
 
                 if (appState.siempreDisponibles && appState.siempreDisponibles.includes(codigo)) stock = 999;
 
@@ -632,6 +633,47 @@ function aplicarFiltros() {
     paginaActual = 1;
     renderizarPagina();
 }
+
+// --- EXPORTAR TOMA DE INVENTARIO (CSV) ---
+window.descargarInventarioCSV = function () {
+    if (!inventario || inventario.length === 0) {
+        if (typeof mostrarToast === 'function') mostrarToast("⚠️ El inventario aún no ha cargado.");
+        return;
+    }
+
+    // Agregamos el BOM (\uFEFF) para que Excel lea los acentos correctamente en UTF-8
+    let csvContent = "\uFEFF";
+    csvContent += "Código;Nombre;Categoría;SubCategoría;Stock;Empaque Simple;Empaque Grupo;Unds por Grupo;Precio Unidad USD;Precio Grupo USD\n";
+
+    inventario.forEach(p => {
+        let row = [
+            p.codigo,
+            `"${p.Nombre.replace(/"/g, '""')}"`, // Escapamos comillas dobles
+            `"${p.Cat}"`,
+            `"${p.SubCat}"`,
+            p.StockNum,
+            `"${p.UnidadSimple}"`,
+            `"${p.UnidadGrup}"`,
+            p.CantidadGrup,
+            p.PrecioNum,
+            p.PrecioCajaNum
+        ].join(";"); // Usamos punto y coma (;) porque Excel en español lo separa mejor así
+        csvContent += row + "\n";
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    const fecha = new Date().toLocaleDateString('es-VE').replace(/\//g, '-');
+    link.setAttribute("download", `Toma_Inventario_GC_${fecha}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    if (typeof mostrarToast === 'function') mostrarToast("📦 Archivo CSV descargado.");
+};
 
 // --- INICIO DE LA APLICACIÓN ---
 cargarInventario();
