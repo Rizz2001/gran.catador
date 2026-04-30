@@ -549,7 +549,8 @@ function limpiarCacheAdmin() {
             let carpeta = getCategoriaFolder(p.Cat);
             const div = document.createElement('div');
             div.className = 'suggestion-item';
-            div.innerHTML = `<img src="assets/img/${carpeta}/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)"><span>${p.Nombre}</span>`;
+            let imgSrc = p.ImagenUrl ? p.ImagenUrl : `assets/img/${carpeta}/${p.codigo}/1.webp`;
+            div.innerHTML = `<img src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)"><span>${p.Nombre}</span>`;
             div.onclick = () => {
                 document.getElementById('buscador').value = p.Nombre;
                 // Mostrar/ocultar el ícono ×
@@ -599,7 +600,8 @@ function limpiarCacheAdmin() {
 
         // OPTIMIZACIÓN DE RENDIMIENTO: Solo cargamos la foto 1 en la cuadrícula.
         // Las otras 5 fotos se buscarán automáticamente solo cuando el cliente abra los detalles.
-        let galeriasHTML = `<img loading="lazy" src="assets/img/${carpeta}/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; object-fit: contain;">`;
+        let imgSrc = p.ImagenUrl ? p.ImagenUrl : `assets/img/${carpeta}/${p.codigo}/1.webp`;
+        let galeriasHTML = `<img loading="lazy" src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; object-fit: contain;">`;
 
         return `
         <div class="producto-card ${isAgotado ? 'agotado' : ''}">
@@ -628,7 +630,7 @@ function limpiarCacheAdmin() {
                     <span class="product-price-bs" style="font-size: 13px;">${precioBsDin} Bs</span>
                 </div>
                 
-            <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" aria-label="Agregar ${p.Nombre} al carrito" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${carpeta}/${p.codigo}/1.webp', ${esModoCaja})"`}>
+            <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" aria-label="Agregar ${p.Nombre} al carrito" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja})"`}>
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
@@ -670,15 +672,17 @@ function limpiarCacheAdmin() {
         let imgContainer = document.getElementById('detalle-img-container');
         let galeriasHTML = '';
         for (let i = 1; i <= 6; i++) {
-            galeriasHTML += `<img loading="lazy" src="assets/img/${carpeta}/${p.codigo}/${i}.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="${i}" data-attempts="0" onerror="imgFallbackFolder(this)" alt="Vista ${i}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain; ${i > 1 ? 'display: none;' : ''}" onload="this.style.display='block'">`;
+            let imgUrl = (i === 1 && p.ImagenUrl) ? p.ImagenUrl : `assets/img/${carpeta}/${p.codigo}/${i}.webp`;
+            galeriasHTML += `<img loading="lazy" src="${imgUrl}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="${i}" data-attempts="0" onerror="imgFallbackFolder(this)" alt="Vista ${i}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain; ${i > 1 ? 'display: none;' : ''}" onload="this.style.display='block'">`;
         }
         imgContainer.innerHTML = galeriasHTML;
 
         let btnContainer = document.getElementById('detalle-btn-add');
+        let imgSrc = p.ImagenUrl ? p.ImagenUrl : `assets/img/${carpeta}/${p.codigo}/1.webp`;
         if (p.StockNum <= 0) {
             btnContainer.innerHTML = `<button class="btn-enviar" style="background: var(--color-border); color: var(--color-text-muted); cursor: not-allowed;" disabled>Agotado</button>`;
         } else {
-            btnContainer.innerHTML = `<button class="btn-enviar" onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${carpeta}/${p.codigo}/1.webp', ${esModoCaja}); document.getElementById('modal-producto').style.display='none';" style="background: var(--color-primary);"><i class="fa-solid fa-cart-shopping"></i> Agregar al carrito</button>`;
+            btnContainer.innerHTML = `<button class="btn-enviar" onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja}); document.getElementById('modal-producto').style.display='none';" style="background: var(--color-primary);"><i class="fa-solid fa-cart-shopping"></i> Agregar al carrito</button>`;
         }
 
         let descContainer = document.getElementById('detalle-descripcion');

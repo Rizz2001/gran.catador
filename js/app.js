@@ -325,8 +325,8 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
 
         if (articulos.length > 0) {
             let nuevosProductos = articulos.map(item => {
-                // Extracción de precios USD estrictos
-                let precioRaw = item.precioVentDiv ?? item.PrecioVentDiv ?? 0;
+                // Extracción de precios USD estrictos (Usando precio 5 según lo solicitado)
+                let precioRaw = item.precioVentDiv5 ?? item.precioVentDiv ?? item.PrecioVentDiv ?? 0;
                 let precioUsd = parseFoxdataNumber(precioRaw);
 
                 // Extracción de cantidad para el cálculo de respaldo
@@ -334,7 +334,7 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
                 let cantidadGrup = parseFoxdataNumber(cantidadGrupRaw);
                 if (cantidadGrup <= 0) cantidadGrup = 12;
 
-                let precioGrupRaw = item.precioVentGrupDiv ?? item.PrecioVentGrupDiv ?? (precioUsd * cantidadGrup);
+                let precioGrupRaw = item.precioVentGrupDiv5 ?? item.precioVentGrupDiv ?? item.PrecioVentGrupDiv ?? (precioUsd * cantidadGrup);
                 let precioCajaNum = parseFoxdataNumber(precioGrupRaw);
                 if (precioCajaNum <= 0) precioCajaNum = precioUsd * cantidadGrup;
 
@@ -344,6 +344,8 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
 
                 let nombre = item.nombre ?? item.Nombre ?? item.descripcion ?? item.Descripcion ?? "Producto sin nombre";
                 let codigo = item.codArticulo ?? item.codigo ?? item.Codigo ?? item.CodArticulo ?? item.cod_articulo ?? item.id ?? item.Id ?? "";
+                
+                let imagenUrl = item.imagenUrl ?? item.ImagenUrl ?? null;
 
                 let medida = item.medida ?? item.Medida ?? "";
                 let unidadGrup = item.unidadGrup ?? item.UnidadGrup ?? "CAJA";
@@ -373,7 +375,8 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
                     CantidadGrup: cantidadGrup,
                     Medida: medida,
                     UnidadGrup: unidadGrup,
-                    UnidadSimple: unidadSimple
+                    UnidadSimple: unidadSimple,
+                    ImagenUrl: imagenUrl
                 };
             }).filter(p => p.PrecioNum >= 0); // Permitimos precio 0 temporalmente para evitar que se oculten por fallos
 
@@ -444,8 +447,8 @@ async function cargarProductosPorSubgrupo(codGrupo, codSubgrupo, nombreGrupo, no
 
         if (articulos.length > 0) {
             let nuevosProductos = articulos.map(item => {
-                // Extracción de precios USD estrictos
-                let precioRaw = item.precioVentDiv ?? item.PrecioVentDiv ?? 0;
+                // Extracción de precios USD estrictos (Usando precio 5 según lo solicitado)
+                let precioRaw = item.precioVentDiv5 ?? item.precioVentDiv ?? item.PrecioVentDiv ?? 0;
                 let precioUsd = parseFoxdataNumber(precioRaw);
 
                 // Extracción de cantidad para el cálculo de respaldo
@@ -453,7 +456,7 @@ async function cargarProductosPorSubgrupo(codGrupo, codSubgrupo, nombreGrupo, no
                 let cantidadGrup = parseFoxdataNumber(cantidadGrupRaw);
                 if (cantidadGrup <= 0) cantidadGrup = 12;
 
-                let precioGrupRaw = item.precioVentGrupDiv ?? item.PrecioVentGrupDiv ?? (precioUsd * cantidadGrup);
+                let precioGrupRaw = item.precioVentGrupDiv5 ?? item.precioVentGrupDiv ?? item.PrecioVentGrupDiv ?? (precioUsd * cantidadGrup);
                 let precioCajaNum = parseFoxdataNumber(precioGrupRaw);
                 if (precioCajaNum <= 0) precioCajaNum = precioUsd * cantidadGrup;
 
@@ -461,6 +464,8 @@ async function cargarProductosPorSubgrupo(codGrupo, codSubgrupo, nombreGrupo, no
                 let stock = parseFloat(stockRaw !== undefined && stockRaw !== null ? stockRaw : 10);
                 let nombre = item.nombre ?? item.Nombre ?? item.descripcion ?? item.Descripcion ?? "Producto sin nombre";
                 let codigo = item.codArticulo ?? item.codigo ?? item.Codigo ?? item.CodArticulo ?? item.cod_articulo ?? item.id ?? item.Id ?? "";
+                
+                let imagenUrl = item.imagenUrl ?? item.ImagenUrl ?? null;
 
                 let medida = item.medida ?? item.Medida ?? "";
                 let unidadGrup = item.unidadGrup ?? item.UnidadGrup ?? "CAJA";
@@ -486,7 +491,8 @@ async function cargarProductosPorSubgrupo(codGrupo, codSubgrupo, nombreGrupo, no
                     CantidadGrup: cantidadGrup,
                     Medida: medida,
                     UnidadGrup: unidadGrup,
-                    UnidadSimple: unidadSimple
+                    UnidadSimple: unidadSimple,
+                    ImagenUrl: imagenUrl
                 };
             }).filter(p => p.PrecioNum >= 0);
 
