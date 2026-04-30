@@ -90,6 +90,17 @@ function setActiveNav(id) {
     if (el) el.classList.add('active');
 }
 
+/** Cierra uno o todos los modales y actualiza la navegación */
+function cerrarModal(modalId, navId) {
+    if (modalId === 'all') {
+        document.querySelectorAll('.modal-fullscreen').forEach(m => m.style.display = 'none');
+    } else {
+        let modal = document.getElementById(modalId);
+        if (modal) modal.style.display = 'none';
+    }
+    if (navId) setActiveNav(navId);
+}
+
 /** Restablece la vista al menú principal (Inicio) */
 function irInicio() {
     cerrarModal('all');
@@ -176,77 +187,81 @@ function abrirAjustes() {
     setActiveNav('nav-settings');
     document.getElementById('modal-ajustes').style.display = 'flex';
     document.getElementById('toggleDarkMode').checked = document.body.classList.contains('dark-mode');
-}
+
+    // Inyectar botón de toma de inventario si no existe en el modal
+    let modalCont = document.querySelector('#modal-ajustes .modal-content');
+    if (modalCont && !document.getElementById('btn-descargar-inv')) {
+        // CORRECCIÓN: Usamos un selector más genérico para encontrar el contenedor del contenido.
+        const modalCont = document.querySelector('#modal-ajustes > div');
+        if (modalCont && !document.getElementById('btn-descargar-inv') && typeof window.descargarInventarioCSV === 'function') {
+            let btn = document.createElement('button');
+            btn.id = 'btn-descargar-inv';
+            btn.className = 'btn-enviar';
+            btn.style.marginTop = '15px';
+            btn.style.backgroundColor = '#10b981'; // Color verde
+            btn.innerHTML = '<i class="fa-solid fa-file-csv"></i> Descargar Inventario Actual';
+            btn.onclick = window.descargarInventarioCSV;
+            modalCont.appendChild(btn);
+        }
+    }
+} // <-- ¡AQUÍ! Cierre correcto de la función abrirAjustes()
 
 function toggleDark() {
     document.body.classList.toggle('dark-mode');
     localStorage.setItem('gc_dark', document.body.classList.contains('dark-mode'));
 }
-function mostrarToast(msg) { const cont = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = msg; cont.appendChild(t); setTimeout(() => t.remove(), 2500); }
 
-// --- VISTAS Y CATEGORÍAS ---
-function cambiarModoVista(modo) { modoVistaGlobal = modo; document.getElementById('btn-modo-unidad').classList.remove('active'); document.getElementById('btn-modo-caja').classList.remove('active'); document.getElementById('btn-modo-' + modo).classList.add('active'); aplicarFiltros(); }
-function inyectarInterruptor() { let cont = document.querySelector('.tools-container'); if (cont && !document.getElementById('toggle-modo-global')) { let div = document.createElement('div'); div.id = 'toggle-modo-global'; div.className = 'toggle-modo-container'; div.innerHTML = `<div class="btn-modo active" id="btn-modo-unidad" onclick="cambiarModoVista('unidad')">🍾 Por Unidad</div><div class="btn-modo" id="btn-modo-caja" onclick="cambiarModoVista('caja')">📦 Por Caja</div>`; cont.insertBefore(div, cont.firstChild); } }
-
-function getIconForCategory(cat) {
-    if (!cat) return 'fa-box-open';
-    let c = cat.toUpperCase();
-    if (c.includes('INICIO') || c === 'TODOS') return 'fa-shop';
-    if (c.includes('FAVORITOS')) return 'fa-heart';
-    if (c.includes('LICOR')) return 'fa-martini-glass-citrus';
-    if (c.includes('CERVEZA')) return 'fa-beer-mug-empty';
-    if (c.includes('VINO')) return 'fa-wine-glass';
-    if (c.includes('RON')) return 'fa-bottle-droplet';
-    if (c.includes('WHISKY')) return 'fa-glass-water';
-    if (c.includes('VODKA') || c.includes('GINEBRA') || c.includes('ANIS') || c.includes('TEQUILA') || c.includes('COCUY')) return 'fa-wine-bottle';
-    if (c.includes('SNACK') || c.includes('CHUCHERIA')) return 'fa-cookie-bite';
-    if (c.includes('AGUA') || c.includes('BEBIDA') || c.includes('REFRESCO') || c.includes('JUGO')) return 'fa-bottle-water';
-    if (c.includes('HIELO')) return 'fa-cubes';
-    if (c.includes('CIGARRO') || c.includes('TABACO')) return 'fa-smoking';
-    return 'fa-box-open';
+/** Limpia la caché y recarga la página (Usado en el modal de Ajustes) */
+function limpiarCacheAdmin() {
+    localStorage.clear();
+    mostrarToast("Caché limpiada. Recargando...");
+    setTimeout(() => location.reload(), 1500);
 }
 
-function unificarBarrasCategorias() {
-    const cat = document.getElementById('contenedorCategorias');
-    const sub = document.getElementById('subcategoria-section-main');
+    function mostrarToast(msg) { const cont = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = msg; cont.appendChild(t); setTimeout(() => t.remove(), 2500); }
 
-    // Obtenemos el wrapper principal de la categoría (que contiene las flechas en index.html)
-    const catWrapper = cat ? cat.closest('.scroll-container-wrapper') : null;
+    // --- VISTAS Y CATEGORÍAS ---
+    function cambiarModoVista(modo) { modoVistaGlobal = modo; document.getElementById('btn-modo-unidad').classList.remove('active'); document.getElementById('btn-modo-caja').classList.remove('active'); document.getElementById('btn-modo-' + modo).classList.add('active'); aplicarFiltros(); }
+    function inyectarInterruptor() { let cont = document.querySelector('.tools-container'); if (cont && !document.getElementById('toggle-modo-global')) { let div = document.createElement('div'); div.id = 'toggle-modo-global'; div.className = 'toggle-modo-container'; div.innerHTML = `<div class="btn-modo active" id="btn-modo-unidad" onclick="cambiarModoVista('unidad')">🍾 Por Unidad</div><div class="btn-modo" id="btn-modo-caja" onclick="cambiarModoVista('caja')">📦 Por Caja</div>`; cont.insertBefore(div, cont.firstChild); } }
 
-    if (catWrapper && sub && !document.getElementById('categorias-wrapper-unified')) {
-        const wrapper = document.createElement('div');
-        wrapper.id = 'categorias-wrapper-unified';
-        wrapper.className = 'categorias-wrapper-unified';
-
-        // Insertamos la nueva caja maestra en el DOM
-        catWrapper.parentNode.insertBefore(wrapper, catWrapper);
-        // Movemos el wrapper de categorías y la sección de subcategorías adentro de la misma caja
-        wrapper.appendChild(catWrapper);
-        wrapper.appendChild(sub);
+    function getIconForCategory(cat) {
+        if (!cat) return 'fa-box-open';
+        let c = cat.toUpperCase();
+        if (c.includes('INICIO') || c === 'TODOS') return 'fa-shop';
+        if (c.includes('FAVORITOS')) return 'fa-heart';
+        if (c.includes('LICOR')) return 'fa-martini-glass-citrus';
+        if (c.includes('CERVEZA')) return 'fa-beer-mug-empty';
+        if (c.includes('VINO')) return 'fa-wine-glass';
+        if (c.includes('RON')) return 'fa-bottle-droplet';
+        if (c.includes('WHISKY')) return 'fa-glass-water';
+        if (c.includes('VODKA') || c.includes('GINEBRA') || c.includes('ANIS') || c.includes('TEQUILA') || c.includes('COCUY')) return 'fa-wine-bottle';
+        if (c.includes('SNACK') || c.includes('CHUCHERIA')) return 'fa-cookie-bite';
+        if (c.includes('AGUA') || c.includes('BEBIDA') || c.includes('REFRESCO') || c.includes('JUGO')) return 'fa-bottle-water';
+        if (c.includes('HIELO')) return 'fa-cubes';
+        if (c.includes('CIGARRO') || c.includes('TABACO')) return 'fa-smoking';
+        return 'fa-box-open';
     }
-}
 
-window.mostrarSkeletonCategorias = function () {
-    unificarBarrasCategorias();
-    const cont = document.getElementById('contenedorCategorias');
-    if (!cont) return;
-    cont.innerHTML = '';
-    // Anchos aleatorios para simular nombres de grupos de distintos tamaños
-    const widths = ['110px', '140px', '95px', '130px', '105px', '150px'];
-    for (let i = 0; i < 6; i++) {
-        let div = document.createElement('div');
-        div.className = 'skeleton-chip';
-        div.style.width = widths[i];
-        cont.appendChild(div);
+    window.mostrarSkeletonCategorias = function () {
+        const cont = document.getElementById('contenedorCategorias');
+        if (!cont) return;
+        cont.innerHTML = '';
+        // Anchos aleatorios para simular nombres de grupos de distintos tamaños
+        const widths = ['110px', '140px', '95px', '130px', '105px', '150px'];
+        for (let i = 0; i < 6; i++) {
+            let div = document.createElement('div');
+            div.className = 'skeleton-chip';
+            div.style.width = widths[i];
+            cont.appendChild(div);
+        }
     }
-}
 
-window.mostrarSkeletonProductos = function () {
-    const cont = document.getElementById('lista-productos');
-    if (!cont) return;
-    cont.innerHTML = '';
-    for (let i = 0; i < 8; i++) {
-        cont.innerHTML += `
+    window.mostrarSkeletonProductos = function () {
+        const cont = document.getElementById('lista-productos');
+        if (!cont) return;
+        cont.innerHTML = '';
+        for (let i = 0; i < 8; i++) {
+            cont.innerHTML += `
             <div class="producto-card" style="pointer-events:none; border: 1px solid var(--color-border); box-shadow: none;">
                 <div class="skeleton-box" style="width: 100%; height: 160px; border-radius: var(--radius-sm); margin-bottom: 12px;"></div>
                 <div class="skeleton-box" style="width: 85%; height: 16px; border-radius: 4px; margin-bottom: 8px;"></div>
@@ -256,309 +271,337 @@ window.mostrarSkeletonProductos = function () {
                     <div class="skeleton-box" style="width: 36px; height: 36px; border-radius: 50%;"></div>
                 </div>
             </div>`;
-    }
-}
-
-function generarCategorias() {
-    unificarBarrasCategorias();
-    const cont = document.getElementById('contenedorCategorias');
-    if (!cont) return;
-
-    cont.innerHTML = '';
-
-    // Botón Inicio
-    let btnInicio = document.createElement('button');
-    btnInicio.className = (categoriaActual === 'Todos') ? "cat-btn active" : "cat-btn";
-    btnInicio.innerHTML = `<i class="fa-solid fa-shop"></i><span>Inicio</span>`;
-    btnInicio.onclick = function () { irInicio(); };
-    cont.appendChild(btnInicio);
-
-    // Botón Favoritos
-    let btnFav = document.createElement('button');
-    btnFav.className = (categoriaActual === 'Favoritos') ? "cat-btn active" : "cat-btn";
-    btnFav.innerHTML = `<i class="fa-solid fa-heart" style="${categoriaActual !== 'Favoritos' ? 'color: #ff4757;' : ''}"></i><span>Favoritos</span>`;
-    btnFav.onclick = function () { filtrarCategoria('Favoritos', this); };
-    cont.appendChild(btnFav);
-
-    console.log("🛠️ Generando Grupos. Grupos API:", appState.gruposInventario?.length);
-
-    // Categorías de la API SmartVentas
-    if (appState.gruposInventario && appState.gruposInventario.length > 0) {
-        appState.gruposInventario.forEach(g => {
-            let nombre = g.Nombre || g.nombre || g.Descripcion || g.descripcion || g.NombreGrupo || g.desc_grupo || g.DescGrupo;
-            if (nombre) {
-                let b = document.createElement('button');
-                b.className = (limpiarCategoria(nombre) === limpiarCategoria(categoriaActual)) ? "cat-btn active" : "cat-btn";
-                b.innerHTML = `<i class="fa-solid ${getIconForCategory(nombre)}"></i><span>${nombre}</span>`;
-                b.onclick = function () { filtrarCategoria(nombre, this); };
-                cont.appendChild(b);
-            }
-        });
-    } else {
-        // Si no hay grupos, mostrar un mensaje de ayuda
-        let p = document.createElement('p');
-        p.style.fontSize = '11px'; p.style.color = 'gray'; p.style.padding = '10px';
-        p.innerText = 'No se encontraron grupos en la API.';
-        cont.appendChild(p);
+        }
     }
 
-    // Manejo de subcategorías y scroll
-    if (categoriaActual !== 'Todos' && categoriaActual !== 'Favoritos') {
-        cargarSubcategoriasAPI(categoriaActual);
-    } else {
+    function generarCategorias() {
+        const cont = document.getElementById('contenedorCategorias');
+        if (!cont) return;
+
+        cont.innerHTML = '';
+
+        // Botón Inicio
+        let btnInicio = document.createElement('button');
+        btnInicio.className = (categoriaActual === 'Todos') ? "cat-btn active" : "cat-btn";
+        btnInicio.innerHTML = `<i class="fa-solid fa-shop"></i><span>Inicio</span>`;
+        btnInicio.onclick = function () { irInicio(); };
+        cont.appendChild(btnInicio);
+
+        // Botón Favoritos
+        let btnFav = document.createElement('button');
+        btnFav.className = (categoriaActual === 'Favoritos') ? "cat-btn active" : "cat-btn";
+        btnFav.innerHTML = `<i class="fa-solid fa-heart" style="${categoriaActual !== 'Favoritos' ? 'color: #ff4757;' : ''}"></i><span>Favoritos</span>`;
+        btnFav.onclick = function () { filtrarCategoria('Favoritos', this); };
+        cont.appendChild(btnFav);
+
+        console.log("🛠️ Generando Grupos. Grupos API:", appState.gruposInventario?.length);
+
+        // Categorías de la API SmartVentas
+        if (appState.gruposInventario && appState.gruposInventario.length > 0) {
+            appState.gruposInventario.forEach(g => {
+                let nombre = g.Nombre || g.nombre || g.Descripcion || g.descripcion || g.NombreGrupo || g.desc_grupo || g.DescGrupo;
+                if (nombre) {
+                    let b = document.createElement('button');
+                    b.className = (limpiarCategoria(nombre) === limpiarCategoria(categoriaActual)) ? "cat-btn active" : "cat-btn";
+                    b.innerHTML = `<i class="fa-solid ${getIconForCategory(nombre)}"></i><span>${nombre}</span>`;
+                    b.onclick = function () { filtrarCategoria(nombre, this); };
+                    cont.appendChild(b);
+                }
+            });
+        } else {
+            // Si no hay grupos, mostrar un mensaje de ayuda
+            let p = document.createElement('p');
+            p.style.fontSize = '11px'; p.style.color = 'gray'; p.style.padding = '10px';
+            p.innerText = 'No se encontraron grupos en la API.';
+            cont.appendChild(p);
+        }
+
+        // Manejo de subcategorías y scroll
+        if (categoriaActual !== 'Todos' && categoriaActual !== 'Favoritos') {
+            cargarSubcategoriasAPI(categoriaActual);
+        } else {
+            let subcatSection = document.getElementById('subcategoria-section-main');
+            let subcatContainer = document.getElementById('contenedorSubcategorias');
+            if (subcatSection) subcatSection.style.display = 'none';
+            if (subcatContainer) subcatContainer.innerHTML = '';
+        }
+
+        setTimeout(() => {
+            let activeBtn = cont.querySelector('.active');
+            if (activeBtn) activeBtn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+            if (typeof actualizarFlechasScroll === 'function') actualizarFlechasScroll('contenedorCategorias');
+        }, 150);
+
+        // Añadir listener para el scroll interactivo de las flechas
+        if (!cont.hasAttribute('data-scroll-listener')) {
+            cont.addEventListener('scroll', () => { if (typeof actualizarFlechasScroll === 'function') actualizarFlechasScroll('contenedorCategorias'); });
+            window.addEventListener('resize', () => { if (typeof actualizarFlechasScroll === 'function') actualizarFlechasScroll('contenedorCategorias'); });
+            cont.setAttribute('data-scroll-listener', 'true');
+        }
+    }
+
+    async function cargarSubcategoriasAPI(nombreCategoria) {
         let subcatSection = document.getElementById('subcategoria-section-main');
         let subcatContainer = document.getElementById('contenedorSubcategorias');
-        if (subcatSection) subcatSection.style.display = 'none';
-        if (subcatContainer) subcatContainer.innerHTML = '';
-    }
+        if (!subcatSection || !subcatContainer) return;
 
-    setTimeout(() => {
-        let activeBtn = cont.querySelector('.active');
-        if (activeBtn) activeBtn.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-        if (typeof actualizarFlechasScroll === 'function') actualizarFlechasScroll('contenedorCategorias');
-    }, 150);
+        // Mostrar visualmente que está cargando
+        subcatSection.style.display = 'block';
+        subcatContainer.innerHTML = '<div style="padding: 10px 5px; font-size: 13px; color: var(--color-primary); font-weight: 600; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando subgrupos...</div>';
 
-    // Añadir listener para el scroll interactivo de las flechas
-    if (!cont.hasAttribute('data-scroll-listener')) {
-        cont.addEventListener('scroll', () => { if (typeof actualizarFlechasScroll === 'function') actualizarFlechasScroll('contenedorCategorias'); });
-        window.addEventListener('resize', () => { if (typeof actualizarFlechasScroll === 'function') actualizarFlechasScroll('contenedorCategorias'); });
-        cont.setAttribute('data-scroll-listener', 'true');
-    }
-}
-
-async function cargarSubcategoriasAPI(nombreCategoria) {
-    let subcatSection = document.getElementById('subcategoria-section-main');
-    let subcatContainer = document.getElementById('contenedorSubcategorias');
-    if (!subcatSection || !subcatContainer) return;
-
-    // Mostrar visualmente que está cargando
-    subcatSection.style.display = 'block';
-    subcatContainer.innerHTML = '<div style="padding: 10px 5px; font-size: 13px; color: var(--color-primary); font-weight: 600; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando subgrupos...</div>';
-
-    // Buscar el código del grupo de forma segura
-    let grupo = null;
-    if (appState.gruposInventario) {
-        grupo = appState.gruposInventario.find(g => {
-            let nom = g.Nombre || g.nombre || g.descripcion || g.Descripcion || g.NombreGrupo || g.DescGrupo || g.desc_grupo || "";
-            return limpiarCategoria(nom) === limpiarCategoria(nombreCategoria);
-        });
-    }
-
-    let codGrupo = grupo ? (grupo.CodGrupo || grupo.codigo || grupo.id || grupo.Codigo || grupo.Id || grupo.grupo || grupo.Grupo || grupo.id_grupo || "").toString().trim() : "";
-    let subcategorias = [];
-
-    // 1. Intentar obtener de la API de Foxdata
-    if (codGrupo) {
-        try {
-            console.log(`📡 Consultando API para subgrupos del grupo: ${nombreCategoria} (ID: ${codGrupo})`);
-            const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy'
-                : isLocalhost ? 'https://gran-catador.pages.dev/api/proxy'
-                    : 'functions/api/proxy.php';
-            const res = await fetch(`${proxyBaseUrl}?endpoint=gruposinvsub/grupo/${encodeURIComponent(codGrupo)}`);
-            if (res.ok) {
-                const data = await res.json();
-                console.log(`✔️ Respuesta API Subgrupos:`, data);
-                subcategorias = Array.isArray(data) ? data : (data.data || data.result || []);
-            }
-        } catch (e) {
-            console.warn("⚠️ Falló la API de subgrupos, usando analizador local.", e);
-        }
-    }
-
-    // 2. ANALIZADOR DE RESPALDO: Analizar el inventario local si la API no devuelve nada
-    if (subcategorias.length === 0) {
-        console.log(`🪄 Analizando productos locales para extraer subgrupos de: ${nombreCategoria}`);
-        let productosDelGrupo = inventario.filter(p => p.Cat === limpiarCategoria(nombreCategoria) || (codGrupo !== "" && p.CatId === codGrupo));
-
-        let mapaSubcats = new Map();
-        productosDelGrupo.forEach(p => {
-            let nomSub = (p.SubCat || "").trim();
-            if (nomSub && nomSub.toUpperCase() !== 'OTROS') {
-                let idSub = (p.SubCatId || nomSub).toString().trim();
-                mapaSubcats.set(idSub, nomSub); // Guardar usando el ID para no duplicar
-            }
-        });
-
-        mapaSubcats.forEach((nombreSub, idSub) => {
-            subcategorias.push({ codigo: idSub, nombre: nombreSub });
-        });
-
-        console.log("🔍 Subgrupos detectados por el analizador:", subcategorias);
-    }
-
-    // 3. Renderizar en la pantalla
-    if (subcategorias.length > 0) {
-        // --- LÓGICA DE RESCATE AUTOMÁTICO ---
-        // Si SmartVentas devolvió 0 productos para el grupo principal, los extraemos forzosamente de los subgrupos.
-        let prodsGrupo = inventario.filter(p => p.CatId === codGrupo || p.Cat === limpiarCategoria(nombreCategoria));
-        if (prodsGrupo.length === 0) {
-            console.log(`⚠️ Grupo vacío. Rescatando productos automáticamente a través de sus ${subcategorias.length} subgrupos...`);
-            let promesas = subcategorias.map(sub => {
-                let nombreSub = sub.nombre || sub.descripcion || sub.Nombre || sub.desc_subgrupo || "Subgrupo";
-                let codSub = (sub.CodSubgrupo || sub.codsubgrupo || sub.Codsubgrupo || sub.cod_subgrupo || sub.cod_sub_grupo || sub.id_subgrupo || sub.id_sub_grupo || sub.Cod_subgrupo || sub.codigo || sub.id || sub.subgrupo || sub.Subgrupo || limpiarCategoria(nombreSub)).toString().trim();
-                if (codSub) return cargarProductosPorSubgrupo(codGrupo, codSub, nombreCategoria, nombreSub);
-            });
-
-            Promise.all(promesas).then(() => {
-                if (codGrupo && !appState.gruposCargados.includes(codGrupo)) appState.gruposCargados.push(codGrupo);
-                if (!subcategoriaActual && categoriaActual === nombreCategoria) aplicarFiltros(); // Refresca "Todos" mágicamente
+        // Buscar el código del grupo de forma segura
+        let grupo = null;
+        if (appState.gruposInventario) {
+            grupo = appState.gruposInventario.find(g => {
+                let nom = g.Nombre || g.nombre || g.descripcion || g.Descripcion || g.NombreGrupo || g.DescGrupo || g.desc_grupo || "";
+                return limpiarCategoria(nom) === limpiarCategoria(nombreCategoria);
             });
         }
 
-        subcatContainer.innerHTML = '';
+        let codGrupo = grupo ? (grupo.CodGrupo || grupo.codigo || grupo.id || grupo.Codigo || grupo.Id || grupo.grupo || grupo.Grupo || grupo.id_grupo || "").toString().trim() : "";
+        let subcategorias = [];
 
-        let btnLimpiar = document.createElement('button');
-        btnLimpiar.className = (!subcategoriaActual) ? "subcat-btn active" : "subcat-btn";
-        btnLimpiar.innerHTML = '<i class="fa-solid fa-list"></i><span>Todos</span>';
-        btnLimpiar.onclick = function () {
-            subcategoriaActual = null;
-            Array.from(subcatContainer.children).forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
+        // 1. Intentar obtener de la API de Foxdata
+        if (codGrupo) {
+            try {
+                console.log(`📡 Consultando API para subgrupos del grupo: ${nombreCategoria} (ID: ${codGrupo})`);
+                const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy'
+                    : isLocalhost ? 'https://gran-catador.pages.dev/api/proxy'
+                        : 'functions/api/proxy.php';
+                const res = await fetch(`${proxyBaseUrl}?endpoint=gruposinvsub/grupo/${encodeURIComponent(codGrupo)}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    console.log(`✔️ Respuesta API Subgrupos:`, data);
+                    subcategorias = Array.isArray(data) ? data : (data.data || data.result || []);
+                }
+            } catch (e) {
+                console.warn("⚠️ Falló la API de subgrupos, usando analizador local.", e);
+            }
+        }
 
-            // Si el usuario presiona "Todos" mientras ocurre el rescate, le mostramos el esqueleto de carga
-            let prods = inventario.filter(p => p.CatId === codGrupo || p.Cat === limpiarCategoria(nombreCategoria));
-            if (prods.length === 0) {
-                if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();
+        // 2. ANALIZADOR DE RESPALDO: Analizar el inventario local si la API no devuelve nada
+        if (subcategorias.length === 0) {
+            console.log(`🪄 Analizando productos locales para extraer subgrupos de: ${nombreCategoria}`);
+            let productosDelGrupo = inventario.filter(p => p.Cat === limpiarCategoria(nombreCategoria) || (codGrupo !== "" && p.CatId === codGrupo));
+
+            let mapaSubcats = new Map();
+            productosDelGrupo.forEach(p => {
+                let nomSub = (p.SubCat || "").trim();
+                if (nomSub && nomSub.toUpperCase() !== 'OTROS') {
+                    let idSub = (p.SubCatId || nomSub).toString().trim();
+                    mapaSubcats.set(idSub, nomSub); // Guardar usando el ID para no duplicar
+                }
+            });
+
+            mapaSubcats.forEach((nombreSub, idSub) => {
+                subcategorias.push({ codigo: idSub, nombre: nombreSub });
+            });
+
+            console.log("🔍 Subgrupos detectados por el analizador:", subcategorias);
+        }
+
+        // 3. Renderizar en la pantalla
+        if (subcategorias.length > 0) {
+            // --- LÓGICA DE RESCATE AUTOMÁTICO ---
+            // Si SmartVentas devolvió 0 productos para el grupo principal, los extraemos forzosamente de los subgrupos.
+            let prodsGrupo = inventario.filter(p => p.CatId === codGrupo || p.Cat === limpiarCategoria(nombreCategoria));
+            if (prodsGrupo.length === 0) {
+                console.log(`⚠️ Grupo vacío. Rescatando productos automáticamente a través de sus ${subcategorias.length} subgrupos...`);
+                let promesas = subcategorias.map(sub => {
+                    let nombreSub = sub.nombre || sub.descripcion || sub.Nombre || sub.desc_subgrupo || "Subgrupo";
+                    let codSub = (sub.CodSubgrupo || sub.codsubgrupo || sub.Codsubgrupo || sub.cod_subgrupo || sub.cod_sub_grupo || sub.id_subgrupo || sub.id_sub_grupo || sub.Cod_subgrupo || sub.codigo || sub.id || sub.subgrupo || sub.Subgrupo || limpiarCategoria(nombreSub)).toString().trim();
+                    if (codSub) return cargarProductosPorSubgrupo(codGrupo, codSub, nombreCategoria, nombreSub);
+                });
+
+                Promise.all(promesas).then(() => {
+                    if (codGrupo && !appState.gruposCargados.includes(codGrupo)) appState.gruposCargados.push(codGrupo);
+                    if (!subcategoriaActual && categoriaActual === nombreCategoria) aplicarFiltros(); // Refresca "Todos" mágicamente
+                });
             }
 
-            aplicarFiltros();
-        };
-        subcatContainer.appendChild(btnLimpiar);
+            subcatContainer.innerHTML = '';
 
-        subcategorias.forEach(sub => {
-            let nombreSub = sub.nombre || sub.descripcion || sub.Nombre || sub.desc_subgrupo || "Subgrupo";
-            let codSub = (sub.CodSubgrupo || sub.codsubgrupo || sub.Codsubgrupo || sub.cod_subgrupo || sub.cod_sub_grupo || sub.id_subgrupo || sub.id_sub_grupo || sub.Cod_subgrupo || sub.codigo || sub.id || sub.subgrupo || sub.Subgrupo || limpiarCategoria(nombreSub)).toString().trim();
-
-            // Formatear Nombre (Capitalizar primera letra: "Whisky" en vez de "WHISKY")
-            let nombreMostrado = nombreSub.charAt(0).toUpperCase() + nombreSub.slice(1).toLowerCase();
-
-            let btn = document.createElement('button');
-            btn.className = (codSub === subcategoriaActual || limpiarCategoria(nombreSub) === subcategoriaActual) ? "subcat-btn active" : "subcat-btn";
-            btn.innerHTML = `<span>${nombreMostrado}</span>`;
-            btn.onclick = async function () {
-                subcategoriaActual = codSub;
+            let btnLimpiar = document.createElement('button');
+            btnLimpiar.className = (!subcategoriaActual) ? "subcat-btn active" : "subcat-btn";
+            btnLimpiar.innerHTML = '<i class="fa-solid fa-list"></i><span>Todos</span>';
+            btnLimpiar.onclick = function () {
+                subcategoriaActual = null;
                 Array.from(subcatContainer.children).forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
 
-                // Siempre llamamos a la API con ?codSubgrupo= para que los productos
-                // queden etiquetados con su SubCatId correcto antes de filtrar.
-                if (codGrupo && codSub) {
+                // Si el usuario presiona "Todos" mientras ocurre el rescate, le mostramos el esqueleto de carga
+                let prods = inventario.filter(p => p.CatId === codGrupo || p.Cat === limpiarCategoria(nombreCategoria));
+                if (prods.length === 0) {
                     if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();
-                    if (typeof cargarProductosPorSubgrupo === 'function') {
-                        await cargarProductosPorSubgrupo(codGrupo, codSub, nombreCategoria, nombreSub);
-                    }
                 }
 
                 aplicarFiltros();
             };
-            subcatContainer.appendChild(btn);
-        });
+            subcatContainer.appendChild(btnLimpiar);
 
-        subcatSection.style.display = 'block';
-        subcatContainer.scrollLeft = 0;
+            subcategorias.forEach(sub => {
+                let nombreSub = sub.nombre || sub.descripcion || sub.Nombre || sub.desc_subgrupo || "Subgrupo";
+                let codSub = (sub.CodSubgrupo || sub.codsubgrupo || sub.Codsubgrupo || sub.cod_subgrupo || sub.cod_sub_grupo || sub.id_subgrupo || sub.id_sub_grupo || sub.Cod_subgrupo || sub.codigo || sub.id || sub.subgrupo || sub.Subgrupo || limpiarCategoria(nombreSub)).toString().trim();
 
-        setTimeout(() => {
-            if (typeof actualizarFlechasScroll === 'function') actualizarFlechasScroll('contenedorSubcategorias');
-        }, 150);
+                // Formatear Nombre (Capitalizar primera letra: "Whisky" en vez de "WHISKY")
+                let nombreMostrado = nombreSub.charAt(0).toUpperCase() + nombreSub.slice(1).toLowerCase();
 
-        if (!subcatContainer.hasAttribute('data-scroll-listener')) {
-            subcatContainer.addEventListener('scroll', () => { if (typeof actualizarFlechasScroll === 'function') actualizarFlechasScroll('contenedorSubcategorias'); });
-            window.addEventListener('resize', () => { if (typeof actualizarFlechasScroll === 'function') actualizarFlechasScroll('contenedorSubcategorias'); });
-            subcatContainer.setAttribute('data-scroll-listener', 'true');
+                let btn = document.createElement('button');
+                btn.className = (codSub === subcategoriaActual || limpiarCategoria(nombreSub) === subcategoriaActual) ? "subcat-btn active" : "subcat-btn";
+                btn.innerHTML = `<span>${nombreMostrado}</span>`;
+                btn.onclick = async function () {
+                    subcategoriaActual = codSub;
+                    Array.from(subcatContainer.children).forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Siempre llamamos a la API con ?codSubgrupo= para que los productos
+                    // queden etiquetados con su SubCatId correcto antes de filtrar.
+                    if (codGrupo && codSub) {
+                        if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();
+                        if (typeof cargarProductosPorSubgrupo === 'function') {
+                            await cargarProductosPorSubgrupo(codGrupo, codSub, nombreCategoria, nombreSub);
+                        }
+                    }
+
+                    aplicarFiltros();
+                };
+                subcatContainer.appendChild(btn);
+            });
+
+            subcatSection.style.display = 'block';
+            subcatContainer.scrollLeft = 0;
+
+            setTimeout(() => {
+                if (typeof actualizarFlechasScroll === 'function') actualizarFlechasScroll('contenedorSubcategorias');
+            }, 150);
+
+            if (!subcatContainer.hasAttribute('data-scroll-listener')) {
+                subcatContainer.addEventListener('scroll', () => { if (typeof actualizarFlechasScroll === 'function') actualizarFlechasScroll('contenedorSubcategorias'); });
+                window.addEventListener('resize', () => { if (typeof actualizarFlechasScroll === 'function') actualizarFlechasScroll('contenedorSubcategorias'); });
+                subcatContainer.setAttribute('data-scroll-listener', 'true');
+            }
+        } else {
+            subcatSection.style.display = 'none';
+            subcatContainer.innerHTML = '';
+            console.warn(`❌ El grupo "${nombreCategoria}" no tiene subgrupos asignados en la base de datos.`);
         }
-    } else {
-        subcatSection.style.display = 'none';
-        subcatContainer.innerHTML = '';
-        console.warn(`❌ El grupo "${nombreCategoria}" no tiene subgrupos asignados en la base de datos.`);
     }
-}
 
-async function filtrarCategoria(cat, btn) {
-    categoriaActual = cat; subcategoriaActual = null;
-    let subcatSection = document.getElementById('subcategoria-section-main');
-    let subcatContainer = document.getElementById('contenedorSubcategorias');
-    if (subcatSection) subcatSection.style.display = 'none';
-    if (subcatContainer) subcatContainer.innerHTML = '';
+    async function filtrarCategoria(cat, btn) {
+        categoriaActual = cat; subcategoriaActual = null;
+        let subcatSection = document.getElementById('subcategoria-section-main');
+        let subcatContainer = document.getElementById('contenedorSubcategorias');
+        if (subcatSection) subcatSection.style.display = 'none';
+        if (subcatContainer) subcatContainer.innerHTML = '';
 
-    document.querySelectorAll('#contenedorCategorias .cat-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
+        document.querySelectorAll('#contenedorCategorias .cat-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
 
-    let mTitle = document.getElementById('mobile-header-title');
-    if (mTitle) mTitle.innerText = (cat === 'Todos') ? 'Inicio' : cat;
+        let mTitle = document.getElementById('mobile-header-title');
+        if (mTitle) mTitle.innerText = (cat === 'Todos') ? 'Inicio' : cat;
 
-    // --- LAZY LOADING: Asegurarnos de que el grupo seleccionado ya esté descargado ---
-    if (cat !== 'Todos' && cat !== 'Favoritos' && appState.gruposInventario) {
-        let grupoMatch = appState.gruposInventario.find(g => {
-            let nom = g.Nombre || g.nombre || g.Descripcion || g.descripcion || g.NombreGrupo || g.desc_grupo || g.DescGrupo || "Grupo";
-            return limpiarCategoria(nom) === limpiarCategoria(cat);
-        });
-        if (grupoMatch) {
-            let codGrupo = (grupoMatch.CodGrupo || grupoMatch.codigo || grupoMatch.id || grupoMatch.Codigo || grupoMatch.Id || grupoMatch.id_grupo || grupoMatch.cod_grupo || grupoMatch.grupo || grupoMatch.Grupo || "").toString().trim();
-            let nombreGrupo = grupoMatch.Nombre || grupoMatch.nombre || grupoMatch.Descripcion || grupoMatch.descripcion || grupoMatch.NombreGrupo || grupoMatch.desc_grupo || grupoMatch.DescGrupo || "Grupo";
+        // --- LAZY LOADING: Asegurarnos de que el grupo seleccionado ya esté descargado ---
+        if (cat !== 'Todos' && cat !== 'Favoritos' && appState.gruposInventario) {
+            let grupoMatch = appState.gruposInventario.find(g => {
+                let nom = g.Nombre || g.nombre || g.Descripcion || g.descripcion || g.NombreGrupo || g.desc_grupo || g.DescGrupo || "Grupo";
+                return limpiarCategoria(nom) === limpiarCategoria(cat);
+            });
+            if (grupoMatch) {
+                let codGrupo = (grupoMatch.CodGrupo || grupoMatch.codigo || grupoMatch.id || grupoMatch.Codigo || grupoMatch.Id || grupoMatch.id_grupo || grupoMatch.cod_grupo || grupoMatch.grupo || grupoMatch.Grupo || "").toString().trim();
+                let nombreGrupo = grupoMatch.Nombre || grupoMatch.nombre || grupoMatch.Descripcion || grupoMatch.descripcion || grupoMatch.NombreGrupo || grupoMatch.desc_grupo || grupoMatch.DescGrupo || "Grupo";
 
-            if (appState.gruposCargados && !appState.gruposCargados.includes(codGrupo)) {
-                if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();
-                // Forzamos la descarga en este momento si no se había descargado en segundo plano aún
-                await cargarProductosPorGrupo(codGrupo, nombreGrupo);
+                if (appState.gruposCargados && !appState.gruposCargados.includes(codGrupo)) {
+                    if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();
+                    // Forzamos la descarga en este momento si no se había descargado en segundo plano aún
+                    await cargarProductosPorGrupo(codGrupo, nombreGrupo);
+                }
             }
         }
+
+        aplicarFiltros();
+
+        if (cat !== 'Todos' && cat !== 'Favoritos') {
+            cargarSubcategoriasAPI(cat);
+        }
     }
+    function toggleCategorias() { const panel = document.getElementById('categoria-panel'); const overlay = document.getElementById('categoria-overlay'); if (!panel || !overlay) return; const isOpen = panel.classList.toggle('open'); overlay.style.display = isOpen ? 'block' : 'none'; }
+    function closeCategorias() { const panel = document.getElementById('categoria-panel'); const overlay = document.getElementById('categoria-overlay'); if (panel) panel.classList.remove('open'); if (overlay) overlay.style.display = 'none'; }
 
-    aplicarFiltros();
+    // --- SUGERENCIAS E INTERACCIONES ---
+    /**
+     * Muestra el panel de sugerencias usando resultados ya calculados por aplicarFiltros.
+     * No hace una segunda pasada al inventario.
+     * @param {string} q - Query normalizado
+     * @param {Array} resultados - Productos ya filtrados y ordenados por score
+     */
+    function mostrarSugerencias(q, resultados) {
+        const cont = document.getElementById('search-suggestions');
+        if (!cont) return;
 
-    if (cat !== 'Todos' && cat !== 'Favoritos') {
-        cargarSubcategoriasAPI(cat);
+        // Tomamos solo los primeros 6 con stock para las sugerencias
+        const sugerencias = resultados.filter(p => p.StockNum > 0).slice(0, 6);
+
+        if (sugerencias.length === 0) { cerrarSugerencias(); return; }
+
+        cont.innerHTML = '';
+        sugerencias.forEach(p => {
+            let carpeta = getCategoriaFolder(p.Cat);
+            const div = document.createElement('div');
+            div.className = 'suggestion-item';
+            div.innerHTML = `<img src="assets/img/${carpeta}/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)"><span>${p.Nombre}</span>`;
+            div.onclick = () => {
+                document.getElementById('buscador').value = p.Nombre;
+                // Mostrar/ocultar el ícono ×
+                const clearBtn = document.getElementById('clear-search');
+                if (clearBtn) clearBtn.style.display = 'flex';
+                cerrarSugerencias();
+                aplicarFiltros();
+            };
+            cont.appendChild(div);
+        });
+        cont.style.display = 'block';
     }
-}
-function toggleCategorias() { const panel = document.getElementById('categoria-panel'); const overlay = document.getElementById('categoria-overlay'); if (!panel || !overlay) return; const isOpen = panel.classList.toggle('open'); overlay.style.display = isOpen ? 'block' : 'none'; }
-function closeCategorias() { const panel = document.getElementById('categoria-panel'); const overlay = document.getElementById('categoria-overlay'); if (panel) panel.classList.remove('open'); if (overlay) overlay.style.display = 'none'; }
+    function cerrarSugerencias() { const cont = document.getElementById('search-suggestions'); if (cont) cont.style.display = 'none'; }
+    document.addEventListener('click', (e) => { if (!e.target.closest('.search-pill') && !e.target.closest('.search-container')) cerrarSugerencias(); });
+    function toggleFav(codigo) { let index = favoritos.indexOf(codigo); if (index === -1) { favoritos.push(codigo); mostrarToast("Agregado a favoritos ❤️"); } else { favoritos.splice(index, 1); } localStorage.setItem('gc_favs', JSON.stringify(favoritos)); aplicarFiltros(); }
+    function compartirProducto(nombre, precio) { const text = `¡Mira esta bebida! ${nombre} a solo $${precio}. ${window.location.href}`; if (navigator.share) { navigator.share({ title: 'Gran Catador', text, url: window.location.href }).catch(e => console.log(e)); return; } if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(() => mostrarToast("Texto copiado al portapapeles."), () => fallbackCopyText(text)); return; } fallbackCopyText(text); }
+    function fallbackCopyText(text) { const textarea = document.createElement('textarea'); textarea.value = text; textarea.style.position = 'fixed'; textarea.style.opacity = '0'; document.body.appendChild(textarea); textarea.focus(); textarea.select(); try { document.execCommand('copy'); mostrarToast("Texto copiado al portapapeles."); } catch (e) { mostrarToast("No se pudo copiar al portapapeles."); } document.body.removeChild(textarea); }
+    function compartirProductoB64(b64, p) { compartirProducto(decodificarNombre(b64), p); }
 
-// --- SUGERENCIAS E INTERACCIONES ---
-function mostrarSugerencias(q) {
-    let qLimpio = quitarAcentos(q); let terminos = qLimpio.split(' ').filter(t => t.length > 0).map(procesarTermino);
-    let coincidencias = inventario.filter(p => {
-        if (p.StockNum <= 0) return false;
-        let textoCompleto = p.TextoBusquedaLimpio; let words = textoCompleto.split(' ');
-        let coincide = terminos.every(term => { if (textoCompleto.includes(term)) return true; if (term.length >= 4) return words.some(w => levenshtein(term, w) <= (term.length >= 6 ? 2 : 1)); return false; });
-        if (coincide) { let nLimpio = quitarAcentos(p.Nombre); let wNombre = nLimpio.split(' '); p.TempScore = 0; terminos.forEach(t => { if (wNombre.includes(t)) p.TempScore += 50; else if (nLimpio.includes(t)) p.TempScore += 25; else p.TempScore += 10; }); } return coincide;
-    });
-    coincidencias.sort((a, b) => b.TempScore - a.TempScore); coincidencias = coincidencias.slice(0, 5);
-    const cont = document.getElementById('search-suggestions');
-    if (coincidencias.length === 0) { cerrarSugerencias(); aplicarFiltros(); return; }
-    cont.innerHTML = '';
-    coincidencias.forEach(p => { let carpeta = getCategoriaFolder(p.Cat); const div = document.createElement('div'); div.className = 'suggestion-item'; div.innerHTML = `<img src="assets/img/${carpeta}/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)"><span>${p.Nombre}</span>`; div.onclick = () => { document.getElementById('buscador').value = p.Nombre; cerrarSugerencias(); aplicarFiltros(); }; cont.appendChild(div); });
-    cont.style.display = 'block'; aplicarFiltros();
-}
-function cerrarSugerencias() { document.getElementById('search-suggestions').style.display = 'none'; }
-document.addEventListener('click', (e) => { if (!e.target.closest('.search-container')) cerrarSugerencias(); });
-function toggleFav(codigo) { let index = favoritos.indexOf(codigo); if (index === -1) { favoritos.push(codigo); mostrarToast("Agregado a favoritos ❤️"); } else { favoritos.splice(index, 1); } localStorage.setItem('gc_favs', JSON.stringify(favoritos)); aplicarFiltros(); }
-function compartirProducto(nombre, precio) { const text = `¡Mira esta bebida! ${nombre} a solo $${precio}. ${window.location.href}`; if (navigator.share) { navigator.share({ title: 'Gran Catador', text, url: window.location.href }).catch(e => console.log(e)); return; } if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(() => mostrarToast("Texto copiado al portapapeles."), () => fallbackCopyText(text)); return; } fallbackCopyText(text); }
-function fallbackCopyText(text) { const textarea = document.createElement('textarea'); textarea.value = text; textarea.style.position = 'fixed'; textarea.style.opacity = '0'; document.body.appendChild(textarea); textarea.focus(); textarea.select(); try { document.execCommand('copy'); mostrarToast("Texto copiado al portapapeles."); } catch (e) { mostrarToast("No se pudo copiar al portapapeles."); } document.body.removeChild(textarea); }
-function compartirProductoB64(b64, p) { compartirProducto(decodificarNombre(b64), p); }
+    // --- RENDERIZADO DE PRODUCTOS (Fase 5: Mejora de Rendimiento) ---
+    function crearHTMLProducto(p) {
+        const isFav = favoritos.includes(p.codigo);
+        const isAgotado = p.StockNum <= 0;
+        const nombreB64 = codificarNombre(p.Nombre);
 
-// --- RENDERIZADO DE PRODUCTOS (Fase 5: Mejora de Rendimiento) ---
-function crearHTMLProducto(p) {
-    const isFav = favoritos.includes(p.codigo);
-    const isAgotado = p.StockNum <= 0;
-    const nombreB64 = codificarNombre(p.Nombre);
+        const esModoCaja = (modoVistaGlobal === 'caja');
+        const precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;
+        const precioBsDin = esModoCaja ? p.PrecioCajaBsStr : p.PrecioBsStr;
+        const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
+        const carpeta = getCategoriaFolder(p.Cat);
 
-    const esModoCaja = (modoVistaGlobal === 'caja');
-    const precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;
-    const precioBsDin = esModoCaja ? p.PrecioCajaBsStr : p.PrecioBsStr;
-    const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
-    const carpeta = getCategoriaFolder(p.Cat);
+        // --- LÓGICA DINÁMICA DE TEXTO DE UNIDAD ---
+        let textoUnidad = '';
+        if (esModoCaja) {
+            let undGrup = p.UnidadGrup ? p.UnidadGrup.toUpperCase() : 'CAJA';
+            let cant = p.CantidadGrup || 12;
+            textoUnidad = `POR ${undGrup} (x${cant})`;
+        } else {
+            let undSimp = p.UnidadSimple ? p.UnidadSimple.toUpperCase() : 'UNIDAD';
+            textoUnidad = `POR ${undSimp}`;
+        }
 
-    let badgeHTML = '';
-    if (isAgotado) {
-        badgeHTML = `<div class="product-badge badge-agotado">AGOTADO</div>`;
-    }
+        let badgeHTML = '';
+        if (isAgotado) {
+            badgeHTML = `<div class="product-badge badge-agotado">AGOTADO</div>`;
+        }
 
-    // OPTIMIZACIÓN DE RENDIMIENTO: Solo cargamos la foto 1 en la cuadrícula.
-    // Las otras 5 fotos se buscarán automáticamente solo cuando el cliente abra los detalles.
-    let galeriasHTML = `<img loading="lazy" src="assets/img/${carpeta}/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; object-fit: contain;">`;
+        // OPTIMIZACIÓN DE RENDIMIENTO: Solo cargamos la foto 1 en la cuadrícula.
+        // Las otras 5 fotos se buscarán automáticamente solo cuando el cliente abra los detalles.
+        let galeriasHTML = `<img loading="lazy" src="assets/img/${carpeta}/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; object-fit: contain;">`;
 
-    return `
+        return `
         <div class="producto-card ${isAgotado ? 'agotado' : ''}">
             
             ${badgeHTML}
@@ -580,6 +623,7 @@ function crearHTMLProducto(p) {
             
             <div class="product-bottom">
                 <div class="product-price-container">
+                    <span style="font-size: 10px; color: var(--color-primary); font-weight: 800; letter-spacing: 0.5px; margin-bottom: -2px; display: block;">${textoUnidad}</span>
                     <span class="product-price" style="font-size: 22px; font-weight: 900; line-height: 1.1;">$${precioUsdDin}</span>
                     <span class="product-price-bs" style="font-size: 13px;">${precioBsDin} Bs</span>
                 </div>
@@ -590,153 +634,181 @@ function crearHTMLProducto(p) {
             </div>
         </div>
     `;
-}
+    }
 
-async function abrirDetalleProducto(codigo) {
-    let p = inventario.find(x => x.codigo === codigo);
-    if (!p) return;
+    async function abrirDetalleProducto(codigo) {
+        let p = inventario.find(x => x.codigo === codigo);
+        if (!p) return;
 
-    const carpeta = getCategoriaFolder(p.Cat);
-    const esModoCaja = (modoVistaGlobal === 'caja');
-    const precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;
-    const precioBsDin = esModoCaja ? p.PrecioCajaBsStr : p.PrecioBsStr;
-    const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
-    const nombreB64 = codificarNombre(p.Nombre);
+        const carpeta = getCategoriaFolder(p.Cat);
+        const esModoCaja = (modoVistaGlobal === 'caja');
+        const precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;
+        const precioBsDin = esModoCaja ? p.PrecioCajaBsStr : p.PrecioBsStr;
+        const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
+        const nombreB64 = codificarNombre(p.Nombre);
 
-    document.getElementById('detalle-titulo').innerText = p.Nombre;
-    document.getElementById('detalle-precio-usd').innerText = `$${precioUsdDin}`;
-    document.getElementById('detalle-precio-bs').innerText = `${precioBsDin} Bs`;
+        document.getElementById('detalle-titulo').innerText = p.Nombre;
+        document.getElementById('detalle-precio-usd').innerText = `$${precioUsdDin}`;
+        document.getElementById('detalle-precio-bs').innerText = `${precioBsDin} Bs`;
 
-    let btnShare = document.getElementById('detalle-btn-share');
-    if (btnShare) btnShare.onclick = () => compartirProducto(p.Nombre, precioUsdDin);
+        let btnShare = document.getElementById('detalle-btn-share');
+        if (btnShare) btnShare.onclick = () => compartirProducto(p.Nombre, precioUsdDin);
 
-    let stockBadge = document.getElementById('detalle-stock');
-    if (p.StockNum <= 0) {
-        stockBadge.innerText = "AGOTADO"; stockBadge.style.background = "rgba(234, 67, 53, 0.1)"; stockBadge.style.color = "#ea4335";
-    } else {
-        let stockText = (p.StockStr || '').toString().toLowerCase() === 'disponible' ? 'Stock Disponible' : `${p.StockNum} und disponibles`;
-        stockBadge.innerText = stockText;
-        if (p.StockNum > 0 && p.StockNum <= 5 && (p.StockStr || '').toString().toLowerCase() !== 'disponible') {
-            stockBadge.style.background = "rgba(234, 67, 53, 0.1)"; stockBadge.style.color = "#ea4335";
+        let stockBadge = document.getElementById('detalle-stock');
+        if (p.StockNum <= 0) {
+            stockBadge.innerText = "AGOTADO"; stockBadge.style.background = "rgba(234, 67, 53, 0.1)"; stockBadge.style.color = "#ea4335";
         } else {
-            stockBadge.style.background = "rgba(37, 211, 102, 0.1)"; stockBadge.style.color = "#25D366";
+            let stockText = (p.StockStr || '').toString().toLowerCase() === 'disponible' ? 'Stock Disponible' : `${p.StockNum} und disponibles`;
+            stockBadge.innerText = stockText;
+            if (p.StockNum > 0 && p.StockNum <= 5 && (p.StockStr || '').toString().toLowerCase() !== 'disponible') {
+                stockBadge.style.background = "rgba(234, 67, 53, 0.1)"; stockBadge.style.color = "#ea4335";
+            } else {
+                stockBadge.style.background = "rgba(37, 211, 102, 0.1)"; stockBadge.style.color = "#25D366";
+            }
         }
+
+        let imgContainer = document.getElementById('detalle-img-container');
+        let galeriasHTML = '';
+        for (let i = 1; i <= 6; i++) {
+            galeriasHTML += `<img loading="lazy" src="assets/img/${carpeta}/${p.codigo}/${i}.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="${i}" data-attempts="0" onerror="imgFallbackFolder(this)" alt="Vista ${i}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain; ${i > 1 ? 'display: none;' : ''}" onload="this.style.display='block'">`;
+        }
+        imgContainer.innerHTML = galeriasHTML;
+
+        let btnContainer = document.getElementById('detalle-btn-add');
+        if (p.StockNum <= 0) {
+            btnContainer.innerHTML = `<button class="btn-enviar" style="background: var(--color-border); color: var(--color-text-muted); cursor: not-allowed;" disabled>Agotado</button>`;
+        } else {
+            btnContainer.innerHTML = `<button class="btn-enviar" onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${carpeta}/${p.codigo}/1.webp', ${esModoCaja}); document.getElementById('modal-producto').style.display='none';" style="background: var(--color-primary);"><i class="fa-solid fa-cart-shopping"></i> Agregar al carrito</button>`;
+        }
+
+        let descContainer = document.getElementById('detalle-descripcion');
+        descContainer.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Buscando información...';
+        document.getElementById('modal-producto').style.display = 'flex';
+
+        try {
+            let res = await fetch(`assets/img/${carpeta}/${p.codigo}/desc.txt`);
+            if (res.ok) { let text = await res.text(); descContainer.innerText = text; } else { descContainer.innerText = "Sin descripción adicional."; }
+        } catch (e) { descContainer.innerText = "Sin descripción adicional."; }
     }
 
-    let imgContainer = document.getElementById('detalle-img-container');
-    let galeriasHTML = '';
-    for (let i = 1; i <= 6; i++) {
-        galeriasHTML += `<img loading="lazy" src="assets/img/${carpeta}/${p.codigo}/${i}.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="${i}" data-attempts="0" onerror="imgFallbackFolder(this)" alt="Vista ${i}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain; ${i > 1 ? 'display: none;' : ''}" onload="this.style.display='block'">`;
-    }
-    imgContainer.innerHTML = galeriasHTML;
+    function renderizarPagina() {
+        const cont = document.getElementById('lista-productos');
+        if (paginaActual === 1) cont.innerHTML = '';
 
-    let btnContainer = document.getElementById('detalle-btn-add');
-    if (p.StockNum <= 0) {
-        btnContainer.innerHTML = `<button class="btn-enviar" style="background: var(--color-border); color: var(--color-text-muted); cursor: not-allowed;" disabled>Agotado</button>`;
-    } else {
-        btnContainer.innerHTML = `<button class="btn-enviar" onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, 'assets/img/${carpeta}/${p.codigo}/1.webp', ${esModoCaja}); document.getElementById('modal-producto').style.display='none';" style="background: var(--color-primary);"><i class="fa-solid fa-cart-shopping"></i> Agregar al carrito</button>`;
-    }
+        const inicio = (paginaActual - 1) * itemsPorPagina;
+        const fin = paginaActual * itemsPorPagina;
+        const pedazo = productosFiltradosGlobal.slice(inicio, fin);
 
-    let descContainer = document.getElementById('detalle-descripcion');
-    descContainer.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Buscando información...';
-    document.getElementById('modal-producto').style.display = 'flex';
+        if (productosFiltradosGlobal.length === 0) {
+            if (paginaActual === 1) {
+                const queryRaw = (document.getElementById('buscador')?.value || '').trim();
+                let msjExtra = '';
+                if (queryRaw.length > 0 && categoriaActual !== 'Todos') {
+                    msjExtra = `<br><span style="color: var(--color-primary); font-weight: 600; display: inline-block; margin-top: 10px; background: rgba(30,58,138,0.1); padding: 6px 12px; border-radius: 8px;"><i class="fa-solid fa-globe"></i> Se buscó en todo el catálogo</span>`;
+                }
 
-    try {
-        let res = await fetch(`assets/img/${carpeta}/${p.codigo}/desc.txt`);
-        if (res.ok) { let text = await res.text(); descContainer.innerText = text; } else { descContainer.innerText = "Sin descripción adicional."; }
-    } catch (e) { descContainer.innerText = "Sin descripción adicional."; }
-}
-
-function renderizarPagina() {
-    const cont = document.getElementById('lista-productos');
-    if (paginaActual === 1) cont.innerHTML = '';
-
-    let inicio = (paginaActual - 1) * itemsPorPagina, fin = paginaActual * itemsPorPagina;
-    let pedazo = productosFiltradosGlobal.slice(inicio, fin);
-
-    if (productosFiltradosGlobal.length === 0) {
-        if (paginaActual === 1) {
-            cont.innerHTML = `
-                <div style="grid-column: span 2; text-align: center; padding: 40px 20px; color: var(--texto-claro);">
+                cont.innerHTML = `
+                <!-- grid-column: 1 / -1 permite que ocupe todo el ancho sea móvil o PC -->
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: var(--texto-claro);">
                     <i class="fa-solid fa-wine-bottle" style="font-size: 60px; opacity: 0.3; margin-bottom: 15px;"></i>
                     <h3 style="color: var(--texto-oscuro); font-size: 16px; font-weight: bold;">¿Aún no tienes sed?</h3>
-                    <p style="font-size: 13px; margin-top: 5px;">No encontramos botellas con esa descripción.</p>
+                    <p style="font-size: 13px; margin-top: 5px;">No encontramos botellas con esa descripción.${msjExtra}</p>
                     <button onclick="irInicio()" class="cat-btn active" style="margin: 20px auto 0 auto; padding: 10px 20px;">Ver todo el catálogo</button>
                 </div>`;
-            document.getElementById('btn-cargar-mas').style.display = 'none';
+                document.getElementById('btn-cargar-mas').style.display = 'none';
+            }
+            return;
         }
-        return;
+
+        // Usar DocumentFragment para evitar reflows intermedios
+        const fragment = document.createDocumentFragment();
+
+        // --- INYECTAR AVISO VISUAL DE BÚSQUEDA GLOBAL ---
+        if (paginaActual === 1) {
+            const queryRaw = (document.getElementById('buscador')?.value || '').trim();
+            if (queryRaw.length > 0 && categoriaActual !== 'Todos' && categoriaActual !== 'Favoritos') {
+                const aviso = document.createElement('div');
+                aviso.style.gridColumn = '1 / -1'; // Ocupa todas las columnas del grid (Responsive)
+                aviso.style.padding = '10px 15px';
+                aviso.style.marginBottom = '15px';
+                aviso.style.backgroundColor = 'rgba(30, 58, 138, 0.08)';
+                aviso.style.color = 'var(--color-primary, #1E3A8A)';
+                aviso.style.borderRadius = 'var(--radius-md, 8px)';
+                aviso.style.fontSize = '12.5px';
+                aviso.style.fontWeight = '600';
+                aviso.innerHTML = `<i class="fa-solid fa-magnifying-glass-location" style="margin-right:6px;"></i> Mostrando resultados de todo el catálogo`;
+                fragment.appendChild(aviso);
+            }
+        }
+
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = pedazo.map(crearHTMLProducto).join('');
+        while (tempDiv.firstChild) fragment.appendChild(tempDiv.firstChild);
+        cont.appendChild(fragment);
+
+        document.getElementById('btn-cargar-mas').style.display =
+            fin < productosFiltradosGlobal.length ? 'block' : 'none';
     }
 
-    const html = pedazo.map(crearHTMLProducto).join('');
-    cont.insertAdjacentHTML('beforeend', html);
-
-    if (fin < productosFiltradosGlobal.length) {
-        document.getElementById('btn-cargar-mas').style.display = 'block';
-    } else {
-        document.getElementById('btn-cargar-mas').style.display = 'none';
+    function cargarMasProductos() {
+        paginaActual++;
+        renderizarPagina();
     }
-}
 
-function cargarMasProductos() {
-    paginaActual++;
-    renderizarPagina();
-}
+    // --- FUNCIÓN PARA FLECHAS DE SCROLL EN PC ---
+    window.scrollHorizontal = function (containerId, amount) {
+        const container = document.getElementById(containerId);
+        if (container) {
+            container.scrollBy({ left: amount, behavior: 'smooth' });
+        }
+    };
 
-// --- FUNCIÓN PARA FLECHAS DE SCROLL EN PC ---
-window.scrollHorizontal = function (containerId, amount) {
-    const container = document.getElementById(containerId);
-    if (container) {
-        container.scrollBy({ left: amount, behavior: 'smooth' });
-    }
-};
+    window.actualizarFlechasScroll = function (containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
 
-window.actualizarFlechasScroll = function (containerId) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
+        const wrapper = container.closest('.scroll-container-wrapper');
+        if (!wrapper) return;
 
-    const wrapper = container.closest('.scroll-container-wrapper');
-    if (!wrapper) return;
+        // Efecto visual de desvanecimiento (Fade Gradient) en los bordes
+        const scrollWrapper = wrapper.querySelector('.horizontal-scroll-wrapper');
+        const hasOverflow = container.scrollWidth > container.clientWidth + 5;
 
-    // Efecto visual de desvanecimiento (Fade Gradient) en los bordes
-    const scrollWrapper = wrapper.querySelector('.horizontal-scroll-wrapper');
-    const hasOverflow = container.scrollWidth > container.clientWidth + 5;
+        if (scrollWrapper) {
+            const isAtStart = container.scrollLeft <= 5;
+            const maxScroll = container.scrollWidth - container.clientWidth;
+            const isAtEnd = container.scrollLeft >= maxScroll - 5;
 
-    if (scrollWrapper) {
-        const isAtStart = container.scrollLeft <= 5;
-        const maxScroll = container.scrollWidth - container.clientWidth;
-        const isAtEnd = container.scrollLeft >= maxScroll - 5;
+            if (hasOverflow) {
+                scrollWrapper.classList.toggle('is-scrollable-left', !isAtStart);
+                scrollWrapper.classList.toggle('is-scrollable-right', !isAtEnd);
+            } else {
+                scrollWrapper.classList.remove('is-scrollable-left', 'is-scrollable-right');
+            }
+        }
 
-        if (hasOverflow) {
-            scrollWrapper.classList.toggle('is-scrollable-left', !isAtStart);
-            scrollWrapper.classList.toggle('is-scrollable-right', !isAtEnd);
+        const leftArrow = wrapper.querySelector('.left-arrow');
+        const rightArrow = wrapper.querySelector('.right-arrow');
+
+        if (!leftArrow || !rightArrow) return;
+
+        // Solo operamos en pantallas donde se muestren las flechas (>1024px)
+        if (window.innerWidth <= 1024) return;
+
+        // Tolerancia de 5px para redondeos del navegador
+        if (!hasOverflow) {
+            leftArrow.style.display = 'none';
+            rightArrow.style.display = 'none';
         } else {
-            scrollWrapper.classList.remove('is-scrollable-left', 'is-scrollable-right');
+            leftArrow.style.display = 'flex';
+            rightArrow.style.display = 'flex';
+
+            // Difuminar y deshabilitar flechas cuando se llega al límite
+            leftArrow.style.opacity = container.scrollLeft <= 5 ? '0.3' : '1';
+            leftArrow.style.pointerEvents = container.scrollLeft <= 5 ? 'none' : 'auto';
+
+            const maxScrollLeft = container.scrollWidth - container.clientWidth;
+            rightArrow.style.opacity = container.scrollLeft >= maxScrollLeft - 5 ? '0.3' : '1';
+            rightArrow.style.pointerEvents = container.scrollLeft >= maxScrollLeft - 5 ? 'none' : 'auto';
         }
-    }
-
-    const leftArrow = wrapper.querySelector('.left-arrow');
-    const rightArrow = wrapper.querySelector('.right-arrow');
-
-    if (!leftArrow || !rightArrow) return;
-
-    // Solo operamos en pantallas donde se muestren las flechas (>1024px)
-    if (window.innerWidth <= 1024) return;
-
-    // Tolerancia de 5px para redondeos del navegador
-    if (!hasOverflow) {
-        leftArrow.style.display = 'none';
-        rightArrow.style.display = 'none';
-    } else {
-        leftArrow.style.display = 'flex';
-        rightArrow.style.display = 'flex';
-
-        // Difuminar y deshabilitar flechas cuando se llega al límite
-        leftArrow.style.opacity = container.scrollLeft <= 5 ? '0.3' : '1';
-        leftArrow.style.pointerEvents = container.scrollLeft <= 5 ? 'none' : 'auto';
-
-        const maxScrollLeft = container.scrollWidth - container.clientWidth;
-        rightArrow.style.opacity = container.scrollLeft >= maxScrollLeft - 5 ? '0.3' : '1';
-        rightArrow.style.pointerEvents = container.scrollLeft >= maxScrollLeft - 5 ? 'none' : 'auto';
-    }
-};
+    };

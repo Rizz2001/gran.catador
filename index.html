@@ -119,6 +119,21 @@
 
                     <!-- Derecha: Botones Circulares -->
                     <div class="header-right">
+                        <!-- Tasas y Soporte movidos aquí (Solo PC) -->
+                        <div class="desktop-only"
+                            style="color: var(--dorado); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; background: rgba(212, 175, 55, 0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.2); margin-right: 10px;"
+                            title="Tasas Oficiales BCV">
+                            <span style="display:flex; align-items:center; gap:4px;"><i
+                                    class="fa-solid fa-dollar-sign"></i> <span id="tasaValor">...</span></span>
+                            <span style="opacity: 0.3;">|</span>
+                            <span style="display:flex; align-items:center; gap:4px;"><i
+                                    class="fa-solid fa-euro-sign"></i> <span id="tasaEuroValor">...</span></span>
+                        </div>
+                        <button class="icon-btn desktop-only" onclick="abrirSoporteWhatsApp()"
+                            aria-label="Soporte WhatsApp">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </button>
+
                         <button class="icon-btn desktop-only" aria-label="Notificaciones">
                             <i class="fa-regular fa-bell"></i>
                         </button>
@@ -145,39 +160,33 @@
                         id="tasaEuroValorMobile">...</span></span>
             </div>
 
-            <!-- Nivel 3: Barra de Navegación Inferior (Solo Escritorio) -->
-            <div class="header-nav-bar desktop-only">
-                <div class="container header-nav-container">
-                    <div class="nav-links-left">
-                        <a href="#" class="nav-link active" onclick="irInicio()">Inicio</a>
-                        <a href="#" class="nav-link" onclick="filtrarCategoria('LICORES', null)">Licores</a>
-                        <a href="#" class="nav-link"
-                            onclick="irInicio(); document.getElementById('buscador').value='Cerveza'; aplicarFiltros();">Cervezas</a>
-                        <a href="#" class="nav-link"
-                            onclick="irInicio(); document.getElementById('buscador').value='Vino'; aplicarFiltros();">Vinos</a>
-                        <a href="#" class="nav-link"
-                            onclick="irInicio(); document.getElementById('buscador').value='Ron'; aplicarFiltros();">Ron</a>
-                        <a href="#" class="nav-link"
-                            onclick="irInicio(); document.getElementById('buscador').value='Whisky'; aplicarFiltros();">Whisky</a>
-                        <a href="#" class="nav-link"
-                            onclick="irInicio(); document.getElementById('buscador').value='Refresco'; aplicarFiltros();">Refrescos</a>
-                        <a href="#" class="nav-link"
-                            onclick="irInicio(); document.getElementById('buscador').value='Snack'; aplicarFiltros();">Snacks</a>
-                    </div>
-                    <div class="nav-links-right" style="display: flex; align-items: center; gap: 15px;">
-                        <div style="color: var(--dorado); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; background: rgba(212, 175, 55, 0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.2);"
-                            title="Tasas Oficiales BCV">
-                            <span style="display:flex; align-items:center; gap:4px;"><i
-                                    class="fa-solid fa-dollar-sign"></i>
-                                <span id="tasaValor">...</span></span>
-                            <span style="opacity: 0.3;">|</span>
-                            <span style="display:flex; align-items:center; gap:4px;"><i
-                                    class="fa-solid fa-euro-sign"></i>
-                                <span id="tasaEuroValor">...</span></span>
+            <!-- Nivel 3: Barra de Categorías y Subgrupos Sticky -->
+            <div class="header-nav-bar"
+                style="background: var(--color-bg); border-top: 1px solid var(--color-border); padding: 5px 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+                <div class="container">
+                    <!-- Menú Deslizable de Grupos -->
+                    <div class="scroll-container-wrapper" style="position: relative; margin-bottom: 0;">
+                        <button class="scroll-arrow left-arrow" onclick="scrollHorizontal('contenedorCategorias', -300)"
+                            aria-label="Desplazar a la izquierda"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="horizontal-scroll-wrapper" style="width: 100%; overflow: hidden;">
+                            <div class="categorias-scroll horizontal-filters" id="contenedorCategorias"></div>
                         </div>
-                        <button class="btn-support" onclick="abrirSoporteWhatsApp()">
-                            <i class="fa-brands fa-whatsapp"></i> Soporte
-                        </button>
+                        <button class="scroll-arrow right-arrow" onclick="scrollHorizontal('contenedorCategorias', 300)"
+                            aria-label="Desplazar a la derecha"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+
+                    <!-- Menú Deslizable de Subcategorías (Oculto por defecto) -->
+                    <div class="scroll-container-wrapper" id="subcategoria-section-main"
+                        style="display:none; position: relative; margin-bottom: 0; border-top: 1px solid var(--color-border); padding-top: 5px; margin-top: 5px;">
+                        <button class="scroll-arrow left-arrow"
+                            onclick="scrollHorizontal('contenedorSubcategorias', -300)"
+                            aria-label="Desplazar a la izquierda"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="horizontal-scroll-wrapper" style="width: 100%; overflow: hidden;">
+                            <div class="categorias-scroll horizontal-filters" id="contenedorSubcategorias"></div>
+                        </div>
+                        <button class="scroll-arrow right-arrow"
+                            onclick="scrollHorizontal('contenedorSubcategorias', 300)"
+                            aria-label="Desplazar a la derecha"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
                 </div>
             </div>
@@ -196,29 +205,6 @@
 
     <div class="container tools-container">
         <h2 class="section-title">Todos los productos</h2>
-
-        <!-- Menú Deslizable de Grupos -->
-        <div class="scroll-container-wrapper" style="position: relative; margin-bottom: 10px;">
-            <button class="scroll-arrow left-arrow" onclick="scrollHorizontal('contenedorCategorias', -300)"
-                aria-label="Desplazar a la izquierda"><i class="fa-solid fa-chevron-left"></i></button>
-            <div class="horizontal-scroll-wrapper" style="width: 100%; overflow: hidden;">
-                <div class="categorias-scroll horizontal-filters" id="contenedorCategorias"></div>
-            </div>
-            <button class="scroll-arrow right-arrow" onclick="scrollHorizontal('contenedorCategorias', 300)"
-                aria-label="Desplazar a la derecha"><i class="fa-solid fa-chevron-right"></i></button>
-        </div>
-
-        <!-- Menú Deslizable de Subcategorías (Oculto por defecto) -->
-        <div class="scroll-container-wrapper" id="subcategoria-section-main"
-            style="display:none; position: relative; margin-bottom: 15px;">
-            <button class="scroll-arrow left-arrow" onclick="scrollHorizontal('contenedorSubcategorias', -300)"
-                aria-label="Desplazar a la izquierda"><i class="fa-solid fa-chevron-left"></i></button>
-            <div class="horizontal-scroll-wrapper" style="width: 100%; overflow: hidden;">
-                <div class="categorias-scroll horizontal-filters" id="contenedorSubcategorias"></div>
-            </div>
-            <button class="scroll-arrow right-arrow" onclick="scrollHorizontal('contenedorSubcategorias', 300)"
-                aria-label="Desplazar a la derecha"><i class="fa-solid fa-chevron-right"></i></button>
-        </div>
 
         <div class="filters-row-container">
             <div class="filters-row">

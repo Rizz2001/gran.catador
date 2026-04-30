@@ -9,6 +9,9 @@ let appSettings = { useApi: true, apiType: 'smartventas' };
 let modoVistaGlobal = 'unidad';
 let subcategoriaActual = null;
 
+// Asegurar que appState global exista para evitar ReferenceErrors
+window.appState = window.appState || {};
+
 // Función para comparar IDs de manera inteligente ("01" == "1")
 function compararIDs(id1, id2) {
     if (id1 === id2) return true;
@@ -20,6 +23,26 @@ function compararIDs(id1, id2) {
         return Number(s1) === Number(s2);
     }
     return false;
+}
+
+// Función universal y a prueba de errores para parsear números de Foxdata
+function parseFoxdataNumber(val) {
+    if (val == null || val === '') return 0;
+    if (typeof val === 'number') return val;
+    let s = String(val).trim();
+    // Detecta inteligentemente si usa formato "1.200,50" o "1,200.50"
+    if (s.includes(',') && s.includes('.')) {
+        let lastComma = s.lastIndexOf(',');
+        let lastDot = s.lastIndexOf('.');
+        if (lastComma > lastDot) {
+            s = s.replace(/\./g, '').replace(',', '.'); // 1.200,50 -> 1200.50
+        } else {
+            s = s.replace(/,/g, ''); // 1,200.50 -> 1200.50
+        }
+    }
+    else if (s.includes(',')) { s = s.replace(',', '.'); }
+    let n = parseFloat(s.replace(/[^\d.-]/g, ''));
+    return isNaN(n) ? 0 : n;
 }
 
 if (localStorage.getItem('gc_dark') === 'true') document.body.classList.add('dark-mode');
@@ -142,7 +165,8 @@ async function obtenerArchivosExternos() {
                         contBanners.innerHTML += `<div class="promo-banner" style="min-width: 100%; flex-shrink: 0;"><img src="assets/banners/${img}" alt="Promo" style="width: 100%; border-radius: 12px; display: block;" ${loadingAttr} onerror="this.parentElement.style.display='none'"></div>`;
                     });
                     let slideIndex = 0;
-                    setInterval(() => { let totalSlides = contBanners.children.length; if (totalSlides > 1) { slideIndex++; if (slideIndex >= totalSlides) slideIndex = 0; contBanners.scrollTo({ left: contBanners.clientWidth * slideIndex, behavior: 'smooth' }); } }, 3000);
+                    if (window.bannersTimer) clearInterval(window.bannersTimer);
+                    window.bannersTimer = setInterval(() => { let totalSlides = contBanners.children.length; if (totalSlides > 1) { slideIndex++; if (slideIndex >= totalSlides) slideIndex = 0; contBanners.scrollTo({ left: contBanners.clientWidth * slideIndex, behavior: 'smooth' }); } }, 3000);
                 }
             }
         } catch (error) { console.log("Sin banners.txt"); }
@@ -154,19 +178,27 @@ async function obtenerArchivosExternos() {
 
 async function cargarConfiguracionDesdeAPI() {
     const { apiUrl, apiToken } = appSettings;
-    // Si tienes un endpoint separado para config, úsalo. Si no, podemos pedirlo por parámetro
-    const response = await fetch(apiUrl + '?task=config', {
-        headers: { 'Authorization': `Bearer ${apiToken || ''}` }
-    });
-    if (response.ok) {
-        const configs = await response.json();
-        configs.forEach(c => {
-            if (c.clave === 'recomendados') codigosRecomendados = c.valor.split(/[\n,]+/).map(x => x.trim());
-            if (c.clave === 'disponibles') siempreDisponibles = c.valor.split(/[\n,]+/).map(x => x.trim());
-            if (c.clave === 'tasa') { tasaOficial = parseFloat(c.valor); appState.tasaOficial = tasaOficial; }
+
+    if (!apiUrl) return; // Evitar petición fallida a "undefined?task=config"
+
+    try {
+        const response = await fetch(apiUrl + '?task=config', {
+            headers: { 'Authorization': `Bearer ${apiToken || ''}` }
         });
-        appState.codigosRecomendados = codigosRecomendados;
-        appState.siempreDisponibles = siempreDisponibles;
+        if (response.ok) {
+            const configs = await response.json();
+            if (Array.isArray(configs)) {
+                configs.forEach(c => {
+                    if (c.clave === 'recomendados') codigosRecomendados = c.valor.split(/[\n,]+/).map(x => x.trim());
+                    if (c.clave === 'disponibles') siempreDisponibles = c.valor.split(/[\n,]+/).map(x => x.trim());
+                    if (c.clave === 'tasa') { tasaOficial = parseFloat(c.valor); appState.tasaOficial = tasaOficial; }
+                });
+            }
+            appState.codigosRecomendados = codigosRecomendados;
+            appState.siempreDisponibles = siempreDisponibles;
+        }
+    } catch (e) {
+        console.log("⚠️ Error de conexión cargando configuraciones:", e.message);
     }
 }
 
@@ -209,7 +241,7 @@ async function cargarInventarioDesdeAPI() {
     // Ruta inteligente: Si estamos en Cloudflare Pages usamos el worker,
     // si estamos en local usamos el proxy subido a Cloudflare,
     // de lo contrario (Laragon, XAMPP, cPanel, Hostinger) usamos el proxy en PHP.
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
     const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy'
         : isLocalhost ? 'https://gran-catador.pages.dev/api/proxy'
             : 'functions/api/proxy.php';
@@ -274,7 +306,7 @@ async function cargarInventarioDesdeAPI() {
 async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
     if (appState.gruposCargados && appState.gruposCargados.includes(codGrupo)) return false; // Ya fue cargado
 
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
     const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy'
         : isLocalhost ? 'https://gran-catador.pages.dev/api/proxy'
             : 'functions/api/proxy.php';
@@ -293,19 +325,32 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
 
         if (articulos.length > 0) {
             let nuevosProductos = articulos.map(item => {
-                // Mapeo ultra-seguro de Precios (cubre variaciones de la API SmartVentas)
-                let precioRaw = item.precio ?? item.Precio ?? item.precio1 ?? item.Precio1 ?? item.precio_1 ?? item.precio_detal ?? item.monto ?? 0;
-                let precioUsd = parseFloat(precioRaw);
+                // Extracción de precios USD estrictos
+                let precioRaw = item.precioVentDiv ?? item.PrecioVentDiv ?? 0;
+                let precioUsd = parseFoxdataNumber(precioRaw);
+
+                // Extracción de cantidad para el cálculo de respaldo
+                let cantidadGrupRaw = item.cantidadGrup ?? item.CantidadGrup ?? item.cant_caja ?? 12;
+                let cantidadGrup = parseFoxdataNumber(cantidadGrupRaw);
+                if (cantidadGrup <= 0) cantidadGrup = 12;
+
+                let precioGrupRaw = item.precioVentGrupDiv ?? item.PrecioVentGrupDiv ?? (precioUsd * cantidadGrup);
+                let precioCajaNum = parseFoxdataNumber(precioGrupRaw);
+                if (precioCajaNum <= 0) precioCajaNum = precioUsd * cantidadGrup;
 
                 // Mapeo ultra-seguro del Stock (asumimos 10 si la API no manda la propiedad para que no se oculten)
                 let stockRaw = item.existencia ?? item.Existencia ?? item.stock ?? item.Stock ?? item.cantidad ?? item.Cantidad;
                 let stock = parseFloat(stockRaw !== undefined && stockRaw !== null ? stockRaw : 10);
 
-                let nombre = item.nombre || item.Nombre || item.descripcion || item.Descripcion || "Producto sin nombre";
-                let codigo = item.codigo || item.Codigo || item.id || item.Id || "";
+                let nombre = item.nombre ?? item.Nombre ?? item.descripcion ?? item.Descripcion ?? "Producto sin nombre";
+                let codigo = item.codArticulo ?? item.codigo ?? item.Codigo ?? item.CodArticulo ?? item.cod_articulo ?? item.id ?? item.Id ?? "";
 
-                let codSubgrupo = (item.CodSubgrupo || item.codsubgrupo || item.Codsubgrupo || item.cod_subgrupo || item.cod_sub_grupo || item.id_subgrupo || item.id_sub_grupo || item.Cod_subgrupo || item.subgrupo || item.Subgrupo || item.subcategoria || item.Subcategoria || item.sub_grupo || "").toString().trim();
-                let nombreSubgrupo = item.desc_subgrupo || item.Desc_subgrupo || item.nombre_subgrupo || item.desc_sub_grupo || codSubgrupo;
+                let medida = item.medida ?? item.Medida ?? "";
+                let unidadGrup = item.unidadGrup ?? item.UnidadGrup ?? "CAJA";
+                let unidadSimple = item.unidadSimple ?? item.UnidadSimple ?? "UNIDAD";
+
+                let codSubgrupo = (item.codSubgrupo ?? item.CodSubgrupo ?? item.codsubgrupo ?? item.cod_subgrupo ?? item.id_subgrupo ?? item.subgrupo ?? item.subcategoria ?? "").toString().trim();
+                let nombreSubgrupo = item.desc_subgrupo ?? item.Desc_subgrupo ?? item.nombre_subgrupo ?? codSubgrupo;
 
                 if (appState.siempreDisponibles && appState.siempreDisponibles.includes(codigo)) stock = 999;
 
@@ -319,22 +364,29 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
                     PrecioStr: precioUsd.toFixed(2),
                     PrecioNum: precioUsd,
                     PrecioBsStr: (precioUsd * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
-                    PrecioCajaUsd: (precioUsd * 12).toFixed(2),
-                    PrecioCajaNum: precioUsd * 12,
-                    PrecioCajaBsStr: ((precioUsd * 12) * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
+                    PrecioCajaUsd: precioCajaNum.toFixed(2),
+                    PrecioCajaNum: precioCajaNum,
+                    PrecioCajaBsStr: (precioCajaNum * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
                     StockNum: stock,
                     StockStr: stock > 0 ? stock.toString() : "0",
-                    TextoBusquedaLimpio: quitarAcentos(nombre) + " " + quitarAcentos(nombreGrupo) + " " + quitarAcentos(nombreSubgrupo)
+                    TextoBusquedaLimpio: quitarAcentos(nombre) + " " + quitarAcentos(nombreGrupo) + " " + quitarAcentos(nombreSubgrupo),
+                    CantidadGrup: cantidadGrup,
+                    Medida: medida,
+                    UnidadGrup: unidadGrup,
+                    UnidadSimple: unidadSimple
                 };
             }).filter(p => p.PrecioNum >= 0); // Permitimos precio 0 temporalmente para evitar que se oculten por fallos
 
-            // Evitar duplicados si se recargan grupos/subgrupos
-            let codigosNuevos = nuevosProductos.map(p => p.codigo);
-            inventario = inventario.filter(p => !codigosNuevos.includes(p.codigo));
+            // Evitar duplicados eliminando también los vacíos previos (previene memory leak de array)
+            let codigosNuevos = new Set(nuevosProductos.filter(p => p.codigo !== "").map(p => p.codigo));
+            inventario = inventario.filter(p => p.codigo !== "" && !codigosNuevos.has(p.codigo));
             inventario = [...inventario, ...nuevosProductos];
 
             appState.inventario = inventario;
             appState.gruposCargados.push(codGrupo);
+
+            // Actualizar el índice de búsqueda con los nuevos productos
+            if (typeof buildSearchIndex === 'function') buildSearchIndex(inventario);
 
             console.log(`✅ ${nuevosProductos.length} productos agregados de ${nombreGrupo}`);
             return true;
@@ -371,7 +423,7 @@ async function cargarProductosPorSubgrupo(codGrupo, codSubgrupo, nombreGrupo, no
     // los productos queden etiquetados correctamente con su SubCatId.
     // Si ya estaba cacheado pero sin SubCatId (cargado a nivel de grupo), lo sobreescribimos.
 
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
     const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy'
         : isLocalhost ? 'https://gran-catador.pages.dev/api/proxy'
             : 'functions/api/proxy.php';
@@ -392,18 +444,31 @@ async function cargarProductosPorSubgrupo(codGrupo, codSubgrupo, nombreGrupo, no
 
         if (articulos.length > 0) {
             let nuevosProductos = articulos.map(item => {
-                let precioRaw = item.precio ?? item.Precio ?? item.precio1 ?? item.Precio1 ?? item.precio_1 ?? item.precio_detal ?? item.monto ?? 0;
-                let precioUsd = parseFloat(precioRaw);
+                // Extracción de precios USD estrictos
+                let precioRaw = item.precioVentDiv ?? item.PrecioVentDiv ?? 0;
+                let precioUsd = parseFoxdataNumber(precioRaw);
+
+                // Extracción de cantidad para el cálculo de respaldo
+                let cantidadGrupRaw = item.cantidadGrup ?? item.CantidadGrup ?? item.cant_caja ?? 12;
+                let cantidadGrup = parseFoxdataNumber(cantidadGrupRaw);
+                if (cantidadGrup <= 0) cantidadGrup = 12;
+
+                let precioGrupRaw = item.precioVentGrupDiv ?? item.PrecioVentGrupDiv ?? (precioUsd * cantidadGrup);
+                let precioCajaNum = parseFoxdataNumber(precioGrupRaw);
+                if (precioCajaNum <= 0) precioCajaNum = precioUsd * cantidadGrup;
+
                 let stockRaw = item.existencia ?? item.Existencia ?? item.stock ?? item.Stock ?? item.cantidad ?? item.Cantidad;
                 let stock = parseFloat(stockRaw !== undefined && stockRaw !== null ? stockRaw : 10);
-                let nombre = item.nombre || item.Nombre || item.descripcion || item.Descripcion || "Producto sin nombre";
-                let codigo = item.codigo || item.Codigo || item.id || item.Id || "";
+                let nombre = item.nombre ?? item.Nombre ?? item.descripcion ?? item.Descripcion ?? "Producto sin nombre";
+                let codigo = item.codArticulo ?? item.codigo ?? item.Codigo ?? item.CodArticulo ?? item.cod_articulo ?? item.id ?? item.Id ?? "";
 
-                // SubCatId siempre = codSubgrupo del parámetro (la API puede no devolverlo por artículo)
-                let codSubApi = (item.CodSubgrupo || item.codsubgrupo || item.Codsubgrupo || item.cod_subgrupo ||
-                    item.cod_sub_grupo || item.id_subgrupo || item.Cod_subgrupo || "").toString().trim();
+                let medida = item.medida ?? item.Medida ?? "";
+                let unidadGrup = item.unidadGrup ?? item.UnidadGrup ?? "CAJA";
+                let unidadSimple = item.unidadSimple ?? item.UnidadSimple ?? "UNIDAD";
+
+                let codSubApi = (item.codSubgrupo ?? item.CodSubgrupo ?? item.codsubgrupo ?? item.cod_subgrupo ?? item.id_subgrupo ?? "").toString().trim();
                 let subCatIdFinal = codSubApi || codSubgrupo;
-                let nombreSubFinal = item.desc_subgrupo || item.Desc_subgrupo || item.nombre_subgrupo || nombreSubgrupo;
+                let nombreSubFinal = item.desc_subgrupo ?? item.Desc_subgrupo ?? item.nombre_subgrupo ?? nombreSubgrupo;
 
                 if (appState.siempreDisponibles && appState.siempreDisponibles.includes(codigo)) stock = 999;
 
@@ -414,21 +479,28 @@ async function cargarProductosPorSubgrupo(codGrupo, codSubgrupo, nombreGrupo, no
                     SubCat: limpiarCategoria(nombreSubFinal),
                     PrecioStr: precioUsd.toFixed(2), PrecioNum: precioUsd,
                     PrecioBsStr: (precioUsd * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
-                    PrecioCajaUsd: (precioUsd * 12).toFixed(2), PrecioCajaNum: precioUsd * 12,
-                    PrecioCajaBsStr: ((precioUsd * 12) * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
+                    PrecioCajaUsd: precioCajaNum.toFixed(2), PrecioCajaNum: precioCajaNum,
+                    PrecioCajaBsStr: (precioCajaNum * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
                     StockNum: stock, StockStr: stock > 0 ? stock.toString() : "0",
-                    TextoBusquedaLimpio: quitarAcentos(nombre) + " " + quitarAcentos(nombreGrupo) + " " + quitarAcentos(nombreSubFinal)
+                    TextoBusquedaLimpio: quitarAcentos(nombre) + " " + quitarAcentos(nombreGrupo) + " " + quitarAcentos(nombreSubFinal),
+                    CantidadGrup: cantidadGrup,
+                    Medida: medida,
+                    UnidadGrup: unidadGrup,
+                    UnidadSimple: unidadSimple
                 };
             }).filter(p => p.PrecioNum >= 0);
 
             // Reemplazar en inventario los productos de este subgrupo
             // (elimina tanto por código como por SubCatId para limpiar entradas previas sin etiqueta)
-            let codigosNuevos = new Set(nuevosProductos.map(p => p.codigo));
-            inventario = inventario.filter(p => !codigosNuevos.has(p.codigo));
+            let codigosNuevos = new Set(nuevosProductos.filter(p => p.codigo !== "").map(p => p.codigo));
+            inventario = inventario.filter(p => p.codigo !== "" && !codigosNuevos.has(p.codigo));
             inventario = [...inventario, ...nuevosProductos];
 
             appState.inventario = inventario;
             if (!appState.subgruposCargados.includes(cacheKey)) appState.subgruposCargados.push(cacheKey);
+
+            // Actualizar el índice de búsqueda con los nuevos productos
+            if (typeof buildSearchIndex === 'function') buildSearchIndex(inventario);
 
             console.log(`✅ ${nuevosProductos.length} productos del subgrupo "${nombreSubgrupo}" (ID: ${codSubgrupo}) cargados con SubCatId correcto.`);
             return true;
@@ -463,76 +535,145 @@ async function cargarRestoDeGruposEnSegundoPlano(grupos) {
 }
 
 function debounceBusqueda(event) {
+    const teclaPresionada = event.key; // Capturamos síncronamente antes de que el objeto event se destruya
     clearTimeout(debounceTimer);
     const query = event.target.value;
+
+    // Sincronizar buscadores desktop/mobile si existen ambos
     if (event.target.id === 'buscador') { let dSearch = document.getElementById('buscador-desktop'); if (dSearch) dSearch.value = query; }
     else if (event.target.id === 'buscador-desktop') { let mSearch = document.getElementById('buscador'); if (mSearch) mSearch.value = query; }
 
-    if (query.trim().length < 2) { cerrarSugerencias(); aplicarFiltros(); return; }
-    debounceTimer = setTimeout(() => { aplicarFiltros(); mostrarSugerencias(query.trim()); }, 300);
+    // Mostrar/ocultar ícono de limpiar
+    const clearBtn = document.getElementById('clear-search');
+    if (clearBtn) clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
+
+    if (query.trim().length === 0) {
+        cerrarSugerencias();
+        // Debounce corto para limpiar rápido
+        debounceTimer = setTimeout(() => aplicarFiltros(), 150);
+        return;
+    }
+
+    // Un solo timer: aplicarFiltros calcula y pasa resultados a mostrarSugerencias
+    debounceTimer = setTimeout(() => {
+        aplicarFiltros();
+        // Lógica para Escáner de Códigos de Barras: Si se presiona Enter y hay 1 solo resultado, abrirlo.
+        if (teclaPresionada === 'Enter' && productosFiltradosGlobal && productosFiltradosGlobal.length === 1) {
+            cerrarSugerencias();
+            if (typeof abrirDetalleProducto === 'function') {
+                abrirDetalleProducto(productosFiltradosGlobal[0].codigo);
+            }
+        }
+    }, 280);
 }
 
 function aplicarFiltros() {
-    let q = quitarAcentos((document.getElementById('buscador')?.value || '').trim());
-    let sortOption = document.getElementById('ordenarSelect')?.value || 'relevancia';
-    let verAgotados = document.getElementById('chkAgotados')?.checked || false;
-    let resultado = inventario;
+    const queryRaw = (document.getElementById('buscador')?.value || '').trim();
+    const q = quitarAcentos(queryRaw);
+    const sortOption = document.getElementById('ordenarSelect')?.value || 'relevancia';
+    const verAgotados = document.getElementById('chkAgotados')?.checked || false;
 
-    if (!verAgotados) resultado = resultado.filter(p => p.StockNum > 0);
+    // ── 1. Filtro de stock ────────────────────────────────────────────────────
+    let inventarioStock = verAgotados ? inventario.slice() : inventario.filter(p => p.StockNum > 0);
+    let resultado = inventarioStock.slice();
 
-    if (categoriaActual === 'Favoritos') {
-        resultado = resultado.filter(p => favoritos.includes(p.codigo));
-    } else if (categoriaActual !== 'Todos') {
-        resultado = resultado.filter(p => p.Cat === limpiarCategoria(categoriaActual) || compararIDs(p.CatId, categoriaActual));
-        console.log(`🔍 Filtro ${categoriaActual}: ${resultado.length} productos`);
-    }
+    // Solo aplicamos filtros de categoría si NO hay una búsqueda activa.
+    if (q.length === 0) {
+        // ── 2. Filtro de categoría ────────────────────────────────────────────────
+        if (categoriaActual === 'Favoritos') {
+            resultado = resultado.filter(p => favoritos.includes(p.codigo));
+        } else if (categoriaActual !== 'Todos') {
+            resultado = resultado.filter(p =>
+                p.Cat === limpiarCategoria(categoriaActual) ||
+                compararIDs(p.CatId, categoriaActual)
+            );
+        }
 
-    // Filtrar POR SUBCATEGORÍA si está activa
-    if (subcategoriaActual && categoriaActual !== 'Todos' && categoriaActual !== 'Favoritos') {
-        const antes = resultado.length;
-        // Comparar tanto por ID (SubCatId) como por nombre limpio (SubCat)
-        // subcategoriaActual puede ser el código numérico ("5") o el nombre limpio ("whisky")
-        resultado = resultado.filter(p =>
-            compararIDs(p.SubCatId, subcategoriaActual) ||
-            p.SubCat === limpiarCategoria(subcategoriaActual) ||
-            limpiarCategoria(p.SubCat) === limpiarCategoria(subcategoriaActual)
-        );
-        console.log(`📦 Filtro de subcategoría aplicado. Buscando por: "${subcategoriaActual}"`);
-        console.log(`   - Productos antes del filtro: ${antes}`);
-        console.log(`   - Productos después del filtro: ${resultado.length}`);
-        if (resultado.length === 0) {
-            console.warn(`⚠️ 0 productos para subcategoría "${subcategoriaActual}". Revisa que SubCatId esté llegando bien desde la API.`);
+        // ── 3. Filtro de subcategoría ─────────────────────────────────────────────
+        if (subcategoriaActual && categoriaActual !== 'Todos' && categoriaActual !== 'Favoritos') {
+            resultado = resultado.filter(p =>
+                compararIDs(p.SubCatId, subcategoriaActual) ||
+                p.SubCat === limpiarCategoria(subcategoriaActual) ||
+                limpiarCategoria(p.SubCat) === limpiarCategoria(subcategoriaActual)
+            );
         }
     }
 
-    if (q !== '') {
-        let terms = q.split(' ').filter(t => t.length > 0).map(procesarTermino);
-        let resultPuntuado = [];
-        resultado.forEach(p => {
-            let nombreLimpio = quitarAcentos(p.Nombre); let wordsNombre = nombreLimpio.split(' ');
-            let textoConSubcat = p.TextoBusquedaLimpio + ' ' + quitarAcentos(p.Cat || '') + ' ' + quitarAcentos(p.SubCat || '');
-            let wordsAll = textoConSubcat.split(' ');
-            let score = 0;
+    // ── 4. Búsqueda de texto — usa el índice invertido para mayor velocidad ───
+    let resultadosFiltrados = resultado; // por si no hay query
 
-            let coincide = terms.every(term => {
-                if (nombreLimpio.includes(term)) { score += wordsNombre.includes(term) ? 50 : 25; return true; }
-                if (textoConSubcat.includes(term)) { score += 10; return true; }
-                if (term.length >= 4 && wordsAll.some(w => levenshtein(term, w) <= (term.length >= 6 ? 2 : 1))) { score += 5; return true; }
-                return false;
-            });
-            if (coincide) { p.ScoreBusqueda = score; resultPuntuado.push(p); }
+    if (q.length > 0) {
+        // Hacemos que la búsqueda sea GLOBAL en el inventario que cumpla con el stock
+        const codigosStock = new Set(inventarioStock.map(p => p.codigo));
+        const porIndice = searchWithIndex(q, inventario);
+
+        resultadosFiltrados = [];
+        porIndice.forEach(({ producto, score }) => {
+            if (codigosStock.has(producto.codigo)) {
+                producto.ScoreBusqueda = score;
+                resultadosFiltrados.push(producto);
+            }
         });
-        resultado = resultPuntuado;
+
+        // Pasar los resultados a mostrarSugerencias SIN segunda pasada al inventario
+        mostrarSugerencias(q, resultadosFiltrados);
+    } else {
+        cerrarSugerencias();
     }
 
-    if (sortOption === 'menor') resultado.sort((a, b) => a.PrecioNum - b.PrecioNum);
-    else if (sortOption === 'mayor') resultado.sort((a, b) => b.PrecioNum - a.PrecioNum);
-    else if (sortOption === 'az') resultado.sort((a, b) => a.Nombre.localeCompare(b.Nombre));
+    // ── 5. Ordenamiento ───────────────────────────────────────────────────────
+    if (q.length === 0 || sortOption !== 'relevancia') {
+        // Si hay query activo y sort=relevancia, ya vienen ordenados por score
+        if (sortOption === 'menor') resultadosFiltrados.sort((a, b) => a.PrecioNum - b.PrecioNum);
+        else if (sortOption === 'mayor') resultadosFiltrados.sort((a, b) => b.PrecioNum - a.PrecioNum);
+        else if (sortOption === 'az') resultadosFiltrados.sort((a, b) => a.Nombre.localeCompare(b.Nombre));
+    }
 
-    productosFiltradosGlobal = resultado;
+    productosFiltradosGlobal = resultadosFiltrados;
     paginaActual = 1;
     renderizarPagina();
 }
+
+// --- EXPORTAR TOMA DE INVENTARIO (CSV) ---
+window.descargarInventarioCSV = function () {
+    if (!inventario || inventario.length === 0) {
+        if (typeof mostrarToast === 'function') mostrarToast("⚠️ El inventario aún no ha cargado.");
+        return;
+    }
+
+    // Agregamos el BOM (\uFEFF) para que Excel lea los acentos correctamente en UTF-8
+    let csvContent = "\uFEFF";
+    csvContent += "Código;Nombre;Categoría;SubCategoría;Stock;Empaque Simple;Empaque Grupo;Unds por Grupo;Precio Unidad USD;Precio Grupo USD\n";
+
+    inventario.forEach(p => {
+        let row = [
+            p.codigo,
+            `"${p.Nombre.replace(/"/g, '""')}"`, // Escapamos comillas dobles
+            `"${p.Cat}"`,
+            `"${p.SubCat}"`,
+            p.StockNum,
+            `"${p.UnidadSimple}"`,
+            `"${p.UnidadGrup}"`,
+            p.CantidadGrup,
+            p.PrecioNum,
+            p.PrecioCajaNum
+        ].join(";"); // Usamos punto y coma (;) porque Excel en español lo separa mejor así
+        csvContent += row + "\n";
+    });
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    const fecha = new Date().toLocaleDateString('es-VE').replace(/\//g, '-');
+    link.setAttribute("download", `Toma_Inventario_GC_${fecha}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    if (typeof mostrarToast === 'function') mostrarToast("📦 Archivo CSV descargado.");
+};
 
 // --- INICIO DE LA APLICACIÓN ---
 cargarInventario();
