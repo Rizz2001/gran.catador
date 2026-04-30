@@ -219,13 +219,17 @@
 
 
     <div class="productos-grid" id="lista-productos">
-        <div class="loader-container">
-            <div class="spinner"></div>
-            <p style="font-size: 13px;">Preparando las mejores botellas...</p>
+        <div class="loader-container" id="initial-loader">
+            <div class="bottle-loader">
+                <i class="fa-solid fa-wine-bottle bottle-background"></i>
+                <i class="fa-solid fa-wine-bottle bottle-foreground"></i>
+            </div>
+            <p>Preparando las mejores botellas...</p>
         </div>
     </div>
 
-    <button id="btn-cargar-mas" class="btn-cargar-mas" onclick="cargarMasProductos()">Cargar más productos...</button>
+    <button id="btn-cargar-mas" class="btn-cargar-mas" onclick="cargarMasProductos()"><i class="fa-solid fa-plus"
+            style="margin-right: 6px;"></i> Cargar más productos</button>
 
     <footer class="main-footer-new">
         <div class="container footer-container">
@@ -272,6 +276,9 @@
     </footer>
 
     <div id="toast-container"></div>
+
+    <button id="btn-scroll-top" class="btn-scroll-top" onclick="scrollToTop()" aria-label="Volver arriba"><i
+            class="fa-solid fa-arrow-up"></i></button>
 
     <div id="modal-cross-sell"
         style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(17,24,39,0.8); backdrop-filter:blur(4px); z-index:4000; display:none; align-items:flex-end;">
