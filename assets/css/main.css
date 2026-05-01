@@ -1678,7 +1678,10 @@ body.dark-mode .cart-item-img {
   background: var(--color-bg);
 }
 
-#modal-cart .cart-header {
+#modal-cart .cart-header,
+#modal-perfil .cart-header,
+#modal-ajustes .cart-header,
+#modal-legales .cart-header {
   padding: 20px 25px;
   margin: 0;
   position: sticky;
@@ -1687,6 +1690,21 @@ body.dark-mode .cart-item-img {
   background: var(--color-bg);
   box-shadow: var(--shadow-sm);
   border-bottom: none;
+}
+
+.cart-header .panel-title {
+  flex: 1;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-primary);
+  margin: 0;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+}
+
+body.dark-mode .cart-header .panel-title {
+  color: var(--color-white);
 }
 
 .cart-layout-grid {
@@ -1749,7 +1767,10 @@ body.dark-mode .cart-item-img {
     margin: auto;
   }
 
-  #modal-cart .cart-header {
+  #modal-cart .cart-header,
+  #modal-perfil .cart-header,
+  #modal-ajustes .cart-header,
+  #modal-legales .cart-header {
     padding: 25px 40px;
     border-bottom: 1px solid var(--color-border);
     box-shadow: none;

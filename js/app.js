@@ -12,6 +12,37 @@ let subcategoriaActual = null;
 // Asegurar que appState global exista para evitar ReferenceErrors
 window.appState = window.appState || {};
 
+// Barra de progreso superior (API)
+function updateApiProgress(percent, isError = false) {
+    let bar = document.getElementById('api-loading-bar');
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'api-loading-bar';
+        Object.assign(bar.style, {
+            position: 'fixed', top: '0', left: '0', height: '3px',
+            backgroundColor: '#25D366', width: '0%', zIndex: '9999',
+            transition: 'width 0.3s ease, opacity 0.3s ease', opacity: '0',
+            boxShadow: '0 0 5px #25D366'
+        });
+        document.body.appendChild(bar);
+    }
+
+    if (isError) {
+        bar.style.backgroundColor = '#ea4335'; // Rojo error
+        bar.style.boxShadow = '0 0 5px #ea4335';
+        percent = 100;
+    } else {
+        bar.style.backgroundColor = '#25D366'; // Verde éxito
+        bar.style.boxShadow = '0 0 5px #25D366';
+    }
+
+    bar.style.opacity = '1';
+    bar.style.width = percent + '%';
+    if (percent >= 100) {
+        setTimeout(() => { bar.style.opacity = '0'; setTimeout(() => { bar.style.width = '0%'; }, 300); }, 500);
+    }
+}
+
 // Función para comparar IDs de manera inteligente ("01" == "1")
 function compararIDs(id1, id2) {
     if (id1 === id2) return true;
@@ -172,6 +203,23 @@ async function obtenerArchivosExternos() {
         } catch (error) { console.log("Sin banners.txt"); }
     })());
 
+    // OPTIMIZACIÓN: Cargar lista de productos siempre disponibles localmente
+    promesasConfig.push((async () => {
+        try {
+            let resDisp = await fetch('data/config/siempre_disponibles.txt?v=' + new Date().getTime());
+            if (resDisp.ok) {
+                let textoDisp = await resDisp.text();
+                let listaDisp = textoDisp.split(/[\n,]+/).map(b => b.trim()).filter(b => b !== "" && !b.startsWith("#"));
+                // Combinamos con los que vengan de la API (si hay)
+                siempreDisponibles = [...new Set([...siempreDisponibles, ...listaDisp])];
+                appState.siempreDisponibles = siempreDisponibles;
+                console.log("📌 Códigos forzados a estar disponibles:", listaDisp.length);
+            }
+        } catch (error) {
+            console.log("Sin siempre_disponibles.txt local");
+        }
+    })());
+
     await Promise.all(promesasConfig);
 }
 
@@ -218,6 +266,7 @@ async function cargarInventario() {
         await cargarInventarioDesdeAPI();
     } catch (e) {
         console.error("Error cargando inventario:", e);
+        updateApiProgress(100, true);
         document.getElementById('lista-productos').innerHTML = `<div style="grid-column: span 2; text-align: center; padding: 30px; border: 1px solid red; border-radius: 10px;"><h3 style="color:red;">Error de Conexión</h3><p style="font-size:12px; margin-top:10px;">${e.message || 'Verifica la configuración de la API.'}</p></div>`;
     }
 }
@@ -233,8 +282,42 @@ function iniciarAutoActualizacion() {
             await cargarInventarioDesdeAPI();
             localStorage.setItem('gc_inv_time_v4', new Date().getTime().toString());
             aplicarFiltros(); // Refresca la vista automáticamente si detecta un cambio de precio/stock
-        } catch (e) { console.log("⚠️ Error en sincronización silenciosa:", e.message); }
+        } catch (e) { 
+            console.log("⚠️ Error en sincronización silenciosa:", e.message); 
+            updateApiProgress(100, true);
+        }
     }, 600000);
+}
+
+async function cargarExistenciasGlobales(proxyBaseUrl) {
+    try {
+        console.log("📦 Consultando existencias de depósitos 01 y 03...");
+        const [res01, res03] = await Promise.all([
+            fetch(`${proxyBaseUrl}?endpoint=${encodeURIComponent('existencias/deposito/01')}`),
+            fetch(`${proxyBaseUrl}?endpoint=${encodeURIComponent('existencias/deposito/03')}`)
+        ]);
+
+        let stockMap = new Map();
+
+        const procesarData = (data) => {
+            let items = Array.isArray(data) ? data : (data.data || data.result || []);
+            items.forEach(item => {
+                let cod = (item.codArticulo ?? item.codigo ?? item.id ?? item.CodArticulo ?? item.Codigo ?? "").toString().trim();
+                let cant = parseFloat(item.cantidad ?? item.existencia ?? item.stock ?? item.Cantidad ?? item.Existencia ?? item.Stock ?? 0);
+                if (cod) {
+                    stockMap.set(cod, (stockMap.get(cod) || 0) + cant);
+                }
+            });
+        };
+
+        if (res01.ok) procesarData(await res01.json());
+        if (res03.ok) procesarData(await res03.json());
+
+        appState.stockMap = stockMap;
+        console.log(`📦 Existencias cargadas. Depósitos 01 y 03 combinados.`);
+    } catch (e) {
+        console.error("⚠️ Error cargando existencias globales:", e);
+    }
 }
 
 async function cargarInventarioDesdeAPI() {
@@ -246,12 +329,19 @@ async function cargarInventarioDesdeAPI() {
         : (isLocalhost || window.location.hostname.includes('github.io')) ? 'https://gran-catador.pages.dev/api/proxy'
             : 'functions/api/proxy.php';
 
+    updateApiProgress(10);
     console.log("📡 Consultando API mediante Proxy Cloudflare...");
 
-    // --- 1. DESCARGAR GRUPOS ---
-    const resGrupos = await fetch(`${proxyBaseUrl}?endpoint=gruposinv`);
-    if (!resGrupos.ok) throw new Error(`Error servidor grupos: ${resGrupos.status}`);
-    const dataGrupos = await resGrupos.json();
+    // --- 0 Y 1. DESCARGAR EXISTENCIAS Y GRUPOS EN PARALELO ---
+    // Esto mejora el performance evitando que una petición bloquee a la otra
+    const existenciasPromise = cargarExistenciasGlobales(proxyBaseUrl);
+    const gruposPromise = fetch(`${proxyBaseUrl}?endpoint=gruposinv`).then(res => {
+        if (!res.ok) throw new Error(`Error servidor grupos: ${res.status}`);
+        return res.json();
+    });
+
+    const [_, dataGrupos] = await Promise.all([existenciasPromise, gruposPromise]);
+    updateApiProgress(50);
 
     let grupos = Array.isArray(dataGrupos) ? dataGrupos : (dataGrupos.data || dataGrupos.result || []);
 
@@ -260,7 +350,6 @@ async function cargarInventarioDesdeAPI() {
         console.log("📂 Grupos procesados correctamente:", grupos.length);
     } else {
         console.warn("⚠️ La API respondió pero no se encontró un listado de grupos válido.", dataGrupos);
-        if (typeof mostrarToast === 'function') mostrarToast("⚠️ API conectada, pero no se encontraron grupos.");
     }
 
     // --- 2. DESCARGAR PRODUCTOS (ARTÍCULOS) ---
@@ -290,14 +379,14 @@ async function cargarInventarioDesdeAPI() {
         let nombreGrupo = grupoInicial.Nombre || grupoInicial.nombre || grupoInicial.Descripcion || grupoInicial.descripcion || grupoInicial.NombreGrupo || grupoInicial.desc_grupo || grupoInicial.DescGrupo || "Grupo";
         if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();
         await cargarProductosPorGrupo(codGrupo, nombreGrupo);
+        updateApiProgress(90);
     }
-
-    if (typeof mostrarToast === 'function') mostrarToast(`✅ API Conectada. Catálogo cargando...`);
 
     // --- INYECTAR EN PANTALLA ---
     // Renderizar los botones de grupos y los productos del grupo inicial
     if (typeof generarCategorias === 'function') generarCategorias();
     aplicarFiltros();
+    updateApiProgress(100);
 
     // --- 3. INICIAR CARGA DE LOS DEMÁS GRUPOS EN SEGUNDO PLANO ---
     cargarRestoDeGruposEnSegundoPlano(grupos);
@@ -339,12 +428,18 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
                 let precioCajaNum = parseFoxdataNumber(precioGrupRaw);
                 if (precioCajaNum <= 0) precioCajaNum = precioUsd * cantidadGrup;
 
-                // Mapeo ultra-seguro del Stock (asumimos 10 si la API no manda la propiedad para que no se oculten)
-                let stockRaw = item.existencia ?? item.Existencia ?? item.stock ?? item.Stock ?? item.cantidad ?? item.Cantidad;
-                let stock = parseFloat(stockRaw !== undefined && stockRaw !== null ? stockRaw : 10);
+                let codigo = item.codArticulo ?? item.codigo ?? item.Codigo ?? item.CodArticulo ?? item.cod_articulo ?? item.id ?? item.Id ?? "";
+
+                let stock = 0;
+                if (appState.stockMap && appState.stockMap.has(codigo)) {
+                    stock = appState.stockMap.get(codigo);
+                } else {
+                    // Fallback
+                    let stockRaw = item.existencia ?? item.Existencia ?? item.stock ?? item.Stock ?? item.cantidad ?? item.Cantidad;
+                    stock = parseFloat(stockRaw !== undefined && stockRaw !== null ? stockRaw : 10);
+                }
 
                 let nombre = item.nombre ?? item.Nombre ?? item.descripcion ?? item.Descripcion ?? "Producto sin nombre";
-                let codigo = item.codArticulo ?? item.codigo ?? item.Codigo ?? item.CodArticulo ?? item.cod_articulo ?? item.id ?? item.Id ?? "";
 
                 let imagenUrl = item.imagenUrl ?? item.ImagenUrl ?? null;
                 if (imagenUrl && imagenUrl.startsWith('/')) {
@@ -375,7 +470,7 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
                     PrecioCajaNum: precioCajaNum,
                     PrecioCajaBsStr: (precioCajaNum * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 }),
                     StockNum: stock,
-                    StockStr: stock > 0 ? stock.toString() : "0",
+                    StockStr: stock >= 999 ? "Disponible" : (stock > 0 ? stock.toString() : "0"),
                     TextoBusquedaLimpio: quitarAcentos(nombre) + " " + quitarAcentos(nombreGrupo) + " " + quitarAcentos(nombreSubgrupo),
                     CantidadGrup: cantidadGrup,
                     Medida: medida,
@@ -466,10 +561,18 @@ async function cargarProductosPorSubgrupo(codGrupo, codSubgrupo, nombreGrupo, no
                 let precioCajaNum = parseFoxdataNumber(precioGrupRaw);
                 if (precioCajaNum <= 0) precioCajaNum = precioUsd * cantidadGrup;
 
-                let stockRaw = item.existencia ?? item.Existencia ?? item.stock ?? item.Stock ?? item.cantidad ?? item.Cantidad;
-                let stock = parseFloat(stockRaw !== undefined && stockRaw !== null ? stockRaw : 10);
-                let nombre = item.nombre ?? item.Nombre ?? item.descripcion ?? item.Descripcion ?? "Producto sin nombre";
                 let codigo = item.codArticulo ?? item.codigo ?? item.Codigo ?? item.CodArticulo ?? item.cod_articulo ?? item.id ?? item.Id ?? "";
+
+                let stock = 0;
+                if (appState.stockMap && appState.stockMap.has(codigo)) {
+                    stock = appState.stockMap.get(codigo);
+                } else {
+                    // Fallback
+                    let stockRaw = item.existencia ?? item.Existencia ?? item.stock ?? item.Stock ?? item.cantidad ?? item.Cantidad;
+                    stock = parseFloat(stockRaw !== undefined && stockRaw !== null ? stockRaw : 10);
+                }
+
+                let nombre = item.nombre ?? item.Nombre ?? item.descripcion ?? item.Descripcion ?? "Producto sin nombre";
 
                 let imagenUrl = item.imagenUrl ?? item.ImagenUrl ?? null;
                 if (imagenUrl && imagenUrl.startsWith('/')) {
