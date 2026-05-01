@@ -173,7 +173,9 @@ textarea {
 
 /* Ajuste para el contenedor de herramientas (filtros, etc.) */
 .tools-container {
-    padding-top: 0 !important;
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+    min-height: auto !important;
 }
 
 #contenedorCategorias {

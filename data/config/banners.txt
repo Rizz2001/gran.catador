@@ -1,3 +1,1 @@
-img1.webp
-img2.webp
-img3.webp
+img1.webp,
