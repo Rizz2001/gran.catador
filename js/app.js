@@ -343,13 +343,36 @@ async function cargarInventarioDesdeAPI() {
     const [_, dataGrupos] = await Promise.all([existenciasPromise, gruposPromise]);
     updateApiProgress(50);
 
-    let grupos = Array.isArray(dataGrupos) ? dataGrupos : (dataGrupos.data || dataGrupos.result || []);
+    // --- BÚSQUEDA ROBUSTA DEL LISTADO DE GRUPOS ---
+    let grupos = [];
+    if (Array.isArray(dataGrupos)) {
+        grupos = dataGrupos;
+    } else if (dataGrupos && typeof dataGrupos === 'object') {
+        // Intentar nombres comunes
+        grupos = dataGrupos.data || dataGrupos.result || dataGrupos.grupos || dataGrupos.items || [];
+        // Si sigue vacío, buscar cualquier propiedad dentro del objeto que sea un Array
+        if (grupos.length === 0) {
+            for (let key in dataGrupos) {
+                if (Array.isArray(dataGrupos[key])) {
+                    grupos = dataGrupos[key];
+                    break;
+                }
+            }
+        }
+    }
 
     if (grupos.length > 0) {
         appState.gruposInventario = grupos;
         console.log("📂 Grupos procesados correctamente:", grupos.length);
     } else {
         console.warn("⚠️ La API respondió pero no se encontró un listado de grupos válido.", dataGrupos);
+
+        // Si la API devolvió un objeto con mensaje de error, detener todo y mostrarlo en pantalla
+        if (dataGrupos && !Array.isArray(dataGrupos) && Object.keys(dataGrupos).length > 0) {
+            throw new Error(`SmartVentas devolvió un error: ${JSON.stringify(dataGrupos)}`);
+        } else {
+            throw new Error("La base de datos respondió, pero la lista de grupos está vacía.");
+        }
     }
 
     // --- 2. DESCARGAR PRODUCTOS (ARTÍCULOS) ---

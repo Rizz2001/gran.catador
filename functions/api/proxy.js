@@ -49,6 +49,21 @@ export async function onRequest(context) {
         });
 
         const tokenData = await tokenResponse.json();
+        
+        if (!tokenData.access_token) {
+            return new Response(JSON.stringify({ 
+                error: "Fallo al obtener token de Foxdata", 
+                detalles: tokenData,
+                envStatus: {
+                    clientIdConfigurado: !!context.env.FOXDATA_CLIENT_ID,
+                    clientSecretConfigurado: !!context.env.FOXDATA_CLIENT_SECRET
+                }
+            }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json', ...corsHeaders }
+            });
+        }
+
         const tokenFresco = tokenData.access_token; // Aquí Cloudflare atrapa tu token automáticamente
 
         // 3. CONSULTAR EL INVENTARIO O IMAGEN CON EL TOKEN FRESCO
