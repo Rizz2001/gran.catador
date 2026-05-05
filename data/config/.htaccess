@@ -1,5 +1,3 @@
-# Bloquear acceso directo a archivos JSON y TXT en esta carpeta
-<FilesMatch "\.(json|txt)$">
-    Order deny,allow
-    Deny from all
-</FilesMatch>
+# Deniega el acceso a todos los archivos en este directorio
+Order Allow,Deny
+Deny from All

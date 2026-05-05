@@ -3,362 +3,413 @@
  */
 
 /** Guarda el estado actual del carrito en LocalStorage */
-function guardarCarritoLS() { 
-    localStorage.setItem('gc_cart', JSON.stringify(appState.carrito)); 
+function guardarCarritoLS() {
+    localStorage.setItem('gc_cart', JSON.stringify(appState.carrito));
 }
 
 /** Anima un producto volando hacia el icono del carrito flotante */
 function animarAlCarrito(btnElement, imgSrc) {
-    if (!btnElement || !imgSrc) return; 
-    
+    if (!btnElement || !imgSrc) return;
+
     // Buscar el icono del carrito activo (header en PC, nav en móvil)
     let cartIcon = document.querySelector('.header-right .icon-btn[aria-label="Carrito"]');
     const navCart = document.getElementById('nav-cart');
     const bottomNav = document.querySelector('.bottom-nav');
-    
+
     if (navCart && bottomNav && getComputedStyle(bottomNav).display !== 'none') {
         cartIcon = navCart;
     }
 
     if (!cartIcon) return;
-    
-    const btnRect = btnElement.getBoundingClientRect(); 
-    const cartRect = cartIcon.getBoundingClientRect(); 
+
+    const btnRect = btnElement.getBoundingClientRect();
+    const cartRect = cartIcon.getBoundingClientRect();
     const flyingImg = document.createElement('img');
-    
-    flyingImg.src = imgSrc; 
-    flyingImg.className = 'flying-img'; 
-    flyingImg.style.left = `${btnRect.left}px`; 
-    flyingImg.style.top = `${btnRect.top}px`; 
+
+    flyingImg.src = imgSrc;
+    flyingImg.className = 'flying-img';
+    flyingImg.style.left = `${btnRect.left}px`;
+    flyingImg.style.top = `${btnRect.top}px`;
     document.body.appendChild(flyingImg);
-    
-    setTimeout(() => { 
-        flyingImg.style.left = `${cartRect.left + (cartRect.width / 2) - 7.5}px`; 
-        flyingImg.style.top = `${cartRect.top + (cartRect.height / 2) - 7.5}px`; 
-        flyingImg.style.width = '15px'; 
-        flyingImg.style.height = '15px'; 
-        flyingImg.style.opacity = '0.3'; 
+
+    setTimeout(() => {
+        flyingImg.style.left = `${cartRect.left + (cartRect.width / 2) - 7.5}px`;
+        flyingImg.style.top = `${cartRect.top + (cartRect.height / 2) - 7.5}px`;
+        flyingImg.style.width = '15px';
+        flyingImg.style.height = '15px';
+        flyingImg.style.opacity = '0.3';
     }, 10);
-    
-    setTimeout(() => { 
-        flyingImg.remove(); 
-        cartIcon.style.transform = 'scale(1.2)'; 
-        setTimeout(() => cartIcon.style.transform = 'scale(1)', 200); 
+
+    setTimeout(() => {
+        flyingImg.remove();
+        cartIcon.style.transform = 'scale(1.2)';
+        setTimeout(() => cartIcon.style.transform = 'scale(1)', 200);
     }, 600);
 }
 
 /** Añade un producto al estado del carrito y lanza efectos visuales */
 function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = '', esCaja = false) {
     let nombreFinal = esCaja ? `${nombre} (CAJA)` : `${nombre} (UNIDAD)`;
-    
+
     // Buscar el código para guardar la imagen en el carrito
     let prodObj = appState.inventario.find(x => x.Nombre === nombre);
-    
+
     if (appState.carrito[nombreFinal]) {
-        appState.carrito[nombreFinal].cantidad++; 
+        appState.carrito[nombreFinal].cantidad++;
     } else {
-        appState.carrito[nombreFinal] = { 
-            precio: precio, 
-            cantidad: 1, 
+        appState.carrito[nombreFinal] = {
+            precio: precio,
+            cantidad: 1,
             codigo: prodObj ? prodObj.codigo : '',
             categoria: prodObj ? prodObj.Cat : ''
         };
     }
-    
-    guardarCarritoLS(); 
-    actualizarCartCount(); 
-    
+
+    guardarCarritoLS();
+    actualizarCartCount();
+
     // Haptic Feedback (Vibración nativa en móviles compatibles)
     if (typeof navigator !== 'undefined' && navigator.vibrate) { navigator.vibrate(50); }
-    
+
     if (btnElement && imgSrc) {
         animarAlCarrito(btnElement, imgSrc);
     }
-    
+
     // Cambio visual de confirmación en el botón
-    if (btnElement) { 
-        let iconoOriginal = btnElement.innerHTML; 
-        btnElement.innerHTML = '<i class="fa-solid fa-check"></i>'; 
-        btnElement.style.background = "#fff"; 
-        btnElement.style.color = "var(--verde-btn)"; 
-        
-        setTimeout(() => { 
-            btnElement.innerHTML = iconoOriginal; 
-            btnElement.style.background = esCaja ? "var(--dorado)" : "var(--verde-btn)"; 
-            btnElement.style.color = esCaja ? "black" : "#fff"; 
-        }, 500); 
+    if (btnElement) {
+        let iconoOriginal = btnElement.innerHTML;
+        btnElement.innerHTML = '<i class="fa-solid fa-check"></i>';
+        btnElement.style.background = "#fff";
+        btnElement.style.color = "var(--verde-btn)";
+
+        // --- NUEVO: Texto flotante "¡Agregado al carrito!" debajo del botón ---
+        let parent = btnElement.parentElement;
+        parent.style.position = 'relative'; // Convertir al padre en el punto de anclaje
+
+        // Limpiar mensaje anterior si el usuario hace clics muy rápidos
+        let oldMsg = parent.querySelector('.cart-msg-toast');
+        if (oldMsg) oldMsg.remove();
+
+        let msgConf = document.createElement('div');
+        msgConf.className = 'cart-msg-toast';
+        msgConf.innerText = "¡Agregado al carrito!";
+        msgConf.style.position = 'absolute';
+        msgConf.style.background = 'var(--color-success, #10B981)';
+        msgConf.style.color = 'white';
+        msgConf.style.fontSize = '10px';
+        msgConf.style.fontWeight = '700';
+        msgConf.style.padding = '4px 8px';
+        msgConf.style.borderRadius = '6px';
+        msgConf.style.whiteSpace = 'nowrap';
+        msgConf.style.pointerEvents = 'none'; // Para que no bloquee clics accidentales
+        msgConf.style.zIndex = '100';
+        msgConf.style.opacity = '0';
+        msgConf.style.transform = 'translateY(-5px)';
+        msgConf.style.transition = 'all 0.3s ease';
+        msgConf.style.boxShadow = 'var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.1))';
+
+        // Posicionamiento dinámico: A la derecha y justo debajo del botón
+        msgConf.style.right = '0';
+        msgConf.style.top = (btnElement.offsetTop + btnElement.offsetHeight + 6) + 'px';
+
+        parent.appendChild(msgConf);
+
+        // Desencadenar animación de entrada fluida
+        requestAnimationFrame(() => {
+            msgConf.style.opacity = '1';
+            msgConf.style.transform = 'translateY(0)';
+        });
+
+        setTimeout(() => {
+            btnElement.innerHTML = iconoOriginal;
+            btnElement.style.background = esCaja ? "var(--dorado)" : "var(--verde-btn)";
+            btnElement.style.color = esCaja ? "black" : "#fff";
+        }, 500);
+
+        // Desaparecer y remover del código luego de 2 segundos
+        setTimeout(() => {
+            msgConf.style.opacity = '0';
+            msgConf.style.transform = 'translateY(-5px)';
+            setTimeout(() => msgConf.remove(), 300);
+        }, 2000);
     }
-    
+
     // Lógica de Cross-Selling (Sugerencias Automáticas)
-    if (!isCross && !esCaja && prodObj) { 
-        let catMayus = (prodObj.Cat || '').toUpperCase(); 
+    if (!isCross && !esCaja && prodObj) {
+        let catMayus = (prodObj.Cat || '').toUpperCase();
         let activadoresCrossSell = ["RON", "WHISKY", "VODKA", "GINEBRA", "LICOR", "TEQUILA"];
-        if (activadoresCrossSell.some(keyword => catMayus.includes(keyword))) { 
-            sugerirAcompañante(); 
-        } 
+        if (activadoresCrossSell.some(keyword => catMayus.includes(keyword))) {
+            sugerirAcompañante();
+        }
     }
 }
 
 /** Muestra modal con sugerencias complementarias (Cross-Sell) */
 function sugerirAcompañante() {
     let sugerencias = [];
-    
-    if (appState.codigosRecomendados.length > 0) { 
-        sugerencias = appState.inventario.filter(p => appState.codigosRecomendados.includes(p.codigo) && p.StockNum > 0).slice(0, 3); 
-    } else { 
-        sugerencias = appState.inventario.filter(p => (p.Nombre.includes("HIELO") || p.Nombre.includes("COLA") || p.Nombre.includes("REFRESCO")) && p.StockNum > 0).slice(0, 3); 
+
+    if (appState.codigosRecomendados && appState.codigosRecomendados.length > 0) {
+        sugerencias = (appState.inventario || []).filter(p => appState.codigosRecomendados.includes(p.codigo) && p.StockNum > 0).slice(0, 3);
+    } else {
+        sugerencias = (appState.inventario || []).filter(p => (p.Nombre.includes("HIELO") || p.Nombre.includes("COLA") || p.Nombre.includes("REFRESCO")) && p.StockNum > 0).slice(0, 3);
     }
-    
-    if (sugerencias.length > 0) { 
-        let cont = document.getElementById('cross-sell-items'); 
+
+    if (sugerencias.length > 0) {
+        let cont = document.getElementById('cross-sell-items');
         cont.innerHTML = sugerencias.map(p => {
-            let nombreB64 = codificarNombre(p.Nombre); 
-            let carpeta = getCategoriaFolder(p.Cat);
+            let nombreB64 = codificarNombre(p.Nombre);
+            let imgSrc = p.ImagenUrl ? p.ImagenUrl : 'logo.webp';
             return `
                 <div style="min-width:130px; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:12px; text-align:center; background:var(--color-card); box-shadow:var(--shadow-sm);">
-                    <img src="assets/img/${carpeta}/${p.codigo}/1.webp" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" style="height:60px; width:100%; object-fit:contain; margin-bottom:8px; mix-blend-mode:multiply;">
+                    <img src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" style="height:60px; width:100%; object-fit:contain; margin-bottom:8px; mix-blend-mode:multiply;">
                     <p style="font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--color-text); font-family:'Inter',sans-serif;">${p.Nombre}</p>
                     <p style="font-size:15px; color:var(--color-text); font-weight:700; font-family:'Inter',sans-serif; margin-top:2px;">$${p.PrecioStr}</p>
-                    <button onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, 'assets/img/${carpeta}/${p.codigo}/1.webp', false); cerrarCrossSell();" style="background:var(--color-primary); color:white; border:none; padding:8px; border-radius:var(--radius-full); font-size:12px; font-weight:700; width:100%; margin-top:8px; cursor:pointer; transition:0.2s;"><i class="fa-solid fa-plus"></i> Añadir</button>
+                    <button onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, '${imgSrc}', false); cerrarCrossSell();" style="background:var(--color-primary); color:white; border:none; padding:8px; border-radius:var(--radius-full); font-size:12px; font-weight:700; width:100%; margin-top:8px; cursor:pointer; transition:0.2s;"><i class="fa-solid fa-plus"></i> Añadir</button>
                 </div>`;
         }).join('');
-        
-        document.getElementById('modal-cross-sell').style.display = 'flex'; 
+
+        document.getElementById('modal-cross-sell').style.display = 'flex';
     }
 }
 
-function cerrarCrossSell() { 
-    document.getElementById('modal-cross-sell').style.display = 'none'; 
+function cerrarCrossSell() {
+    document.getElementById('modal-cross-sell').style.display = 'none';
 }
 
-function actualizarCartCount() { 
-    let totalItems = 0; 
-    for(let key in appState.carrito) {
-        totalItems += appState.carrito[key].cantidad; 
+function actualizarCartCount() {
+    let totalItems = 0;
+    for (let key in appState.carrito) {
+        totalItems += appState.carrito[key].cantidad;
     }
-    document.getElementById('cart-count').innerText = totalItems; 
+    document.getElementById('cart-count').innerText = totalItems;
 }
 
-function vaciarCarrito() { 
-    if (confirm("¿Estás seguro de vaciar tu pedido?")) { 
-        appState.carrito = {}; 
-        guardarCarritoLS(); 
-        actualizarCartCount(); 
-        cerrarModal('modal-cart', 'nav-home'); 
-        mostrarToast("Pedido vaciado"); 
-    } 
+function vaciarCarrito() {
+    if (confirm("¿Estás seguro de vaciar tu pedido?")) {
+        appState.carrito = {};
+        guardarCarritoLS();
+        actualizarCartCount();
+        cerrarModal('modal-cart', 'nav-home');
+        mostrarToast("Pedido vaciado");
+    }
 }
 
-function abrirCarrito() { 
-    cerrarModal('all'); 
-    setActiveNav('nav-cart'); 
-    document.getElementById('modal-cart').style.display = 'flex'; 
-    renderizarCarrito(); 
+function abrirCarrito() {
+    cerrarModal('all');
+    setActiveNav('nav-cart');
+    document.getElementById('modal-cart').style.display = 'flex';
+    renderizarCarrito();
 }
 
-function repetirPedido(index) { 
-    let hist = JSON.parse(localStorage.getItem('gc_historial')) || []; 
-    let ped = hist[index]; 
-    if (!ped) return; 
-    
-    appState.carrito = {}; 
-    ped.items.forEach(i => { 
-        appState.carrito[i.nombre] = { precio: i.precio, cantidad: i.cantidad, codigo: i.codigo || '', categoria: i.categoria || '' }; 
-    }); 
-    
-    guardarCarritoLS(); 
-    actualizarCartCount(); 
-    cerrarModal('modal-perfil', 'nav-home'); 
-    abrirCarrito(); 
-    mostrarToast("Pedido cargado"); 
+function repetirPedido(index) {
+    let hist = JSON.parse(localStorage.getItem('gc_historial')) || [];
+    let ped = hist[index];
+    if (!ped) return;
+
+    appState.carrito = {};
+    ped.items.forEach(i => {
+        appState.carrito[i.nombre] = { precio: i.precio, cantidad: i.cantidad, codigo: i.codigo || '', categoria: i.categoria || '' };
+    });
+
+    guardarCarritoLS();
+    actualizarCartCount();
+    cerrarModal('modal-perfil', 'nav-home');
+    abrirCarrito();
+    mostrarToast("Pedido cargado");
 }
 
 /** Dibuja los productos en la vista del Carrito de Compras (Performance Optimizado) */
 function renderizarCarrito() {
-    const lista = document.getElementById('lista-carrito'); 
+    const lista = document.getElementById('lista-carrito');
     appState.totalCarrito = 0;
-    
-    if (Object.keys(appState.carrito).length === 0) { 
+
+    if (Object.keys(appState.carrito).length === 0) {
         lista.innerHTML = `
             <div style="text-align: center; padding: 60px 20px; color: var(--color-text-muted); display: flex; flex-direction: column; align-items: center;">
                 <div style="width: 80px; height: 80px; background: var(--item-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;"><i class="fa-solid fa-basket-shopping" style="font-size: 32px; color: var(--color-text-muted); opacity: 0.5;"></i></div>
                 <h3 style="color: var(--color-text); font-size: 18px; font-weight: 800; letter-spacing: -0.5px;">Tu carrito está vacío</h3>
                 <p style="font-size: 14px; margin-top: 8px; line-height: 1.5;">Agrega unas botellas para que empiece la fiesta.</p>
                 <button onclick="cerrarModal('modal-cart', 'nav-home')" class="btn-enviar" style="width: auto; padding: 12px 30px; margin-top: 25px; border-radius: var(--radius-full);">Explorar Catálogo</button>
-            </div>`; 
-        document.getElementById('checkout-sections').style.display = 'none'; 
-        return; 
+            </div>`;
+        document.getElementById('checkout-sections').style.display = 'none';
+        return;
     }
-    
-    document.getElementById('checkout-sections').style.display = 'block'; 
-        
+
+    document.getElementById('checkout-sections').style.display = 'block';
+
     let renderHTML = '';
-    for (let nombre in appState.carrito) { 
-        let nombreB64 = codificarNombre(nombre); 
-        let item = appState.carrito[nombre]; 
-        let subTotalItem = item.precio * item.cantidad; 
-        appState.totalCarrito += subTotalItem; 
-        
-        let carpeta = getCategoriaFolder(item.categoria);
-        let imgHTML = item.codigo 
-            ? `<img loading="lazy" src="assets/img/${carpeta}/${item.codigo}/1.webp" data-codigo="${item.codigo}" data-categoria="${item.categoria || ''}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" class="cart-item-img">` 
+    for (let nombre in appState.carrito) {
+        let nombreB64 = codificarNombre(nombre);
+        let item = appState.carrito[nombre];
+        // Redondear individualmente cada subtotal a 2 decimales
+        let subTotalItem = parseFloat((item.precio * item.cantidad).toFixed(2));
+        appState.totalCarrito += subTotalItem;
+
+        let prodObj = appState.inventario.find(x => x.codigo === item.codigo);
+        let imgSrc = (prodObj && prodObj.ImagenUrl) ? prodObj.ImagenUrl : 'logo.webp';
+        let imgHTML = item.codigo
+            ? `<img loading="lazy" src="${imgSrc}" data-codigo="${item.codigo}" data-categoria="${item.categoria || ''}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" class="cart-item-img">`
             : `<div class="cart-item-img-placeholder"><i class="fa-solid fa-wine-bottle"></i></div>`;
-            
+
         let btnMinus = item.cantidad > 1 ? '<i class="fa-solid fa-minus"></i>' : '<i class="fa-solid fa-trash-can" style="color: var(--color-danger);"></i>';
-        
+
         renderHTML += `
             <div class="cart-item">
                 ${imgHTML}
                 <div class="cart-item-info cart-item-info-container">
                     <p class="cart-item-title">${nombre}</p>
-                    <p class="cart-item-price">$${item.precio.toFixed(2)} <span class="cart-item-price-bs">/ ${(item.precio * appState.tasaOficial).toLocaleString('es-VE', {minimumFractionDigits:2})} Bs</span></p>
+                    <p class="cart-item-price">$${item.precio.toFixed(2)} <span class="cart-item-price-bs">/ ${(item.precio * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs</span></p>
                 </div>
                 <div class="cart-controls"><button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button><span style="font-size:13px; font-weight:800; width:18px; text-align:center;">${item.cantidad}</span><button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', 1)"><i class="fa-solid fa-plus"></i></button></div>
-            </div>`; 
+            </div>`;
     }
-    
+
     // Insertamos todo el HTML generado de una sola vez para mejorar el rendimiento (Performance)
     lista.innerHTML = renderHTML;
-    
-    document.getElementById('totalUsdModal').innerText = `$${appState.totalCarrito.toFixed(2)}`; 
-    document.getElementById('totalBsModal').innerText = `${(appState.totalCarrito * appState.tasaOficial).toLocaleString('es-VE', {minimumFractionDigits:2})} Bs`; 
+
+    // Evitar errores de coma flotante asegurando 2 decimales finales
+    appState.totalCarrito = parseFloat(appState.totalCarrito.toFixed(2));
+
+    document.getElementById('totalUsdModal').innerText = `$${appState.totalCarrito.toFixed(2)}`;
+    document.getElementById('totalBsModal').innerText = `${(appState.totalCarrito * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
     calcularVuelto();
 }
 
-function cambiarCant(n, delta) { 
-    appState.carrito[n].cantidad += delta; 
-    if(appState.carrito[n].cantidad <= 0) {
-        delete appState.carrito[n]; 
+function cambiarCant(n, delta) {
+    appState.carrito[n].cantidad += delta;
+    if (appState.carrito[n].cantidad <= 0) {
+        delete appState.carrito[n];
     }
-    guardarCarritoLS(); 
-    actualizarCartCount(); 
-    renderizarCarrito(); 
+    guardarCarritoLS();
+    actualizarCartCount();
+    renderizarCarrito();
 }
 
-function toggleDireccion() { 
-    let met = document.querySelector('input[name="metodoEntrega"]:checked').value; 
+function toggleDireccion() {
+    let met = document.querySelector('input[name="metodoEntrega"]:checked').value;
     let dirInput = document.getElementById('direccionDelivery');
-    let btnMap = document.getElementById('btnMap'); 
-    
-    if (met === 'Delivery') { 
-        dirInput.style.display = 'block'; 
-        btnMap.style.display = 'none'; 
+    let btnMap = document.getElementById('btnMap');
+
+    if (met === 'Delivery') {
+        dirInput.style.display = 'block';
+        btnMap.style.display = 'none';
         if (localStorage.getItem('gc_direccion') && !dirInput.value) {
-            dirInput.value = localStorage.getItem('gc_direccion'); 
+            dirInput.value = localStorage.getItem('gc_direccion');
         }
-    } else { 
-        dirInput.style.display = 'none'; 
-        btnMap.style.display = 'block'; 
-    } 
+    } else {
+        dirInput.style.display = 'none';
+        btnMap.style.display = 'block';
+    }
 }
 
-function abrirMapa() { 
-    window.open('https://maps.app.goo.gl/tgjTHzaRd8xPdNbb7', '_blank'); 
-} 
-
-function actualizarMetodoPago() { 
-    let val = document.getElementById('metodoPagoSelect').value; 
-    document.getElementById('box-efectivo').style.display = (val === 'Efectivo') ? 'block' : 'none'; 
-    
-    let boxPm = document.getElementById('box-pagomovil'); 
-    if(boxPm) boxPm.style.display = (val === 'Pago Movil') ? 'block' : 'none'; 
-    
-    let boxZ = document.getElementById('box-zelle'); 
-    if(boxZ) boxZ.style.display = (val === 'Zelle') ? 'block' : 'none'; 
+function abrirMapa() {
+    window.open('https://maps.app.goo.gl/tgjTHzaRd8xPdNbb7', '_blank');
 }
 
-function calcularVuelto() { 
-    let pago = parseFloat(document.getElementById('montoPago').value) || 0; 
-    let res = document.getElementById('res-vuelto'); 
-    
-    if(pago > 0 && pago > appState.totalCarrito) { 
-        let vUsd = pago - appState.totalCarrito; 
-        let vBs = vUsd * appState.tasaOficial; 
-        res.style.display = 'block'; 
-        res.style.color = 'var(--verde-btn)'; 
-        res.innerHTML = `Vuelto: $${vUsd.toFixed(2)} / ${vBs.toLocaleString('es-VE', {minimumFractionDigits:2})} Bs`; 
-    } else { 
-        res.style.display = 'none'; 
-    } 
+function actualizarMetodoPago() {
+    let val = document.getElementById('metodoPagoSelect').value;
+    document.getElementById('box-efectivo').style.display = (val === 'Efectivo') ? 'block' : 'none';
+
+    let boxPm = document.getElementById('box-pagomovil');
+    if (boxPm) boxPm.style.display = (val === 'Pago Movil') ? 'block' : 'none';
+
+    let boxZ = document.getElementById('box-zelle');
+    if (boxZ) boxZ.style.display = (val === 'Zelle') ? 'block' : 'none';
+}
+
+function calcularVuelto() {
+    let pago = parseFloat(document.getElementById('montoPago').value) || 0;
+    let res = document.getElementById('res-vuelto');
+
+    if (pago > 0 && pago > appState.totalCarrito) {
+        let vUsd = parseFloat((pago - appState.totalCarrito).toFixed(2));
+        let vBs = parseFloat((vUsd * appState.tasaOficial).toFixed(2));
+        res.style.display = 'block';
+        res.style.color = 'var(--verde-btn)';
+        res.innerHTML = `Vuelto: $${vUsd.toFixed(2)} / ${vBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
+    } else {
+        res.style.display = 'none';
+    }
 }
 
 /** Finaliza la compra y procesa el texto hacia WhatsApp */
-function enviarPedido() { 
-    if (Object.keys(appState.carrito).length === 0) return alert("Tu carrito está vacío."); 
-    if (!appState.isTiendaAbierta) return alert("Lo sentimos, Gran Catador está cerrado en este momento."); 
-    
+function enviarPedido() {
+    if (Object.keys(appState.carrito).length === 0) return alert("Tu carrito está vacío.");
+    if (!appState.isTiendaAbierta) return alert("Lo sentimos, Gran Catador está cerrado en este momento.");
+
     // Generar registro histórico del pedido
-    let historial = JSON.parse(localStorage.getItem('gc_historial')) || []; 
-    let fechaDate = new Date(); 
-    let fechaStr = fechaDate.toLocaleDateString('es-VE') + " - " + fechaDate.toLocaleTimeString('es-VE', {hour:'2-digit', minute:'2-digit'}); 
-    
-    let nuevoPedido = { 
-        fecha: fechaStr, 
-        total: appState.totalCarrito, 
-        items: Object.keys(appState.carrito).map(k => ({ 
-            nombre: k, 
-            precio: appState.carrito[k].precio, 
-            cantidad: appState.carrito[k].cantidad, 
+    let historial = JSON.parse(localStorage.getItem('gc_historial')) || [];
+    let fechaDate = new Date();
+    let fechaStr = fechaDate.toLocaleDateString('es-VE') + " - " + fechaDate.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+
+    let nuevoPedido = {
+        fecha: fechaStr,
+        total: appState.totalCarrito,
+        items: Object.keys(appState.carrito).map(k => ({
+            nombre: k,
+            precio: appState.carrito[k].precio,
+            cantidad: appState.carrito[k].cantidad,
             codigo: appState.carrito[k].codigo,
-            categoria: appState.carrito[k].categoria 
-        })) 
-    }; 
-    
-    historial.unshift(nuevoPedido); 
-    if(historial.length > 5) historial.pop(); // Solo se guardan los últimos 5
-    localStorage.setItem('gc_historial', JSON.stringify(historial)); 
-    
+            categoria: appState.carrito[k].categoria
+        }))
+    };
+
+    historial.unshift(nuevoPedido);
+    if (historial.length > 5) historial.pop(); // Solo se guardan los últimos 5
+    localStorage.setItem('gc_historial', JSON.stringify(historial));
+
     // Comienza la construcción del mensaje de WhatsApp
-    let nombreUser = localStorage.getItem('gc_nombre') || 'un cliente nuevo'; 
-    let msg = `🔥 *NUEVO PEDIDO - GRAN CATADOR* 🔥\n\n👤 *Cliente:* ${nombreUser}\n--------------------------------\n`; 
-    
-    for(let nombre in appState.carrito) { 
-        msg += `▪ ${appState.carrito[nombre].cantidad}x ${nombre}\n`; 
-    } 
-    msg += `--------------------------------\n`; 
-    
-    let entrega = document.querySelector('input[name="metodoEntrega"]:checked').value; 
-    msg += `📦 *Entrega:* ${entrega}\n`; 
-    
-    if (entrega === 'Delivery') { 
-        let dir = document.getElementById('direccionDelivery').value.trim(); 
-        if(!dir) return alert("Por favor, ingresa tu dirección para el delivery."); 
-        msg += `📍 *Dirección:* ${dir}\n`; 
-        if(!localStorage.getItem('gc_direccion')) localStorage.setItem('gc_direccion', dir); 
-    } 
-    
-    let notas = document.getElementById('notasPedido').value.trim(); 
-    if (notas) msg += `📝 *Notas:* ${notas}\n`; 
-    
-    let metodo = document.getElementById('metodoPagoSelect').value; 
-    msg += `💳 *Método de Pago:* ${metodo}\n`; 
-    
-    if (metodo === 'Efectivo') { 
-        let pago = parseFloat(document.getElementById('montoPago').value) || 0; 
-        if (pago > appState.totalCarrito) { 
-            msg += `💵 _Paga con $${pago.toFixed(2)}_\n🟢 _Requiere vuelto: $${(pago - appState.totalCarrito).toFixed(2)}_\n`; 
-        } 
-    } else { 
-        msg += `📎 _[Capture adjunto en el siguiente mensaje]_\n`; 
-    } 
-    
-    msg += `\n💰 *TOTAL A PAGAR: $${appState.totalCarrito.toFixed(2)}*\n💱 _(Tasa BCV: ${appState.tasaOficial.toFixed(2)} Bs)_`; 
-    
+    let nombreUser = localStorage.getItem('gc_nombre') || 'un cliente nuevo';
+    let msg = `🔥 *NUEVO PEDIDO - GRAN CATADOR* 🔥\n\n👤 *Cliente:* ${nombreUser}\n--------------------------------\n`;
+
+    for (let nombre in appState.carrito) {
+        let iconoProducto = nombre.includes('(CAJA)') ? '📦' : '🍾';
+        msg += `${iconoProducto} ${appState.carrito[nombre].cantidad}x *${nombre}*\n`;
+    }
+    msg += `--------------------------------\n`;
+
+    let entrega = document.querySelector('input[name="metodoEntrega"]:checked').value;
+    msg += `📦 *Entrega:* ${entrega}\n`;
+
+    if (entrega === 'Delivery') {
+        let dir = document.getElementById('direccionDelivery').value.trim();
+        if (!dir) return alert("Por favor, ingresa tu dirección para el delivery.");
+        msg += `📍 *Dirección:* ${dir}\n`;
+        if (!localStorage.getItem('gc_direccion')) localStorage.setItem('gc_direccion', dir);
+    }
+
+    let notas = document.getElementById('notasPedido').value.trim();
+    if (notas) msg += `📝 *Notas:* ${notas}\n`;
+
+    let metodo = document.getElementById('metodoPagoSelect').value;
+    msg += `💳 *Método de Pago:* ${metodo}\n`;
+
+    if (metodo === 'Efectivo') {
+        let pago = parseFloat(document.getElementById('montoPago').value) || 0;
+        if (pago > appState.totalCarrito) {
+            msg += `💵 _Paga con $${pago.toFixed(2)}_\n🟢 _Requiere vuelto: $${(pago - appState.totalCarrito).toFixed(2)}_\n`;
+        }
+    } else {
+        msg += `📎 _[Capture adjunto en el siguiente mensaje]_\n`;
+    }
+
+    msg += `\n💰 *TOTAL A PAGAR: $${appState.totalCarrito.toFixed(2)}*\n💱 _(Tasa BCV: ${appState.tasaOficial.toFixed(2)} Bs)_`;
+
     // Limpieza post-compra
-    localStorage.removeItem('gc_inv_time_v3'); 
-    appState.carrito = {}; 
-    guardarCarritoLS(); 
-    actualizarCartCount(); 
-    cerrarModal('modal-cart', 'nav-home'); 
-    
-    window.open(`https://wa.me/584245496366?text=${encodeURIComponent(msg)}`, '_blank'); 
+    localStorage.removeItem('gc_inv_time_v3');
+    appState.carrito = {};
+    guardarCarritoLS();
+    actualizarCartCount();
+    cerrarModal('modal-cart', 'nav-home');
+
+    window.open(`https://wa.me/584245496366?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 /** Helpers para base64 que se enlazan desde HTML de forma segura */
-function agregarAlCarritoB64(b64, p, btn, c = false, img = '', esCaja = false) { 
-    agregarAlCarrito(decodificarNombre(b64), p, btn, c, img, esCaja); 
+function agregarAlCarritoB64(b64, p, btn, c = false, img = '', esCaja = false) {
+    agregarAlCarrito(decodificarNombre(b64), p, btn, c, img, esCaja);
 }
 
-function cambiarCantB64(b64, d) { 
-    cambiarCant(decodificarNombre(b64), d); 
+function cambiarCantB64(b64, d) {
+    cambiarCant(decodificarNombre(b64), d);
 }

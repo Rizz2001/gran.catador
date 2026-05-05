@@ -16,9 +16,9 @@ export async function onRequest(context) {
         const requestUrl = new URL(context.request.url);
         const endpoint = requestUrl.searchParams.get("endpoint") || "gruposinv";
         const imagePath = requestUrl.searchParams.get("imagePath");
-        
+
         let urlFoxdata = "";
-        
+
         if (imagePath) {
             urlFoxdata = `https://apismartventas.foxdata.app${imagePath}`;
         } else {
@@ -37,8 +37,8 @@ export async function onRequest(context) {
         const authUrl = "https://auth.foxdata.app/connect/token";
         const credenciales = new URLSearchParams({
             'grant_type': 'client_credentials',
-            'client_id': 'smvt-apiweb-C0006',
-            'client_secret': 'i84so7BEzsUo',
+            'client_id': context.env.FOXDATA_CLIENT_ID,
+            'client_secret': context.env.FOXDATA_CLIENT_SECRET,
             'scope': 'smartventas-api smartventas.service.read smartventas.service.write'
         });
 
@@ -58,7 +58,7 @@ export async function onRequest(context) {
                 'Authorization': `Bearer ${tokenFresco}`
             }
         };
-        
+
         if (!imagePath) {
             fetchOptions.headers['Content-Type'] = 'application/json';
         }

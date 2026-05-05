@@ -38,8 +38,8 @@ function procesarTermino(t) { let sin = diccionarioSinonimos[t] || t; if (sin.le
 /** @type {Map<string, Set<string>>} token → Set de códigos de producto */
 let _searchIndex = new Map();
 
-/** @type {number} Número de productos al momento de construir el índice */
-let _searchIndexVersion = 0;
+/** @type {string} Hash rápido para detectar cambios en inventario */
+let _searchIndexVersion = "";
 
 /**
  * Tokeniza un texto: normaliza, quita acentos y genera prefijos (≥3 chars).
@@ -72,7 +72,10 @@ function tokenizar(texto) {
  */
 function buildSearchIndex(lista) {
     if (!lista || lista.length === 0) return;
-    if (lista.length === _searchIndexVersion) return;
+
+    // Usar length + un par de IDs aleatorios o valores como firma rápida
+    let currentHash = lista.length + "-" + (lista[0]?.codigo || "") + "-" + (lista[lista.length - 1]?.codigo || "");
+    if (currentHash === _searchIndexVersion) return;
 
     const nuevoIndice = new Map();
     lista.forEach(p => {
@@ -94,7 +97,7 @@ function buildSearchIndex(lista) {
     });
 
     _searchIndex = nuevoIndice;
-    _searchIndexVersion = lista.length;
+    _searchIndexVersion = currentHash;
 }
 
 /**
@@ -215,23 +218,17 @@ function decodificarNombre(b64) { try { return decodeURIComponent(escape(atob(b6
 
 // --- REDES Y DOM HELPERS GENÉRICOS ---
 
-function imgFallback(imgElement, codigoProducto, categoria) {
-    let attempts = imgElement.dataset.attempts ? parseInt(imgElement.dataset.attempts) : 0; const formatos = ['webp', 'jpg', 'png', 'jpeg']; attempts++;
-    let carpeta = getCategoriaFolder(categoria);
-    if (attempts < formatos.length) { imgElement.dataset.attempts = attempts; imgElement.src = `assets/img/${carpeta}/${codigoProducto}.${formatos[attempts]}`; } else { imgElement.src = 'logo.webp'; imgElement.onerror = null; }
+function imgFallback(imgElement) {
+    imgElement.src = 'logo.webp';
+    imgElement.onerror = null;
 }
 
 function imgFallbackFolder(imgElement) {
-    let attempts = imgElement.dataset.attempts ? parseInt(imgElement.dataset.attempts) : 0;
-    let codigo = imgElement.dataset.codigo; let index = imgElement.dataset.index || "1";
-    let categoria = imgElement.dataset.categoria || "otros";
-    let carpeta = getCategoriaFolder(categoria);
-    const formatos = ['webp', 'jpg', 'png', 'jpeg']; attempts++;
-    if (attempts < formatos.length) {
-        imgElement.dataset.attempts = attempts;
-        imgElement.src = `assets/img/${carpeta}/${codigo}/${index}.${formatos[attempts]}`;
+    let index = imgElement.dataset.index || "1";
+    if (index === "1") {
+        imgElement.src = 'logo.webp';
     } else {
-        if (index === "1") { imgElement.src = 'logo.webp'; } else { imgElement.style.display = 'none'; }
-        imgElement.onerror = null;
+        imgElement.style.display = 'none';
     }
+    imgElement.onerror = null;
 }

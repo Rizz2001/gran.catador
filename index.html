@@ -222,14 +222,20 @@
     <button id="btn-cargar-mas" class="btn-cargar-mas" onclick="cargarMasProductos()">Cargar más productos...</button>
 
     <footer class="main-footer-new">
-        <div class="container footer-container" style="display: flex; justify-content: center; text-align: center; padding-top: 40px; padding-bottom: 20px;">
+        <div class="container footer-container"
+            style="display: flex; justify-content: center; text-align: center; padding-top: 40px; padding-bottom: 20px;">
             <div class="footer-col" style="align-items: center; max-width: 400px; margin: 0 auto;">
-                <img src="logo.webp" alt="Logo Gran Catador" class="footer-logo" onerror="this.style.display='none'" style="margin: 0 auto 15px auto; width: 140px; height: auto; border-radius: 8px;">
-                <p class="footer-desc" style="font-size: 14px; margin-bottom: 25px; line-height: 1.6;">Gran Catador Supermercado y Bodegón. Para pedidos especiales o dudas, escríbenos directamente.</p>
+                <img src="logo.webp" alt="Logo Gran Catador" class="footer-logo" onerror="this.style.display='none'"
+                    style="margin: 0 auto 15px auto; width: 140px; height: auto; border-radius: 8px;">
+                <p class="footer-desc" style="font-size: 14px; margin-bottom: 25px; line-height: 1.6;">Gran Catador
+                    Supermercado y Bodegón. Para pedidos especiales o dudas, escríbenos directamente.</p>
                 <div class="footer-social-new" style="justify-content: center; gap: 20px;">
-                    <a href="https://wa.me/584245496366" target="_blank" aria-label="WhatsApp" style="background-color: #25d366; color: white; width: 45px; height: 45px; font-size: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);"><i
+                    <a href="https://wa.me/584245496366" target="_blank" aria-label="WhatsApp"
+                        style="background-color: #25d366; color: white; width: 45px; height: 45px; font-size: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);"><i
                             class="fa-brands fa-whatsapp"></i></a>
-                    <a href="https://www.instagram.com/elcatador.bnas/" target="_blank" aria-label="Instagram" style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; width: 45px; height: 45px; font-size: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 4px 10px rgba(220, 39, 67, 0.3);"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://www.instagram.com/elcatador.bnas/" target="_blank" aria-label="Instagram"
+                        style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; width: 45px; height: 45px; font-size: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 4px 10px rgba(220, 39, 67, 0.3);"><i
+                            class="fa-brands fa-instagram"></i></a>
                 </div>
             </div>
         </div>
@@ -240,242 +246,242 @@
 
     <div id="toast-container"></div>
 
-    <div id="modal-cross-sell"
-        style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(17,24,39,0.8); backdrop-filter:blur(4px); z-index:4000; display:none; align-items:flex-end;">
-        <div class="cross-modal-content"
-            style="background:var(--color-bg); width:100%; padding:25px; border-top-left-radius:25px; border-top-right-radius:25px; box-shadow: 0 -10px 25px rgba(0,0,0,0.1);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h3
-                    style="color:var(--color-text); font-size:20px; font-weight:800; font-family:'Poppins', sans-serif; letter-spacing:-0.5px;">
-                    ¡Acompaña tu bebida!</h3>
-                <button onclick="cerrarCrossSell()" aria-label="Cerrar sugerencias"
-                    style="background:var(--item-bg); border:none; width:32px; height:32px; border-radius:50%; font-size:16px; cursor:pointer; color:var(--color-text); display:flex; align-items:center; justify-content:center;"><i
-                        class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-            </div>
-            <p style="font-size:13px; color:var(--color-text-muted); margin-bottom:20px;">Añade esto a tu carrito para
-                disfrutar mejor:</p>
-            <div id="cross-sell-items" style="display:flex; gap:15px; overflow-x:auto; padding-bottom:10px;"></div>
-            <button onclick="cerrarCrossSell()"
-                style="width:100%; background:transparent; color:var(--color-text-muted); border:1px solid var(--color-border); padding:14px; border-radius:var(--radius-full); font-weight:700; margin-top:15px; cursor:pointer; transition:0.2s;">No,
-                gracias</button>
-        </div>
-    </div>
-
     <div id="modal-cart" class="modal-fullscreen">
-        <div class="cart-header">
-            <h2>Mi Pedido</h2>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-trash" onclick="vaciarCarrito()" aria-label="Vaciar carrito de compras"><i
-                        class="fa-solid fa-trash-can"></i></button>
-                <button onclick="cerrarModal('modal-cart', 'nav-home')" aria-label="Cerrar carrito"
-                    style="background:var(--color-card); border:1px solid var(--color-border); width:40px; height:40px; border-radius:50%; font-size: 18px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i
-                        class="fa-solid fa-xmark"></i></button>
-            </div>
-        </div>
-        <div id="lista-carrito" style="flex-grow: 1;"></div>
-
-        <div id="checkout-sections">
-            <div class="checkout-box">
-                <p class="box-title"><i class="fa-solid fa-truck-fast"></i> Opciones de Entrega</p>
-                <div class="delivery-toggles">
-                    <input type="radio" id="ret" name="metodoEntrega" value="Retiro" checked
-                        onchange="toggleDireccion()">
-                    <label for="ret" class="toggle-btn">Retiro Local</label>
-                    <input type="radio" id="del" name="metodoEntrega" value="Delivery" onchange="toggleDireccion()">
-                    <label for="del" class="toggle-btn">Delivery</label>
+        <div class="modal-content-wrapper">
+            <div class="cart-header">
+                <h2>Mi Pedido</h2>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-trash" onclick="vaciarCarrito()" aria-label="Vaciar carrito de compras"><i
+                            class="fa-solid fa-trash-can"></i></button>
+                    <button onclick="cerrarModal('modal-cart', 'nav-home')" aria-label="Cerrar carrito"
+                        style="background:var(--color-card); border:1px solid var(--color-border); width:40px; height:40px; border-radius:50%; font-size: 18px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i
+                            class="fa-solid fa-xmark"></i></button>
                 </div>
-                <input type="text" id="direccionDelivery" class="input-text"
-                    placeholder="Ingresa tu dirección exacta..." style="display:none;">
-                <button id="btnMap" class="btn-maps" onclick="abrirMapa()"><i class="fa-solid fa-location-dot"></i> Ver
-                    ruta a la tienda</button>
-                <textarea id="notasPedido" class="input-text" placeholder="Notas (Ej: Traer hielo extra)..."
-                    style="margin-top:10px; height: 60px;"></textarea>
             </div>
+            <div id="lista-carrito" style="flex-grow: 1;"></div>
 
-            <div class="checkout-box">
-                <p class="box-title"><i class="fa-regular fa-credit-card"></i> Método de Pago</p>
-                <select id="metodoPagoSelect" class="input-select" onchange="actualizarMetodoPago()">
-                    <option value="Efectivo">💵 Efectivo</option>
-                    <option value="Pago Movil">📱 Pago Móvil</option>
-                    <option value="Zelle">🟣 Zelle</option>
-                </select>
-
-                <div id="box-efectivo" style="margin-top: 15px; text-align: center;">
-                    <p style="font-size: 11px; color: var(--texto-claro); margin-bottom: 5px;">¿Con cuánto vas a pagar?
-                    </p>
-                    <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
-                        <span style="font-size:20px; color:var(--dorado); font-weight:bold;">$</span>
-                        <input type="number" id="montoPago" class="vuelto-input" placeholder="0.00"
-                            onkeyup="calcularVuelto()">
+            <div id="checkout-sections">
+                <div class="checkout-box">
+                    <p class="box-title"><i class="fa-solid fa-truck-fast"></i> Opciones de Entrega</p>
+                    <div class="delivery-toggles">
+                        <input type="radio" id="ret" name="metodoEntrega" value="Retiro" checked
+                            onchange="toggleDireccion()">
+                        <label for="ret" class="toggle-btn">Retiro Local</label>
+                        <input type="radio" id="del" name="metodoEntrega" value="Delivery" onchange="toggleDireccion()">
+                        <label for="del" class="toggle-btn">Delivery</label>
                     </div>
-                    <p id="res-vuelto" style="font-size:12px; margin-top:5px; display:none; font-weight:bold;"></p>
+                    <input type="text" id="direccionDelivery" class="input-text"
+                        placeholder="Ingresa tu dirección exacta..." style="display:none;">
+                    <button id="btnMap" class="btn-maps" onclick="abrirMapa()"><i class="fa-solid fa-location-dot"></i>
+                        Ver
+                        ruta a la tienda</button>
+                    <textarea id="notasPedido" class="input-text" placeholder="Notas (Ej: Traer hielo extra)..."
+                        style="margin-top:10px; height: 60px;"></textarea>
                 </div>
 
-                <div id="box-pagomovil"
-                    style="margin-top: 15px; display:none; background: var(--color-bg); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--color-border); text-align: left;">
-                    <p
-                        style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing:0.5px;">
-                        Datos Pago Móvil</p>
-                    <p style="font-size: 13px; margin-bottom: 4px;"><b>Banco:</b> Mercantil (0105)</p>
-                    <p style="font-size: 13px; margin-bottom: 4px;"><b>Teléfono:</b> 0414-3732274</p>
-                    <p style="font-size: 13px; margin-bottom: 8px;"><b>Cédula/RIF:</b> V-22582611</p>
-                    <p
-                        style="font-size: 11px; color: var(--color-primary); font-weight: bold; text-align: center; margin-top: 10px;">
-                        <i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp
-                    </p>
+                <div class="checkout-box">
+                    <p class="box-title"><i class="fa-regular fa-credit-card"></i> Método de Pago</p>
+                    <select id="metodoPagoSelect" class="input-select" onchange="actualizarMetodoPago()">
+                        <option value="Efectivo">💵 Efectivo</option>
+                        <option value="Pago Movil">📱 Pago Móvil</option>
+                        <option value="Zelle">🟣 Zelle</option>
+                    </select>
+
+                    <div id="box-efectivo" style="margin-top: 15px; text-align: center;">
+                        <p style="font-size: 11px; color: var(--texto-claro); margin-bottom: 5px;">¿Con cuánto vas a
+                            pagar?
+                        </p>
+                        <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
+                            <span style="font-size:20px; color:var(--dorado); font-weight:bold;">$</span>
+                            <input type="number" id="montoPago" class="vuelto-input" placeholder="0.00"
+                                onkeyup="calcularVuelto()">
+                        </div>
+                        <p id="res-vuelto" style="font-size:12px; margin-top:5px; display:none; font-weight:bold;"></p>
+                    </div>
+
+                    <div id="box-pagomovil"
+                        style="margin-top: 15px; display:none; background: var(--color-bg); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--color-border); text-align: left;">
+                        <p
+                            style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing:0.5px;">
+                            Datos Pago Móvil</p>
+                        <p style="font-size: 13px; margin-bottom: 4px;"><b>Banco:</b> Mercantil (0105)</p>
+                        <p style="font-size: 13px; margin-bottom: 4px;"><b>Teléfono:</b> 0414-3732274</p>
+                        <p style="font-size: 13px; margin-bottom: 8px;"><b>Cédula/RIF:</b> V-22582611</p>
+                        <p
+                            style="font-size: 11px; color: var(--color-primary); font-weight: bold; text-align: center; margin-top: 10px;">
+                            <i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp
+                        </p>
+                    </div>
+
+                    <div id="box-zelle"
+                        style="margin-top: 15px; display:none; background: var(--color-bg); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--color-border); text-align: center;">
+                        <p
+                            style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing:0.5px;">
+                            Datos Zelle</p>
+                        <p style="font-size: 14px; margin-bottom: 4px; font-weight: bold; color: #741b88;">
+                            grancatadorcorp@gmail.com</p>
+                        <p style="font-size: 12px; margin-bottom: 8px;">A nombre de: <b>Ariadna Silva</b></p>
+                        <p style="font-size: 11px; color: var(--color-primary); font-weight: bold; margin-top: 10px;"><i
+                                class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp</p>
+                    </div>
                 </div>
 
-                <div id="box-zelle"
-                    style="margin-top: 15px; display:none; background: var(--color-bg); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--color-border); text-align: center;">
-                    <p
-                        style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing:0.5px;">
-                        Datos Zelle</p>
-                    <p style="font-size: 14px; margin-bottom: 4px; font-weight: bold; color: #741b88;">
-                        grancatadorcorp@gmail.com</p>
-                    <p style="font-size: 12px; margin-bottom: 8px;">A nombre de: <b>Ariadna Silva</b></p>
-                    <p style="font-size: 11px; color: var(--color-primary); font-weight: bold; margin-top: 10px;"><i
-                            class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp</p>
+                <div class="total-container">
+                    <p style="font-size: 15px; font-weight: 700; color: var(--color-text); margin: 0;">Total a pagar</p>
+                    <div>
+                        <div class="total-usd" id="totalUsdModal">$0.00</div>
+                        <div class="total-bs" id="totalBsModal">0,00 Bs</div>
+                    </div>
                 </div>
+                <button id="btn-whatsapp" class="btn-enviar" onclick="enviarPedido()"><i class="fa-brands fa-whatsapp"
+                        style="font-size: 20px;"></i> Enviar Pedido a WhatsApp</button>
+                <p id="msg-cerrado"
+                    style="text-align:center; color:#ea4335; font-size:11px; font-weight:bold; display:none; margin-top:10px;">
+                    La tienda está cerrada en este momento.</p>
             </div>
-
-            <div class="total-container">
-                <p style="font-size: 15px; font-weight: 700; color: var(--color-text); margin: 0;">Total a pagar</p>
-                <div>
-                    <div class="total-usd" id="totalUsdModal">$0.00</div>
-                    <div class="total-bs" id="totalBsModal">0,00 Bs</div>
-                </div>
-            </div>
-            <button id="btn-whatsapp" class="btn-enviar" onclick="enviarPedido()"><i class="fa-brands fa-whatsapp"
-                    style="font-size: 20px;"></i> Enviar Pedido a WhatsApp</button>
-            <p id="msg-cerrado"
-                style="text-align:center; color:#ea4335; font-size:11px; font-weight:bold; display:none; margin-top:10px;">
-                La tienda está cerrada en este momento.</p>
         </div>
     </div>
 
     <div id="modal-producto" class="modal-fullscreen" style="z-index: 3000;">
-        <div class="cart-header">
-            <h2>Detalles</h2>
-            <div style="display:flex; gap:10px;">
-                <button id="detalle-btn-share" aria-label="Compartir producto"
-                    style="background:var(--item-bg); border:none; width:40px; height:40px; border-radius:50%; font-size: 18px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i
-                        class="fa-solid fa-share-nodes"></i></button>
-                <button onclick="document.getElementById('modal-producto').style.display='none'"
-                    aria-label="Cerrar detalle"
-                    style="background:var(--item-bg); border:none; width:40px; height:40px; border-radius:50%; font-size: 20px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i
-                        class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-            </div>
-        </div>
-        <div class="checkout-box" style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
-            <div id="detalle-img-container"
-                style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 8px; width: 100%; height: 250px; align-items: center; justify-content: center;">
-            </div>
-            <h3 id="detalle-titulo"
-                style="font-size: 20px; font-weight: 800; color: var(--color-text); margin-top: 5px;"></h3>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <p id="detalle-precio-usd" style="font-size: 22px; font-weight: 800; color: var(--color-primary);">
-                    </p>
-                    <p id="detalle-precio-bs" style="font-size: 14px; color: var(--color-text-muted);"></p>
+        <div class="modal-content-wrapper">
+            <div class="cart-header">
+                <h2>Detalles</h2>
+                <div style="display:flex; gap:10px;">
+                    <button id="detalle-btn-share" aria-label="Compartir producto"
+                        style="background:var(--item-bg); border:none; width:40px; height:40px; border-radius:50%; font-size: 18px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i
+                            class="fa-solid fa-share-nodes"></i></button>
+                    <button onclick="document.getElementById('modal-producto').style.display='none'"
+                        aria-label="Cerrar detalle"
+                        style="background:var(--item-bg); border:none; width:40px; height:40px; border-radius:50%; font-size: 20px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i
+                            class="fa-solid fa-xmark" aria-hidden="true"></i></button>
                 </div>
-                <div id="detalle-stock"
-                    style="font-size: 13px; font-weight: 600; padding: 5px 10px; border-radius: 8px;"></div>
             </div>
-            <div style="border-top: 1px solid var(--color-border); padding-top: 15px; margin-top: 5px;">
-                <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--color-text);">Descripción
-                </h4>
-                <p id="detalle-descripcion"
-                    style="font-size: 14px; color: var(--color-text-muted); line-height: 1.6; white-space: pre-wrap;">
-                </p>
+            <div class="checkout-box" style="display: flex; flex-direction: column; gap: 15px; margin-top: 10px;">
+                <div id="detalle-img-container"
+                    style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 8px; width: 100%; height: 250px; align-items: center; justify-content: center;">
+                </div>
+                <h3 id="detalle-titulo"
+                    style="font-size: 20px; font-weight: 800; color: var(--color-text); margin-top: 5px;"></h3>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <p id="detalle-precio-usd"
+                            style="font-size: 22px; font-weight: 800; color: var(--color-primary);">
+                        </p>
+                        <p id="detalle-precio-bs" style="font-size: 14px; color: var(--color-text-muted);"></p>
+                    </div>
+                    <div id="detalle-stock"
+                        style="font-size: 13px; font-weight: 600; padding: 5px 10px; border-radius: 8px;"></div>
+                </div>
+                <div style="border-top: 1px solid var(--color-border); padding-top: 15px; margin-top: 5px;">
+                    <h4 style="font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--color-text);">
+                        Descripción
+                    </h4>
+                    <p id="detalle-descripcion"
+                        style="font-size: 14px; color: var(--color-text-muted); line-height: 1.6; white-space: pre-wrap;">
+                    </p>
+                </div>
+                <div id="detalle-btn-add" style="margin-top: 10px;"></div>
             </div>
-            <div id="detalle-btn-add" style="margin-top: 10px;"></div>
         </div>
     </div>
 
     <div id="modal-perfil" class="modal-fullscreen">
-        <div class="cart-header">
-            <h2>Mi Perfil</h2>
-            <button onclick="cerrarModal('modal-perfil', 'nav-home')" aria-label="Cerrar perfil"
-                style="background:var(--item-bg); border:none; width:40px; height:40px; border-radius:50%; font-size: 20px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i
-                    class="fa-solid fa-xmark" aria-hidden="true"></i></button>
-        </div>
-        <div class="checkout-box">
-            <p class="box-title">Tus Datos</p>
-            <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 15px;">Guarda tu información para
-                compras rápidas.</p>
-            <label style="font-size: 12px; font-weight: bold;">Nombre y Apellido</label>
-            <input type="text" id="perfilNombre" class="input-text" placeholder="Ej: Juan Pérez"
-                style="margin-bottom: 15px;">
-            <label style="font-size: 12px; font-weight: bold;">Dirección de Delivery</label>
-            <input type="text" id="perfilDireccion" class="input-text" placeholder="Ej: Av. Principal, Casa #10">
-            <button class="btn-enviar" onclick="guardarPerfil()"
-                style="margin-top: 20px; background:var(--color-primary); box-shadow:0 4px 15px rgba(30,58,138,0.2);">Guardar
-                Datos</button>
-        </div>
-        <div class="checkout-box" style="margin-top:20px;">
-            <p class="box-title">Tus Últimos Pedidos</p>
-            <div id="historial-lista"></div>
+        <div class="modal-content-wrapper">
+            <div class="cart-header">
+                <h2>Mi Perfil</h2>
+                <button onclick="cerrarModal('modal-perfil', 'nav-home')" aria-label="Cerrar perfil"
+                    style="background:var(--item-bg); border:none; width:40px; height:40px; border-radius:50%; font-size: 20px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i
+                        class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+            </div>
+            <div class="checkout-box">
+                <p class="box-title">Tus Datos</p>
+                <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 15px;">Guarda tu información
+                    para
+                    compras rápidas.</p>
+                <label style="font-size: 12px; font-weight: bold;">Nombre y Apellido</label>
+                <input type="text" id="perfilNombre" class="input-text" placeholder="Ej: Juan Pérez"
+                    style="margin-bottom: 15px;">
+                <label style="font-size: 12px; font-weight: bold;">Dirección de Delivery</label>
+                <input type="text" id="perfilDireccion" class="input-text" placeholder="Ej: Av. Principal, Casa #10">
+                <button class="btn-enviar" onclick="guardarPerfil()"
+                    style="margin-top: 20px; background:var(--color-primary); box-shadow:0 4px 15px rgba(30,58,138,0.2);">Guardar
+                    Datos</button>
+            </div>
+            <div class="checkout-box" style="margin-top:20px;">
+                <p class="box-title">Tus Últimos Pedidos</p>
+                <div id="historial-lista"></div>
+            </div>
         </div>
     </div>
 
     <div id="modal-ajustes" class="modal-fullscreen">
-        <div class="cart-header">
-            <h2>Ajustes</h2>
-            <button onclick="cerrarModal('modal-ajustes', 'nav-home')" aria-label="Cerrar ajustes"
-                style="background:var(--item-bg); border:none; width:40px; height:40px; border-radius:50%; font-size: 20px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i
-                    class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+        <div class="modal-content-wrapper">
+            <div class="cart-header">
+                <h2>Ajustes</h2>
+                <button onclick="cerrarModal('modal-ajustes', 'nav-home')" aria-label="Cerrar ajustes"
+                    style="background:var(--item-bg); border:none; width:40px; height:40px; border-radius:50%; font-size: 20px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i
+                        class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+            </div>
+            <div class="checkout-box" style="display:flex; justify-content:space-between; align-items:center;">
+                <label for="toggleDarkMode" style="font-weight:600; font-size: 14px; cursor: pointer;">🌙 Modo
+                    Oscuro</label>
+                <input type="checkbox" id="toggleDarkMode" onchange="toggleDark()"
+                    style="width:20px; height:20px; accent-color: var(--color-primary);"
+                    aria-label="Activar modo oscuro">
+            </div>
+            <div class="checkout-box" style="margin-top:15px; cursor:pointer;" onclick="abrirLegales()" role="button"
+                tabindex="0" aria-label="Ver políticas y soporte">
+                <span style="font-weight:600; font-size: 14px; display:flex; align-items:center;"><i
+                        class="fa-solid fa-scale-balanced"
+                        style="margin-right:10px; color: var(--color-primary); font-size: 18px;" aria-hidden="true"></i>
+                    Políticas y Soporte</span>
+            </div>
+            <div class="checkout-box" style="margin-top:15px; cursor:pointer;" onclick="limpiarCacheAdmin()"
+                role="button" tabindex="0" aria-label="Actualizar precios e inventario">
+                <span style="font-weight:600; font-size: 14px; display:flex; align-items:center;"><i
+                        class="fa-solid fa-arrows-rotate"
+                        style="margin-right:10px; color: var(--color-success); font-size: 18px;" aria-hidden="true"></i>
+                    Actualizar Precios e Inventario</span>
+            </div>
+            <p
+                style="text-align: center; margin-top: 30px; font-size: 11px; color: var(--color-text-muted); line-height: 1.5;">
+                Desarrollado para Gran Catador C.A.<br>Contacto Soporte Técnico: 0422-0012375</p>
         </div>
-        <div class="checkout-box" style="display:flex; justify-content:space-between; align-items:center;">
-            <label for="toggleDarkMode" style="font-weight:600; font-size: 14px; cursor: pointer;">🌙 Modo
-                Oscuro</label>
-            <input type="checkbox" id="toggleDarkMode" onchange="toggleDark()"
-                style="width:20px; height:20px; accent-color: var(--color-primary);" aria-label="Activar modo oscuro">
-        </div>
-        <div class="checkout-box" style="margin-top:15px; cursor:pointer;" onclick="abrirLegales()" role="button"
-            tabindex="0" aria-label="Ver políticas y soporte">
-            <span style="font-weight:600; font-size: 14px; display:flex; align-items:center;"><i
-                    class="fa-solid fa-scale-balanced"
-                    style="margin-right:10px; color: var(--color-primary); font-size: 18px;" aria-hidden="true"></i>
-                Políticas y Soporte</span>
-        </div>
-        <div class="checkout-box" style="margin-top:15px; cursor:pointer;" onclick="limpiarCacheAdmin()" role="button"
-            tabindex="0" aria-label="Actualizar precios e inventario">
-            <span style="font-weight:600; font-size: 14px; display:flex; align-items:center;"><i
-                    class="fa-solid fa-arrows-rotate"
-                    style="margin-right:10px; color: var(--color-success); font-size: 18px;" aria-hidden="true"></i>
-                Actualizar Precios e Inventario</span>
-        </div>
-        <p
-            style="text-align: center; margin-top: 30px; font-size: 11px; color: var(--color-text-muted); line-height: 1.5;">
-            Desarrollado para Gran Catador C.A.<br>Contacto Soporte Técnico: 0422-0012375</p>
     </div>
 
     <div id="modal-legales" class="modal-fullscreen" style="z-index: 2500;">
-        <div class="cart-header">
-            <h2>Legal y Soporte</h2>
-            <button onclick="cerrarModal('modal-legales', 'modal-ajustes')" aria-label="Volver a ajustes"
-                style="background:var(--item-bg); border:none; width:40px; height:40px; border-radius:50%; font-size: 18px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i
-                    class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+        <div class="modal-content-wrapper">
+            <div class="cart-header">
+                <h2>Legal y Soporte</h2>
+                <button onclick="cerrarModal('modal-legales', 'modal-ajustes')" aria-label="Volver a ajustes"
+                    style="background:var(--item-bg); border:none; width:40px; height:40px; border-radius:50%; font-size: 18px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i
+                        class="fa-solid fa-arrow-left" aria-hidden="true"></i></button>
+            </div>
+            <div class="checkout-box">
+                <p style="font-size: 14px; font-weight: 700; color: var(--color-primary); margin-bottom: 5px;">1. Zonas
+                    de
+                    Delivery</p>
+                <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom:15px; line-height: 1.5;">
+                    Llegamos a
+                    gran parte de la ciudad. Ciertas zonas periféricas pueden tener recargo o no estar cubiertas por
+                    seguridad.</p>
+                <p style="font-size: 14px; font-weight: 700; color: var(--color-primary); margin-bottom: 5px;">2. Edad
+                    Mínima</p>
+                <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom:15px; line-height: 1.5;">
+                    Prohibida
+                    la venta de licores a menores de 18 años. El repartidor podrá exigir documento de identidad en la
+                    entrega.</p>
+                <p style="font-size: 14px; font-weight: 700; color: var(--color-primary); margin-bottom: 5px;">3.
+                    Políticas
+                    de Garantía</p>
+                <p style="font-size: 13px; color: var(--color-text-muted); line-height: 1.5;">Revise su pedido al
+                    momento de
+                    recibirlo. No aceptamos devoluciones de botellas abiertas o con sellos fiscales rotos.</p>
+            </div>
+            <button class="btn-enviar" onclick="abrirSoporteWhatsApp()"
+                style="background:#25D366; box-shadow:0 4px 15px rgba(37,211,102,0.3); margin-top:20px;"><i
+                    class="fa-brands fa-whatsapp" style="font-size: 18px;"></i> Chatear con Soporte</button>
         </div>
-        <div class="checkout-box">
-            <p style="font-size: 14px; font-weight: 700; color: var(--color-primary); margin-bottom: 5px;">1. Zonas de
-                Delivery</p>
-            <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom:15px; line-height: 1.5;">Llegamos a
-                gran parte de la ciudad. Ciertas zonas periféricas pueden tener recargo o no estar cubiertas por
-                seguridad.</p>
-            <p style="font-size: 14px; font-weight: 700; color: var(--color-primary); margin-bottom: 5px;">2. Edad
-                Mínima</p>
-            <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom:15px; line-height: 1.5;">Prohibida
-                la venta de licores a menores de 18 años. El repartidor podrá exigir documento de identidad en la
-                entrega.</p>
-            <p style="font-size: 14px; font-weight: 700; color: var(--color-primary); margin-bottom: 5px;">3. Políticas
-                de Garantía</p>
-            <p style="font-size: 13px; color: var(--color-text-muted); line-height: 1.5;">Revise su pedido al momento de
-                recibirlo. No aceptamos devoluciones de botellas abiertas o con sellos fiscales rotos.</p>
-        </div>
-        <button class="btn-enviar" onclick="abrirSoporteWhatsApp()"
-            style="background:#25D366; box-shadow:0 4px 15px rgba(37,211,102,0.3); margin-top:20px;"><i
-                class="fa-brands fa-whatsapp" style="font-size: 18px;"></i> Chatear con Soporte</button>
     </div>
 
     <!-- Botón Flotante: Volver Arriba -->

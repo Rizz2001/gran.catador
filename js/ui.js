@@ -531,14 +531,14 @@ function compartirProductoB64(b64, p) { compartirProducto(decodificarNombre(b64)
 
 // --- RENDERIZADO DE PRODUCTOS (Fase 5: Mejora de Rendimiento) ---
 function crearHTMLProducto(p) {
-    const isAgotado = p.StockNum <= 0;
+    const esModoCaja = (modoVistaGlobal === 'caja');
+    const cantCaja = p.CantidadGrup || 12;
+    const isAgotado = esModoCaja ? (p.StockNum < cantCaja && p.StockNum < 999) : p.StockNum <= 0;
     const nombreB64 = codificarNombre(p.Nombre);
 
-    const esModoCaja = (modoVistaGlobal === 'caja');
     const precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;
     const precioBsDin = esModoCaja ? p.PrecioCajaBsStr : p.PrecioBsStr;
     const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
-    const carpeta = getCategoriaFolder(p.Cat);
 
     // --- LÓGICA DINÁMICA DE TEXTO DE UNIDAD ---
     let textoUnidad = '';
@@ -551,14 +551,21 @@ function crearHTMLProducto(p) {
         textoUnidad = `POR ${undSimp}`;
     }
 
+    let textoStock = '';
+    if ((p.StockStr || '').toString().toLowerCase() === 'disponible' || p.StockNum >= 999) {
+        textoStock = '<b>Stock Disponible</b>';
+    } else if (isAgotado && p.StockNum > 0) {
+        textoStock = `<b style="color: #ea4335;">Solo ${p.StockNum} und (No alcanza p/ caja)</b>`;
+    } else {
+        textoStock = `<b style="${p.StockNum > 0 && p.StockNum <= 5 ? 'color: #ea4335;' : ''}">${p.StockNum} und disponibles</b>`;
+    }
+
     let badgeHTML = '';
     if (isAgotado) {
         badgeHTML = `<div class="product-badge badge-agotado">AGOTADO</div>`;
     }
 
-    // OPTIMIZACIÓN DE RENDIMIENTO: Solo cargamos la foto 1 en la cuadrícula.
-    // Las otras 5 fotos se buscarán automáticamente solo cuando el cliente abra los detalles.
-    let imgSrc = p.ImagenUrl ? p.ImagenUrl : `assets/img/${carpeta}/${p.codigo}/1.webp`;
+    let imgSrc = p.ImagenUrl ? p.ImagenUrl : 'logo.webp';
     let galeriasHTML = `<img loading="lazy" src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain;" onload="this.parentElement.classList.remove('skeleton-box');">`;
 
     return `
@@ -575,7 +582,7 @@ function crearHTMLProducto(p) {
                 <h3 class="producto-titulo" title="${p.Nombre}">${p.Nombre}</h3>
             </div>
             <p class="producto-stock" style="font-size: 12.5px; margin-top: 4px; margin-bottom: 8px; color: var(--color-text);">
-                ${(p.StockStr || '').toString().toLowerCase() === 'disponible' ? '<b>Stock Disponible</b>' : `<b style="${p.StockNum > 0 && p.StockNum <= 5 ? 'color: #ea4335;' : ''}">${p.StockNum} und disponibles</b>`}
+                ${textoStock}
             </p>
             
             <div class="product-bottom">
@@ -597,8 +604,9 @@ async function abrirDetalleProducto(codigo) {
     let p = inventario.find(x => x.codigo === codigo);
     if (!p) return;
 
-    const carpeta = getCategoriaFolder(p.Cat);
     const esModoCaja = (modoVistaGlobal === 'caja');
+    const cantCaja = p.CantidadGrup || 12;
+    const isAgotado = esModoCaja ? (p.StockNum < cantCaja && p.StockNum < 999) : p.StockNum <= 0;
     const precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;
     const precioBsDin = esModoCaja ? p.PrecioCajaBsStr : p.PrecioBsStr;
     const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
@@ -612,12 +620,17 @@ async function abrirDetalleProducto(codigo) {
     if (btnShare) btnShare.onclick = () => compartirProducto(p.Nombre, precioUsdDin);
 
     let stockBadge = document.getElementById('detalle-stock');
-    if (p.StockNum <= 0) {
-        stockBadge.innerText = "AGOTADO"; stockBadge.style.background = "rgba(234, 67, 53, 0.1)"; stockBadge.style.color = "#ea4335";
+    if (isAgotado) {
+        if (p.StockNum <= 0) {
+            stockBadge.innerText = "AGOTADO";
+        } else {
+            stockBadge.innerText = `Solo ${p.StockNum} und (Insuficiente p/ caja)`;
+        }
+        stockBadge.style.background = "rgba(234, 67, 53, 0.1)"; stockBadge.style.color = "#ea4335";
     } else {
-        let stockText = (p.StockStr || '').toString().toLowerCase() === 'disponible' ? 'Stock Disponible' : `${p.StockNum} und disponibles`;
+        let stockText = (p.StockStr || '').toString().toLowerCase() === 'disponible' || p.StockNum >= 999 ? 'Stock Disponible' : `${p.StockNum} und disponibles`;
         stockBadge.innerText = stockText;
-        if (p.StockNum > 0 && p.StockNum <= 5 && (p.StockStr || '').toString().toLowerCase() !== 'disponible') {
+        if (p.StockNum > 0 && p.StockNum <= 5 && (p.StockStr || '').toString().toLowerCase() !== 'disponible' && p.StockNum < 999) {
             stockBadge.style.background = "rgba(234, 67, 53, 0.1)"; stockBadge.style.color = "#ea4335";
         } else {
             stockBadge.style.background = "rgba(37, 211, 102, 0.1)"; stockBadge.style.color = "#25D366";
@@ -626,17 +639,15 @@ async function abrirDetalleProducto(codigo) {
 
     let imgContainer = document.getElementById('detalle-img-container');
     imgContainer.classList.add('skeleton-box');
-    let galeriasHTML = '';
-    for (let i = 1; i <= 6; i++) {
-        let imgUrl = (i === 1 && p.ImagenUrl) ? p.ImagenUrl : `assets/img/${carpeta}/${p.codigo}/${i}.webp`;
-        galeriasHTML += `<img loading="lazy" src="${imgUrl}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="${i}" data-attempts="0" onerror="imgFallbackFolder(this)" alt="Vista ${i}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain; ${i > 1 ? 'display: none;' : ''}" onload="this.style.display='block'; this.parentElement.classList.remove('skeleton-box');">`;
-    }
+    let imgUrl = p.ImagenUrl ? p.ImagenUrl : 'logo.webp';
+    let galeriasHTML = `<img loading="lazy" src="${imgUrl}" class="zoomable-img" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="Vista 1" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain;" onload="this.style.display='block'; this.parentElement.classList.remove('skeleton-box');" onmousemove="if(typeof handleZoom==='function') handleZoom(event, this)" onmouseleave="if(typeof resetZoom==='function') resetZoom(this)">`;
     imgContainer.innerHTML = galeriasHTML;
 
     let btnContainer = document.getElementById('detalle-btn-add');
-    let imgSrc = p.ImagenUrl ? p.ImagenUrl : `assets/img/${carpeta}/${p.codigo}/1.webp`;
-    if (p.StockNum <= 0) {
-        btnContainer.innerHTML = `<button class="btn-enviar" style="background: var(--color-border); color: var(--color-text-muted); cursor: not-allowed;" disabled>Agotado</button>`;
+    let imgSrc = p.ImagenUrl ? p.ImagenUrl : 'logo.webp';
+    if (isAgotado) {
+        let txtBtn = p.StockNum <= 0 ? 'Agotado' : 'Stock Insuficiente';
+        btnContainer.innerHTML = `<button class="btn-enviar" style="background: var(--color-border); color: var(--color-text-muted); cursor: not-allowed;" disabled>${txtBtn}</button>`;
     } else {
         btnContainer.innerHTML = `<button class="btn-enviar" onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja}); document.getElementById('modal-producto').style.display='none';" style="background: var(--color-primary);"><i class="fa-solid fa-cart-shopping"></i> Agregar al carrito</button>`;
     }
@@ -647,12 +658,7 @@ async function abrirDetalleProducto(codigo) {
     if (p.DescAdicional && p.DescAdicional.trim() !== '') {
         descContainer.innerText = p.DescAdicional;
     } else {
-        descContainer.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Buscando información...';
-        try {
-            // Evitamos la caché del navegador al buscar el archivo local
-            let res = await fetch(`assets/img/${carpeta}/${p.codigo}/desc.txt?v=${new Date().getTime()}`);
-            if (res.ok) { let text = await res.text(); descContainer.innerText = text.trim().startsWith('<') ? "Sin descripción adicional." : text; } else { descContainer.innerText = "Sin descripción adicional."; }
-        } catch (e) { descContainer.innerText = "Sin descripción adicional."; }
+        descContainer.innerText = "Sin descripción adicional.";
     }
 }
 
@@ -791,4 +797,25 @@ window.addEventListener('scroll', () => {
 
 window.scrollToTop = function () {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// --- EFECTO ZOOM EN IMAGEN DE PRODUCTO (SOLO PC) ---
+window.handleZoom = function (e, img) {
+    if (window.innerWidth < 1024) return; // Solo aplicar en pantallas grandes
+
+    const container = img.parentElement;
+    const rect = container.getBoundingClientRect();
+
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
+
+    img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+};
+
+window.resetZoom = function (img) {
+    if (window.innerWidth < 1024) return;
+    img.style.transformOrigin = 'center center';
 };

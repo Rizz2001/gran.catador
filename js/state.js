@@ -1,7 +1,7 @@
 /**
  * state.js - Estado Global Centralizado de la Aplicación
  */
-const appState = {
+window.appState = {
     // Datos de Inventario
     inventario: [],
     gruposInventario: [],

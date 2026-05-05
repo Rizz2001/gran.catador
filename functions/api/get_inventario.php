@@ -5,7 +5,8 @@
  */
 
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *'); // Ajustar según sea necesario por seguridad
+// Seguridad: Restringir CORS al dominio real
+header('Access-Control-Allow-Origin: https://grancatador.com'); 
 
 // 1. Leer las credenciales desde el archivo JSON (Ruta acomodada a ../../)
 $settingsPath = '../../data/config/settings.json';

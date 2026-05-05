@@ -9,8 +9,8 @@ let appSettings = { useApi: true, apiType: 'smartventas' };
 let modoVistaGlobal = 'unidad';
 let subcategoriaActual = null;
 
-// Asegurar que appState global exista para evitar ReferenceErrors
-window.appState = window.appState || {};
+// Asegurar que appState exista y tenga su estructura base
+window.appState = window.appState || { inventario: [], filtros: {}, carrito: {} };
 
 // Barra de progreso superior (API)
 function updateApiProgress(percent, isError = false) {
@@ -282,8 +282,8 @@ function iniciarAutoActualizacion() {
             await cargarInventarioDesdeAPI();
             localStorage.setItem('gc_inv_time_v4', new Date().getTime().toString());
             aplicarFiltros(); // Refresca la vista automáticamente si detecta un cambio de precio/stock
-        } catch (e) { 
-            console.log("⚠️ Error en sincronización silenciosa:", e.message); 
+        } catch (e) {
+            console.log("⚠️ Error en sincronización silenciosa:", e.message);
             updateApiProgress(100, true);
         }
     }, 600000);

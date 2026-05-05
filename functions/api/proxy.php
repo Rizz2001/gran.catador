@@ -44,7 +44,7 @@ curl_setopt($chToken, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($chToken, CURLOPT_POST, true);
 curl_setopt($chToken, CURLOPT_POSTFIELDS, http_build_query($body));
 curl_setopt($chToken, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
-curl_setopt($chToken, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($chToken, CURLOPT_SSL_VERIFYPEER, true);
 $tokenResponse = curl_exec($chToken);
 curl_close($chToken);
 
@@ -62,7 +62,7 @@ if ($imagePath) {
     curl_setopt($chApi, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $tokenFresco, 'Content-Type: application/json']);
 }
 
-curl_setopt($chApi, CURLOPT_SSL_VERIFYPEER, false);
+curl_setopt($chApi, CURLOPT_SSL_VERIFYPEER, true);
 $apiResponse = curl_exec($chApi);
 $httpCode = curl_getinfo($chApi, CURLINFO_HTTP_CODE);
 $contentType = curl_getinfo($chApi, CURLINFO_CONTENT_TYPE);
