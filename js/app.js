@@ -275,7 +275,7 @@ function iniciarAutoActualizacion() {
     // Evitar que se creen múltiples temporizadores paralelos
     if (window.autoSyncTimer) clearInterval(window.autoSyncTimer);
 
-    // Ejecutar silenciosamente cada 10 minutos (600000 ms)
+    // Ejecutar silenciosamente cada 1 minuto (60000 ms)
     window.autoSyncTimer = setInterval(async () => {
         console.log("⏱️ Sincronizando con SmartVentas en segundo plano...");
         try {
@@ -286,7 +286,7 @@ function iniciarAutoActualizacion() {
             console.log("⚠️ Error en sincronización silenciosa:", e.message);
             updateApiProgress(100, true);
         }
-    }, 600000);
+    }, 60000);
 }
 
 async function cargarExistenciasGlobales(proxyBaseUrl) {
