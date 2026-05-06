@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Descargar Muestra JSON Fox Data</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+        button { padding: 15px 30px; font-size: 18px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 5px; }
+        button:hover { background-color: #218838; }
+        #status { margin-top: 20px; font-weight: bold; color: #333; }
+    </style>
+</head>
+<body>
+    <h2>Herramienta para capturar JSON original de la API</h2>
+    <p>Haz clic en el botón para consultar la API (Grupos y el primer grupo de artículos) y descargar el archivo JSON tal cual viene de Fox Data.</p>
+    
+    <button onclick="descargarMuestra()">Descargar Muestra JSON</button>
+    <div id="status"></div>
+
+    <script>
+        async function descargarMuestra() {
+            const statusEl = document.getElementById('status');
+            statusEl.innerText = "Consultando grupos...";
+            
+            try {
+                // 1. Obtener grupos
+                const resGrupos = await fetch('https://gran-catador.pages.dev/api/proxy?endpoint=gruposinv');
+                const grupos = await resGrupos.json();
+                
+                let codGrupo = "01"; // Por defecto
+                let arrayGrupos = Array.isArray(grupos) ? grupos : (grupos.data || grupos.result || []);
+                if(arrayGrupos.length > 0) {
+                    let g = arrayGrupos[0];
+                    codGrupo = g.CodGrupo || g.codigo || g.id || g.Codigo || "01";
+                }
+
+                statusEl.innerText = `Grupos obtenidos. Consultando artículos del grupo ${codGrupo}...`;
+
+                // 2. Obtener artículos de ese grupo
+                const resArticulos = await fetch(`https://gran-catador.pages.dev/api/proxy?endpoint=articulos/grupo/${encodeURIComponent(codGrupo)}`);
+                const articulos = await resArticulos.json();
+
+                // 3. Crear el objeto final para descargar
+                const datosCompletos = {
+                    nota: "Muestra directa de la API de Fox Data a través del proxy",
+                    fecha: new Date().toLocaleString(),
+                    grupos_raw: grupos,
+                    articulos_grupo_1_raw: articulos
+                };
+
+                // 4. Descargar
+                statusEl.innerText = "Descargando archivo...";
+                const blob = new Blob([JSON.stringify(datosCompletos, null, 4)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = "foxdata_muestra_original.json";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                statusEl.innerText = "✅ Descarga completada. Revisa tu carpeta de descargas.";
+                statusEl.style.color = "green";
+                
+            } catch (error) {
+                console.error(error);
+                statusEl.innerText = "❌ Error: " + error.message;
+                statusEl.style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>
