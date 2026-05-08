@@ -342,6 +342,24 @@ function enviarPedido() {
     if (Object.keys(appState.carrito).length === 0) return alert("Tu carrito está vacío.");
     if (!appState.isTiendaAbierta) return alert("Lo sentimos, Gran Catador está cerrado en este momento.");
 
+    // Validación de datos de perfil obligatorios
+    let nombreUser = (localStorage.getItem('gc_nombre') || '').trim();
+    let cedulaUser = (localStorage.getItem('gc_cedula') || '').trim();
+    let telefonoUser = (localStorage.getItem('gc_telefono') || '').trim();
+
+    if (!nombreUser || !cedulaUser || !telefonoUser) {
+        alert("⚠️ Datos incompletos.\nPor favor, completa tu Nombre, Cédula y Teléfono en tu perfil antes de hacer el pedido.");
+        abrirPerfil();
+        return;
+    }
+
+    // Segunda capa de validación para asegurar que el formato es correcto
+    if (!/^(V-|E-|J-)/i.test(cedulaUser) || !/^[a-zA-Z0-9\s\-]+$/.test(telefonoUser)) {
+        alert("⚠️ Datos de perfil inválidos.\nPor favor, verifica que tu Cédula empiece con V-, E-, o J- y que tu Teléfono solo contenga números y letras.");
+        abrirPerfil();
+        return;
+    }
+
     // Generar registro histórico del pedido
     let historial = JSON.parse(localStorage.getItem('gc_historial')) || [];
     let fechaDate = new Date();
@@ -364,9 +382,6 @@ function enviarPedido() {
     localStorage.setItem('gc_historial', JSON.stringify(historial));
 
     // Comienza la construcción del mensaje de WhatsApp
-    let nombreUser = localStorage.getItem('gc_nombre') || 'un cliente nuevo';
-    let cedulaUser = localStorage.getItem('gc_cedula') || 'No especificada';
-    let telefonoUser = localStorage.getItem('gc_telefono') || 'No especificado';
     let msg = `🔥 *NUEVO PEDIDO - GRAN CATADOR* 🔥\n\n👤 *Cliente:* ${nombreUser}\n🪪 *Cédula:* ${cedulaUser}\n📱 *Teléfono:* ${telefonoUser}\n--------------------------------\n`;
 
     for (let nombre in appState.carrito) {

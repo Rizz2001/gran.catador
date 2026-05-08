@@ -971,16 +971,3 @@ body.dark-mode .total-usd {
     align-items: center;
     justify-content: center;
 }
-
-.btn-scroll-top.visible {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-}
-
-@media (min-width: 768px) {
-    .btn-scroll-top {
-        bottom: 30px;
-        /* Más abajo en PC ya que no hay bottom-nav */
-    }
-}

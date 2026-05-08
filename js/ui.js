@@ -193,14 +193,36 @@ function abrirPerfil() {
 
 /** Guarda las preferencias del perfil del usuario */
 function guardarPerfil() {
-    localStorage.setItem('gc_nombre', document.getElementById('perfilNombre').value);
-    localStorage.setItem('gc_direccion', document.getElementById('perfilDireccion').value);
+    let nombre = document.getElementById('perfilNombre').value.trim();
+    let direccion = document.getElementById('perfilDireccion').value.trim();
 
     let inputCedula = document.getElementById('perfilCedula');
-    if (inputCedula) localStorage.setItem('gc_cedula', inputCedula.value);
+    let cedula = inputCedula ? inputCedula.value.trim().toUpperCase() : '';
 
     let inputTelefono = document.getElementById('perfilTelefono');
-    if (inputTelefono) localStorage.setItem('gc_telefono', inputTelefono.value);
+    let telefono = inputTelefono ? inputTelefono.value.trim() : '';
+
+    if (!nombre || !cedula || !telefono) {
+        alert("⚠️ Los campos de Nombre, Cédula y Teléfono son obligatorios.");
+        return;
+    }
+
+    // Validación estricta de Cédula (Debe empezar por V-, E- o J-)
+    if (!/^(V-|E-|J-)/.test(cedula)) {
+        alert("⚠️ La Cédula debe empezar obligatoriamente por 'V-', 'E-' o 'J-'.\nEjemplo: V-12345678");
+        return;
+    }
+
+    // Validación estricta de Teléfono (Solo números, letras, espacios y guiones)
+    if (!/^[a-zA-Z0-9\s\-]+$/.test(telefono)) {
+        alert("⚠️ El campo de Teléfono solo acepta números y letras.");
+        return;
+    }
+
+    localStorage.setItem('gc_nombre', nombre);
+    localStorage.setItem('gc_direccion', direccion);
+    if (inputCedula) localStorage.setItem('gc_cedula', cedula);
+    if (inputTelefono) localStorage.setItem('gc_telefono', telefono);
 
     mostrarToast("Datos guardados ✅");
     cerrarModal('modal-perfil', 'nav-home');
@@ -824,4 +846,13 @@ window.handleZoom = function (e, img) {
     const rect = container.getBoundingClientRect();
 
     const x = e.clientX - rect.left;
-    const y = e.clientY - rect
+    const y = e.clientY - rect.top;
+
+    img.style.transformOrigin = `${x}px ${y}px`;
+    img.style.transform = 'scale(2)';
+};
+
+window.resetZoom = function (img) {
+    img.style.transformOrigin = 'center center';
+    img.style.transform = 'scale(1)';
+};
