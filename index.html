@@ -407,8 +407,13 @@
                         <input type="radio" id="del" name="metodoEntrega" value="Delivery" onchange="toggleDireccion()">
                         <label for="del" class="toggle-btn">Delivery</label>
                     </div>
-                    <input type="text" id="direccionDelivery" class="input-text"
-                        placeholder="Ingresa tu dirección exacta..." style="display:none;">
+                    <div style="display:flex; gap: 8px;">
+                        <input type="text" id="direccionDelivery" class="input-text"
+                            placeholder="Ingresa tu dirección exacta..." style="display:none; flex-grow: 1;">
+                        <button id="btn-geo" onclick="obtenerUbicacion()"
+                            style="display:none; background: var(--item-bg); border: 1px solid var(--color-border); border-radius: 10px; padding: 0 15px; cursor: pointer; color: var(--color-primary); font-size: 18px; transition: 0.2s;"
+                            title="Usar mi ubicación actual"><i class="fa-solid fa-location-crosshairs"></i></button>
+                    </div>
                     <button id="btnMap" class="btn-maps" onclick="abrirMapa()"><i class="fa-solid fa-location-dot"></i>
                         Ver
                         ruta a la tienda</button>
@@ -548,7 +553,13 @@
                     oninput="formatearTelefono(this)" style="margin-bottom: 15px;">
 
                 <label style="font-size: 12px; font-weight: bold;">Dirección de Delivery</label>
-                <input type="text" id="perfilDireccion" class="input-text" placeholder="Ej: Av. Principal, Casa #10">
+                <div style="display:flex; gap: 8px;">
+                    <input type="text" id="perfilDireccion" class="input-text" placeholder="Ej: Av. Principal, Casa #10"
+                        style="flex-grow: 1;">
+                    <button id="btn-geo-perfil" onclick="obtenerUbicacion('perfilDireccion', 'btn-geo-perfil')"
+                        style="background: var(--item-bg); border: 1px solid var(--color-border); border-radius: 10px; padding: 0 15px; cursor: pointer; color: var(--color-primary); font-size: 18px; transition: 0.2s;"
+                        title="Usar mi ubicación actual"><i class="fa-solid fa-location-crosshairs"></i></button>
+                </div>
                 <button class="btn-enviar" onclick="guardarPerfil()"
                     style="margin-top: 20px; background:var(--color-primary); box-shadow:0 4px 15px rgba(30,58,138,0.2);">Guardar
                     Datos</button>

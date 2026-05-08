@@ -293,18 +293,40 @@ function cambiarCant(n, delta) {
 function toggleDireccion() {
     let met = document.querySelector('input[name="metodoEntrega"]:checked').value;
     let dirInput = document.getElementById('direccionDelivery');
+    let btnGeo = document.getElementById('btn-geo');
     let btnMap = document.getElementById('btnMap');
 
     if (met === 'Delivery') {
         dirInput.style.display = 'block';
+        if (btnGeo) btnGeo.style.display = 'block';
         btnMap.style.display = 'none';
         if (localStorage.getItem('gc_direccion') && !dirInput.value) {
             dirInput.value = localStorage.getItem('gc_direccion');
         }
     } else {
         dirInput.style.display = 'none';
+        if (btnGeo) btnGeo.style.display = 'none';
         btnMap.style.display = 'block';
     }
+}
+
+/** Obtiene las coordenadas GPS del cliente y las anexa a la dirección */
+function obtenerUbicacion(ion) {
+    let btn = document.getElementById(btnId);
+    let originalHTML = btn.innerHTML;olspinner fa - spin"></i>';
+
+    navigator.geolocation.getCurrentPosition(function (pos) {
+        let link = `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+        let input = document.getElementById(inputId);
+        input.value = (input.value ? input.value + ' - ' : '') + '📍 Ubicación GPS: ' + link; or: #10B981; "></i>';
+        setTimeout(() => btn.innerHTML = originalHTML, 2000);
+    }, function (err) {
+        alert("⚠️ No pudimos obtener tu ubicación. Verifica que el GPS esté encendido y hayas dado permisos al navegador.");
+        btn.innerHTML = originalHTML;
+    }, { timeout: 10000, enableHighAccuracy: true });
+} else {
+    alert("Tu navegador no soporta geolocalización.");
+}
 }
 
 function abrirMapa() {
