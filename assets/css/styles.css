@@ -971,3 +971,30 @@ body.dark-mode .total-usd {
     align-items: center;
     justify-content: center;
 }
+
+/* --- BUSCADOR: LISTA FLOTANTE DE SUGERENCIAS --- */
+.search-pill {
+    position: relative;
+}
+
+#search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-card, #ffffff);
+    border: 1px solid var(--color-border, #E5E7EB);
+    border-radius: 12px;
+    margin-top: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    max-height: 350px;
+    overflow-y: auto;
+    z-index: 3000;
+    display: none;
+}
+
+body.dark-mode #search-suggestions {
+    background: #121E3F;
+    border-color: #1E293B;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}

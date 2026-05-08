@@ -288,10 +288,22 @@ function toggleDark() {
 }
 
 /** Limpia la caché y recarga la página (Usado en el modal de Ajustes) */
-function limpiarCacheAdmin() {
+async function limpiarCacheAdmin() {
     localStorage.clear();
+    if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (let reg of registrations) {
+            await reg.unregister();
+        }
+    }
+    if ('caches' in window) {
+        const keys = await caches.keys();
+        for (let key of keys) {
+            await caches.delete(key);
+        }
+    }
     mostrarToast("Caché limpiada. Recargando...");
-    setTimeout(() => location.reload(), 1500);
+    setTimeout(() => window.location.href = window.location.pathname + '?v=' + new Date().getTime(), 1500);
 }
 
 function mostrarToast(msg) { const cont = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = msg; cont.appendChild(t); setTimeout(() => t.remove(), 2500); }
