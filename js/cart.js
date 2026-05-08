@@ -365,7 +365,9 @@ function enviarPedido() {
 
     // Comienza la construcción del mensaje de WhatsApp
     let nombreUser = localStorage.getItem('gc_nombre') || 'un cliente nuevo';
-    let msg = `🔥 *NUEVO PEDIDO - GRAN CATADOR* 🔥\n\n👤 *Cliente:* ${nombreUser}\n--------------------------------\n`;
+    let cedulaUser = localStorage.getItem('gc_cedula') || 'No especificada';
+    let telefonoUser = localStorage.getItem('gc_telefono') || 'No especificado';
+    let msg = `🔥 *NUEVO PEDIDO - GRAN CATADOR* 🔥\n\n👤 *Cliente:* ${nombreUser}\n🪪 *Cédula:* ${cedulaUser}\n📱 *Teléfono:* ${telefonoUser}\n--------------------------------\n`;
 
     for (let nombre in appState.carrito) {
         let iconoProducto = nombre.includes('(CAJA)') ? '📦' : '🍾';

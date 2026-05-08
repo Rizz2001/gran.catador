@@ -160,6 +160,12 @@ function abrirPerfil() {
     document.getElementById('perfilNombre').value = localStorage.getItem('gc_nombre') || '';
     document.getElementById('perfilDireccion').value = localStorage.getItem('gc_direccion') || '';
 
+    let inputCedula = document.getElementById('perfilCedula');
+    if (inputCedula) inputCedula.value = localStorage.getItem('gc_cedula') || '';
+
+    let inputTelefono = document.getElementById('perfilTelefono');
+    if (inputTelefono) inputTelefono.value = localStorage.getItem('gc_telefono') || '';
+
     let hist = JSON.parse(localStorage.getItem('gc_historial')) || [];
     let listCont = document.getElementById('historial-lista');
 
@@ -189,6 +195,13 @@ function abrirPerfil() {
 function guardarPerfil() {
     localStorage.setItem('gc_nombre', document.getElementById('perfilNombre').value);
     localStorage.setItem('gc_direccion', document.getElementById('perfilDireccion').value);
+
+    let inputCedula = document.getElementById('perfilCedula');
+    if (inputCedula) localStorage.setItem('gc_cedula', inputCedula.value);
+
+    let inputTelefono = document.getElementById('perfilTelefono');
+    if (inputTelefono) localStorage.setItem('gc_telefono', inputTelefono.value);
+
     mostrarToast("Datos guardados ✅");
     cerrarModal('modal-perfil', 'nav-home');
 }
@@ -811,15 +824,4 @@ window.handleZoom = function (e, img) {
     const rect = container.getBoundingClientRect();
 
     const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    const xPercent = (x / rect.width) * 100;
-    const yPercent = (y / rect.height) * 100;
-
-    img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-};
-
-window.resetZoom = function (img) {
-    if (window.innerWidth < 1024) return;
-    img.style.transformOrigin = 'center center';
-};
+    const y = e.clientY - rect
