@@ -541,11 +541,11 @@
 
                 <label style="font-size: 12px; font-weight: bold;">Cédula de Identidad</label>
                 <input type="text" id="perfilCedula" class="input-text" placeholder="Ej: V-12345678"
-                    style="margin-bottom: 15px;">
+                    oninput="formatearCedula(this)" style="margin-bottom: 15px;">
 
                 <label style="font-size: 12px; font-weight: bold;">Número de Teléfono</label>
                 <input type="tel" id="perfilTelefono" class="input-text" placeholder="Ej: 0414-1234567"
-                    style="margin-bottom: 15px;">
+                    oninput="formatearTelefono(this)" style="margin-bottom: 15px;">
 
                 <label style="font-size: 12px; font-weight: bold;">Dirección de Delivery</label>
                 <input type="text" id="perfilDireccion" class="input-text" placeholder="Ej: Av. Principal, Casa #10">

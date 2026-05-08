@@ -207,9 +207,9 @@ function guardarPerfil() {
         return;
     }
 
-    // Validación estricta de Cédula (Debe empezar por V-, E- o J-)
-    if (!/^(V-|E-|J-)/.test(cedula)) {
-        alert("⚠️ La Cédula debe empezar obligatoriamente por 'V-', 'E-' o 'J-'.\nEjemplo: V-12345678");
+    // Validación estricta de Cédula (Prefijo válido seguido solo de números)
+    if (!/^(V-|E-|J-|G-|P-)\d+$/.test(cedula)) {
+        alert("⚠️ La Cédula debe empezar obligatoriamente por 'V-', 'E-', 'J-', 'G-' o 'P-' seguido únicamente de números.\nEjemplo: V-12345678");
         return;
     }
 
@@ -226,6 +226,53 @@ function guardarPerfil() {
 
     mostrarToast("Datos guardados ✅");
     cerrarModal('modal-perfil', 'nav-home');
+}
+
+/** Formatea la cédula en tiempo real, forzando mayúsculas, el prefijo y bloqueando letras intermedias */
+window.formatearCedula = function (input) {
+    let val = input.value.toUpperCase();
+
+    if (val === '') {
+        input.value = '';
+        return;
+    }
+
+    let primeraLetra = val.charAt(0);
+    let prefijo = '';
+    let resto = '';
+
+    if (['V', 'E', 'J', 'G', 'P'].includes(primeraLetra)) {
+        prefijo = primeraLetra + '-';
+        resto = val.substring(1);
+    } else if (/[0-9]/.test(primeraLetra)) {
+        // Si empieza directamente con números, le facilitamos la vida agregando V-
+        prefijo = 'V-';
+        resto = val;
+    } else {
+        input.value = '';
+        return;
+    }
+
+    // Remueve todo lo que NO sea un número del resto de la cadena
+    input.value = prefijo + resto.replace(/[^0-9]/g, '');
+}
+
+/** Formatea el teléfono en tiempo real (Ej: 0414-1234567) bloqueando letras */
+window.formatearTelefono = function (input) {
+    // Eliminar todo lo que no sea número
+    let val = input.value.replace(/\D/g, '');
+
+    // Limitar a 11 dígitos máximo (formato estándar venezolano 04141234567)
+    if (val.length > 11) {
+        val = val.substring(0, 11);
+    }
+
+    // Agregar el guion después de los primeros 4 dígitos
+    if (val.length > 4) {
+        val = val.substring(0, 4) + '-' + val.substring(4);
+    }
+
+    input.value = val;
 }
 
 function abrirAjustes() {

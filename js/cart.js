@@ -354,8 +354,8 @@ function enviarPedido() {
     }
 
     // Segunda capa de validación para asegurar que el formato es correcto
-    if (!/^(V-|E-|J-)/i.test(cedulaUser) || !/^[a-zA-Z0-9\s\-]+$/.test(telefonoUser)) {
-        alert("⚠️ Datos de perfil inválidos.\nPor favor, verifica que tu Cédula empiece con V-, E-, o J- y que tu Teléfono solo contenga números y letras.");
+    if (!/^(V-|E-|J-|G-|P-)\d+$/i.test(cedulaUser) || !/^[0-9\-]+$/.test(telefonoUser)) {
+        alert("⚠️ Datos de perfil inválidos.\nPor favor, verifica que tu Cédula empiece con V-, E-, J-, G- o P- seguido de números, y que tu Teléfono tenga el formato correcto.");
         abrirPerfil();
         return;
     }
