@@ -769,7 +769,7 @@ function aplicarFiltros() {
             }
         });
 
-        // Ya no desplegamos la lista flotante, la grilla se actualiza dinámicamente
+        if (typeof mostrarSugerencias === 'function') mostrarSugerencias(q, resultadosFiltrados);
     } else {
         cerrarSugerencias();
     }

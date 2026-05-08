@@ -605,9 +605,34 @@ function closeCategorias() { const panel = document.getElementById('categoria-pa
  * @param {Array} resultados - Productos ya filtrados y ordenados por score
  */
 function mostrarSugerencias(q, resultados) {
-    // Función deshabilitada: Ya no se muestra la lista flotante (sugerencias). 
-    // El catálogo principal se actualiza en vivo al escribir.
-    cerrarSugerencias();
+    const cont = document.getElementById('search-suggestions');
+    if (!cont || q.length === 0) return cerrarSugerencias();
+
+    if (resultados.length === 0) {
+        cont.innerHTML = '<div class="suggestion-item" style="color:gray; font-size:12px; padding: 10px;">No se encontraron resultados</div>';
+        cont.style.display = 'block';
+        return;
+    }
+
+    let html = '';
+    let topResultados = resultados.slice(0, 6);
+
+    topResultados.forEach(p => {
+        let nombreB64 = codificarNombre(p.Nombre);
+        let isAgotado = p.StockNum <= 0;
+        let imgSrc = p.ImagenUrl ? p.ImagenUrl : 'logo.webp';
+        html += `
+        <div class="suggestion-item" onclick="abrirDetalleProducto('${p.codigo}')" style="cursor:pointer; display: flex; align-items: center; padding: 8px; border-bottom: 1px solid var(--color-border);">
+            <img src="${imgSrc}" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 6px; background: var(--item-bg); padding: 2px;">
+            <div class="sugg-info" style="flex-grow: 1; min-width: 0; margin-left: 10px;">
+                <p class="sugg-title" style="margin: 0; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; ${isAgotado ? 'text-decoration: line-through; opacity:0.6;' : ''}">${p.Nombre}</p>
+                <p class="sugg-price" style="margin: 0; font-size: 13px; font-weight: 700; color: var(--color-primary);">$${p.PrecioStr} <span style="font-size:10px; color:var(--color-text-muted);">/ ${p.PrecioBsStr} Bs</span></p>
+            </div>
+            <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" style="width: 30px; height: 30px; min-width: 30px; font-size: 12px; margin-left: 10px; border-radius: 50%; border: none; background: var(--color-primary); color: white; cursor: pointer;" ${isAgotado ? 'disabled' : ''} onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, false, '${imgSrc}', false)"><i class="fa-solid fa-plus"></i></button>
+        </div>`;
+    });
+    cont.innerHTML = html;
+    cont.style.display = 'block';
 }
 function cerrarSugerencias() { const cont = document.getElementById('search-suggestions'); if (cont) cont.style.display = 'none'; }
 document.addEventListener('click', (e) => { if (!e.target.closest('.search-pill') && !e.target.closest('.search-container')) cerrarSugerencias(); });
