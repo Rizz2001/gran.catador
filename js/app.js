@@ -434,8 +434,7 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
     const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy'
         : (isLocalhost || window.location.hostname.includes('github.io')) ? 'https://gran-catador.pages.dev/api/proxy'
-            : (isLocalhost || window.location.hostname.includes('github.io')) ? 'https://gran-catador.pages.dev/api/proxy'
-                : 'functions/api/proxy.php';
+            : 'functions/api/proxy.php';
     console.log(`📡 Consultando productos del grupo: ${nombreGrupo} (ID: ${codGrupo})`);
 
     try {

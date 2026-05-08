@@ -7,6 +7,116 @@ function guardarCarritoLS() {
     localStorage.setItem('gc_cart', JSON.stringify(appState.carrito));
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SISTEMA DE STOCK INTELIGENTE
+// Calcula el stock real restante descontando lo que ya está en el carrito.
+// Combina unidades sueltas y cajas para un control preciso.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Calcula el stock real restante para un producto, descontando
+ * las unidades y cajas que ya están en el carrito.
+ * @param {string} nombreBase - Nombre del producto SIN sufijo (UNIDAD/CAJA).
+ * @returns {{ prodObj: Object|null, stockDisponible: number, unidadesEnCarrito: number, unidadesRestantes: number, unidadesPorCaja: number }}
+ */
+function calcularStockRestante(nombreBase) {
+    const prodObj = appState.inventario.find(x => x.Nombre === nombreBase);
+
+    if (!prodObj) {
+        return { prodObj: null, stockDisponible: 999, unidadesEnCarrito: 0, unidadesRestantes: 999, unidadesPorCaja: 12 };
+    }
+
+    const stockDisponible = prodObj.StockNum;
+    const unidadesPorCaja = prodObj.CantidadGrup > 0 ? prodObj.CantidadGrup : 12;
+
+    // Stock ilimitado: devolver directamente sin calcular carrito
+    if (stockDisponible >= 999) {
+        return { prodObj, stockDisponible: 999, unidadesEnCarrito: 0, unidadesRestantes: 999, unidadesPorCaja };
+    }
+
+    const cantUnidades = appState.carrito[`${nombreBase} (UNIDAD)`]?.cantidad || 0;
+    const cantCajas   = appState.carrito[`${nombreBase} (CAJA)`]?.cantidad   || 0;
+    const unidadesEnCarrito = cantUnidades + (cantCajas * unidadesPorCaja);
+    const unidadesRestantes = Math.max(0, stockDisponible - unidadesEnCarrito);
+
+    return { prodObj, stockDisponible, unidadesEnCarrito, unidadesRestantes, unidadesPorCaja };
+}
+
+/**
+ * Valida si hay stock suficiente para agregar un producto (unidad o caja).
+ * Muestra un mensaje claro y contextual si no se puede agregar.
+ * @param {string} nombreBase - Nombre base del producto (sin sufijo).
+ * @param {boolean} esCaja - True si se intenta agregar una caja completa.
+ * @returns {boolean}
+ */
+function tieneStockSuficiente(nombreBase, esCaja) {
+    const { prodObj, stockDisponible, unidadesEnCarrito, unidadesRestantes, unidadesPorCaja } =
+        calcularStockRestante(nombreBase);
+
+    if (!prodObj) return true; // Failsafe
+    if (stockDisponible >= 999) return true; // Stock ilimitado
+
+    const unidadesPorAgregar = esCaja ? unidadesPorCaja : 1;
+
+    if (unidadesRestantes <= 0) {
+        // Ya se agotó todo el stock disponible
+        mostrarToastError(
+            `🚫 Límite de stock alcanzado`,
+            `Solo hay <b>${stockDisponible}</b> unidad${stockDisponible !== 1 ? 'es' : ''} y ya las tienes todas en el carrito.`
+        );
+        return false;
+    }
+
+    if (unidadesPorAgregar > unidadesRestantes) {
+        if (esCaja) {
+            // No alcanza el stock para una caja completa
+            mostrarToastError(
+                `📦 Stock insuficiente para una caja`,
+                `Solo quedan <b>${unidadesRestantes}</b> unidad${unidadesRestantes !== 1 ? 'es' : ''} disponible${unidadesRestantes !== 1 ? 's' : ''}. Una caja requiere <b>${unidadesPorCaja}</b>.`
+            );
+        } else {
+            mostrarToastError(
+                `⚠️ Stock insuficiente`,
+                `Solo quedan <b>${unidadesRestantes}</b> unidad${unidadesRestantes !== 1 ? 'es' : ''} disponible${unidadesRestantes !== 1 ? 's' : ''}.`
+            );
+        }
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * Muestra un toast de error con título y detalle.
+ * Si el toast simple ya existe, lo reemplaza con uno más rico.
+ */
+function mostrarToastError(titulo, detalle) {
+    const cont = document.getElementById('toast-container');
+    if (!cont) { mostrarToast(titulo); return; }
+
+    // Eliminar toasts de error anteriores para no apilarlos
+    const prev = cont.querySelector('.toast-error');
+    if (prev) prev.remove();
+
+    const t = document.createElement('div');
+    t.className = 'toast toast-error';
+    t.style.cssText = [
+        'background: linear-gradient(135deg, #ff4b4b, #c0392b)',
+        'border-left: 4px solid #ff1a1a',
+        'min-width: 240px',
+        'padding: 12px 16px',
+        'border-radius: 12px',
+        'box-shadow: 0 8px 24px rgba(234,67,53,0.35)',
+        'animation: toastSlideIn 0.3s ease'
+    ].join(';');
+    t.innerHTML = `
+        <div style="font-size:13px;font-weight:800;margin-bottom:3px;">${titulo}</div>
+        <div style="font-size:12px;opacity:0.9;line-height:1.4;">${detalle}</div>
+    `;
+    cont.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+}
+
 /** Anima un producto volando hacia el icono del carrito flotante */
 function animarAlCarrito(btnElement, imgSrc) {
     if (!btnElement || !imgSrc) return;
@@ -49,6 +159,12 @@ function animarAlCarrito(btnElement, imgSrc) {
 
 /** Añade un producto al estado del carrito y lanza efectos visuales */
 function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = '', esCaja = false) {
+    // --- VALIDACIÓN DE STOCK ---
+    if (!tieneStockSuficiente(nombre, esCaja)) {
+        return; // Detener si no hay stock
+    }
+    // --- FIN VALIDACIÓN ---
+
     let nombreFinal = esCaja ? `${nombre} (CAJA)` : `${nombre} (UNIDAD)`;
 
     // Buscar el código para guardar la imagen en el carrito
@@ -246,7 +362,6 @@ function renderizarCarrito() {
     for (let nombre in appState.carrito) {
         let nombreB64 = codificarNombre(nombre);
         let item = appState.carrito[nombre];
-        // Redondear individualmente cada subtotal a 2 decimales
         let subTotalItem = parseFloat((item.precio * item.cantidad).toFixed(2));
         appState.totalCarrito += subTotalItem;
 
@@ -256,7 +371,35 @@ function renderizarCarrito() {
             ? `<img loading="lazy" src="${imgSrc}" data-codigo="${item.codigo}" data-categoria="${item.categoria || ''}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" class="cart-item-img">`
             : `<div class="cart-item-img-placeholder"><i class="fa-solid fa-wine-bottle"></i></div>`;
 
-        let btnMinus = item.cantidad > 1 ? '<i class="fa-solid fa-minus"></i>' : '<i class="fa-solid fa-trash-can" style="color: var(--color-danger);"></i>';
+        let btnMinus = item.cantidad > 1
+            ? '<i class="fa-solid fa-minus"></i>'
+            : '<i class="fa-solid fa-trash-can" style="color: var(--color-danger);"></i>';
+
+        // ── STOCK INTELIGENTE: calcular si se puede agregar más ──────────────────
+        const nombreBase = nombre.replace(/ \((CAJA|UNIDAD)\)$/, '');
+        const esCajaItem = nombre.includes('(CAJA)');
+        const { stockDisponible, unidadesEnCarrito, unidadesRestantes, unidadesPorCaja } =
+            calcularStockRestante(nombreBase);
+
+        const enLimite = stockDisponible < 999 && unidadesRestantes <= 0;
+        const noAlcanzaOtraCaja = esCajaItem && stockDisponible < 999 && unidadesRestantes < unidadesPorCaja;
+        const bloquearSumar = enLimite || noAlcanzaOtraCaja;
+
+        // Badge de stock restante / límite
+        let stockBadge = '';
+        if (stockDisponible < 999) {
+            if (unidadesRestantes <= 0) {
+                stockBadge = `<span class="cart-stock-badge limit">🔴 Stock máximo en carrito</span>`;
+            } else if (unidadesRestantes <= 3) {
+                stockBadge = `<span class="cart-stock-badge warning">⚠️ Quedan ${unidadesRestantes} unid. disponibles</span>`;
+            } else {
+                stockBadge = `<span class="cart-stock-badge info">${stockDisponible} unid. en stock</span>`;
+            }
+        }
+
+        let btnSumarAttrs = bloquearSumar
+            ? `class="cart-btn cart-btn-disabled" disabled title="Stock agotado — no hay más unidades disponibles"`
+            : `class="cart-btn" onclick="cambiarCantB64('${nombreB64}', 1)"`;
 
         renderHTML += `
             <div class="cart-item">
@@ -264,23 +407,38 @@ function renderizarCarrito() {
                 <div class="cart-item-info cart-item-info-container">
                     <p class="cart-item-title">${nombre}</p>
                     <p class="cart-item-price">$${item.precio.toFixed(2)} <span class="cart-item-price-bs">/ ${(item.precio * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs</span></p>
+                    ${stockBadge}
                 </div>
-                <div class="cart-controls"><button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button><span style="font-size:13px; font-weight:800; width:18px; text-align:center;">${item.cantidad}</span><button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', 1)"><i class="fa-solid fa-plus"></i></button></div>
+                <div class="cart-controls">
+                    <button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
+                    <span style="font-size:13px; font-weight:800; width:18px; text-align:center;">${item.cantidad}</span>
+                    <button ${btnSumarAttrs}><i class="fa-solid ${bloquearSumar ? 'fa-lock' : 'fa-plus'}"></i></button>
+                </div>
             </div>`;
     }
 
-    // Insertamos todo el HTML generado de una sola vez para mejorar el rendimiento (Performance)
     lista.innerHTML = renderHTML;
 
-    // Evitar errores de coma flotante asegurando 2 decimales finales
     appState.totalCarrito = parseFloat(appState.totalCarrito.toFixed(2));
-
     document.getElementById('totalUsdModal').innerText = `$${appState.totalCarrito.toFixed(2)}`;
     document.getElementById('totalBsModal').innerText = `${(appState.totalCarrito * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
     calcularVuelto();
 }
 
 function cambiarCant(n, delta) {
+    if (delta > 0) {
+        const esCaja = n.includes('(CAJA)');
+        const nombreBase = n.replace(/ \((CAJA|UNIDAD)\)$/, '');
+
+        // Doble verificación: validar antes de aplicar el cambio
+        if (!tieneStockSuficiente(nombreBase, esCaja)) {
+            renderizarCarrito(); // Refrescar UI para reflejar estado actual
+            return;
+        }
+    }
+
+    if (!appState.carrito[n]) return; // Seguridad: el ítem pudo eliminarse antes
+
     appState.carrito[n].cantidad += delta;
     if (appState.carrito[n].cantidad <= 0) {
         delete appState.carrito[n];

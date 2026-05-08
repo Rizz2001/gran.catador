@@ -388,98 +388,110 @@
             <div class="cart-header">
                 <h2>Mi Pedido</h2>
                 <div style="display:flex; gap:10px;">
-                    <button class="btn-trash" onclick="vaciarCarrito()" aria-label="Vaciar carrito de compras"><i
-                            class="fa-solid fa-trash-can"></i></button>
+                    <button class="btn-trash" onclick="vaciarCarrito()" aria-label="Vaciar carrito de compras"><i class="fa-solid fa-trash-can"></i></button>
                     <button onclick="cerrarModal('modal-cart', 'nav-home')" aria-label="Cerrar carrito"
-                        style="background:var(--color-card); border:1px solid var(--color-border); width:40px; height:40px; border-radius:50%; font-size: 18px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;"><i
-                            class="fa-solid fa-xmark"></i></button>
+                        style="background:var(--color-card); border:1px solid var(--color-border); width:40px; height:40px; border-radius:50%; font-size: 18px; cursor: pointer; color: var(--color-text); display:flex; align-items:center; justify-content:center;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 </div>
             </div>
+
+            <!-- Lista de ítems del carrito -->
             <div id="lista-carrito" style="flex-grow: 1;"></div>
 
-            <div id="checkout-sections">
+            <!-- Sección de checkout (entrega, pago, total) -->
+            <div id="checkout-sections" style="display:none;">
+
+                <!-- Opciones de Entrega -->
                 <div class="checkout-box">
-                    <p class="box-title"><i class="fa-solid fa-truck-fast"></i> Opciones de Entrega</p>
+                    <p class="box-title"><i class="fa-solid fa-motorcycle"></i> Opciones de Entrega</p>
                     <div class="delivery-toggles">
-                        <input type="radio" id="ret" name="metodoEntrega" value="Retiro" checked
-                            onchange="toggleDireccion()">
-                        <label for="ret" class="toggle-btn">Retiro Local</label>
+                        <input type="radio" id="ret" name="metodoEntrega" value="Retiro" checked onchange="toggleDireccion()">
+                        <label for="ret" class="toggle-btn">🏪 Tienda</label>
                         <input type="radio" id="del" name="metodoEntrega" value="Delivery" onchange="toggleDireccion()">
-                        <label for="del" class="toggle-btn">Delivery</label>
+                        <label for="del" class="toggle-btn">🛵 Delivery</label>
                     </div>
-                    <div style="display:flex; gap: 8px;">
+                    <div style="display:flex; gap: 8px; margin-top: 10px;">
                         <input type="text" id="direccionDelivery" class="input-text"
                             placeholder="Ingresa tu dirección exacta..." style="display:none; flex-grow: 1;">
                         <button id="btn-geo" onclick="obtenerUbicacion()"
                             style="display:none; background: var(--item-bg); border: 1px solid var(--color-border); border-radius: 10px; padding: 0 15px; cursor: pointer; color: var(--color-primary); font-size: 18px; transition: 0.2s;"
-                            title="Usar mi ubicación actual"><i class="fa-solid fa-location-crosshairs"></i></button>
+                            title="Usar mi ubicación actual">
+                            <i class="fa-solid fa-location-crosshairs"></i>
+                        </button>
                     </div>
-                    <button id="btnMap" class="btn-maps" onclick="abrirMapa()"><i class="fa-solid fa-location-dot"></i>
-                        Ver
-                        ruta a la tienda</button>
-                    <textarea id="notasPedido" class="input-text" placeholder="Notas (Ej: Traer hielo extra)..."
-                        style="margin-top:10px; height: 60px;"></textarea>
+                    <button id="btnMap" class="btn-maps" onclick="abrirMapa()">
+                        <i class="fa-solid fa-location-dot"></i> Ver ruta a la tienda
+                    </button>
+                    <textarea id="notasPedido" class="input-text"
+                        placeholder="Notas (Ej: Traer hielo extra, vuelto de $50)..."
+                        style="margin-top:15px; height: 60px; resize: none;"></textarea>
                 </div>
 
+                <!-- Método de Pago -->
                 <div class="checkout-box">
-                    <p class="box-title"><i class="fa-regular fa-credit-card"></i> Método de Pago</p>
-                    <select id="metodoPagoSelect" class="input-select" onchange="actualizarMetodoPago()">
-                        <option value="Efectivo">💵 Efectivo</option>
+                    <p class="box-title"><i class="fa-solid fa-wallet"></i> Método de Pago</p>
+                    <select id="metodoPagoSelect" class="input-select" onchange="actualizarMetodoPago()" style="font-weight: 600;">
+                        <option value="Efectivo">💵 Efectivo Divisas</option>
                         <option value="Pago Movil">📱 Pago Móvil</option>
                         <option value="Zelle">🟣 Zelle</option>
                     </select>
 
+                    <!-- Panel: Efectivo -->
                     <div id="box-efectivo" style="margin-top: 15px; text-align: center;">
-                        <p style="font-size: 11px; color: var(--texto-claro); margin-bottom: 5px;">¿Con cuánto vas a
-                            pagar?
-                        </p>
+                        <p style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 8px;">¿Con cuánto vas a pagar?</p>
                         <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
-                            <span style="font-size:20px; color:var(--dorado); font-weight:bold;">$</span>
-                            <input type="number" id="montoPago" class="vuelto-input" placeholder="0.00"
-                                onkeyup="calcularVuelto()">
+                            <span style="font-size:22px; color:var(--color-primary); font-weight:bold;">$</span>
+                            <input type="number" id="montoPago" class="vuelto-input" placeholder="0.00" onkeyup="calcularVuelto()">
                         </div>
-                        <p id="res-vuelto" style="font-size:12px; margin-top:5px; display:none; font-weight:bold;"></p>
+                        <p id="res-vuelto" style="font-size:13px; margin-top:8px; display:none; font-weight:bold;"></p>
                     </div>
 
+                    <!-- Panel: Pago Móvil -->
                     <div id="box-pagomovil"
                         style="margin-top: 15px; display:none; background: var(--color-bg); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--color-border); text-align: left;">
-                        <p
-                            style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing:0.5px;">
-                            Datos Pago Móvil</p>
+                        <p style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing:0.5px;">Datos Pago Móvil</p>
                         <p style="font-size: 13px; margin-bottom: 4px;"><b>Banco:</b> Mercantil (0105)</p>
                         <p style="font-size: 13px; margin-bottom: 4px;"><b>Teléfono:</b> 0414-3732274</p>
                         <p style="font-size: 13px; margin-bottom: 8px;"><b>Cédula/RIF:</b> V-22582611</p>
-                        <p
-                            style="font-size: 11px; color: var(--color-primary); font-weight: bold; text-align: center; margin-top: 10px;">
+                        <p style="font-size: 11px; color: var(--color-primary); font-weight: bold; text-align: center; margin-top: 10px;">
                             <i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp
                         </p>
                     </div>
 
+                    <!-- Panel: Zelle -->
                     <div id="box-zelle"
                         style="margin-top: 15px; display:none; background: var(--color-bg); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--color-border); text-align: center;">
-                        <p
-                            style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing:0.5px;">
-                            Datos Zelle</p>
-                        <p style="font-size: 14px; margin-bottom: 4px; font-weight: bold; color: #741b88;">
-                            grancatadorcorp@gmail.com</p>
+                        <p style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing:0.5px;">Datos Zelle</p>
+                        <p style="font-size: 14px; margin-bottom: 4px; font-weight: bold; color: #741b88;">grancatadorcorp@gmail.com</p>
                         <p style="font-size: 12px; margin-bottom: 8px;">A nombre de: <b>Ariadna Silva</b></p>
-                        <p style="font-size: 11px; color: var(--color-primary); font-weight: bold; margin-top: 10px;"><i
-                                class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp</p>
+                        <p style="font-size: 11px; color: var(--color-primary); font-weight: bold; margin-top: 10px;">
+                            <i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp
+                        </p>
                     </div>
                 </div>
 
-                <div class="total-container">
-                    <p style="font-size: 15px; font-weight: 700; color: var(--color-text); margin: 0;">Total a pagar</p>
-                    <div>
-                        <div class="total-usd" id="totalUsdModal">$0.00</div>
-                        <div class="total-bs" id="totalBsModal">0,00 Bs</div>
+                <!-- Total y botón enviar -->
+                <div class="checkout-box">
+                    <div class="summary-box">
+                        <div class="summary-row">
+                            <span>Total USD</span>
+                            <span class="total-usd" id="totalUsdModal">$0.00</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Total Bs</span>
+                            <span class="total-bs" id="totalBsModal">0,00 Bs</span>
+                        </div>
                     </div>
+                    <button id="btn-whatsapp" class="btn-enviar" onclick="enviarPedido()" style="margin-top: 15px;">
+                        <i class="fa-brands fa-whatsapp" style="font-size: 20px;"></i> Enviar Pedido a WhatsApp
+                    </button>
+                    <p id="msg-cerrado"
+                        style="text-align:center; color:#ea4335; font-size:11px; font-weight:bold; display:none; margin-top:10px;">
+                        La tienda está cerrada en este momento.
+                    </p>
                 </div>
-                <button id="btn-whatsapp" class="btn-enviar" onclick="enviarPedido()"><i class="fa-brands fa-whatsapp"
-                        style="font-size: 20px;"></i> Enviar Pedido a WhatsApp</button>
-                <p id="msg-cerrado"
-                    style="text-align:center; color:#ea4335; font-size:11px; font-weight:bold; display:none; margin-top:10px;">
-                    La tienda está cerrada en este momento.</p>
+
             </div>
         </div>
     </div>

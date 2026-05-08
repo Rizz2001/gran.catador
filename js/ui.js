@@ -688,13 +688,58 @@ function crearHTMLProducto(p) {
         badgeHTML = `<div class="product-badge badge-agotado">AGOTADO</div>`;
     }
 
+    // --- STOCK INTELIGENTE: verificar si ya está en carrito al máximo ---
+    let enCarritoStr = '';
+    let btnBloqueadoPorStock = false;
+    if (!isAgotado && typeof calcularStockRestante === 'function') {
+        const { stockDisponible, unidadesRestantes, unidadesPorCaja: upC } = calcularStockRestante(p.Nombre);
+        const cantEnCarritoUnidad = appState.carrito[`${p.Nombre} (UNIDAD)`]?.cantidad || 0;
+        const cantEnCarritoCaja   = appState.carrito[`${p.Nombre} (CAJA)`]?.cantidad   || 0;
+        const totalEnCarrito = cantEnCarritoUnidad + cantEnCarritoCaja;
+
+        if (totalEnCarrito > 0) {
+            enCarritoStr = cantEnCarritoCaja > 0
+                ? `${cantEnCarritoCaja} caja${cantEnCarritoCaja > 1 ? 's' : ''}`
+                : `${cantEnCarritoUnidad} und`;
+        }
+
+        if (stockDisponible < 999) {
+            if (unidadesRestantes <= 0) {
+                btnBloqueadoPorStock = true;
+            } else if (esModoCaja && unidadesRestantes < upC) {
+                btnBloqueadoPorStock = true;
+            }
+        }
+    }
+
     let imgSrc = p.ImagenUrl ? p.ImagenUrl : 'logo.webp';
     let galeriasHTML = `<img loading="lazy" decoding="async" width="300" height="300" src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain;" onload="this.parentElement.classList.remove('skeleton-box');">`;
+
+    // Botón dinámico según estado de stock en carrito
+    let btnAddHTML;
+    if (isAgotado) {
+        btnAddHTML = `<button class="btn-add-cart disabled" disabled aria-label="Agotado"><i class="fa-solid fa-ban"></i></button>`;
+    } else if (btnBloqueadoPorStock) {
+        btnAddHTML = `<button class="btn-add-cart btn-stock-limit" disabled aria-label="Stock máximo en carrito" title="Ya tienes todo el stock disponible en tu carrito" style="background: var(--color-border); color: var(--color-text-muted); cursor: not-allowed; position: relative;">
+            <i class="fa-solid fa-lock"></i>
+        </button>`;
+    } else {
+        let onclickAttr = `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja})"`;
+        btnAddHTML = `<button class="btn-add-cart" aria-label="Agregar ${p.Nombre} al carrito" title="Agregar al carrito" ${onclickAttr}>
+            <i class="fa-solid fa-plus"></i>
+        </button>`;
+    }
+
+    // Badge "En carrito" sobre la imagen
+    let cartBadgeHTML = enCarritoStr
+        ? `<div class="product-badge badge-en-carrito"><i class="fa-solid fa-cart-shopping" style="font-size:9px;"></i> ${enCarritoStr}</div>`
+        : '';
 
     return `
         <div class="producto-card ${isAgotado ? 'agotado' : ''}">
             
             ${badgeHTML}
+            ${cartBadgeHTML}
             
             <div onclick="abrirDetalleProducto('${p.codigo}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); abrirDetalleProducto('${p.codigo}'); }" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;" role="button" tabindex="0" aria-label="Ver detalles de ${p.Nombre}">
                 <div class="product-img-container skeleton-box" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 8px;">
@@ -715,9 +760,7 @@ function crearHTMLProducto(p) {
                     <span class="product-price-bs" style="font-size: 13px;">${precioBsDin} Bs</span>
                 </div>
                 
-            <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" aria-label="Agregar ${p.Nombre} al carrito" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja})"`}>
-                    <i class="fa-solid fa-plus"></i>
-                </button>
+            ${btnAddHTML}
             </div>
         </div>
     `;
