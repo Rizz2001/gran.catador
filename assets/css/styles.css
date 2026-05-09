@@ -322,13 +322,15 @@ textarea {
     color: var(--color-primary, #1E3A8A);
 }
 
-.delivery-toggles {
+.delivery-toggles,
+.payment-toggles {
     display: flex;
     gap: 10px;
     margin-bottom: 10px;
 }
 
-.delivery-toggles input[type="radio"] {
+.delivery-toggles input[type="radio"],
+.payment-toggles input[type="radio"] {
     display: none;
 }
 
@@ -346,11 +348,52 @@ textarea {
     transition: all 0.2s;
 }
 
-.delivery-toggles input[type="radio"]:checked+.toggle-btn {
+.delivery-toggles input[type="radio"]:checked+.toggle-btn,
+.payment-toggles input[type="radio"]:checked+.toggle-btn {
     background: var(--color-primary, #1E3A8A);
     color: #ffffff;
     border-color: var(--color-primary, #1E3A8A);
     box-shadow: 0 4px 10px rgba(30, 58, 138, 0.2);
+}
+
+/* --- BOTONES DE COPIAR DATOS DE PAGO --- */
+.data-pago-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--item-bg, #F9FAFB);
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1px solid var(--color-border, #E5E7EB);
+}
+
+.data-pago-row span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text, #111827);
+    font-family: monospace;
+    letter-spacing: 0.5px;
+}
+
+.btn-copy-pago {
+    background: transparent;
+    border: none;
+    color: var(--color-primary, #1E3A8A);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    text-transform: uppercase;
+}
+
+.btn-copy-pago:hover {
+    background: rgba(30, 58, 138, 0.1);
 }
 
 .input-text,

@@ -533,6 +533,33 @@ function compartirProducto(nombre, precio) { const text = `¡Mira esta bebida! $
 function fallbackCopyText(text) { const textarea = document.createElement('textarea'); textarea.value = text; textarea.style.position = 'fixed'; textarea.style.opacity = '0'; document.body.appendChild(textarea); textarea.focus(); textarea.select(); try { document.execCommand('copy'); mostrarToast("Texto copiado al portapapeles."); } catch (e) { mostrarToast("No se pudo copiar al portapapeles."); } document.body.removeChild(textarea); }
 function compartirProductoB64(b64, p) { compartirProducto(decodificarNombre(b64), p); }
 
+/** Copia un texto al portapapeles (Ej: Datos de Pago) y da feedback visual en el botón */
+function copiarDatoPago(texto, btnElement) {
+    const showFeedback = () => {
+        if (!btnElement) return;
+        let originalHTML = btnElement.innerHTML;
+        let originalColor = btnElement.style.color;
+        let originalBg = btnElement.style.background;
+
+        btnElement.innerHTML = '<i class="fa-solid fa-check"></i> Copiado';
+        btnElement.style.color = 'var(--color-success, #10B981)';
+        btnElement.style.background = 'rgba(16, 185, 129, 0.15)';
+
+        setTimeout(() => {
+            btnElement.innerHTML = originalHTML;
+            btnElement.style.color = originalColor;
+            btnElement.style.background = originalBg;
+        }, 2000);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texto).then(showFeedback).catch(() => { fallbackCopyText(texto); showFeedback(); });
+    } else {
+        fallbackCopyText(texto);
+        showFeedback();
+    }
+}
+
 // --- RENDERIZADO DE PRODUCTOS (Fase 5: Mejora de Rendimiento) ---
 function crearHTMLProducto(p) {
     const esModoCaja = (modoVistaGlobal === 'caja');

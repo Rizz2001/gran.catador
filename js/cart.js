@@ -35,7 +35,7 @@ function calcularStockRestante(nombreBase) {
     }
 
     const cantUnidades = appState.carrito[`${nombreBase} (UNIDAD)`]?.cantidad || 0;
-    const cantCajas   = appState.carrito[`${nombreBase} (CAJA)`]?.cantidad   || 0;
+    const cantCajas = appState.carrito[`${nombreBase} (CAJA)`]?.cantidad || 0;
     const unidadesEnCarrito = cantUnidades + (cantCajas * unidadesPorCaja);
     const unidadesRestantes = Math.max(0, stockDisponible - unidadesEnCarrito);
 
@@ -497,11 +497,16 @@ function abrirMapa() {
 }
 
 function actualizarMetodoPago() {
-    let val = document.getElementById('metodoPagoSelect').value;
-    document.getElementById('box-efectivo').style.display = (val === 'Efectivo') ? 'block' : 'none';
+    // Soporta tanto el <select> original como un grupo de botones tipo radio
+    let selectElem = document.getElementById('metodoPagoSelect');
+    let radioElem = document.querySelector('input[name="metodoPago"]:checked');
+    let val = radioElem ? radioElem.value : (selectElem ? selectElem.value : 'Efectivo');
+
+    let boxE = document.getElementById('box-efectivo');
+    if (boxE) boxE.style.display = (val === 'Efectivo') ? 'block' : 'none';
 
     let boxPm = document.getElementById('box-pagomovil');
-    if (boxPm) boxPm.style.display = (val === 'Pago Movil') ? 'block' : 'none';
+    if (boxPm) boxPm.style.display = (val === 'Pago Movil' || val === 'PagoMovil') ? 'block' : 'none';
 
     let boxZ = document.getElementById('box-zelle');
     if (boxZ) boxZ.style.display = (val === 'Zelle') ? 'block' : 'none';
@@ -588,7 +593,9 @@ function enviarPedido() {
     let notas = document.getElementById('notasPedido').value.trim();
     if (notas) msg += `📝 *Notas:* ${notas}\n`;
 
-    let metodo = document.getElementById('metodoPagoSelect').value;
+    let selectMetodo = document.getElementById('metodoPagoSelect');
+    let radioMetodo = document.querySelector('input[name="metodoPago"]:checked');
+    let metodo = radioMetodo ? radioMetodo.value : (selectMetodo ? selectMetodo.value : 'Efectivo');
     msg += `💳 *Método de Pago:* ${metodo}\n`;
 
     if (metodo === 'Efectivo') {
