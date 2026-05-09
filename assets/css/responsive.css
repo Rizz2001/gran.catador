@@ -100,6 +100,144 @@
         /* Elimina el retraso de 300ms al hacer tap en algunos navegadores */
         border-radius: 50% !important;
     }
+
+    /* --- MEJORAS VISUALES DEL CARRITO (MÓVIL) --- */
+    .cart-header {
+        padding: 12px 15px !important;
+    }
+
+    .cart-header h2 {
+        font-size: 18px !important;
+    }
+
+    #lista-carrito {
+        padding: 10px 15px !important;
+        gap: 10px !important;
+    }
+
+    .cart-item {
+        padding: 12px 10px !important;
+        gap: 10px !important;
+        border-radius: 14px !important;
+        align-items: center !important;
+    }
+
+    .cart-item-img,
+    .cart-item-img-placeholder {
+        width: 55px !important;
+        height: 55px !important;
+        border-radius: 8px !important;
+    }
+
+    .cart-item-title {
+        font-size: 13px !important;
+        white-space: normal !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        line-height: 1.3 !important;
+        margin-bottom: 4px !important;
+    }
+
+    .cart-item-price {
+        font-size: 15px !important;
+    }
+
+    .cart-item-price-bs {
+        display: block !important;
+        font-size: 11px !important;
+        margin-top: 1px !important;
+    }
+
+    .cart-controls {
+        padding: 4px 6px !important;
+        gap: 6px !important;
+        border-radius: 16px !important;
+    }
+
+    .cart-btn {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 12px !important;
+    }
+
+    #checkout-sections {
+        padding: 0 15px 15px 15px !important;
+    }
+
+    .checkout-box {
+        padding: 15px !important;
+        border-radius: 14px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .box-title {
+        font-size: 14px !important;
+        margin-bottom: 10px !important;
+    }
+
+    .toggle-btn {
+        padding: 10px 5px !important;
+        font-size: 12px !important;
+        border-radius: 8px !important;
+    }
+
+    .input-text,
+    .input-select {
+        padding: 12px !important;
+        font-size: 13px !important;
+        border-radius: 8px !important;
+    }
+
+    .total-container {
+        padding: 15px !important;
+        border-radius: 14px !important;
+        margin-bottom: 15px !important;
+    }
+
+    .total-usd {
+        font-size: 22px !important;
+    }
+
+    .total-bs {
+        font-size: 12px !important;
+    }
+
+    /* --- MEJORAS VISUALES DEL PERFIL (MÓVIL) --- */
+    #modal-perfil .cart-layout-grid {
+        padding: 15px !important;
+        gap: 15px !important;
+    }
+
+    .historial-item {
+        padding: 15px !important;
+        border-radius: 14px !important;
+        margin-bottom: 12px !important;
+    }
+
+    .historial-item>div>span:first-child {
+        font-size: 11px !important;
+    }
+
+    .historial-item>div>span:last-child {
+        font-size: 16px !important;
+    }
+
+    .historial-item p {
+        font-size: 12px !important;
+        line-height: 1.3 !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
+        margin-bottom: 12px !important;
+    }
+
+    .historial-item button {
+        padding: 10px !important;
+        border-radius: 10px !important;
+        font-size: 12px !important;
+    }
 }
 
 @media (min-width: 768px) {

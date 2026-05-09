@@ -160,12 +160,6 @@ function abrirPerfil() {
     document.getElementById('perfilNombre').value = localStorage.getItem('gc_nombre') || '';
     document.getElementById('perfilDireccion').value = localStorage.getItem('gc_direccion') || '';
 
-    let inputCedula = document.getElementById('perfilCedula');
-    if (inputCedula) inputCedula.value = localStorage.getItem('gc_cedula') || '';
-
-    let inputTelefono = document.getElementById('perfilTelefono');
-    if (inputTelefono) inputTelefono.value = localStorage.getItem('gc_telefono') || '';
-
     let hist = JSON.parse(localStorage.getItem('gc_historial')) || [];
     let listCont = document.getElementById('historial-lista');
 
@@ -193,86 +187,10 @@ function abrirPerfil() {
 
 /** Guarda las preferencias del perfil del usuario */
 function guardarPerfil() {
-    let nombre = document.getElementById('perfilNombre').value.trim();
-    let direccion = document.getElementById('perfilDireccion').value.trim();
-
-    let inputCedula = document.getElementById('perfilCedula');
-    let cedula = inputCedula ? inputCedula.value.trim().toUpperCase() : '';
-
-    let inputTelefono = document.getElementById('perfilTelefono');
-    let telefono = inputTelefono ? inputTelefono.value.trim() : '';
-
-    if (!nombre || !cedula || !telefono) {
-        alert("⚠️ Los campos de Nombre, Cédula y Teléfono son obligatorios.");
-        return;
-    }
-
-    // Validación estricta de Cédula (Prefijo válido seguido solo de números)
-    if (!/^(V-|E-|J-|G-|P-)\d+$/.test(cedula)) {
-        alert("⚠️ La Cédula debe empezar obligatoriamente por 'V-', 'E-', 'J-', 'G-' o 'P-' seguido únicamente de números.\nEjemplo: V-12345678");
-        return;
-    }
-
-    // Validación estricta de Teléfono (Solo números, letras, espacios y guiones)
-    if (!/^[a-zA-Z0-9\s\-]+$/.test(telefono)) {
-        alert("⚠️ El campo de Teléfono solo acepta números y letras.");
-        return;
-    }
-
-    localStorage.setItem('gc_nombre', nombre);
-    localStorage.setItem('gc_direccion', direccion);
-    if (inputCedula) localStorage.setItem('gc_cedula', cedula);
-    if (inputTelefono) localStorage.setItem('gc_telefono', telefono);
-
+    localStorage.setItem('gc_nombre', document.getElementById('perfilNombre').value);
+    localStorage.setItem('gc_direccion', document.getElementById('perfilDireccion').value);
     mostrarToast("Datos guardados ✅");
     cerrarModal('modal-perfil', 'nav-home');
-}
-
-/** Formatea la cédula en tiempo real, forzando mayúsculas, el prefijo y bloqueando letras intermedias */
-window.formatearCedula = function (input) {
-    let val = input.value.toUpperCase();
-
-    if (val === '') {
-        input.value = '';
-        return;
-    }
-
-    let primeraLetra = val.charAt(0);
-    let prefijo = '';
-    let resto = '';
-
-    if (['V', 'E', 'J', 'G', 'P'].includes(primeraLetra)) {
-        prefijo = primeraLetra + '-';
-        resto = val.substring(1);
-    } else if (/[0-9]/.test(primeraLetra)) {
-        // Si empieza directamente con números, le facilitamos la vida agregando V-
-        prefijo = 'V-';
-        resto = val;
-    } else {
-        input.value = '';
-        return;
-    }
-
-    // Remueve todo lo que NO sea un número del resto de la cadena
-    input.value = prefijo + resto.replace(/[^0-9]/g, '');
-}
-
-/** Formatea el teléfono en tiempo real (Ej: 0414-1234567) bloqueando letras */
-window.formatearTelefono = function (input) {
-    // Eliminar todo lo que no sea número
-    let val = input.value.replace(/\D/g, '');
-
-    // Limitar a 11 dígitos máximo (formato estándar venezolano 04141234567)
-    if (val.length > 11) {
-        val = val.substring(0, 11);
-    }
-
-    // Agregar el guion después de los primeros 4 dígitos
-    if (val.length > 4) {
-        val = val.substring(0, 4) + '-' + val.substring(4);
-    }
-
-    input.value = val;
 }
 
 function abrirAjustes() {
@@ -288,22 +206,10 @@ function toggleDark() {
 }
 
 /** Limpia la caché y recarga la página (Usado en el modal de Ajustes) */
-async function limpiarCacheAdmin() {
+function limpiarCacheAdmin() {
     localStorage.clear();
-    if ('serviceWorker' in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        for (let reg of registrations) {
-            await reg.unregister();
-        }
-    }
-    if ('caches' in window) {
-        const keys = await caches.keys();
-        for (let key of keys) {
-            await caches.delete(key);
-        }
-    }
     mostrarToast("Caché limpiada. Recargando...");
-    setTimeout(() => window.location.href = window.location.pathname + '?v=' + new Date().getTime(), 1500);
+    setTimeout(() => location.reload(), 1500);
 }
 
 function mostrarToast(msg) { const cont = document.getElementById('toast-container'); const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = msg; cont.appendChild(t); setTimeout(() => t.remove(), 2500); }
@@ -617,34 +523,9 @@ function closeCategorias() { const panel = document.getElementById('categoria-pa
  * @param {Array} resultados - Productos ya filtrados y ordenados por score
  */
 function mostrarSugerencias(q, resultados) {
-    const cont = document.getElementById('search-suggestions');
-    if (!cont || q.length === 0) return cerrarSugerencias();
-
-    if (resultados.length === 0) {
-        cont.innerHTML = '<div class="suggestion-item" style="color:gray; font-size:12px; padding: 10px;">No se encontraron resultados</div>';
-        cont.style.display = 'block';
-        return;
-    }
-
-    let html = '';
-    let topResultados = resultados.slice(0, 6);
-
-    topResultados.forEach(p => {
-        let nombreB64 = codificarNombre(p.Nombre);
-        let isAgotado = p.StockNum <= 0;
-        let imgSrc = p.ImagenUrl ? p.ImagenUrl : 'logo.webp';
-        html += `
-        <div class="suggestion-item" onclick="abrirDetalleProducto('${p.codigo}')" style="cursor:pointer; display: flex; align-items: center; padding: 8px; border-bottom: 1px solid var(--color-border);">
-            <img src="${imgSrc}" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 6px; background: var(--item-bg); padding: 2px;">
-            <div class="sugg-info" style="flex-grow: 1; min-width: 0; margin-left: 10px;">
-                <p class="sugg-title" style="margin: 0; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; ${isAgotado ? 'text-decoration: line-through; opacity:0.6;' : ''}">${p.Nombre}</p>
-                <p class="sugg-price" style="margin: 0; font-size: 13px; font-weight: 700; color: var(--color-primary);">$${p.PrecioStr} <span style="font-size:10px; color:var(--color-text-muted);">/ ${p.PrecioBsStr} Bs</span></p>
-            </div>
-            <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" style="width: 30px; height: 30px; min-width: 30px; font-size: 12px; margin-left: 10px; border-radius: 50%; border: none; background: var(--color-primary); color: white; cursor: pointer;" ${isAgotado ? 'disabled' : ''} onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, false, '${imgSrc}', false)"><i class="fa-solid fa-plus"></i></button>
-        </div>`;
-    });
-    cont.innerHTML = html;
-    cont.style.display = 'block';
+    // Función deshabilitada: Ya no se muestra la lista flotante (sugerencias). 
+    // El catálogo principal se actualiza en vivo al escribir.
+    cerrarSugerencias();
 }
 function cerrarSugerencias() { const cont = document.getElementById('search-suggestions'); if (cont) cont.style.display = 'none'; }
 document.addEventListener('click', (e) => { if (!e.target.closest('.search-pill') && !e.target.closest('.search-container')) cerrarSugerencias(); });
@@ -688,58 +569,13 @@ function crearHTMLProducto(p) {
         badgeHTML = `<div class="product-badge badge-agotado">AGOTADO</div>`;
     }
 
-    // --- STOCK INTELIGENTE: verificar si ya está en carrito al máximo ---
-    let enCarritoStr = '';
-    let btnBloqueadoPorStock = false;
-    if (!isAgotado && typeof calcularStockRestante === 'function') {
-        const { stockDisponible, unidadesRestantes, unidadesPorCaja: upC } = calcularStockRestante(p.Nombre);
-        const cantEnCarritoUnidad = appState.carrito[`${p.Nombre} (UNIDAD)`]?.cantidad || 0;
-        const cantEnCarritoCaja   = appState.carrito[`${p.Nombre} (CAJA)`]?.cantidad   || 0;
-        const totalEnCarrito = cantEnCarritoUnidad + cantEnCarritoCaja;
-
-        if (totalEnCarrito > 0) {
-            enCarritoStr = cantEnCarritoCaja > 0
-                ? `${cantEnCarritoCaja} caja${cantEnCarritoCaja > 1 ? 's' : ''}`
-                : `${cantEnCarritoUnidad} und`;
-        }
-
-        if (stockDisponible < 999) {
-            if (unidadesRestantes <= 0) {
-                btnBloqueadoPorStock = true;
-            } else if (esModoCaja && unidadesRestantes < upC) {
-                btnBloqueadoPorStock = true;
-            }
-        }
-    }
-
     let imgSrc = p.ImagenUrl ? p.ImagenUrl : 'logo.webp';
     let galeriasHTML = `<img loading="lazy" decoding="async" width="300" height="300" src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain;" onload="this.parentElement.classList.remove('skeleton-box');">`;
-
-    // Botón dinámico según estado de stock en carrito
-    let btnAddHTML;
-    if (isAgotado) {
-        btnAddHTML = `<button class="btn-add-cart disabled" disabled aria-label="Agotado"><i class="fa-solid fa-ban"></i></button>`;
-    } else if (btnBloqueadoPorStock) {
-        btnAddHTML = `<button class="btn-add-cart btn-stock-limit" disabled aria-label="Stock máximo en carrito" title="Ya tienes todo el stock disponible en tu carrito" style="background: var(--color-border); color: var(--color-text-muted); cursor: not-allowed; position: relative;">
-            <i class="fa-solid fa-lock"></i>
-        </button>`;
-    } else {
-        let onclickAttr = `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja})"`;
-        btnAddHTML = `<button class="btn-add-cart" aria-label="Agregar ${p.Nombre} al carrito" title="Agregar al carrito" ${onclickAttr}>
-            <i class="fa-solid fa-plus"></i>
-        </button>`;
-    }
-
-    // Badge "En carrito" sobre la imagen
-    let cartBadgeHTML = enCarritoStr
-        ? `<div class="product-badge badge-en-carrito"><i class="fa-solid fa-cart-shopping" style="font-size:9px;"></i> ${enCarritoStr}</div>`
-        : '';
 
     return `
         <div class="producto-card ${isAgotado ? 'agotado' : ''}">
             
             ${badgeHTML}
-            ${cartBadgeHTML}
             
             <div onclick="abrirDetalleProducto('${p.codigo}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); abrirDetalleProducto('${p.codigo}'); }" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;" role="button" tabindex="0" aria-label="Ver detalles de ${p.Nombre}">
                 <div class="product-img-container skeleton-box" style="display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 8px;">
@@ -760,7 +596,9 @@ function crearHTMLProducto(p) {
                     <span class="product-price-bs" style="font-size: 13px;">${precioBsDin} Bs</span>
                 </div>
                 
-            ${btnAddHTML}
+            <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" aria-label="Agregar ${p.Nombre} al carrito" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja})"`}>
+                    <i class="fa-solid fa-plus"></i>
+                </button>
             </div>
         </div>
     `;
@@ -959,6 +797,16 @@ window.addEventListener('scroll', () => {
             btnScrollTop.classList.remove('visible');
         }
     }
+
+    // --- EFECTO SOMBRA EN HEADER ---
+    const header = document.querySelector('.site-header');
+    if (header) {
+        if (window.scrollY > 10) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    }
 });
 
 window.scrollToTop = function () {
@@ -975,11 +823,13 @@ window.handleZoom = function (e, img) {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
 
-    img.style.transformOrigin = `${x}px ${y}px`;
-    img.style.transform = 'scale(2)';
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
+
+    img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
 };
 
 window.resetZoom = function (img) {
+    if (window.innerWidth < 1024) return;
     img.style.transformOrigin = 'center center';
-    img.style.transform = 'scale(1)';
 };
