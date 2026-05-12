@@ -546,8 +546,15 @@ function enviarPedido() {
     }
 
     // Segunda capa de validación para asegurar que el formato es correcto
-    if (!/^(V-|E-|J-|G-|P-)\d+$/i.test(cedulaUser) || !/^[0-9\-]+$/.test(telefonoUser)) {
-        alert("⚠️ Datos de perfil inválidos.\nPor favor, verifica que tu Cédula empiece con V-, E-, J-, G- o P- seguido de números, y que tu Teléfono tenga el formato correcto.");
+    let cedulaLimpia = cedulaUser.toUpperCase().replace(/\s/g, '');
+    if (!/^[VEJGP]-?[\d\-]+$/.test(cedulaLimpia) && !/^[\d\-]+$/.test(cedulaLimpia)) {
+        alert("⚠️ Cédula inválida.\nPor favor, verifica que tu Cédula contenga números válidos (Ej: V-12345678).");
+        abrirPerfil();
+        return;
+    }
+
+    if (!/^[\+0-9\-\s]+$/.test(telefonoUser) || telefonoUser.replace(/[^0-9]/g, '').length < 10) {
+        alert("⚠️ Teléfono inválido.\nPor favor, ingresa un número de teléfono válido (Ej: 0414-1234567).");
         abrirPerfil();
         return;
     }
