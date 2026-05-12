@@ -277,10 +277,11 @@ function sugerirAcompañante() {
         if (cont && modal) {
             cont.innerHTML = sugerencias.map(p => {
                 let nombreB64 = codificarNombre(p.Nombre);
-                let imgSrc = p.ImagenUrl ? p.ImagenUrl : 'logo.webp';
+                let imgSrc = p.ImagenUrl ? p.ImagenUrl : `assets/img/productos/${p.codigo}.webp`;
+                let attempts = p.ImagenUrl ? 0 : 1;
                 return `
                     <div style="min-width:130px; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:12px; text-align:center; background:var(--color-card); box-shadow:var(--shadow-sm);">
-                        <img src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" style="height:60px; width:100%; object-fit:contain; margin-bottom:8px; mix-blend-mode:multiply;">
+                        <img src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" style="height:60px; width:100%; object-fit:contain; margin-bottom:8px; mix-blend-mode:multiply;">
                         <p style="font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--color-text); font-family:'Inter',sans-serif;">${p.Nombre}</p>
                         <p style="font-size:15px; color:var(--color-text); font-weight:700; font-family:'Inter',sans-serif; margin-top:2px;">$${p.PrecioStr}</p>
                         <button onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, '${imgSrc}', false); cerrarCrossSell();" style="background:var(--color-primary); color:white; border:none; padding:8px; border-radius:var(--radius-full); font-size:12px; font-weight:700; width:100%; margin-top:8px; cursor:pointer; transition:0.2s;"><i class="fa-solid fa-plus"></i> Añadir</button>
@@ -366,9 +367,10 @@ function renderizarCarrito() {
         appState.totalCarrito += subTotalItem;
 
         let prodObj = appState.inventario.find(x => x.codigo === item.codigo);
-        let imgSrc = (prodObj && prodObj.ImagenUrl) ? prodObj.ImagenUrl : 'logo.webp';
+        let imgSrc = (prodObj && prodObj.ImagenUrl) ? prodObj.ImagenUrl : `assets/img/productos/${item.codigo}.webp`;
+        let attempts = (prodObj && prodObj.ImagenUrl) ? 0 : 1;
         let imgHTML = item.codigo
-            ? `<img loading="lazy" src="${imgSrc}" data-codigo="${item.codigo}" data-categoria="${item.categoria || ''}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" class="cart-item-img">`
+            ? `<img loading="lazy" src="${imgSrc}" data-codigo="${item.codigo}" data-categoria="${item.categoria || ''}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" class="cart-item-img">`
             : `<div class="cart-item-img-placeholder"><i class="fa-solid fa-wine-bottle"></i></div>`;
 
         let btnMinus = item.cantidad > 1

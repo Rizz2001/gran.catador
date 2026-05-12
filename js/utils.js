@@ -225,10 +225,24 @@ function imgFallback(imgElement) {
 
 function imgFallbackFolder(imgElement) {
     let index = imgElement.dataset.index || "1";
-    if (index === "1") {
-        imgElement.src = 'logo.webp';
+    let attempts = parseInt(imgElement.dataset.attempts || "0");
+    let codigo = imgElement.dataset.codigo;
+
+    if (attempts === 0 && codigo) {
+        // Intento 1: Cargar imagen local .webp si falla la API
+        imgElement.src = `assets/img/productos/${codigo}.webp`;
+        imgElement.dataset.attempts = "1";
+    } else if (attempts === 1 && codigo) {
+        // Intento 2: Cargar imagen local .jpg si falla el .webp
+        imgElement.src = `assets/img/productos/${codigo}.jpg`;
+        imgElement.dataset.attempts = "2";
     } else {
-        imgElement.style.display = 'none';
+        // Fallo final: mostrar logo por defecto
+        if (index === "1") {
+            imgElement.src = 'logo.webp';
+        } else {
+            imgElement.style.display = 'none';
+        }
+        imgElement.onerror = null;
     }
-    imgElement.onerror = null;
 }

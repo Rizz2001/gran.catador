@@ -596,8 +596,9 @@ function crearHTMLProducto(p) {
         badgeHTML = `<div class="product-badge badge-agotado">AGOTADO</div>`;
     }
 
-    let imgSrc = p.ImagenUrl ? p.ImagenUrl : 'logo.webp';
-    let galeriasHTML = `<img loading="lazy" decoding="async" width="300" height="300" src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain;" onload="this.parentElement.classList.remove('skeleton-box');">`;
+    let imgSrc = p.ImagenUrl ? p.ImagenUrl : `assets/img/productos/${p.codigo}.webp`;
+    let attempts = p.ImagenUrl ? 0 : 1;
+    let galeriasHTML = `<img loading="lazy" decoding="async" width="300" height="300" src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain;" onload="this.parentElement.classList.remove('skeleton-box');">`;
 
     return `
         <div class="producto-card ${isAgotado ? 'agotado' : ''}">
@@ -670,12 +671,13 @@ async function abrirDetalleProducto(codigo) {
 
     let imgContainer = document.getElementById('detalle-img-container');
     imgContainer.classList.add('skeleton-box');
-    let imgUrl = p.ImagenUrl ? p.ImagenUrl : 'logo.webp';
-    let galeriasHTML = `<img loading="lazy" decoding="async" width="300" height="300" src="${imgUrl}" class="zoomable-img" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="0" onerror="imgFallbackFolder(this)" alt="Vista 1" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain;" onload="this.style.display='block'; this.parentElement.classList.remove('skeleton-box');" onmousemove="if(typeof handleZoom==='function') handleZoom(event, this)" onmouseleave="if(typeof resetZoom==='function') resetZoom(this)">`;
+    let imgUrl = p.ImagenUrl ? p.ImagenUrl : `assets/img/productos/${p.codigo}.webp`;
+    let attempts = p.ImagenUrl ? 0 : 1;
+    let galeriasHTML = `<img loading="lazy" decoding="async" width="300" height="300" src="${imgUrl}" class="zoomable-img" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" alt="Vista 1" style="scroll-snap-align: start; flex-shrink: 0; width: 100%; height: 100%; object-fit: contain;" onload="this.style.display='block'; this.parentElement.classList.remove('skeleton-box');" onmousemove="if(typeof handleZoom==='function') handleZoom(event, this)" onmouseleave="if(typeof resetZoom==='function') resetZoom(this)">`;
     imgContainer.innerHTML = galeriasHTML;
 
     let btnContainer = document.getElementById('detalle-btn-add');
-    let imgSrc = p.ImagenUrl ? p.ImagenUrl : 'logo.webp';
+    let imgSrc = p.ImagenUrl ? p.ImagenUrl : `assets/img/productos/${p.codigo}.webp`;
     if (isAgotado) {
         let txtBtn = p.StockNum <= 0 ? 'Agotado' : 'Stock Insuficiente';
         btnContainer.innerHTML = `<button class="btn-enviar" style="background: var(--color-border); color: var(--color-text-muted); cursor: not-allowed;" disabled>${txtBtn}</button>`;
