@@ -237,9 +237,13 @@ function imgFallbackFolder(imgElement) {
         imgElement.src = `assets/img/productos/${codigo}.webp`;
         imgElement.dataset.attempts = "1";
     } else if (attempts === 1 && codigo) {
-        // Intento 2: Cargar imagen local .jpeg si falla el .webp
-        imgElement.src = `assets/img/productos/${codigo}.jpeg`;
+        // Intento 2: Cargar imagen local .jpg si falla el .webp
+        imgElement.src = `assets/img/productos/${codigo}.jpg`;
         imgElement.dataset.attempts = "2";
+    } else if (attempts === 2 && codigo) {
+        // Intento 3: Cargar imagen local .jpeg si falla el .jpg
+        imgElement.src = `assets/img/productos/${codigo}.jpeg`;
+        imgElement.dataset.attempts = "3";
     } else {
         // Fallo final: mostrar logo por defecto
         if (index === "1") {
