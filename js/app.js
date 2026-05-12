@@ -264,6 +264,19 @@ async function cargarInventario() {
 
     try {
         await cargarInventarioDesdeAPI();
+
+        // --- AUTO-SCROLL A LOS PRODUCTOS (IGNORANDO EL BANNER) ---
+        setTimeout(() => {
+            // Buscamos el inicio del catálogo (los filtros o la lista de productos)
+            const target = document.querySelector('.tools-container') || document.getElementById('lista-productos');
+            if (target) {
+                const header = document.querySelector('.site-header');
+                const headerOffset = header ? header.offsetHeight : 80;
+                const targetPos = target.getBoundingClientRect().top + window.scrollY - headerOffset - 10;
+                window.scrollTo({ top: targetPos, behavior: 'smooth' });
+            }
+        }, 800); // Retraso de 800ms para asegurar que las imágenes y la estructura se hayan pintado
+
     } catch (e) {
         console.error("Error cargando inventario:", e);
         updateApiProgress(100, true);
