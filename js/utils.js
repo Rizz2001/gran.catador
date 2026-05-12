@@ -111,7 +111,7 @@ function searchWithIndex(query, inventario) {
 
     buildSearchIndex(inventario);
 
-    const terms = quitarAcentos(query).split(/\s+/).filter(t => t.length > 0).map(procesarTermino);
+    const terms = quitarAcentos(query).split(/\s+/).map(procesarTermino).filter(t => t.length > 0);
     if (terms.length === 0) return [];
 
     // ── FASE 1: Búsqueda por índice (exacta + prefijo) ────────────────────────
@@ -187,7 +187,8 @@ function searchWithIndex(query, inventario) {
             });
             let score = 0;
 
-            const coincide = terms.every(term => {
+            // Evaluamos cuántos términos escritos por el usuario logran coincidir
+            const terminosCoincidentes = terms.filter(term => {
                 if (term.length < 4) {
                     if (words.some(w => w === term || w.startsWith(term))) {
                         score += 5;
@@ -203,7 +204,10 @@ function searchWithIndex(query, inventario) {
                 return false;
             });
 
-            if (coincide) resultadosFuzzy.push({ producto: p, score });
+            // Flexibilidad: Si escriben 3 o más palabras, permitimos que se equivoquen o inventen 1 palabra
+            // Ej: "Ron Cacique Añejo", si "Añejo" no está en la base de datos, aún así mostrará "Ron Cacique"
+            const minMatchesRequired = terms.length > 2 ? terms.length - 1 : terms.length;
+            if (terminosCoincidentes.length >= minMatchesRequired) resultadosFuzzy.push({ producto: p, score });
         });
 
         return resultadosFuzzy.sort((a, b) => b.score - a.score);

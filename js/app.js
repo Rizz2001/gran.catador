@@ -388,6 +388,14 @@ async function cargarInventarioDesdeAPI() {
     }
 
     if (grupos.length > 0) {
+        // Excluir grupos no deseados en la tienda online
+        grupos = grupos.filter(g => {
+            let nombre = g.Nombre || g.nombre || g.Descripcion || g.descripcion || g.NombreGrupo || g.desc_grupo || g.DescGrupo || "";
+            let nombreLimpio = quitarAcentos(nombre).toUpperCase();
+            const excluidos = ["FRUTERIA", "PAPELERIA", "MATERIAL DE OFICINA", "UNICO", "SERVICIO"];
+            return !excluidos.some(excluido => nombreLimpio.includes(excluido));
+        });
+
         appState.gruposInventario = grupos;
         console.log("📂 Grupos procesados correctamente:", grupos.length);
     } else {
