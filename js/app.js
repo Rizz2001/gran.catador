@@ -188,7 +188,8 @@ async function obtenerArchivosExternos() {
                 let contBanners = document.getElementById('contenedorBanners');
                 if (listaBanners.length > 0 && contBanners) {
                     contBanners.innerHTML = '';
-                    contBanners.style.display = 'flex';
+                    const queryRaw = (document.getElementById('buscador')?.value || '').trim();
+                    contBanners.style.display = (categoriaActual === 'Todos' && queryRaw.length === 0) ? 'flex' : 'none';
                     contBanners.style.overflowX = 'hidden';
                     contBanners.style.scrollBehavior = 'smooth';
                     listaBanners.forEach((img, idx) => {
@@ -773,6 +774,12 @@ function aplicarFiltros() {
     const q = quitarAcentos(queryRaw);
     const sortOption = document.getElementById('ordenarSelect')?.value || 'relevancia';
     const verAgotados = document.getElementById('chkAgotados')?.checked || false;
+
+    // Controlar visibilidad de los banners: Solo en "Inicio" (Todos) y sin búsqueda activa
+    let contBanners = document.getElementById('contenedorBanners');
+    if (contBanners) {
+        contBanners.style.display = (categoriaActual === 'Todos' && q.length === 0) ? 'flex' : 'none';
+    }
 
     // ── 1. Filtro de stock ────────────────────────────────────────────────────
     let inventarioStock = verAgotados ? inventario.slice() : inventario.filter(p => p.StockNum > 0);
