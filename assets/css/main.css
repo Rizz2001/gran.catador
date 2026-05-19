@@ -1697,11 +1697,9 @@ body.dark-mode .cart-header .panel-title {
   }
 
   .promo-banner {
-    min-width: calc(33.333% - 6px);
-    height: 10vh;
-    /* Ocupará exactamente el 10% del alto de la pantalla */
-    aspect-ratio: auto;
-    /* Anulamos el ratio para que respete la altura fija */
+    min-width: calc(90% - 10px);
+    height: auto;
+    aspect-ratio: 21 / 9;
     border-radius: 10px;
   }
 
@@ -1731,12 +1729,12 @@ body.dark-mode .cart-header .panel-title {
   }
 
   .hero-banner {
-    flex-direction: row;
-    text-align: left;
-    padding: 12px 15px;
+    flex-direction: column;
+    text-align: center;
+    padding: 20px 15px;
     align-items: center;
-    justify-content: space-between;
-    margin: 10px 0;
+    justify-content: center;
+    margin: 15px 0;
     border-radius: var(--radius-lg);
   }
 
@@ -1746,7 +1744,7 @@ body.dark-mode .cart-header .panel-title {
   }
 
   .hero-title {
-    font-size: 16px;
+    font-size: 22px;
     margin-bottom: 6px;
   }
 
@@ -1754,6 +1752,7 @@ body.dark-mode .cart-header .panel-title {
     font-size: 11px;
     margin-bottom: 8px;
     line-height: 1.4;
+    text-align: center;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -1762,21 +1761,21 @@ body.dark-mode .cart-header .panel-title {
 
   .btn-hero {
     padding: 6px 14px;
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .hero-image {
-    flex: 0 0 80px;
-    margin-top: 0;
-    margin-left: 15px;
+    flex: 0 0 auto;
+    margin-top: 15px;
+    margin-left: 0;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   .hero-image img {
-    width: 100%;
-    height: auto;
+    width: 150px;
+    height: 150px;
     transform: none;
   }
 

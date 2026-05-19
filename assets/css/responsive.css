@@ -282,6 +282,75 @@
     }
 }
 
+/* --- OPTIMIZACIÓN EXTREMA PARA DISPOSITIVOS MUY PEQUEÑOS (ej. iPhone SE, Galaxy Fold) < 400px --- */
+@media (max-width: 400px) {
+    .header-main-container {
+        gap: 5px !important;
+        padding: 5px 8px !important;
+    }
+
+    .search-pill {
+        padding: 5px 10px !important;
+    }
+
+    .icon-btn {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 13px !important;
+    }
+
+    .btn-menu-sidebar {
+        padding: 5px 8px !important;
+        font-size: 11px !important;
+    }
+
+    .productos-grid {
+        gap: 8px !important;
+        padding: 8px 8px 20px 8px !important;
+    }
+
+    .producto-card {
+        padding: 8px !important;
+    }
+
+    .producto-titulo {
+        font-size: 11px !important;
+        height: 30px !important;
+        line-height: 1.25 !important;
+        margin-bottom: 4px !important;
+    }
+
+    .product-price {
+        font-size: 14px !important;
+    }
+
+    .product-price-bs {
+        font-size: 10px !important;
+    }
+
+    .btn-add-cart {
+        width: 30px !important;
+        height: 30px !important;
+        font-size: 13px !important;
+    }
+
+    .bottom-nav {
+        width: calc(100% - 16px) !important;
+        padding: 6px 10px !important;
+    }
+
+    .bottom-nav a {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 18px !important;
+    }
+
+    .hero-image img {
+        width: 20px !important;
+        height: 10px !important;
+    }
+}
+
 @media (min-width: 768px) {
     .tools-container {
         display: flex;

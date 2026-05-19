@@ -1274,13 +1274,15 @@ body.dark-mode .sidebar-subfilters .checkbox-item input[type="checkbox"]:checked
     flex-direction: column;
     justify-content: space-between;
     height: 100%;
+    animation: card-fade-in 0.35s ease-out both;
+    will-change: transform, opacity;
 }
 
 /* Animación de entrada para las tarjetas de producto */
 @keyframes card-fade-in {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(15px);
     }
 
     to {
@@ -1297,11 +1299,6 @@ body.dark-mode .sidebar-subfilters .checkbox-item input[type="checkbox"]:checked
         background: var(--color-card, #ffffff);
         overflow: hidden;
         /* Evita que la imagen se salga al hacer zoom */
-        animation: card-fade-in 0.4s ease-out both;
-        /* 'both' mantiene el estado final de la animación */
-        opacity: 0;
-        /* Oculto por defecto hasta que la animación comience */
-        will-change: transform;
     }
 
     .producto-card:hover {
