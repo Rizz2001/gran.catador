@@ -180,17 +180,35 @@ async function cargarBannersLocales() {
                 Array.from(contBanners.children).forEach(banner => observer.observe(banner));
 
                 let slideIndex = 0;
-                if (window.bannersTimer) clearInterval(window.bannersTimer);
-                window.bannersTimer = setInterval(() => {
-                    let totalSlides = contBanners.children.length;
-                    if (totalSlides > 1) {
-                        slideIndex++;
-                        if (slideIndex >= totalSlides) slideIndex = 0;
-                        let bannerWidth = contBanners.children[0].offsetWidth;
-                        let gap = parseInt(window.getComputedStyle(contBanners).gap) || 0;
-                        contBanners.scrollTo({ left: (bannerWidth + gap) * slideIndex, behavior: 'smooth' });
-                    }
-                }, 3000);
+                const totalSlides = contBanners.children.length;
+
+                const startAutoScroll = () => {
+                    if (window.bannersTimer) clearInterval(window.bannersTimer);
+                    window.bannersTimer = setInterval(() => {
+                        if (contBanners.scrollWidth > contBanners.clientWidth + 10) {
+                            // Calculamos el índice basado en la posición actual por si el usuario movió el scroll manualmente
+                            let bannerWidth = contBanners.children[0].offsetWidth;
+                            let gap = parseInt(window.getComputedStyle(contBanners).gap) || 0;
+                            slideIndex = Math.round(contBanners.scrollLeft / (bannerWidth + gap)) + 1;
+                            
+                            if (slideIndex >= totalSlides) slideIndex = 0;
+                            contBanners.scrollTo({ left: (bannerWidth + gap) * slideIndex, behavior: 'smooth' });
+                        }
+                    }, 4000); // 4 segundos es más amigable para lectura
+                };
+
+                // Detener el auto-scroll cuando el usuario interactúa
+                const handleUserInteraction = () => {
+                    clearInterval(window.bannersTimer);
+                    // Reiniciar el auto-scroll después de 10 segundos de inactividad
+                    clearTimeout(window.resumeBannerTimer);
+                    window.resumeBannerTimer = setTimeout(startAutoScroll, 10000);
+                };
+
+                contBanners.addEventListener('touchstart', handleUserInteraction, { passive: true });
+                contBanners.addEventListener('mousedown', handleUserInteraction);
+
+                startAutoScroll();
             }
         }
     } catch (error) { }

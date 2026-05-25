@@ -5,7 +5,14 @@
  */
 
 // --- CONFIGURACIÓN ---
-const diccionarioSinonimos = { 'birra': 'cerveza', 'curda': 'licor', 'cana': 'ron', 'pasapalo': 'snack', 'soda': 'refresco', 'fresco': 'refresco', 'chuche': 'snack', 'chucheria': 'snack', 'champagne': 'espumante', 'champaña': 'espumante', 'vinito': 'vino', 'roncito': 'ron', 'aguardiente': 'licor' };
+const CONFIG_BUSQUEDA = {
+    minCharsToken: 3,
+    maxLevenshteinDist: 2,
+    diccionarioSinonimos: { 
+        'birra': 'cerveza', 'curda': 'licor', 'cana': 'ron', 
+        'pasapalo': 'snack', 'soda': 'refresco', 'fresco': 'refresco' 
+    }
+};
 
 // --- FUNCIONES DE TEXTO Y BÚSQUEDA ---
 function limpiarCategoria(texto) { if (!texto) return "Otros"; return texto.trim().replace(/\s+/g, ' ').toUpperCase(); }

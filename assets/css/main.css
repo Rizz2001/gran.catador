@@ -1,6 +1,10 @@
 /* --- Tipografía --- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* --- Importación de Módulos --- */
+@import url('styles.css');
+@import url('responsive.css');
+
 :root {
   --color-white: #FFFFFF;
   --color-primary: #1E3A8A;
@@ -678,11 +682,14 @@ body.dark-mode .hero-banner {
 .banners-container {
   display: flex;
   overflow-x: auto;
+  overflow-y: hidden;
   gap: 15px;
   padding: 15px 20px 5px 20px;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
 }
 
 .banners-container::-webkit-scrollbar {
@@ -1697,9 +1704,9 @@ body.dark-mode .cart-header .panel-title {
   }
 
   .promo-banner {
-    min-width: calc(90% - 10px);
-    height: auto;
-    aspect-ratio: 21 / 9;
+    min-width: calc(33.333% - 6px);
+    height: 100px;
+    aspect-ratio: auto;
     border-radius: 10px;
   }
 
