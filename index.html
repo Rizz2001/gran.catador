@@ -399,9 +399,9 @@
             <div class="cart-header">
                 <h2>Mi Pedido</h2>
                 <div style="display:flex; gap:10px;">
-                    <button class="btn-trash" onclick="vaciarCarrito()" aria-label="Vaciar carrito de compras"><i
+                    <button type="button" class="btn-trash" onclick="vaciarCarrito()" aria-label="Vaciar carrito de compras"><i
                             class="fa-solid fa-trash-can"></i></button>
-                    <button onclick="cerrarModal('modal-cart', 'nav-home')" aria-label="Cerrar carrito"
+                    <button type="button" onclick="cerrarModal('modal-cart', 'nav-home')" aria-label="Cerrar carrito"
                         class="modal-close-btn">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
@@ -533,7 +533,7 @@
                             <span class="total-bs" id="totalBsModal">0,00 Bs</span>
                         </div>
                     </div>
-                    <button id="btn-whatsapp" class="btn-enviar" onclick="enviarPedido()" style="margin-top: 15px;">
+                    <button type="button" id="btn-whatsapp" class="btn-enviar" onclick="enviarPedido()" style="margin-top: 15px;">
                         <i class="fa-brands fa-whatsapp" style="font-size: 20px;"></i> Enviar Pedido a WhatsApp
                     </button>
                     <p id="msg-cerrado"

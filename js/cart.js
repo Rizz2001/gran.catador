@@ -414,9 +414,9 @@ function renderizarCarrito() {
                     ${stockBadge}
                 </div>
                 <div class="cart-controls">
-                    <button class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
+                    <button type="button" class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
                     <span style="font-size:13px; font-weight:800; width:18px; text-align:center;">${item.cantidad}</span>
-                    <button ${btnSumarAttrs}><i class="fa-solid ${bloquearSumar ? 'fa-lock' : 'fa-plus'}"></i></button>
+                    <button type="button" ${btnSumarAttrs}><i class="fa-solid ${bloquearSumar ? 'fa-lock' : 'fa-plus'}"></i></button>
                 </div>
             </div>`;
     }
