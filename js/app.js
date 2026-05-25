@@ -2,6 +2,7 @@ let inventario = [];
 let favoritos = JSON.parse(localStorage.getItem('gc_favs')) || [];
 let tasaOficial = 36.25; let tasaEuro = 40.00; let categoriaActual = 'Todos'; let debounceTimer;
 let isTiendaAbierta = true; let codigosRecomendados = []; let siempreDisponibles = [];
+let masVendidosCodigos = []; let masVendidosProductos = [];
 let productosFiltradosGlobal = []; let itemsPorPagina = 30; let paginaActual = 1;
 
 let appSettings = { useApi: true, apiType: 'smartventas' };
@@ -76,7 +77,16 @@ function parseFoxdataNumber(val) {
     let n = parseFloat(s.replace(/[^\d.-]/g, ''));
     return isNaN(n) ? 0 : n;
 }
-
+function normalizarCodigo(codigo) {
+    if (codigo == null) return '';
+    let valor = String(codigo).trim();
+    if (valor === '') return '';
+    const soloDigitos = valor.replace(/[^0-9]/g, '');
+    if (soloDigitos.length > 0) {
+        return soloDigitos.replace(/^0+(?=\d)/, '');
+    }
+    return valor.toLowerCase();
+}
 if (localStorage.getItem('gc_dark') === 'true') document.body.classList.add('dark-mode');
 
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(reg => { reg.update(); }).catch(() => { }); }); }
@@ -226,6 +236,45 @@ async function cargarSiempreDisponiblesLocal() {
     } catch (error) { }
 }
 
+async function cargarMasVendidosLocal() {
+    try {
+        const res = await fetch('data/config/mas_vendidos.txt?v=' + new Date().getTime());
+        if (res.ok) {
+            const texto = await res.text();
+            masVendidosCodigos = texto
+                .split(/[\n,]+/)
+                .map(line => line.trim())
+                .filter(line => line !== '' && !line.startsWith('#'))
+                .map(line => line.replace(/["']/g, ''))
+                .map(line => line.trim());
+            masVendidosCodigos = [...new Set(masVendidosCodigos)];
+            appState.masVendidosCodigos = masVendidosCodigos;
+        }
+    } catch (error) { }
+}
+
+function obtenerProductosMasVendidos() {
+    if (!masVendidosCodigos.length || !inventario.length) return [];
+    const mapa = new Map(inventario.map(p => [normalizarCodigo(p.codigo), p]));
+    const productos = [];
+
+    masVendidosCodigos.forEach(codigo => {
+        const clave = normalizarCodigo(codigo);
+        if (!clave) return;
+
+        let producto = mapa.get(clave);
+        if (!producto) {
+            producto = inventario.find(p => normalizarCodigo(p.codigo) === clave || compararIDs(p.codigo, codigo));
+        }
+
+        if (producto && !productos.some(p => normalizarCodigo(p.codigo) === normalizarCodigo(producto.codigo))) {
+            productos.push(producto);
+        }
+    });
+
+    return productos;
+}
+
 async function obtenerArchivosExternos() {
     // 1. OPTIMIZACIÓN: Ejecutar peticiones de tasas en paralelo
     const promesasTasas = [
@@ -249,6 +298,7 @@ async function obtenerArchivosExternos() {
 
     promesasConfig.push(cargarBannersLocales());
     promesasConfig.push(cargarSiempreDisponiblesLocal());
+    promesasConfig.push(cargarMasVendidosLocal());
 
     await Promise.all(promesasConfig);
 }

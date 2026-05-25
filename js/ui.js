@@ -622,9 +622,88 @@ window.closeSidebar = function () {
  * @param {Array} resultados - Productos ya filtrados y ordenados por score
  */
 function mostrarSugerencias(q, resultados) {
-    // Función deshabilitada: Ya no se muestra la lista flotante (sugerencias). 
-    // El catálogo principal se actualiza en vivo al escribir.
-    cerrarSugerencias();
+    const cont = document.getElementById('search-suggestions');
+    const input = document.getElementById('buscador');
+    if (!cont || !input) return;
+
+    const query = q ? q.trim() : '';
+    if (query.length === 0) {
+        cont.style.display = 'none';
+        return;
+    }
+
+    cont.innerHTML = '';
+    cont.style.display = 'block';
+
+    const header = document.createElement('div');
+    header.className = 'search-suggestions-header';
+    header.innerHTML = `<span>Buscando <strong>${query}</strong></span><small>${resultados.length} resultado${resultados.length === 1 ? '' : 's'}</small>`;
+    cont.appendChild(header);
+
+    if (resultados.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'search-suggestions-empty';
+        empty.innerHTML = '<strong>No se encontraron productos.</strong><p>Prueba otra marca, medida o categoría.</p>';
+        cont.appendChild(empty);
+        return;
+    }
+
+    const lista = document.createElement('div');
+    lista.className = 'search-suggestions-list';
+    resultados.slice(0, 6).forEach(producto => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'search-suggestion-item';
+        item.onclick = () => {
+            input.value = producto.Nombre || '';
+            cont.style.display = 'none';
+            aplicarFiltros();
+            input.focus();
+        };
+
+        const imagen = document.createElement('img');
+        imagen.className = 'search-suggestion-image';
+        imagen.src = producto.ImagenUrl || `assets/img/productos/${producto.codigo}.webp`;
+        imagen.alt = producto.Nombre || 'Producto';
+        imagen.onerror = () => { imagen.src = 'logo.webp'; };
+
+        const datos = document.createElement('div');
+        datos.className = 'search-suggestion-data';
+        const titulo = document.createElement('div');
+        titulo.className = 'search-suggestion-title';
+        titulo.textContent = producto.Nombre || 'Producto';
+        const meta = document.createElement('div');
+        meta.className = 'search-suggestion-meta';
+        const categoria = producto.Cat || producto.SubCat || 'Producto';
+        const precio = producto.PrecioStr ? `$${producto.PrecioStr}` : '';
+        meta.textContent = `${categoria}${precio ? ' · ' + precio : ''}`;
+
+        datos.appendChild(titulo);
+        datos.appendChild(meta);
+        item.appendChild(imagen);
+        item.appendChild(datos);
+        lista.appendChild(item);
+    });
+    cont.appendChild(lista);
+
+    const footer = document.createElement('div');
+    footer.className = 'search-suggestions-footer';
+    const resultCount = document.createElement('span');
+    resultCount.className = 'search-suggestions-result-count';
+    resultCount.textContent = `${resultados.length} coincidencia${resultados.length === 1 ? '' : 's'}`;
+    const action = document.createElement('button');
+    action.type = 'button';
+    action.className = 'search-suggestions-action';
+    action.textContent = resultados.length > 6 ? 'Ver todos los resultados' : 'Ver resultados';
+    action.onclick = () => {
+        cont.style.display = 'none';
+        input.focus();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    footer.appendChild(resultCount);
+    footer.appendChild(action);
+    cont.appendChild(footer);
 }
 function cerrarSugerencias() { const cont = document.getElementById('search-suggestions'); if (cont) cont.style.display = 'none'; }
 document.addEventListener('click', (e) => { if (!e.target.closest('.search-pill') && !e.target.closest('.search-container')) cerrarSugerencias(); });
@@ -731,6 +810,39 @@ function crearHTMLProducto(p) {
     `;
 }
 
+function crearHTMLMasVendidos() {
+    const masVendidos = typeof obtenerProductosMasVendidos === 'function' ? obtenerProductosMasVendidos() : [];
+    if (!masVendidos.length) return '';
+
+    const cards = masVendidos.slice(0, 6).map(producto => {
+        const nombre = producto.Nombre || 'Producto';
+        const imagen = producto.ImagenUrl ? producto.ImagenUrl : `assets/img/productos/${producto.codigo}.webp`;
+        const precio = producto.PrecioStr ? `$${producto.PrecioStr}` : 'Precio no disponible';
+        const nombreEscapado = nombre.replace(/'/g, "\\'");
+        return `
+            <button type="button" class="mas-vendidos-card" onclick="document.getElementById('buscador').value='${nombreEscapado}'; aplicarFiltros(); document.getElementById('search-suggestions').style.display='none';">
+                <span class="mas-vendidos-card-thumb"><img src="${imagen}" alt="${nombre}" loading="lazy" onerror="this.src='logo.webp'"></span>
+                <span class="mas-vendidos-card-info">
+                    <span class="mas-vendidos-card-name">${nombre}</span>
+                    <span class="mas-vendidos-card-price">${precio}</span>
+                </span>
+            </button>`;
+    }).join('');
+
+    return `
+        <section id="mas-vendidos-section" class="mas-vendidos-section">
+            <div class="mas-vendidos-header">
+                <div>
+                    <h3>Más vendidos</h3>
+                    <p>Los productos más pedidos por nuestros clientes.</p>
+                </div>
+                <span class="mas-vendidos-badge">Top</span>
+            </div>
+            <div class="mas-vendidos-list">${cards}</div>
+        </section>
+    `;
+}
+
 function renderizarPagina() {
     const cont = document.getElementById('lista-productos');
     if (paginaActual === 1) cont.innerHTML = '';
@@ -782,8 +894,25 @@ function renderizarPagina() {
         }
     }
 
+    const queryRaw = (document.getElementById('buscador')?.value || '').trim();
+    const mostrarMasVendidos = paginaActual === 1 && queryRaw.length === 0 && categoriaActual === 'Todos' && typeof obtenerProductosMasVendidos === 'function' && obtenerProductosMasVendidos().length > 0;
+    const insertAfterIndex = 9;
+
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = pedazo.map(crearHTMLProducto).join('');
+    const contenidoArray = [];
+
+    pedazo.forEach((producto, index) => {
+        contenidoArray.push(crearHTMLProducto(producto));
+        if (mostrarMasVendidos && index === insertAfterIndex - 1) {
+            contenidoArray.push(crearHTMLMasVendidos());
+        }
+    });
+
+    if (mostrarMasVendidos && pedazo.length > 0 && pedazo.length <= insertAfterIndex) {
+        contenidoArray.push(crearHTMLMasVendidos());
+    }
+
+    tempDiv.innerHTML = contenidoArray.join('');
     while (tempDiv.firstChild) fragment.appendChild(tempDiv.firstChild);
     cont.appendChild(fragment);
 

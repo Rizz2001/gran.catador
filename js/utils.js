@@ -8,11 +8,16 @@
 const CONFIG_BUSQUEDA = {
     minCharsToken: 3,
     maxLevenshteinDist: 2,
-    diccionarioSinonimos: { 
-        'birra': 'cerveza', 'curda': 'licor', 'cana': 'ron', 
-        'pasapalo': 'snack', 'soda': 'refresco', 'fresco': 'refresco' 
+    diccionarioSinonimos: {
+        'birra': 'cerveza', 'birras': 'cerveza', 'curda': 'licor', 'cana': 'ron',
+        'pasapalo': 'snack', 'pasapalos': 'snack', 'soda': 'refresco', 'fresco': 'refresco',
+        'whisky': 'whisky', 'whiskey': 'whisky', 'ginebra': 'gin', 'vodka': 'vodka'
     }
 };
+
+const STOP_WORDS = new Set([
+    'de','la','el','los','las','y','con','sin','para','por','en','al','del','que','un','una','unos','unas','su','sus','lo','se','mi','tu'
+]);
 
 // --- FUNCIONES DE TEXTO Y BÚSQUEDA ---
 function limpiarCategoria(texto) { if (!texto) return "Otros"; return texto.trim().replace(/\s+/g, ' ').toUpperCase(); }
@@ -34,7 +39,16 @@ function getCategoriaFolder(cat) {
 function levenshtein(a, b) { const m = []; for (let i = 0; i <= b.length; i++)m[i] = [i]; for (let j = 0; j <= a.length; j++)m[0][j] = j; for (let i = 1; i <= b.length; i++) { for (let j = 1; j <= a.length; j++) { if (b.charAt(i - 1) === a.charAt(j - 1)) { m[i][j] = m[i - 1][j - 1]; } else { m[i][j] = Math.min(m[i - 1][j - 1] + 1, Math.min(m[i][j - 1] + 1, m[i - 1][j] + 1)); } } } return m[b.length][a.length]; }
 
 // Cerebro para detectar plurales y sinónimos (Ej: rones -> ron, cervezas -> cerveza)
-function procesarTermino(t) { let sin = diccionarioSinonimos[t] || t; if (sin.length > 3 && sin !== 'anis' && sin.endsWith('s')) { return sin.endsWith('es') ? sin.slice(0, -2) : sin.slice(0, -1); } return sin; }
+function procesarTermino(t) {
+    if (!t) return '';
+    const token = t.toString().trim();
+    if (token.length === 0 || STOP_WORDS.has(token)) return '';
+    let sin = CONFIG_BUSQUEDA.diccionarioSinonimos[token] || token;
+    if (sin.length > 3 && sin !== 'anis' && sin.endsWith('s')) {
+        return sin.endsWith('es') ? sin.slice(0, -2) : sin.slice(0, -1);
+    }
+    return sin;
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ÍNDICE INVERTIDO DE BÚSQUEDA
@@ -56,17 +70,17 @@ let _searchIndexVersion = "";
 function tokenizar(texto) {
     if (!texto) return [];
     let base = quitarAcentos(texto.toString());
-    let palabras = base.split(/\s+/).filter(w => w.length >= 2);
+    let palabras = base.split(/\s+/).filter(w => w.length >= 2 && !STOP_WORDS.has(w));
     let tokens = new Set();
     palabras.forEach(w => {
         tokens.add(w); // Palabra completa
-        for (let i = 3; i < w.length; i++) tokens.add(w.slice(0, i)); // Prefijos
+        for (let i = CONFIG_BUSQUEDA.minCharsToken; i < w.length; i++) tokens.add(w.slice(0, i)); // Prefijos
 
         // Versión sin caracteres especiales (ej: "0.70L" o "0,70" -> "070l")
         let alphaNum = w.replace(/[^a-z0-9]/g, '');
         if (alphaNum !== w && alphaNum.length >= 2) {
             tokens.add(alphaNum);
-            for (let i = 3; i < alphaNum.length; i++) tokens.add(alphaNum.slice(0, i));
+            for (let i = CONFIG_BUSQUEDA.minCharsToken; i < alphaNum.length; i++) tokens.add(alphaNum.slice(0, i));
         }
     });
     return Array.from(tokens);
