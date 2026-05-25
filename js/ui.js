@@ -814,19 +814,32 @@ function crearHTMLMasVendidos() {
     const masVendidos = typeof obtenerProductosMasVendidos === 'function' ? obtenerProductosMasVendidos() : [];
     if (!masVendidos.length) return '';
 
-    const cards = masVendidos.slice(0, 6).map(producto => {
+    const cards = masVendidos.slice(0, 6).map((producto, index) => {
         const nombre = producto.Nombre || 'Producto';
         const imagen = producto.ImagenUrl ? producto.ImagenUrl : `assets/img/productos/${producto.codigo}.webp`;
-        const precio = producto.PrecioStr ? `$${producto.PrecioStr}` : 'Precio no disponible';
+        const precioNum = Number(producto.PrecioNum ?? String(producto.PrecioStr || '').replace(/[^0-9.-]/g, '')) || 0;
+        const precio = producto.PrecioStr ? `$${producto.PrecioStr}` : (precioNum > 0 ? `$${precioNum.toFixed(2)}` : 'Precio no disponible');
         const nombreEscapado = nombre.replace(/'/g, "\\'");
+        const stockTexto = (producto.StockNum >= 999 || (String(producto.StockStr || '').toLowerCase() === 'disponible'))
+            ? 'Disponible'
+            : producto.StockNum > 5
+                ? `${producto.StockNum} disponibles`
+                : producto.StockNum > 0
+                    ? `Últimas ${producto.StockNum}`
+                    : 'Agotado';
+        const stockStatusClass = producto.StockNum <= 5 && producto.StockNum > 0 ? 'stock-warning' : producto.StockNum <= 0 ? 'stock-out' : 'stock-available';
+        const rankingBadge = index < 3 ? `<span class="mas-vendidos-card-tag">Top ${index + 1}</span>` : '';
         return `
-            <button type="button" class="mas-vendidos-card" onclick="document.getElementById('buscador').value='${nombreEscapado}'; aplicarFiltros(); document.getElementById('search-suggestions').style.display='none';">
+            <article class="mas-vendidos-card ${index < 3 ? 'featured' : ''}" onclick="document.getElementById('buscador').value='${nombreEscapado}'; aplicarFiltros(); document.getElementById('search-suggestions').style.display='none';" aria-label="Buscar ${nombre}">
+                ${rankingBadge}
                 <span class="mas-vendidos-card-thumb"><img src="${imagen}" alt="${nombre}" loading="lazy" onerror="this.src='logo.webp'"></span>
                 <span class="mas-vendidos-card-info">
                     <span class="mas-vendidos-card-name">${nombre}</span>
                     <span class="mas-vendidos-card-price">${precio}</span>
+                    <span class="mas-vendidos-card-stock ${stockStatusClass}">${stockTexto}</span>
+                    <button type="button" class="mas-vendidos-card-action" onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreEscapado}', ${precioNum}, this, false, '${imagen}', false);" aria-label="Agregar ${nombre} al carrito">Agregar al carrito</button>
                 </span>
-            </button>`;
+            </article>`;
     }).join('');
 
     return `

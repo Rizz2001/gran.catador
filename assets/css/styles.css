@@ -1671,30 +1671,49 @@ body.dark-mode #search-suggestions {
 .mas-vendidos-card {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 18px;
     border: 1px solid rgba(59, 130, 246, 0.14);
-    border-radius: 20px;
-    padding: 16px;
+    border-radius: 24px;
+    padding: 18px;
     background: #ffffff;
     cursor: pointer;
     text-align: left;
-    min-height: 96px;
-    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    min-height: 116px;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+    position: relative;
+}
+
+.mas-vendidos-card.featured {
+    background: rgba(59, 130, 246, 0.05);
+    border-color: rgba(59, 130, 246, 0.22);
 }
 
 .mas-vendidos-card:hover {
     transform: translateY(-5px);
-    border-color: rgba(59, 130, 246, 0.4);
-    box-shadow: 0 24px 50px rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.45);
+    box-shadow: 0 30px 65px rgba(59, 130, 246, 0.12);
+}
+
+.mas-vendidos-card-tag {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.12);
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
 }
 
 .mas-vendidos-card-thumb {
-    width: 72px;
-    min-width: 72px;
-    height: 72px;
-    border-radius: 18px;
+    width: 84px;
+    min-width: 84px;
+    height: 84px;
+    border-radius: 22px;
     overflow: hidden;
-    background: linear-gradient(135deg, rgba(56, 189, 248, 0.16), rgba(59, 130, 246, 0.08));
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(14, 165, 233, 0.08));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1710,7 +1729,7 @@ body.dark-mode #search-suggestions {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .mas-vendidos-card-name {
@@ -1729,12 +1748,95 @@ body.dark-mode #search-suggestions {
     align-items: center;
     justify-content: center;
     width: fit-content;
-    padding: 7px 14px;
+    padding: 8px 16px;
     border-radius: 999px;
     background: linear-gradient(135deg, rgba(34, 211, 238, 0.18), rgba(59, 130, 246, 0.12));
     color: #1d4ed8;
     font-weight: 700;
     font-size: 12px;
+}
+
+.mas-vendidos-card-stock {
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.mas-vendidos-card-stock.stock-warning {
+    color: #b45309;
+    font-weight: 700;
+}
+
+.mas-vendidos-card-stock.stock-out {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.mas-vendidos-card-action {
+    align-self: flex-start;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 16px;
+    background: #2563eb;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.mas-vendidos-card-action:hover {
+    filter: brightness(1.05);
+}
+
+.mas-vendidos-card-action:active {
+    transform: scale(0.98);
+}
+
+@media (max-width: 1024px) {
+    .mas-vendidos-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767px) {
+    .mas-vendidos-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .mas-vendidos-section {
+        padding: 20px 18px;
+    }
+
+    .mas-vendidos-card {
+        gap: 14px;
+        padding: 14px;
+        min-width: 260px;
+        scroll-snap-align: start;
+    }
+
+    .mas-vendidos-card-thumb {
+        width: 70px;
+        min-width: 70px;
+        height: 70px;
+    }
+
+    .mas-vendidos-list {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        padding-bottom: 8px;
+        gap: 14px;
+    }
+
+    .mas-vendidos-list::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .mas-vendidos-list::-webkit-scrollbar-thumb {
+        background: rgba(59, 130, 246, 0.35);
+        border-radius: 999px;
+    }
 }
 
 @media (max-width: 1024px) {
