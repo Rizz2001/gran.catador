@@ -810,6 +810,209 @@ function crearHTMLProducto(p) {
     `;
 }
 
+function convertirATitulo(texto) {
+    if (!texto || typeof texto !== 'string') return 'Grupo';
+    return texto.trim().split(/\s+/).map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase()).join(' ');
+}
+
+function obtenerNombreGrupoDisplay(catId, catName) {
+    if (appState && Array.isArray(appState.gruposInventario)) {
+        const candidato = appState.gruposInventario.find(g => {
+            const rawNombre = g.Nombre || g.nombre || g.Descripcion || g.descripcion || g.NombreGrupo || g.desc_grupo || g.DescGrupo || g.grupo || g.Grupo || '';
+            const rawId = (g.CodGrupo || g.codigo || g.id || g.Codigo || g.Id || g.id_grupo || g.cod_grupo || g.grupo || g.Grupo || '').toString().trim();
+            if (catId && rawId && rawId === catId.toString().trim()) return true;
+            return limpiarCategoria(rawNombre) === limpiarCategoria(catName);
+        });
+        if (candidato) {
+            return candidato.Nombre || candidato.nombre || candidato.Descripcion || candidato.descripcion || candidato.NombreGrupo || candidato.desc_grupo || candidato.DescGrupo || candidato.grupo || candidato.Grupo || catName || 'Grupo';
+        }
+    }
+    return convertirATitulo(catName || 'Grupo');
+}
+
+function mezclarArray(array) {
+    return Array.isArray(array) ? array.slice().sort(() => Math.random() - 0.5) : [];
+}
+
+function obtenerCategoriasYSubgrupos(productos) {
+    if (!Array.isArray(productos)) return [];
+    const grupos = new Map();
+    const subgrupos = new Map();
+
+    productos.forEach(producto => {
+        const catId = (producto.CatId || producto.Cat || '').toString().trim();
+        const catNameRaw = producto.Cat || '';
+        const groupName = obtenerNombreGrupoDisplay(catId, catNameRaw || productFullNameFallback(producto));
+        const groupKey = `${catId || groupName}||${groupName}`;
+
+        if (groupName && groupName.toUpperCase() !== 'OTROS') {
+            if (!grupos.has(groupKey)) {
+                grupos.set(groupKey, {
+                    type: 'group',
+                    key: groupKey,
+                    name: groupName,
+                    producto
+                });
+            }
+        }
+
+        const subId = (producto.SubCatId || producto.SubCat || '').toString().trim();
+        const subNameRaw = producto.SubCat || producto.SubCatId || '';
+        const subName = convertirATitulo(subNameRaw);
+        if (subName && subName.toUpperCase() !== 'OTROS' && subName !== groupName) {
+            const subKey = `${catId || groupName}||${subId || subName}`;
+            if (!subgrupos.has(subKey)) {
+                subgrupos.set(subKey, {
+                    type: 'subgroup',
+                    key: subKey,
+                    name: subName,
+                    parentGrupo: groupName,
+                    producto
+                });
+            }
+        }
+    });
+
+    const listaSubgrupos = Array.from(subgrupos.values());
+    if (listaSubgrupos.length > 0) return mezclarArray(listaSubgrupos);
+    return mezclarArray(Array.from(grupos.values()));
+}
+
+function productFullNameFallback(producto) {
+    return producto.Nombre || producto.nombre || producto.Descripcion || producto.descripcion || 'Grupo';
+}
+
+function crearHTMLSeccionCategoriasAleatorias(productos, offset = 0) {
+    const seleccion = obtenerProductosPorCategorias(productos, 15, offset);
+    if (!seleccion.length) return '';
+
+    const cards = seleccion.map(producto => {
+        const imgSrc = obtenerImgProducto(producto);
+        const titulo = producto.Nombre || producto.nombre || 'Producto';
+        const subtitle = convertirATitulo(producto.SubCat || producto.Cat || producto.Subcategoria || producto.Categoria || 'Recomendado');
+        const precioNum = Number(producto.PrecioNum ?? String(producto.PrecioStr || '').replace(/[^0-9.-]/g, '')) || 0;
+        const precio = producto.PrecioStr ? `$${producto.PrecioStr}` : (precioNum > 0 ? `$${precioNum.toFixed(2)}` : 'Precio no disponible');
+        const isAgotado = producto.StockNum <= 0 || String(producto.StockStr || '').toLowerCase() === 'agotado';
+        const stockTexto = isAgotado ? 'Agotado' : 'Disponible';
+        const stockClass = isAgotado ? 'agotado' : 'disponible';
+        const nombreB64 = codificarNombre(titulo);
+        return `
+            <article class="grupo-aleatorio-card" aria-label="Quizás te interese ${titulo}">
+                <div class="grupo-aleatorio-card-thumb">
+                    <img src="${imgSrc}" alt="${titulo}" loading="lazy" onerror="this.src='logo.webp'">
+                </div>
+                <div class="grupo-aleatorio-card-meta">
+                    <span class="grupo-aleatorio-card-label">Quizás te interese</span>
+                    <h4 class="grupo-aleatorio-card-title" title="${titulo}">${titulo}</h4>
+                    <span class="grupo-aleatorio-card-subtitle">${subtitle}</span>
+                    <div class="grupo-aleatorio-card-details">
+                        <span class="grupo-aleatorio-card-price">${precio}</span>
+                        <span class="grupo-aleatorio-card-stock ${stockClass}">${stockTexto}</span>
+                    </div>
+                    <button type="button" class="grupo-aleatorio-card-action" ${isAgotado ? 'disabled' : `onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc.replace(/'/g, "\\'")}', false);"`} aria-label="Agregar ${titulo} al carrito">${isAgotado ? 'No disponible' : 'Agregar al carrito'}</button>
+                </div>
+            </article>`;
+    }).join('');
+
+    return `
+        <section class="grupo-aleatorio-section" aria-label="Quizás te interese">
+            <div class="grupo-aleatorio-header">
+                <div>
+                    <h3 class="grupo-aleatorio-title">Quizás te interese</h3>
+                    <p class="grupo-aleatorio-subtitle">Productos recomendados basados en lo que estás viendo.</p>
+                </div>
+                <span class="grupo-aleatorio-tag">Recomendado</span>
+            </div>
+            <div class="grupo-aleatorio-marquee">
+                <div class="grupo-aleatorio-track">
+                    ${cards}
+                </div>
+            </div>
+        </section>`;
+}
+
+function obtenerItemsPorFila(container) {
+    try {
+        const cols = window.getComputedStyle(container).gridTemplateColumns || '';
+        const count = cols.split(' ').filter(Boolean).length;
+        return Math.max(1, count);
+    } catch (e) {
+        return 2;
+    }
+}
+
+function obtenerProductosPorCategorias(productos, cantidad = 15, offset = 0) {
+    if (!Array.isArray(productos) || productos.length === 0) return [];
+
+    const categorias = new Map();
+    const subcategorias = new Map();
+    const todosProductos = [];
+
+    productos.forEach(producto => {
+        const catNombre = producto.Cat || producto.CatId || producto.Categoria || 'Sin categoría';
+        const catKey = limpiarCategoria(catNombre) || 'SIN-CATEGORIA';
+        const subNombre = producto.SubCat || producto.SubCatId || producto.Subcategoria || catNombre || 'General';
+        const subKey = `${catKey}||${limpiarCategoria(subNombre) || 'GENERAL'}`;
+
+        if (!categorias.has(catKey)) categorias.set(catKey, []);
+        categorias.get(catKey).push(producto);
+
+        if (!subcategorias.has(subKey)) subcategorias.set(subKey, []);
+        subcategorias.get(subKey).push(producto);
+
+        todosProductos.push(producto);
+    });
+
+    let categoriaKeys = mezclarArray(Array.from(categorias.keys()));
+    if (categoriaKeys.length === 0) return [];
+    offset = Math.max(0, offset) % categoriaKeys.length;
+    categoriaKeys = categoriaKeys.slice(offset).concat(categoriaKeys.slice(0, offset));
+
+    const seleccion = [];
+    const vistos = new Set();
+
+    categoriaKeys.some(catKey => {
+        if (seleccion.length >= cantidad) return true;
+        const productosCategoria = categorias.get(catKey) || [];
+        if (!productosCategoria.length) return false;
+        const producto = productosCategoria[Math.floor(Math.random() * productosCategoria.length)];
+        const productCode = producto.codigo?.toString() || JSON.stringify(producto);
+        if (vistos.has(productCode)) return false;
+        vistos.add(productCode);
+        seleccion.push(producto);
+        return false;
+    });
+
+    if (seleccion.length < cantidad) {
+        const subcatKeys = mezclarArray(Array.from(subcategorias.keys()));
+        subcatKeys.some(subKey => {
+            if (seleccion.length >= cantidad) return true;
+            const productosSub = subcategorias.get(subKey) || [];
+            if (!productosSub.length) return false;
+            const producto = productosSub[Math.floor(Math.random() * productosSub.length)];
+            const productCode = producto.codigo?.toString() || JSON.stringify(producto);
+            if (vistos.has(productCode)) return false;
+            vistos.add(productCode);
+            seleccion.push(producto);
+            return false;
+        });
+    }
+
+    if (seleccion.length < cantidad) {
+        const productosAleatorios = mezclarArray(todosProductos);
+        productosAleatorios.some(producto => {
+            if (seleccion.length >= cantidad) return true;
+            const productCode = producto.codigo?.toString() || JSON.stringify(producto);
+            if (vistos.has(productCode)) return false;
+            vistos.add(productCode);
+            seleccion.push(producto);
+            return false;
+        });
+    }
+
+    return seleccion.slice(0, cantidad);
+}
+
 function crearHTMLMasVendidos() {
     const masVendidos = typeof obtenerProductosMasVendidos === 'function' ? obtenerProductosMasVendidos() : [];
     if (!masVendidos.length) return '';
@@ -945,13 +1148,21 @@ function renderizarPagina() {
 
     const queryRaw = (document.getElementById('buscador')?.value || '').trim();
     const mostrarMasVendidos = paginaActual === 1 && queryRaw.length === 0 && categoriaActual === 'Todos' && typeof obtenerProductosMasVendidos === 'function' && obtenerProductosMasVendidos().length > 0;
-    const insertAfterIndex = 9;
+    const itemsPorFila = obtenerItemsPorFila(cont);
+    const insertAfterIndex = itemsPorFila * 3;
 
     const tempDiv = document.createElement('div');
     const contenidoArray = [];
 
     pedazo.forEach((producto, index) => {
         contenidoArray.push(crearHTMLProducto(producto));
+
+        const posicion = index + 1;
+        if (posicion % insertAfterIndex === 0 && posicion < pedazo.length) {
+            const seccionId = Math.floor(index / insertAfterIndex);
+            contenidoArray.push(crearHTMLSeccionCategoriasAleatorias(productosFiltradosGlobal, seccionId));
+        }
+
         if (mostrarMasVendidos && index === insertAfterIndex - 1) {
             contenidoArray.push(crearHTMLMasVendidos());
         }

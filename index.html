@@ -185,29 +185,23 @@
     <!-- Menú Lateral (Sidebar) de Categorías -->
     <aside id="sidebar-menu" class="sidebar-menu" aria-label="Filtros y Categorías">
         <div class="sidebar-header">
-            <h3
-                style="margin: 0; font-size: 18px; color: var(--color-text); font-weight: 700; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid fa-list-ul"></i> Categorías
+            <h3 class="sidebar-title">
+                <i class="fa-solid fa-list-ul"></i>
+                Categorías
             </h3>
-            <button onclick="closeSidebar()" class="modal-close-btn"
-                style="width: 32px; height: 32px; font-size: 16px; display: flex; align-items: center; justify-content: center; background: transparent; border: none;">
+            <button onclick="closeSidebar()" class="sidebar-close-btn" aria-label="Cerrar menú">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
         <div class="sidebar-content">
-            <div style="margin-bottom: 20px;">
-                <h4
-                    style="font-size: 12px; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 10px; letter-spacing: 0.5px; font-weight: 700;">
-                    Explorar Grupos</h4>
+            <div class="sidebar-section">
+                <h4 class="sidebar-section-title">Explorar Grupos</h4>
                 <div class="sidebar-filters" id="contenedorCategorias"></div>
             </div>
 
-            <div id="subcategoria-section-main"
-                style="display:none; border-top: 1px solid var(--color-border); padding-top: 20px; margin-top: 10px;">
-                <h4
-                    style="font-size: 12px; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 10px; letter-spacing: 0.5px; font-weight: 700;">
-                    Subgrupos</h4>
+            <div id="subcategoria-section-main" class="sidebar-section sidebar-section--hidden">
+                <h4 class="sidebar-section-title">Subgrupos</h4>
                 <div class="sidebar-subfilters" id="contenedorSubcategorias"></div>
             </div>
         </div>
