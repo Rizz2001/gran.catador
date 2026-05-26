@@ -248,22 +248,31 @@ function imgFallback(imgElement) {
     imgElement.onerror = null;
 }
 
+function obtenerImgProducto(producto) {
+    const codigo = producto.codigo || producto.Codigo || producto.codArticulo || producto.CodArticulo || producto.id || producto.Id || '';
+    let imagenUrl = producto.ImagenUrl || producto.imagenUrl || '';
+    if (imagenUrl) {
+        return imagenUrl.replace(/\.webp(\?.*)?$/i, '.jpg').replace(/\.jpeg(\?.*)?$/i, '.jpg');
+    }
+    return codigo ? `assets/img/productos/${codigo}.jpg` : 'logo.webp';
+}
+
 function imgFallbackFolder(imgElement) {
     let index = imgElement.dataset.index || "1";
     let attempts = parseInt(imgElement.dataset.attempts || "0");
     let codigo = imgElement.dataset.codigo;
 
     if (attempts === 0 && codigo) {
-        // Intento 1: Cargar imagen local .webp si falla la API
-        imgElement.src = `assets/img/productos/${codigo}.webp`;
+        // Intento 1: Cargar imagen local .jpg
+        imgElement.src = `assets/img/productos/${codigo}.jpg`;
         imgElement.dataset.attempts = "1";
     } else if (attempts === 1 && codigo) {
-        // Intento 2: Cargar imagen local .jpg si falla el .webp
-        imgElement.src = `assets/img/productos/${codigo}.jpg`;
+        // Intento 2: Cargar imagen local .jpeg si falla el .jpg
+        imgElement.src = `assets/img/productos/${codigo}.jpeg`;
         imgElement.dataset.attempts = "2";
     } else if (attempts === 2 && codigo) {
-        // Intento 3: Cargar imagen local .jpeg si falla el .jpg
-        imgElement.src = `assets/img/productos/${codigo}.jpeg`;
+        // Intento 3: Cargar imagen local .webp como último recurso
+        imgElement.src = `assets/img/productos/${codigo}.webp`;
         imgElement.dataset.attempts = "3";
     } else {
         // Fallo final: mostrar logo por defecto

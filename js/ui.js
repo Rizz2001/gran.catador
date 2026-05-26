@@ -663,7 +663,7 @@ function mostrarSugerencias(q, resultados) {
 
         const imagen = document.createElement('img');
         imagen.className = 'search-suggestion-image';
-        imagen.src = producto.ImagenUrl || `assets/img/productos/${producto.codigo}.webp`;
+        imagen.src = obtenerImgProducto(producto);
         imagen.alt = producto.Nombre || 'Producto';
         imagen.onerror = () => { imagen.src = 'logo.webp'; };
 
@@ -774,7 +774,7 @@ function crearHTMLProducto(p) {
         badgeHTML = `<div class="product-badge badge-agotado">AGOTADO</div>`;
     }
 
-    let imgSrc = p.ImagenUrl ? p.ImagenUrl : `assets/img/productos/${p.codigo}.webp`;
+    let imgSrc = obtenerImgProducto(p);
     let attempts = p.ImagenUrl ? 0 : 1;
     // Se retiran las clases de scroll-snap porque la vista en miniatura no debería ser scrolleable para mejor UX
     let galeriasHTML = `<img loading="lazy" decoding="async" width="300" height="300" src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease; cursor: zoom-in;" onload="this.parentElement.classList.remove('skeleton-box');" onclick="event.stopPropagation(); abrirImagenLightbox(this.src, '${p.codigo}');">`;
@@ -816,7 +816,7 @@ function crearHTMLMasVendidos() {
 
     const cards = masVendidos.slice(0, 6).map((producto, index) => {
         const nombre = producto.Nombre || 'Producto';
-        const imagen = producto.ImagenUrl ? producto.ImagenUrl : `assets/img/productos/${producto.codigo}.webp`;
+        const imagen = obtenerImgProducto(producto);
         const precioNum = Number(producto.PrecioNum ?? String(producto.PrecioStr || '').replace(/[^0-9.-]/g, '')) || 0;
         const precio = producto.PrecioStr ? `$${producto.PrecioStr}` : (precioNum > 0 ? `$${precioNum.toFixed(2)}` : 'Precio no disponible');
         const nombreEscapado = nombre.replace(/'/g, "\\'");
@@ -828,6 +828,7 @@ function crearHTMLMasVendidos() {
                     ? `Últimas ${producto.StockNum}`
                     : 'Agotado';
         const stockStatusClass = producto.StockNum <= 5 && producto.StockNum > 0 ? 'stock-warning' : producto.StockNum <= 0 ? 'stock-out' : 'stock-available';
+        const nombreB64 = codificarNombre(nombre);
         const rankingBadge = index < 3 ? `<span class="mas-vendidos-card-tag">Top ${index + 1}</span>` : '';
         return `
             <article class="mas-vendidos-card ${index < 3 ? 'featured' : ''}" onclick="document.getElementById('buscador').value='${nombreEscapado}'; aplicarFiltros(); document.getElementById('search-suggestions').style.display='none';" aria-label="Buscar ${nombre}">
@@ -837,7 +838,7 @@ function crearHTMLMasVendidos() {
                     <span class="mas-vendidos-card-name">${nombre}</span>
                     <span class="mas-vendidos-card-price">${precio}</span>
                     <span class="mas-vendidos-card-stock ${stockStatusClass}">${stockTexto}</span>
-                    <button type="button" class="mas-vendidos-card-action" onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreEscapado}', ${precioNum}, this, false, '${imagen}', false);" aria-label="Agregar ${nombre} al carrito">Agregar al carrito</button>
+                    <button type="button" class="mas-vendidos-card-action" onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imagen}', false);" aria-label="Agregar ${nombre} al carrito">Agregar al carrito</button>
                 </span>
             </article>`;
     }).join('');

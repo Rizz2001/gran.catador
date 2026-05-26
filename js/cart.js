@@ -277,7 +277,7 @@ function sugerirAcompañante() {
         if (cont && modal) {
             cont.innerHTML = sugerencias.map(p => {
                 let nombreB64 = codificarNombre(p.Nombre);
-                let imgSrc = p.ImagenUrl ? p.ImagenUrl : `assets/img/productos/${p.codigo}.webp`;
+                let imgSrc = obtenerImgProducto(p);
                 let attempts = p.ImagenUrl ? 0 : 1;
                 return `
                     <div style="min-width:130px; border:1px solid var(--color-border); border-radius:var(--radius-md); padding:12px; text-align:center; background:var(--color-card); box-shadow:var(--shadow-sm);">
@@ -369,7 +369,7 @@ function renderizarCarrito() {
         appState.totalCarrito += subTotalItem;
 
         let prodObj = appState.inventario.find(x => x.codigo === item.codigo);
-        let imgSrc = (prodObj && prodObj.ImagenUrl) ? prodObj.ImagenUrl : `assets/img/productos/${item.codigo}.webp`;
+        let imgSrc = prodObj ? obtenerImgProducto(prodObj) : `assets/img/productos/${item.codigo}.jpg`;
         let attempts = (prodObj && prodObj.ImagenUrl) ? 0 : 1;
         let imgHTML = item.codigo
             ? `<img loading="lazy" src="${imgSrc}" data-codigo="${item.codigo}" data-categoria="${item.categoria || ''}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" class="cart-item-img">`

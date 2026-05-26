@@ -722,7 +722,7 @@ function debounceBusqueda(event) {
             cerrarSugerencias();
             if (typeof abrirImagenLightbox === 'function') {
                 let p = productosFiltradosGlobal[0];
-                let imgSrc = p.ImagenUrl ? p.ImagenUrl : `assets/img/productos/${p.codigo}.webp`;
+                let imgSrc = obtenerImgProducto(p);
                 abrirImagenLightbox(imgSrc, p.codigo);
             }
         }
