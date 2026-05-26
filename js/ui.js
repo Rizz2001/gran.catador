@@ -1190,7 +1190,7 @@ function crearHTMLMarcasAliadas() {
             <div class="marcas-aliadas-header">
                 <div>
                     <span class="marcas-aliadas-eyebrow">Marcas aliadas</span>
-                    <h2 id="marcas-aliadas-title">Proveedores y marcas premium que confían en nosotros</h2>
+                    <h2 id="marcas-aliadas-title">Proveedores y marcas que confían en nosotros</h2>
                     <p class="marcas-aliadas-description">Nuestra selección de marcas y proveedores aliados garantiza calidad, variedad y entrega rápida en cada pedido.</p>
                 </div>
             </div>

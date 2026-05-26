@@ -31,14 +31,6 @@
         padding: 10px 14px !important;
     }
 
-    .header-right {
-        order: 2 !important;
-        width: 100% !important;
-        justify-content: flex-end !important;
-        flex-wrap: wrap !important;
-        gap: 8px !important;
-    }
-
     .search-pill input {
         width: 100% !important;
         font-size: 15px !important;
