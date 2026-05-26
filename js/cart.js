@@ -369,7 +369,7 @@ function renderizarCarrito() {
         appState.totalCarrito += subTotalItem;
 
         let prodObj = appState.inventario.find(x => x.codigo === item.codigo);
-        let imgSrc = prodObj ? obtenerImgProducto(prodObj) : `assets/img/productos/${item.codigo}.jpg`;
+        let imgSrc = obtenerImgProducto(prodObj || { codigo: item.codigo });
         let attempts = (prodObj && prodObj.ImagenUrl) ? 0 : 1;
         let imgHTML = item.codigo
             ? `<img loading="lazy" src="${imgSrc}" data-codigo="${item.codigo}" data-categoria="${item.categoria || ''}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" class="cart-item-img">`

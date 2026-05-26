@@ -1,4 +1,77 @@
-/* --- OPTIMIZACIÓN RESPONSIVE MÓVIL (Buscador Full-Width) --- */
+/* --- OPTIMIZACIÓN RESPONSIVE TABLET / MÓVIL --- */
+@media (max-width: 1024px) {
+    .header-main-container {
+        flex-wrap: wrap !important;
+        align-items: flex-start !important;
+        gap: 10px !important;
+        padding: 0 !important;
+    }
+
+    .header-left,
+    .header-center,
+    .header-right {
+        min-width: 0 !important;
+    }
+
+    .header-left {
+        order: 1 !important;
+        flex: 0 1 auto !important;
+    }
+
+    .header-center {
+        order: 3 !important;
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .search-pill {
+        width: 100% !important;
+        max-width: none !important;
+        padding: 10px 14px !important;
+    }
+
+    .header-right {
+        order: 2 !important;
+        width: 100% !important;
+        justify-content: flex-end !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+
+    .search-pill input {
+        width: 100% !important;
+        font-size: 15px !important;
+    }
+
+    #clear-search {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #search-suggestions {
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    .header-right {
+        order: 3 !important;
+        width: 100% !important;
+        justify-content: flex-end !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
+        margin-top: 6px !important;
+    }
+
+    .header-right .icon-btn {
+        width: 38px !important;
+        height: 38px !important;
+    }
+}
+
 @media (max-width: 767px) {
 
     /* Hacemos los iconos más pequeños en móviles para que no ocupen tanto espacio */
@@ -22,12 +95,13 @@
         width: 28px !important;
     }
 
-    .brand-text {
-        font-size: 16px !important;
+    .btn-menu-sidebar span,
+    .header-left .brand-text {
+        display: none !important;
     }
 
     .search-pill {
-        padding: 6px 12px;
+        padding: 6px 12px !important;
     }
 
     .search-icon {
@@ -66,6 +140,8 @@
     .search-suggestion-item {
         padding: 12px 14px !important;
         gap: 10px !important;
+        flex-wrap: wrap !important;
+        align-items: flex-start !important;
     }
 
     .search-suggestion-image {
@@ -76,6 +152,7 @@
 
     .search-suggestion-title {
         font-size: 14px !important;
+        white-space: normal !important;
     }
 
     .search-suggestion-meta {
@@ -298,27 +375,44 @@
 
     /* --- AJUSTES PARA COMPACTAR HEADER EN MÓVIL --- */
     .header-main-container {
-        flex-wrap: nowrap !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        justify-content: space-between !important;
         gap: 8px !important;
         padding: 5px 12px !important;
         height: auto !important;
         min-height: 56px;
     }
 
+    .header-left {
+        order: 1 !important;
+        flex: 0 1 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
     .header-left .brand-text {
         display: none !important;
     }
 
-    .header-center {
-        flex: 1 1 auto !important;
+    .header-right {
         order: 2 !important;
-        margin: 0 !important;
-        min-width: 0;
+        width: auto !important;
+        flex: 0 1 auto !important;
+        justify-content: flex-end !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        margin-top: 0 !important;
+        max-width: calc(100% - 120px) !important;
     }
 
-    .header-right {
+    .header-center {
+        flex: 1 1 100% !important;
         order: 3 !important;
-        gap: 8px !important;
+        margin: 0 !important;
+        min-width: 0;
     }
 
     .horizontal-filters,
@@ -394,8 +488,9 @@
     }
 
     .hero-image img {
-        width: 20px !important;
-        height: 10px !important;
+        width: auto !important;
+        max-width: 100% !important;
+        height: auto !important;
     }
 }
 

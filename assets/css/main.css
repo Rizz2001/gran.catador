@@ -312,6 +312,7 @@ body.dark-mode .age-box {
 
 .search-pill {
   background-color: var(--item-bg);
+  min-width: 0;
   border-radius: 12px;
   display: flex;
   align-items: center;

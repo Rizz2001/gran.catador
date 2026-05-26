@@ -254,7 +254,11 @@ function obtenerImgProducto(producto) {
     if (imagenUrl) {
         return imagenUrl.replace(/\.webp(\?.*)?$/i, '.jpg').replace(/\.jpeg(\?.*)?$/i, '.jpg');
     }
-    return codigo ? `assets/img/productos/${codigo}.jpg` : 'logo.webp';
+    if (!codigo) return 'logo.webp';
+    if (window.productoImagenesDisponibles && window.productoImagenesDisponibles.has(String(codigo).trim())) {
+        return `assets/img/productos/${codigo}.jpg`;
+    }
+    return 'logo.webp';
 }
 
 function imgFallbackFolder(imgElement) {

@@ -254,6 +254,18 @@ async function cargarMasVendidosLocal() {
     } catch (error) { }
 }
 
+async function cargarManifestImagenesProductos() {
+    try {
+        const response = await fetch('assets/img/productos/manifest.json?v=' + new Date().getTime());
+        if (response.ok) {
+            const lista = await response.json();
+            if (Array.isArray(lista)) {
+                window.productoImagenesDisponibles = new Set(lista.map(item => String(item || '').trim()));
+            }
+        }
+    } catch (error) { }
+}
+
 function normalizarNombreArchivo(nombre) {
     return String(nombre || '').trim().replace(/^\/+/, '').replace(/\\/g, '/');
 }
@@ -346,6 +358,7 @@ async function obtenerArchivosExternos() {
     promesasConfig.push(cargarSiempreDisponiblesLocal());
     promesasConfig.push(cargarMasVendidosLocal());
     promesasConfig.push(cargarMarcasAliadasLocal());
+    promesasConfig.push(cargarManifestImagenesProductos());
 
     await Promise.all(promesasConfig);
 }
