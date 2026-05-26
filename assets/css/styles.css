@@ -2513,9 +2513,16 @@ body.dark-mode .grupo-aleatorio-card-note {
         font-size: 22px;
     }
 
+    .marcas-aliadas-marquee {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .marcas-aliadas-track {
         gap: 18px;
         animation-duration: 20s;
+        min-width: max-content;
     }
 
     .marcas-aliadas-item {

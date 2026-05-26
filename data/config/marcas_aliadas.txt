@@ -1,4 +1,10 @@
 # Lista de imágenes de marcas aliadas en assets/img/marcas-aliadas
-# Agrega cualquier nombre de archivo .jpg, uno por línea.
-# Ejemplo:
-# 
+# Agrega cualquier nombre de archivo de imagen, uno por línea.
+# Si usas rutas relativas, se buscarán en assets/img/marcas-aliadas/
+
+marca-01.jpg
+marca-01 copy.jpg
+marca-01 copy 2.jpg
+marca-01 copy 3.jpg
+marca-01 copy 4.jpg
+marca-01 copy 5.jpg

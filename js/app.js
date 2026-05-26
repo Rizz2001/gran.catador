@@ -259,6 +259,7 @@ function normalizarNombreArchivo(nombre) {
 }
 
 async function listarMarcasAliadasDesdeCarpeta() {
+    if (window.location.protocol === 'file:') return [];
     try {
         const response = await fetch('assets/img/marcas-aliadas/');
         if (!response.ok) return [];
@@ -285,9 +286,9 @@ async function cargarMarcasAliadasLocal() {
                     .split(/[\n,]+/)
                     .map(line => line.trim())
                     .filter(line => line !== '' && !line.startsWith('#'))
-                    .map(line => line.replace(/["']/g, ''))
+                    .map(line => line.replace(/['"]/g, ''))
                     .map(line => normalizarNombreArchivo(line))
-                    .filter(line => line.toLowerCase().endsWith('.jpg'))
+                    .filter(line => /\.(jpe?g|png|webp|svg)$/i.test(line))
                     .map(line => line.startsWith('http') ? line : `assets/img/marcas-aliadas/${line.replace(/^.*\/(.+)$/, '$1')}`);
                 archivos = [...new Set(archivos)];
             }
