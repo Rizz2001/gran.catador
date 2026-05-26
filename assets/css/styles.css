@@ -1610,6 +1610,7 @@ body.dark-mode #search-suggestions {
     margin: 28px 0;
     position: relative;
     overflow: hidden;
+    animation: sectionGlow 3s ease-in-out infinite;
 }
 
 .mas-vendidos-section::after {
@@ -1621,7 +1622,7 @@ body.dark-mode #search-suggestions {
     height: 100%;
     background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.05) 45%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 55%, transparent 70%);
     transform: translateX(-100%);
-    animation: shine-sweep 6s infinite;
+    animation: shine-sweep 3s infinite;
     pointer-events: none;
     z-index: 1;
 }
@@ -1908,10 +1909,13 @@ body.dark-mode #search-suggestions {
     margin: 42px 0 24px;
     padding: 36px 28px;
     border-radius: 32px;
-    background: linear-gradient(180deg, rgba(15, 23, 42, 0.02), rgba(59, 130, 246, 0.08));
-    border: 1px solid rgba(59, 130, 246, 0.16);
+    background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.15), transparent 18%),
+                linear-gradient(180deg, rgba(15, 23, 42, 0.04), rgba(255, 255, 255, 0.9));
+    border: 1px solid rgba(59, 130, 246, 0.18);
     position: relative;
     overflow: hidden;
+    backdrop-filter: blur(4px);
+    animation: sectionGlow 3s ease-in-out infinite;
 }
 
 .marcas-aliadas-section::before,
@@ -1936,6 +1940,19 @@ body.dark-mode #search-suggestions {
     right: -90px;
     bottom: -90px;
     background: radial-gradient(circle at center, rgba(34, 211, 238, 0.18), transparent 52%);
+}
+
+@keyframes sectionGlow {
+    0%, 75%, 100% {
+        transform: translateY(0);
+        box-shadow: 0 18px 40px rgba(59, 130, 246, 0.08);
+        filter: brightness(1);
+    }
+    5%, 10% {
+        transform: translateY(-2px);
+        box-shadow: 0 30px 60px rgba(59, 130, 246, 0.16);
+        filter: brightness(1.04);
+    }
 }
 
 .marcas-aliadas-header {
@@ -1987,6 +2004,11 @@ body.dark-mode #search-suggestions {
     will-change: transform;
 }
 
+.marcas-aliadas-track.single {
+    animation: none;
+    justify-content: center;
+}
+
 .marcas-aliadas-marquee:hover .marcas-aliadas-track {
     animation-play-state: paused;
 }
@@ -1997,9 +2019,9 @@ body.dark-mode #search-suggestions {
     min-height: 88px;
     padding: 18px;
     border-radius: 22px;
-    background: rgba(255,255,255,0.95);
-    border: 1px solid rgba(59, 130, 246, 0.12);
-    box-shadow: 0 26px 46px rgba(15, 23, 42, 0.06);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 255, 0.92));
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    box-shadow: 0 32px 72px rgba(15, 23, 42, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;

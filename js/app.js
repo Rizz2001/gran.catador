@@ -3,6 +3,7 @@ let favoritos = JSON.parse(localStorage.getItem('gc_favs')) || [];
 let tasaOficial = 36.25; let tasaEuro = 40.00; let categoriaActual = 'Todos'; let debounceTimer;
 let isTiendaAbierta = true; let codigosRecomendados = []; let siempreDisponibles = [];
 let masVendidosCodigos = []; let masVendidosProductos = [];
+let marcasAliadasArchivos = [];
 let productosFiltradosGlobal = []; let itemsPorPagina = 30; let paginaActual = 1;
 
 let appSettings = { useApi: true, apiType: 'smartventas' };
@@ -253,6 +254,50 @@ async function cargarMasVendidosLocal() {
     } catch (error) { }
 }
 
+function normalizarNombreArchivo(nombre) {
+    return String(nombre || '').trim().replace(/^\/+/, '').replace(/\\/g, '/');
+}
+
+async function listarMarcasAliadasDesdeCarpeta() {
+    try {
+        const response = await fetch('assets/img/marcas-aliadas/');
+        if (!response.ok) return [];
+        const text = await response.text();
+        const matches = [...text.matchAll(/href="([^"']+\.(?:jpg|jpeg))"/gi)];
+        if (!matches.length) {
+            const srcMatches = [...text.matchAll(/src="([^"']+\.(?:jpg|jpeg))"/gi)];
+            matches.push(...srcMatches);
+        }
+        return [...new Set(matches.map(m => normalizarNombreArchivo(m[1]).startsWith('http') ? m[1] : 'assets/img/marcas-aliadas/' + normalizarNombreArchivo(m[1].replace(/^.*\/(.+)$/, '$1'))))];
+    } catch (error) {
+        return [];
+    }
+}
+
+async function cargarMarcasAliadasLocal() {
+    let archivos = await listarMarcasAliadasDesdeCarpeta();
+    if (!archivos.length) {
+        try {
+            const res = await fetch('data/config/marcas_aliadas.txt?v=' + new Date().getTime());
+            if (res.ok) {
+                const texto = await res.text();
+                archivos = texto
+                    .split(/[\n,]+/)
+                    .map(line => line.trim())
+                    .filter(line => line !== '' && !line.startsWith('#'))
+                    .map(line => line.replace(/["']/g, ''))
+                    .map(line => normalizarNombreArchivo(line))
+                    .filter(line => line.toLowerCase().endsWith('.jpg'))
+                    .map(line => line.startsWith('http') ? line : `assets/img/marcas-aliadas/${line.replace(/^.*\/(.+)$/, '$1')}`);
+                archivos = [...new Set(archivos)];
+            }
+        } catch (error) { }
+    }
+
+    marcasAliadasArchivos = archivos;
+    appState.marcasAliadasArchivos = archivos;
+}
+
 function obtenerProductosMasVendidos() {
     if (!masVendidosCodigos.length || !inventario.length) return [];
     const mapa = new Map(inventario.map(p => [normalizarCodigo(p.codigo), p]));
@@ -299,6 +344,7 @@ async function obtenerArchivosExternos() {
     promesasConfig.push(cargarBannersLocales());
     promesasConfig.push(cargarSiempreDisponiblesLocal());
     promesasConfig.push(cargarMasVendidosLocal());
+    promesasConfig.push(cargarMarcasAliadasLocal());
 
     await Promise.all(promesasConfig);
 }
@@ -335,6 +381,7 @@ async function cargarInventario() {
 
     await loadAppSettings();
     await obtenerArchivosExternos();
+    if (typeof renderMarcasAliadas === 'function') renderMarcasAliadas();
 
     if (typeof toggleDireccion === 'function') toggleDireccion();
     if (typeof inyectarInterruptor === 'function') inyectarInterruptor();

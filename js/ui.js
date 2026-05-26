@@ -857,6 +857,41 @@ function crearHTMLMasVendidos() {
     `;
 }
 
+function crearHTMLMarcasAliadas() {
+    const archivos = (appState && Array.isArray(appState.marcasAliadasArchivos)) ? appState.marcasAliadasArchivos : [];
+    if (!archivos.length) return '';
+
+    const items = archivos.map((archivo, index) => `
+        <div class="marcas-aliadas-item">
+            <img src="${archivo}" alt="Marca Aliada ${index + 1}" loading="lazy" onerror="this.src='logo.webp'">
+        </div>`).join('');
+
+    const contenido = archivos.length > 1 ? items + items : items;
+    const trackClass = archivos.length > 1 ? 'marcas-aliadas-track' : 'marcas-aliadas-track single';
+
+    return `
+        <section class="marcas-aliadas-section" aria-labelledby="marcas-aliadas-title">
+            <div class="marcas-aliadas-header">
+                <div>
+                    <span class="marcas-aliadas-eyebrow">Marcas aliadas</span>
+                    <h2 id="marcas-aliadas-title">Proveedores y marcas premium que confían en nosotros</h2>
+                    <p class="marcas-aliadas-description">Nuestra selección de marcas y proveedores aliados garantiza calidad, variedad y entrega rápida en cada pedido.</p>
+                </div>
+            </div>
+            <div class="marcas-aliadas-marquee" role="presentation">
+                <div class="${trackClass}">
+                    ${contenido}
+                </div>
+            </div>
+        </section>`;
+}
+
+function renderMarcasAliadas() {
+    const root = document.getElementById('marcas-aliadas-root');
+    if (!root) return;
+    root.innerHTML = crearHTMLMarcasAliadas();
+}
+
 function renderizarPagina() {
     const cont = document.getElementById('lista-productos');
     if (paginaActual === 1) cont.innerHTML = '';

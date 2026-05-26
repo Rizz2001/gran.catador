@@ -1,0 +1,14 @@
+# Lista de imágenes de marcas aliadas en assets/img/marcas-aliadas
+# Agrega cualquier nombre de archivo .jpg, uno por línea.
+# Ejemplo:
+# logo-cervex.jpg
+# brand-elite.jpg
+# proveedor-principal.jpg
+marca-01.jpg
+marca-02.jpg
+marca-03.jpg
+marca-04.jpg
+marca-05.jpg
+marca-06.jpg
+marca-07.jpg
+marca-08.jpg
