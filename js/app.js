@@ -201,11 +201,11 @@ async function cargarBannersLocales() {
                             let bannerWidth = contBanners.children[0].offsetWidth;
                             let gap = parseInt(window.getComputedStyle(contBanners).gap) || 0;
                             slideIndex = Math.round(contBanners.scrollLeft / (bannerWidth + gap)) + 1;
-                            
+
                             if (slideIndex >= totalSlides) slideIndex = 0;
                             contBanners.scrollTo({ left: (bannerWidth + gap) * slideIndex, behavior: 'smooth' });
                         }
-                    }, 4000); // 4 segundos es más amigable para lectura
+                    }, 5000); // Cambiado a 5 segundos según requerimiento del usuario
                 };
 
                 // Detener el auto-scroll cuando el usuario interactúa
@@ -403,18 +403,6 @@ async function cargarInventario() {
     try {
         await cargarInventarioDesdeAPI();
 
-        // --- AUTO-SCROLL A LOS PRODUCTOS (IGNORANDO EL BANNER) ---
-        setTimeout(() => {
-            // Buscamos el inicio del catálogo (los filtros o la lista de productos)
-            const target = document.querySelector('.tools-container') || document.getElementById('lista-productos');
-            if (target) {
-                const header = document.querySelector('.site-header');
-                const headerOffset = header ? header.offsetHeight : 80;
-                const targetPos = target.getBoundingClientRect().top + window.scrollY - headerOffset - 10;
-                window.scrollTo({ top: targetPos, behavior: 'smooth' });
-            }
-        }, 800); // Retraso de 800ms para asegurar que las imágenes y la estructura se hayan pintado
-
     } catch (e) {
         updateApiProgress(100, true);
         document.getElementById('lista-productos').innerHTML = `<div style="grid-column: span 2; text-align: center; padding: 30px; border: 1px solid red; border-radius: 10px;"><h3 style="color:red;">Error de Conexión</h3><p style="font-size:12px; margin-top:10px;">${e.message || 'Verifica la configuración de la API.'}</p></div>`;
@@ -565,6 +553,7 @@ async function cargarInventarioDesdeAPI() {
     // --- INYECTAR EN PANTALLA ---
     // Renderizar los botones de grupos y los productos del grupo inicial
     if (typeof generarCategorias === 'function') generarCategorias();
+    if (typeof generarMarquesinaGrupos === 'function') generarMarquesinaGrupos();
     aplicarFiltros();
     updateApiProgress(100);
 
@@ -800,6 +789,10 @@ function aplicarFiltros() {
     let contBanners = document.getElementById('contenedorBanners');
     if (contBanners) {
         contBanners.style.display = (categoriaActual === 'Todos' && q.length === 0) ? 'flex' : 'none';
+    }
+    let marquesina = document.getElementById('marquesina-grupos-container');
+    if (marquesina) {
+        marquesina.style.display = (categoriaActual === 'Todos' && q.length === 0) ? 'block' : 'none';
     }
 
     // ── 1. Filtro de stock ────────────────────────────────────────────────────
