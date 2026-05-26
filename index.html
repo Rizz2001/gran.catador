@@ -356,27 +356,50 @@
     </main>
 
     <footer class="main-footer-new" role="contentinfo">
-        <div class="container footer-container"
-            style="display: flex; justify-content: center; text-align: center; padding-top: 40px; padding-bottom: 20px;">
-            <div class="footer-col" style="align-items: center; max-width: 400px; margin: 0 auto;">
-                <img src="logo.webp" alt="Logo Gran Catador" class="footer-logo" onerror="this.style.display='none'"
-                    width="1000" height="750" loading="lazy"
-                    style="margin: 0 auto 15px auto; width: 140px; height: auto; border-radius: 8px;">
-                <p class="footer-desc" style="font-size: 14px; margin-bottom: 25px; line-height: 1.6;">Gran Catador
-                    Supermercado y Bodegón. Para pedidos especiales o dudas, escríbenos directamente.</p>
-                <div class="footer-social-new" style="justify-content: center; gap: 20px;">
-                    <a href="https://wa.me/584245496366" target="_blank" aria-label="WhatsApp"
-                        style="background-color: #25d366; color: white; width: 45px; height: 45px; font-size: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);"><i
-                            class="fa-brands fa-whatsapp"></i></a>
-                    <a href="https://www.instagram.com/elcatador.bnas/" target="_blank" aria-label="Instagram"
-                        style="background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; width: 45px; height: 45px; font-size: 22px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 4px 10px rgba(220, 39, 67, 0.3);"><i
-                            class="fa-brands fa-instagram"></i></a>
+        <div class="container footer-container">
+            
+            <!-- Columna 1: Marca y Redes -->
+            <div class="footer-col">
+                <img src="logo.webp" alt="Logo Gran Catador" class="footer-logo" onerror="this.style.display='none'" loading="lazy">
+                <p class="footer-desc">Gran Catador Supermercado y Bodegón. Para pedidos especiales, eventos o dudas, escríbenos directamente.</p>
+                <div class="footer-social-new">
+                    <a href="https://wa.me/584245496366" target="_blank" aria-label="WhatsApp" class="social-btn whatsapp-btn"><i class="fa-brands fa-whatsapp"></i></a>
+                    <a href="https://www.instagram.com/elcatador.bnas/" target="_blank" aria-label="Instagram" class="social-btn instagram-btn"><i class="fa-brands fa-instagram"></i></a>
                 </div>
             </div>
+
+            <!-- Columna 2: Enlaces Rápidos -->
+            <div class="footer-col">
+                <h3>Enlaces Rápidos</h3>
+                <ul>
+                    <li><a href="#" onclick="event.preventDefault(); irInicio();"><i class="fa-solid fa-angle-right"></i> Inicio</a></li>
+                    <li><a href="#" onclick="event.preventDefault(); abrirCarrito();"><i class="fa-solid fa-angle-right"></i> Mi Pedido</a></li>
+                    <li><a href="#" onclick="event.preventDefault(); abrirPerfil();"><i class="fa-solid fa-angle-right"></i> Mi Perfil</a></li>
+                    <li><a href="#" onclick="event.preventDefault(); abrirAjustes();"><i class="fa-solid fa-angle-right"></i> Ajustes</a></li>
+                </ul>
+            </div>
+
+            <!-- Columna 3: Información y Soporte -->
+            <div class="footer-col">
+                <h3>Atención al Cliente</h3>
+                <ul>
+                    <li><a href="#" onclick="event.preventDefault(); abrirLegales();"><i class="fa-solid fa-angle-right"></i> Políticas y Privacidad</a></li>
+                    <li><a href="#" onclick="event.preventDefault(); abrirSoporteWhatsApp();"><i class="fa-solid fa-angle-right"></i> Soporte Técnico</a></li>
+                </ul>
+            </div>
+
+            <!-- Columna 4: Contacto -->
+            <div class="footer-col">
+                <h3>Contacto</h3>
+                <ul class="footer-contact-list">
+                    <li><i class="fa-solid fa-location-dot"></i> <span>Barinas, Venezuela.</span></li>
+                    <li><i class="fa-brands fa-whatsapp"></i> <span>+58 424-5496366</span></li>
+                    <li><i class="fa-regular fa-clock"></i> <span>Lun-Dom: 8:00 AM - 9:00 PM</span></li>
+                </ul>
+            </div>
         </div>
+        
         <div class="footer-bottom">
-            <p style="margin-bottom: 8px;"><a href="#" onclick="event.preventDefault(); abrirLegales();"
-                    style="color: inherit; text-decoration: underline;">Privacidad</a></p>
             <p>© 2026 Gran Catador C.A. Todos los derechos reservados.</p>
         </div>
     </footer>

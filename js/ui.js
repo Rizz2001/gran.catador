@@ -112,6 +112,9 @@ function irInicio() {
 
     let inputBuscador = document.getElementById('buscador');
     if (inputBuscador) inputBuscador.value = '';
+    
+    let inputBuscadorDesktop = document.getElementById('buscador-desktop');
+    if (inputBuscadorDesktop) inputBuscadorDesktop.value = '';
 
     let chk = document.getElementById('chkAgotados');
     if (chk) chk.checked = false;
@@ -137,12 +140,15 @@ function irInicio() {
 }
 
 /** Limpia instantáneamente la barra de búsqueda y refresca los productos */
-window.limpiarBuscador = function () {
+window.limpiarBuscador = function (skipFilters = false) {
     let input = document.getElementById('buscador');
     if (input) input.value = '';
-    document.getElementById('clear-search').style.display = 'none';
-    cerrarSugerencias();
-    aplicarFiltros();
+    let inputDesktop = document.getElementById('buscador-desktop');
+    if (inputDesktop) inputDesktop.value = '';
+    let clearBtn = document.getElementById('clear-search');
+    if (clearBtn) clearBtn.style.display = 'none';
+    if (typeof cerrarSugerencias === 'function') cerrarSugerencias();
+    if (!skipFilters && typeof aplicarFiltros === 'function') aplicarFiltros();
 }
 
 function abrirLegales() {
@@ -493,6 +499,7 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
         `;
         let cbTodos = divTodos.querySelector('input');
         cbTodos.onchange = function () {
+            if (typeof window.limpiarBuscador === 'function') window.limpiarBuscador(true);
             try { subcategoriaActual = null; } catch(e) { window.subcategoriaActual = null; }
             subcatContainer.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
             this.checked = true;
@@ -523,6 +530,7 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
             `;
             let cb = divSub.querySelector('input');
             cb.onchange = async function () {
+                if (typeof window.limpiarBuscador === 'function') window.limpiarBuscador(true);
                 try { subcategoriaActual = codSub; } catch(e) { window.subcategoriaActual = codSub; }
                 subcatContainer.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
                 this.checked = true;
@@ -552,6 +560,8 @@ async function filtrarCategoria(cat, checkboxElement) {
         irInicio();
         return;
     }
+        
+        if (typeof window.limpiarBuscador === 'function') window.limpiarBuscador(true);
 
     try { categoriaActual = cat; subcategoriaActual = null; } catch(e) { window.categoriaActual = cat; window.subcategoriaActual = null; }
     let subcatSection = document.getElementById('subcategoria-section-main');

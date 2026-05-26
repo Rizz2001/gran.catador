@@ -71,7 +71,6 @@ body {
   color: var(--texto-oscuro);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  padding-bottom: 90px;
   transition: background 0.3s, color 0.3s;
   scroll-behavior: smooth;
 }
@@ -1884,10 +1883,6 @@ body.dark-mode .cart-header .panel-title {
   .search-container {
     max-width: 500px;
     margin: 0 auto;
-  }
-
-  body {
-    padding-bottom: 90px;
   }
 
   .main-footer-new {
