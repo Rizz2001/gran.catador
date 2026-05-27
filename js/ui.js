@@ -451,7 +451,13 @@ window.generarMarquesinaGrupos = function () {
     track.innerHTML = `<div class="marquesina-group">${pillsHTML}</div><div class="marquesina-group">${pillsHTML}</div>`;
 
     wrap.appendChild(track);
-    contBanners.parentNode.insertBefore(wrap, contBanners.nextSibling);
+
+    let dotsContainer = document.getElementById('banners-dots');
+    if (dotsContainer) {
+        dotsContainer.parentNode.insertBefore(wrap, dotsContainer.nextSibling);
+    } else {
+        contBanners.parentNode.insertBefore(wrap, contBanners.nextSibling);
+    }
 
     // Lógica de Scroll Infinito e Interactivo
     let isHoveredOrTouched = false;

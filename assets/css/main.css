@@ -690,6 +690,7 @@ body.dark-mode .hero-banner {
   -ms-overflow-style: none;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+  position: relative;
 }
 
 .banners-container::-webkit-scrollbar {
@@ -697,8 +698,8 @@ body.dark-mode .hero-banner {
 }
 
 .promo-banner {
-  min-width: 100%;
-  aspect-ratio: 21 / 9;
+  min-width: calc(100% - 24px);
+  aspect-ratio: 16 / 7;
   height: auto;
   border-radius: 12px;
   scroll-snap-align: center;
@@ -724,6 +725,14 @@ body.dark-mode .hero-banner {
 
 .promo-banner:not(.active-banner) {
   transform: scale(0.98);
+}
+
+@media (min-width: 768px) {
+  .promo-banner {
+    min-width: 100%;
+    aspect-ratio: 21 / 7;
+    scroll-snap-align: center;
+  }
 }
 
 /* --- SECCIÓN DE PRODUCTOS Y FILTROS --- */

@@ -1763,6 +1763,40 @@ body.dark-mode #search-suggestions {
     font-size: 13px;
 }
 
+/* --- BANNER DOTS --- */
+.banners-dots-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.banner-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--color-border, #E5E7EB);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.banner-dot.active {
+    background-color: var(--color-primary, #1E3A8A);
+    width: 24px;
+    border-radius: 10px;
+}
+
+body.dark-mode .banner-dot {
+    background-color: #374151;
+}
+
+body.dark-mode .banner-dot.active {
+    background-color: #60A5FA;
+}
+
 /* --- MARQUESINA DE GRUPOS --- */
 .marquesina-grupos-section {
     width: 100%;

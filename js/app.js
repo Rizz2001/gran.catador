@@ -171,53 +171,129 @@ async function cargarBannersLocales() {
                 contBanners.innerHTML = '';
                 const queryRaw = (document.getElementById('buscador')?.value || '').trim();
                 contBanners.style.display = (categoriaActual === 'Todos' && queryRaw.length === 0) ? 'flex' : 'none';
-                contBanners.style.overflowX = 'hidden';
+                contBanners.style.overflowX = 'auto';
                 contBanners.style.scrollBehavior = 'smooth';
+                contBanners.style.scrollSnapType = 'x mandatory';
+
+                // Eliminar puntos si existían previamente en el DOM
+                let dotsContainer = document.getElementById('banners-dots');
+                if (dotsContainer) dotsContainer.remove();
+
+                // Crear contenedor de puntos
+                dotsContainer = document.createElement('div');
+                dotsContainer.id = 'banners-dots';
+                dotsContainer.className = 'banners-dots-container';
+                dotsContainer.style.display = contBanners.style.display;
+                contBanners.parentElement.insertBefore(dotsContainer, contBanners.nextSibling);
+
+                let bannersHTML = '';
                 listaBanners.forEach((img, idx) => {
                     let loadingAttr = idx === 0 ? '' : 'loading="lazy"';
                     let activeClass = idx === 0 ? 'active-banner' : '';
-                    contBanners.innerHTML += `<div class="promo-banner ${activeClass}"><img src="assets/banners/${img}" alt="Promo" style="border-radius: 12px; display: block;" ${loadingAttr} onerror="this.parentElement.style.display='none'"></div>`;
+                    // Removemos el scroll-snap-align en línea para respetar las reglas responsive de CSS
+                    bannersHTML += `<div class="promo-banner ${activeClass}"><img src="assets/banners/${img}" alt="Promo" style="border-radius: 12px; display: block; width: 100%; height: 100%; object-fit: cover;" ${loadingAttr} onerror="this.style.display='none'"></div>`;
+                });
+                contBanners.innerHTML = bannersHTML;
+
+                listaBanners.forEach((_, idx) => {
+                    let dot = document.createElement('div');
+                    dot.className = `banner-dot ${idx === 0 ? 'active' : ''}`;
+                    dot.dataset.index = idx;
+                    dot.onclick = () => {
+                        let child = contBanners.children[idx];
+                        if (child) {
+                            // Centrado matemático perfecto teniendo en cuenta paddings
+                            let targetScroll = child.offsetLeft - (contBanners.clientWidth - child.clientWidth) / 2;
+                            contBanners.scrollTo({ left: targetScroll, behavior: 'smooth' });
+                        }
+                        handleUserInteraction();
+                    };
+                    dotsContainer.appendChild(dot);
                 });
 
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('active-banner');
-                        } else {
-                            entry.target.classList.remove('active-banner');
+                const updateActiveState = () => {
+                    if (contBanners.children.length === 0) return;
+                    let scrollPosition = contBanners.scrollLeft;
+                    let containerCenter = scrollPosition + (contBanners.clientWidth / 2);
+                    
+                    let minDistance = Infinity;
+                    let currentIndex = 0;
+
+                    Array.from(contBanners.children).forEach((banner, idx) => {
+                        let bannerCenter = banner.offsetLeft + (banner.clientWidth / 2);
+                        let distance = Math.abs(containerCenter - bannerCenter);
+                        
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            currentIndex = idx;
                         }
                     });
-                }, { root: contBanners, threshold: 0.55 });
-                Array.from(contBanners.children).forEach(banner => observer.observe(banner));
 
-                let slideIndex = 0;
-                const totalSlides = contBanners.children.length;
+                    Array.from(contBanners.children).forEach((banner, idx) => {
+                        if (idx === currentIndex) banner.classList.add('active-banner');
+                        else banner.classList.remove('active-banner');
+                    });
+
+                    if (dotsContainer) {
+                        Array.from(dotsContainer.children).forEach((dot, idx) => {
+                            if (idx === currentIndex) dot.classList.add('active');
+                            else dot.classList.remove('active');
+                        });
+                    }
+                };
+
+                // Reemplazamos addEventListener por .onscroll para evitar duplicación de listeners en el DOM
+                contBanners.onscroll = () => {
+                    requestAnimationFrame(updateActiveState);
+                };
 
                 const startAutoScroll = () => {
                     if (window.bannersTimer) clearInterval(window.bannersTimer);
                     window.bannersTimer = setInterval(() => {
-                        if (contBanners.scrollWidth > contBanners.clientWidth + 10) {
-                            // Calculamos el índice basado en la posición actual por si el usuario movió el scroll manualmente
-                            let bannerWidth = contBanners.children[0].offsetWidth;
-                            let gap = parseInt(window.getComputedStyle(contBanners).gap) || 0;
-                            slideIndex = Math.round(contBanners.scrollLeft / (bannerWidth + gap)) + 1;
+                        if (contBanners.scrollWidth > contBanners.clientWidth + 10 && contBanners.style.display !== 'none') {
+                            let scrollPosition = contBanners.scrollLeft;
+                            let containerCenter = scrollPosition + (contBanners.clientWidth / 2);
+                            
+                            let minDistance = Infinity;
+                            let currentIndex = 0;
 
-                            if (slideIndex >= totalSlides) slideIndex = 0;
-                            contBanners.scrollTo({ left: (bannerWidth + gap) * slideIndex, behavior: 'smooth' });
+                            Array.from(contBanners.children).forEach((banner, idx) => {
+                                let bannerCenter = banner.offsetLeft + (banner.clientWidth / 2);
+                                let distance = Math.abs(containerCenter - bannerCenter);
+                                
+                                if (distance < minDistance) {
+                                    minDistance = distance;
+                                    currentIndex = idx;
+                                }
+                            });
+                            
+                            let nextIndex = currentIndex + 1;
+                            if (nextIndex >= contBanners.children.length) {
+                                nextIndex = 0;
+                            }
+                            
+                            let child = contBanners.children[nextIndex];
+                            if (child) {
+                                let targetScroll = child.offsetLeft - (contBanners.clientWidth - child.clientWidth) / 2;
+                                contBanners.scrollTo({ left: targetScroll, behavior: 'smooth' });
+                            }
                         }
-                    }, 5000); // Cambiado a 5 segundos según requerimiento del usuario
+                    }, 4000);
                 };
 
-                // Detener el auto-scroll cuando el usuario interactúa
                 const handleUserInteraction = () => {
-                    clearInterval(window.bannersTimer);
-                    // Reiniciar el auto-scroll después de 10 segundos de inactividad
-                    clearTimeout(window.resumeBannerTimer);
-                    window.resumeBannerTimer = setTimeout(startAutoScroll, 10000);
+                    if (window.bannersTimer) clearInterval(window.bannersTimer);
+                    if (window.resumeBannerTimer) clearTimeout(window.resumeBannerTimer);
+                    window.resumeBannerTimer = setTimeout(startAutoScroll, 8000);
                 };
 
-                contBanners.addEventListener('touchstart', handleUserInteraction, { passive: true });
-                contBanners.addEventListener('mousedown', handleUserInteraction);
+                contBanners.ontouchstart = handleUserInteraction;
+                contBanners.onmouseenter = handleUserInteraction;
+                contBanners.onmouseleave = () => {
+                    clearTimeout(window.resumeBannerTimer);
+                    window.resumeBannerTimer = setTimeout(startAutoScroll, 2000);
+                };
+                contBanners.onwheel = handleUserInteraction;
 
                 startAutoScroll();
             }
@@ -789,6 +865,10 @@ function aplicarFiltros() {
     let contBanners = document.getElementById('contenedorBanners');
     if (contBanners) {
         contBanners.style.display = (categoriaActual === 'Todos' && q.length === 0) ? 'flex' : 'none';
+        let dotsContainer = document.getElementById('banners-dots');
+        if (dotsContainer) {
+            dotsContainer.style.display = contBanners.style.display;
+        }
     }
     let marquesina = document.getElementById('marquesina-grupos-container');
     if (marquesina) {
