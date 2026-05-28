@@ -634,6 +634,15 @@ function enviarPedido() {
     guardarCarritoLS();
     actualizarCartCount();
 
+    let whatsappUrl = `https://wa.me/584245496366?text=${encodeURIComponent(msg)}`;
+    
+    // Abrimos la pestaña ANTES del timeout para evitar bloqueos por políticas anti-popups (ej. en iOS Safari)
+    let win = window.open(whatsappUrl, '_blank');
+    if (!win) {
+        // Fallback robusto en caso de que el navegador lo bloquee de todas formas
+        window.location.href = whatsappUrl;
+    }
+
     // Feedback visual en el botón antes de redirigir
     let btnEnviar = document.getElementById('btn-whatsapp');
     let originalHTML = btnEnviar.innerHTML;
@@ -642,8 +651,6 @@ function enviarPedido() {
     btnEnviar.disabled = true;
 
     setTimeout(() => {
-        window.open(`https://wa.me/584245496366?text=${encodeURIComponent(msg)}`, '_blank');
-        cerrarModal('modal-cart', 'nav-home');
         btnEnviar.innerHTML = originalHTML;
         btnEnviar.classList.remove('disabled');
         btnEnviar.disabled = false;

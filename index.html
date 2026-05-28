@@ -16,7 +16,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="canonical" href="https://gran-catador.pages.dev/">
     <meta name="description"
         content="Supermercado y Bodegón en Barinas con delivery a domicilio. Licores, víveres, snacks y más. Pide por WhatsApp, acepta Pago Móvil, Zelle y efectivo. Abierto todos los días 8AM–9PM.">
-    <meta name="keywords" content="supermercado, bodegón, licores, víveres, snacks, delivery, Barinas, Venezuela, Gran Catador, el catador, el poblado, catador barinas, bodegon barinas, fiestas barinas, vinos, cervezas, cocteles, cotecteles, avilas gym, avila, carnes, caravanas, gran cantador, el catador venezuela, el catador barinas,barinas,elcatadorbarinas,elcatador,bodegonelcatador,catasalud,catador,elcatador barinas,barinas, barinas,el catador barinas">
+    <meta name="keywords" content="supermercado, bodegón, licores, víveres, snacks, delivery, Barinas, Venezuela, Gran Catador, el catador, catador barinas, bodegon barinas, fiestas barinas, vinos, cervezas, cocteles">
     <meta name="author" content="Gran Catador C.A.">
     <meta name="robots" content="index, follow">
 
@@ -89,40 +89,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <p style="font-size: 12px; margin-bottom: 20px; color: var(--texto-claro);">Ingresa tu fecha de nacimiento
             </p>
             <div class="dob-container">
-                <input type="number" id="age-d" class="dob-input" placeholder="DD" min="1" max="31">
-                <input type="number" id="age-m" class="dob-input" placeholder="MM" min="1" max="12">
-                <input type="number" id="age-y" class="dob-input" placeholder="AAAA" min="1900" max="2026">
+                <input type="number" id="age-d" class="dob-input" placeholder="DD" min="1" max="31" aria-label="Día de nacimiento">
+                <input type="number" id="age-m" class="dob-input" placeholder="MM" min="1" max="12" aria-label="Mes de nacimiento">
+                <input type="number" id="age-y" class="dob-input" placeholder="AAAA" min="1900" max="2026" aria-label="Año de nacimiento">
             </div>
             <button onclick="verificarEdad()" class="age-btn">ENTRAR</button>
             <p id="age-error" class="age-error">Debes ser mayor de 18 años.</p>
         </div>
     </div>
 
-    <style>
-        .marquee-container {
-            overflow: hidden;
-            white-space: nowrap;
-            width: 100%;
-            display: flex;
-            align-items: center;
-        }
-
-        .marquee-text {
-            display: inline-block;
-            animation: marquee-scroll 20s linear infinite;
-            padding-left: 100%;
-        }
-
-        @keyframes marquee-scroll {
-            0% {
-                transform: translateX(0);
-            }
-
-            100% {
-                transform: translateX(-100%);
-            }
-        }
-    </style>
     <div class="header-top-bar marquee-container">
         <div class="marquee-text">
             <span style="font-weight: 600; letter-spacing: 0.5px;">
@@ -151,7 +126,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <div class="header-center">
                         <div class="search-pill">
                             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                            <input type="text" id="buscador" placeholder="Buscar productos..."
+                            <input type="text" id="buscador" placeholder="Buscar productos..." aria-label="Buscar productos"
                                 onkeyup="debounceBusqueda(event)" autocomplete="off">
                             <i class="fa-solid fa-circle-xmark clear-search-icon" id="clear-search"
                                 onclick="limpiarBuscador()" aria-label="Limpiar búsqueda"></i>
