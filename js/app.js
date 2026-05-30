@@ -894,7 +894,8 @@ function aplicarFiltros() {
             resultado = resultado.filter(p =>
                 compararIDs(p.SubCatId, subcategoriaActual) ||
                 p.SubCat === limpiarCategoria(subcategoriaActual) ||
-                limpiarCategoria(p.SubCat) === limpiarCategoria(subcategoriaActual)
+                limpiarCategoria(p.SubCat) === limpiarCategoria(subcategoriaActual) ||
+                (window.subcategoriaNombreActual && limpiarCategoria(p.SubCat) === limpiarCategoria(window.subcategoriaNombreActual))
             );
         }
     }

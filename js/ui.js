@@ -123,10 +123,9 @@ function irInicio() {
     if (sortSelect) sortSelect.value = 'relevancia';
 
     cerrarSugerencias();
-    try { subcategoriaActual = null; } catch (e) { window.subcategoriaActual = null; }
+    try { subcategoriaActual = null; window.subcategoriaNombreActual = null; } catch (e) { window.subcategoriaActual = null; window.subcategoriaNombreActual = null; }
 
-    let subcatSection = document.getElementById('subcategoria-section-main');
-    if (subcatSection) subcatSection.style.display = 'none';
+    if (typeof mostrarPanelGrupos === 'function') mostrarPanelGrupos();
 
     let cbInicio = document.getElementById('cat-todos');
     if (cbInicio) {
@@ -559,7 +558,6 @@ function generarCategorias() {
                             <i class="fa-solid fa-xmark close-cat-icon" style="display:none; opacity: 0.8; font-size: 14px;"></i>
                         </label>
                     </div>
-                    <div class="sidebar-subfilters" id="subcats-${catIdLimpio}" style="display: none; padding-left: 20px; margin-top: 8px; margin-bottom: 15px;"></div>
                 `;
                 cont.appendChild(div);
             }
@@ -576,12 +574,7 @@ function generarCategorias() {
     if (categoriaActual !== 'Todos' && categoriaActual !== 'Favoritos') {
         cargarSubcategoriasAPI(categoriaActual);
     } else {
-        let subcatSection = document.getElementById('subcategoria-section-main');
-        if (subcatSection) subcatSection.style.display = 'none';
-        document.querySelectorAll('.sidebar-subfilters').forEach(el => {
-            el.style.display = 'none';
-            el.innerHTML = '';
-        });
+        if (typeof mostrarPanelGrupos === 'function') mostrarPanelGrupos();
     }
 
     setTimeout(() => {
@@ -706,23 +699,29 @@ window.generarMarquesinaGrupos = function () {
 
 async function cargarSubcategoriasAPI(nombreCategoria) {
     let catIdLimpio = limpiarCategoria(nombreCategoria).replace(/[^a-z0-9]/gi, '-').toLowerCase();
-    let subcatSection = document.getElementById('subcategoria-section-main');
-    if (subcatSection) subcatSection.style.display = 'none'; // Ocultamos el bloque estático nativo
 
-    // Cerramos todos los demás subgrupos primero
-    document.querySelectorAll('.sidebar-subfilters').forEach(el => {
-        if (el.id !== `subcats-${catIdLimpio}`) {
-            el.style.display = 'none';
-            el.innerHTML = '';
-        }
-    });
-
-    let subcatContainer = document.getElementById(`subcats-${catIdLimpio}`);
+    // Obtenemos el contenedor de subcategorías
+    let subcatContainer = document.getElementById('contenedorSubcategoriasSidebar');
     if (!subcatContainer) return;
 
+    // Actualizar el título del subgrupo
+    let parentTitle = document.getElementById('submenu-parent-title');
+    if (parentTitle) {
+        parentTitle.innerText = `Subgrupos de ${nombreCategoria}`;
+    }
+
     // Mostrar visualmente que está cargando
-    subcatContainer.style.display = 'flex';
-    subcatContainer.innerHTML = '<div style="padding: 10px 5px; font-size: 13px; color: var(--color-primary); font-weight: 600; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando subgrupos...</div>';
+    subcatContainer.innerHTML = '<div style="padding: 15px 5px; font-size: 13px; color: var(--color-primary); font-weight: 600; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando subgrupos...</div>';
+
+    // Animación Drill-down: Mostrar subgrupos, ocultar grupos
+    let panelGrupos = document.getElementById('categoria-section-main');
+    let panelSubgrupos = document.getElementById('subcategoria-section-main');
+    if (panelGrupos && panelSubgrupos) {
+        panelGrupos.classList.remove('active-panel');
+        panelGrupos.classList.add('hidden-panel');
+        panelSubgrupos.classList.remove('hidden-panel');
+        panelSubgrupos.classList.add('active-panel');
+    }
 
     // Buscar el código del grupo de forma segura
     let grupo = null;
@@ -767,13 +766,11 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
         mapaSubcats.forEach((nombreSub, idSub) => {
             subcategorias.push({ codigo: idSub, nombre: nombreSub });
         });
-
     }
 
     // 3. Renderizar en la pantalla
     if (subcategorias.length > 0) {
         // --- LÓGICA DE RESCATE AUTOMÁTICO ---
-        // Si SmartVentas devolvió 0 productos para el grupo principal, los extraemos forzosamente de los subgrupos.
         let prodsGrupo = inventario.filter(p => p.CatId === codGrupo || p.Cat === limpiarCategoria(nombreCategoria));
         if (prodsGrupo.length === 0) {
             let promesas = subcategorias.map(sub => {
@@ -799,11 +796,10 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
         let cbTodos = divTodos.querySelector('input');
         cbTodos.onchange = function () {
             if (typeof window.limpiarBuscador === 'function') window.limpiarBuscador(true);
-            try { subcategoriaActual = null; } catch (e) { window.subcategoriaActual = null; }
+            try { subcategoriaActual = null; window.subcategoriaNombreActual = null; } catch (e) { window.subcategoriaActual = null; window.subcategoriaNombreActual = null; }
             subcatContainer.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
             this.checked = true;
 
-            // Si el usuario presiona "Todos" mientras ocurre el rescate, le mostramos el esqueleto de carga
             let prods = inventario.filter(p => p.CatId === codGrupo || p.Cat === limpiarCategoria(nombreCategoria));
             if (prods.length === 0) {
                 if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();
@@ -817,7 +813,6 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
             let nombreSub = sub.nombre || sub.descripcion || sub.Nombre || sub.desc_subgrupo || "Subgrupo";
             let codSub = (sub.CodSubgrupo || sub.codsubgrupo || sub.Codsubgrupo || sub.cod_subgrupo || sub.cod_sub_grupo || sub.id_subgrupo || sub.id_sub_grupo || sub.Cod_subgrupo || sub.codigo || sub.id || sub.subgrupo || sub.Subgrupo || limpiarCategoria(nombreSub)).toString().trim();
 
-            // Formatear Nombre (Capitalizar primera letra: "Whisky" en vez de "WHISKY")
             let nombreMostrado = nombreSub.charAt(0).toUpperCase() + nombreSub.slice(1).toLowerCase();
             let subIdLimpio = codSub.replace(/[^a-z0-9]/gi, '-').toLowerCase();
 
@@ -825,21 +820,30 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
             divSub.className = 'checkbox-item';
             divSub.innerHTML = `
                 <input type="checkbox" id="subcat-${subIdLimpio}" ${(codSub === subcategoriaActual || limpiarCategoria(nombreSub) === subcategoriaActual) ? 'checked' : ''}>
-                    <label for="subcat-${subIdLimpio}"><i class="fa-solid fa-angle-right"></i> ${nombreMostrado}</label>
+                <label for="subcat-${subIdLimpio}"><i class="fa-solid fa-angle-right"></i> ${nombreMostrado}</label>
             `;
             let cb = divSub.querySelector('input');
             cb.onchange = async function () {
                 if (typeof window.limpiarBuscador === 'function') window.limpiarBuscador(true);
-                try { subcategoriaActual = codSub; } catch (e) { window.subcategoriaActual = codSub; }
+                try { subcategoriaActual = codSub; window.subcategoriaNombreActual = nombreSub; } catch (e) { window.subcategoriaActual = codSub; window.subcategoriaNombreActual = nombreSub; }
                 subcatContainer.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
                 this.checked = true;
 
-                // Siempre llamamos a la API con ?codSubgrupo= para que los productos
-                // queden etiquetados con su SubCatId correcto antes de filtrar.
                 if (codGrupo && codSub) {
-                    if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();
-                    if (typeof cargarProductosPorSubgrupo === 'function') {
-                        await cargarProductosPorSubgrupo(codGrupo, codSub, nombreCategoria, nombreSub);
+                    let yaTengoProductos = inventario.some(p => (p.SubCatId && p.SubCatId.toString() === codSub) || (window.subcategoriaNombreActual && limpiarCategoria(p.SubCat) === limpiarCategoria(window.subcategoriaNombreActual)));
+                    
+                    if (!yaTengoProductos) {
+                        if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();
+                        if (typeof cargarProductosPorSubgrupo === 'function') {
+                            await cargarProductosPorSubgrupo(codGrupo, codSub, nombreCategoria, nombreSub);
+                        }
+                    } else {
+                        // Refresco silencioso en background
+                        if (typeof cargarProductosPorSubgrupo === 'function') {
+                            cargarProductosPorSubgrupo(codGrupo, codSub, nombreCategoria, nombreSub).then(() => {
+                                if (subcategoriaActual === codSub) aplicarFiltros();
+                            });
+                        }
                     }
                 }
 
@@ -848,13 +852,12 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
             subcatContainer.appendChild(divSub);
         });
     } else {
-        subcatContainer.style.display = 'none';
+        if (typeof mostrarPanelGrupos === 'function') mostrarPanelGrupos();
         subcatContainer.innerHTML = '';
     }
 }
 
 async function filtrarCategoria(cat, checkboxElement) {
-    // Si el usuario hace clic en el grupo que ya estaba seleccionado o en la X, se desmarca
     if (categoriaActual === cat && checkboxElement && !checkboxElement.checked) {
         irInicio();
         return;
@@ -863,16 +866,14 @@ async function filtrarCategoria(cat, checkboxElement) {
     if (typeof window.limpiarBuscador === 'function') window.limpiarBuscador(true);
 
     try { categoriaActual = cat; subcategoriaActual = null; } catch (e) { window.categoriaActual = cat; window.subcategoriaActual = null; }
-    let subcatSection = document.getElementById('subcategoria-section-main');
-    if (subcatSection) subcatSection.style.display = 'none';
 
     document.querySelectorAll('#contenedorCategorias input[type="checkbox"]').forEach(cb => cb.checked = false);
     if (checkboxElement) checkboxElement.checked = true;
 
-    document.querySelectorAll('.sidebar-subfilters').forEach(el => {
-        el.style.display = 'none';
-        el.innerHTML = '';
-    });
+    // Si seleccionamos "Todos" o "Favoritos", regresar a la vista de grupos
+    if (cat === 'Todos' || cat === 'Favoritos') {
+        if (typeof mostrarPanelGrupos === 'function') mostrarPanelGrupos();
+    }
 
     let mTitle = document.getElementById('mobile-header-title');
     if (mTitle) mTitle.innerText = (cat === 'Todos') ? 'Inicio' : cat;
@@ -889,7 +890,6 @@ async function filtrarCategoria(cat, checkboxElement) {
 
             if (appState.gruposCargados && !appState.gruposCargados.includes(codGrupo)) {
                 if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();
-                // Forzamos la descarga en este momento si no se había descargado en segundo plano aún
                 await cargarProductosPorGrupo(codGrupo, nombreGrupo);
             }
         }
@@ -917,10 +917,25 @@ window.toggleSidebar = function () {
 window.closeSidebar = function () {
     const sidebar = document.getElementById('sidebar-menu');
     const overlay = document.getElementById('sidebar-overlay');
-    if (sidebar && overlay) {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
+    
+    if (sidebar) sidebar.classList.remove('open');
+    if (overlay) overlay.classList.remove('active');
+};
+
+window.mostrarPanelGrupos = function () {
+    let panelGrupos = document.getElementById('categoria-section-main');
+    let panelSubgrupos = document.getElementById('subcategoria-section-main');
+    if (panelGrupos && panelSubgrupos) {
+        panelSubgrupos.classList.remove('active-panel');
+        panelSubgrupos.classList.add('hidden-panel');
+        panelGrupos.classList.remove('hidden-panel');
+        panelGrupos.classList.add('active-panel');
     }
+};
+
+window.volverAGrupos = function () {
+    mostrarPanelGrupos();
+    irInicio(); // Reset to "Todos" filter gracefully
 };
 
 // --- SUGERENCIAS E INTERACCIONES ---

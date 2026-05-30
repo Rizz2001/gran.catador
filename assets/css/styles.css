@@ -1178,6 +1178,65 @@ body.dark-mode .sidebar-menu {
     transform: translateX(0);
 }
 
+/* --- SIDEBAR DRILL-DOWN (Single Sidebar) --- */
+.drilldown-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    background: inherit;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, visibility 0.35s;
+    overflow-y: auto;
+}
+
+.active-panel {
+    transform: translateX(0);
+    opacity: 1;
+    visibility: visible;
+    z-index: 2;
+}
+
+.hidden-panel {
+    transform: translateX(30px);
+    opacity: 0;
+    visibility: hidden;
+    z-index: 1;
+}
+
+.inner-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(30, 58, 138, 0.08);
+    border: 1px solid rgba(30, 58, 138, 0.15);
+    padding: 8px 14px;
+    border-radius: 20px;
+    color: var(--color-primary);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 5px;
+    width: max-content;
+}
+
+.inner-back-btn:hover {
+    background: var(--color-primary);
+    color: #fff;
+}
+
+body.dark-mode .inner-back-btn {
+    background: rgba(96, 165, 250, 0.1);
+    border-color: rgba(96, 165, 250, 0.2);
+    color: #60A5FA;
+}
+body.dark-mode .inner-back-btn:hover {
+    background: #60A5FA;
+    color: #000;
+}
+
 .sidebar-header {
     display: flex;
     align-items: center;
@@ -2975,3 +3034,278 @@ body.dark-mode .grupo-aleatorio-card-note {
         font-size: 18px;
     }
 }
+
+/* ==========================================================================
+   SECCIÓN DE FILTROS Y ORDENAMIENTO ULTRA COMPACTA (SÚPER PROFESIONAL)
+   ========================================================================== */
+
+/* Contenedor principal de herramientas */
+.tools-container {
+    margin-top: 8px !important;
+    margin-bottom: 12px !important;
+    padding: 8px 16px !important;
+    min-height: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 15px !important;
+    border-radius: var(--radius-md, 12px) !important;
+    background: var(--color-card) !important;
+    border: 1px solid var(--color-border) !important;
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05)) !important;
+}
+
+/* Título de la sección */
+.tools-container .section-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--color-text) !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    order: 1 !important;
+    flex: 0 1 auto !important;
+}
+
+/* Contenedor del selector de Modo de Vista (Por Unidad / Por Caja) */
+#toggle-modo-global.toggle-modo-container {
+    display: inline-flex !important;
+    align-items: center !important;
+    background: var(--item-bg, #f3f4f6) !important;
+    padding: 2px !important;
+    border-radius: var(--radius-full, 50px) !important;
+    border: 1px solid var(--color-border) !important;
+    margin: 0 !important;
+    order: 2 !important;
+    flex: 0 0 auto !important;
+}
+
+/* Botón individual del Modo de Vista */
+#toggle-modo-global .btn-modo {
+    border: none !important;
+    background: transparent !important;
+    padding: 4px 10px !important;
+    border-radius: var(--radius-full, 50px) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: var(--color-text-muted) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    text-align: center !important;
+}
+
+#toggle-modo-global .btn-modo.active {
+    background: var(--color-primary, #1E3A8A) !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode #toggle-modo-global.toggle-modo-container {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode #toggle-modo-global .btn-modo {
+    color: #9ca3af !important;
+}
+
+body.dark-mode #toggle-modo-global .btn-modo.active {
+    background: #ffffff !important;
+    color: #0b132b !important;
+}
+
+/* Contenedor de filtros y ordenamiento en el extremo derecho */
+.tools-container .filters-row-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    order: 3 !important;
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+}
+
+/* Envoltura del Checkbox "Ver Agotados" */
+.tools-container .filters-row {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+}
+
+/* Pill del Checkbox de Agotados */
+.tools-container .chk-agotados {
+    background: var(--item-bg, #f3f4f6) !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-full, 50px) !important;
+    padding: 4px 8px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    height: 28px !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
+}
+
+.tools-container .chk-agotados:hover {
+    background: var(--color-border) !important;
+}
+
+.tools-container .chk-agotados input[type="checkbox"] {
+    margin: 0 !important;
+    cursor: pointer !important;
+    width: 13px !important;
+    height: 13px !important;
+}
+
+.tools-container .chk-agotados #info-agotados-icon {
+    font-size: 10px !important;
+    margin-left: 2px !important;
+    color: var(--color-text-muted) !important;
+}
+
+/* Selector dropdown de Ordenamiento */
+.tools-container .sort-container {
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.tools-container .sort-select {
+    background-color: var(--item-bg, #f3f4f6) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-full, 50px) !important;
+    padding: 4px 24px 4px 10px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: var(--color-text) !important;
+    cursor: pointer !important;
+    outline: none !important;
+    height: 28px !important;
+    box-sizing: border-box !important;
+    background-position: right 8px top 50% !important;
+    background-size: 8px auto !important;
+}
+
+body.dark-mode .tools-container .chk-agotados,
+body.dark-mode .tools-container .sort-select {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .tools-container .chk-agotados:hover {
+    background-color: #334155 !important;
+}
+
+/* RESPONSIVE MÓVIL Y TABLET (Ajustes de flujo y compactación extrema) */
+@media (max-width: 767px) {
+    .tools-container {
+        margin-top: 6px !important;
+        margin-bottom: 8px !important;
+        padding: 6px 12px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    .tools-container .section-title {
+        font-size: 13px !important;
+        flex: 1 1 auto !important;
+        order: 1 !important;
+    }
+
+    #toggle-modo-global.toggle-modo-container {
+        order: 2 !important;
+        flex: 0 0 auto !important;
+    }
+
+    #toggle-modo-global .btn-modo {
+        padding: 3px 8px !important;
+        font-size: 10.5px !important;
+    }
+
+    .tools-container .filters-row-container {
+        flex: 1 1 100% !important;
+        order: 3 !important;
+        justify-content: space-between !important;
+        margin-top: 2px !important;
+        gap: 8px !important;
+    }
+
+    .tools-container .filters-row {
+        flex: 1 1 auto !important;
+    }
+
+    .tools-container .chk-agotados {
+        width: 100% !important;
+        justify-content: center !important;
+        font-size: 11px !important;
+        height: 26px !important;
+        padding: 3px 8px !important;
+    }
+
+    .tools-container .sort-container {
+        flex: 1 1 auto !important;
+    }
+
+    .tools-container .sort-select {
+        width: 100% !important;
+        font-size: 11px !important;
+        height: 26px !important;
+        padding: 3px 20px 3px 8px !important;
+    }
+}
+
+/* ==========================================================================
+   SECCIÓN DE CATEGORÍAS (MARQUESINA HORIZONTAL) ULTRA COMPACTA
+   ========================================================================== */
+
+.marquesina-grupos-section {
+    margin-top: 2px !important;
+    margin-bottom: 8px !important;
+    padding: 4px 0 !important;
+}
+
+.marquesina-group {
+    gap: 8px !important;
+    padding-right: 8px !important;
+}
+
+.marquesina-pill {
+    padding: 6px 14px !important;
+    font-size: 11.5px !important;
+    gap: 6px !important;
+    border-radius: var(--radius-full, 50px) !important;
+}
+
+.marquesina-pill i {
+    font-size: 13.5px !important;
+}
+
+@media (max-width: 768px) {
+    .marquesina-grupos-section {
+        margin-top: 2px !important;
+        margin-bottom: 6px !important;
+        padding: 3px 0 !important;
+    }
+
+    .marquesina-pill {
+        padding: 5px 12px !important;
+        font-size: 11px !important;
+        gap: 5px !important;
+    }
+
+    .marquesina-pill i {
+        font-size: 12.5px !important;
+    }
+}
+
