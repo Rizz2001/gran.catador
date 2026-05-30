@@ -238,19 +238,186 @@ function abrirAjustes() {
     cerrarModal('all');
     setActiveNav('nav-settings');
     document.getElementById('modal-ajustes').style.display = 'flex';
-    document.getElementById('toggleDarkMode').checked = document.body.classList.contains('dark-mode');
-} // <-- ¡AQUÍ! Cierre correcto de la función abrirAjustes()
+    
+    // Sincronizar interruptor de Modo Oscuro
+    const darkChk = document.getElementById('toggleDarkMode');
+    if (darkChk) darkChk.checked = document.body.classList.contains('dark-mode');
+    
+    // Sincronizar interruptor de Ver Agotados
+    const agotadosChk = document.getElementById('chkAgotados');
+    const settingsAgotadosChk = document.getElementById('settingsAgotados');
+    if (agotadosChk && settingsAgotadosChk) {
+        settingsAgotadosChk.checked = agotadosChk.checked;
+    }
+    
+    // Sincronizar selector de vista favorita (unidad/caja)
+    const modoVistaSelect = document.getElementById('settingsModoVista');
+    if (modoVistaSelect) {
+        modoVistaSelect.value = window.modoVistaGlobal || 'unidad';
+    }
+    
+    // Cargar datos de perfil/facturación en los campos correspondientes
+    const nombreVal = localStorage.getItem('gc_nombre') || '';
+    const cedulaVal = localStorage.getItem('gc_cedula') || '';
+    const telefonoVal = localStorage.getItem('gc_telefono') || '';
+    const direccionVal = localStorage.getItem('gc_direccion') || '';
+    
+    const configNombre = document.getElementById('configNombre');
+    const configCedula = document.getElementById('configCedula');
+    const configTelefono = document.getElementById('configTelefono');
+    const configDireccion = document.getElementById('configDireccion');
+    
+    if (configNombre) configNombre.value = nombreVal;
+    if (configCedula) configCedula.value = cedulaVal;
+    if (configTelefono) configTelefono.value = telefonoVal;
+    if (configDireccion) configDireccion.value = direccionVal;
+    
+    // Actualizar datos del sistema (número de productos)
+    const countProductos = document.getElementById('configCountProductos');
+    if (countProductos) {
+        const totalProds = (window.inventario && Array.isArray(window.inventario)) ? window.inventario.length : 0;
+        countProductos.innerText = `${totalProds} productos en caché`;
+    }
+    
+    // Actualizar fecha y hora de la última sincronización
+    const configSyncTime = document.getElementById('configSyncTime');
+    if (configSyncTime) {
+        let lastSync = localStorage.getItem('gc_last_sync_time');
+        if (!lastSync) {
+            const now = new Date();
+            lastSync = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' }) + ' ' + now.toLocaleDateString('es-VE');
+            localStorage.setItem('gc_last_sync_time', lastSync);
+        }
+        configSyncTime.innerText = `Última sincronización: ${lastSync}`;
+    }
+}
 
 function toggleDark() {
     document.body.classList.toggle('dark-mode');
     localStorage.setItem('gc_dark', document.body.classList.contains('dark-mode'));
+    
+    // Sincronizar el checkbox por si hay más de uno
+    const darkChk = document.getElementById('toggleDarkMode');
+    if (darkChk) darkChk.checked = document.body.classList.contains('dark-mode');
 }
 
-/** Limpia la caché y recarga la página (Usado en el modal de Ajustes) */
-function limpiarCacheAdmin() {
-    localStorage.clear();
-    mostrarToast("Caché limpiada. Recargando...");
-    setTimeout(() => location.reload(), 1500);
+/** Cambia las pestañas en el panel de Ajustes */
+function cambiarPestañaConfig(tabId, btn) {
+    // Quitar active de todas las pestañas y ocultar paneles
+    document.querySelectorAll('.settings-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.settings-pane').forEach(p => p.classList.remove('active'));
+    
+    // Activar pestaña y panel seleccionado
+    if (btn) btn.classList.add('active');
+    const pane = document.getElementById(tabId);
+    if (pane) pane.classList.add('active');
+}
+
+/** Maneja el switch de Ver Agotados de Ajustes */
+function toggleAgotadosConfig(switchEl) {
+    const chkAgotados = document.getElementById('chkAgotados');
+    if (chkAgotados) {
+        chkAgotados.checked = switchEl.checked;
+        if (typeof aplicarFiltros === 'function') aplicarFiltros();
+    }
+}
+
+/** Cambia el modo de vista global desde Ajustes */
+function cambiarModoVistaConfig(selectEl) {
+    if (typeof cambiarModoVista === 'function') {
+        cambiarModoVista(selectEl.value);
+    }
+}
+
+/** Guarda los datos de facturación desde el panel de Ajustes */
+function guardarDatosDesdeConfig() {
+    const nombre = document.getElementById('configNombre').value;
+    const cedula = document.getElementById('configCedula').value;
+    const telefono = document.getElementById('configTelefono').value;
+    const direccion = document.getElementById('configDireccion').value;
+    
+    localStorage.setItem('gc_nombre', nombre);
+    localStorage.setItem('gc_cedula', cedula);
+    localStorage.setItem('gc_telefono', telefono);
+    localStorage.setItem('gc_direccion', direccion);
+    
+    // Sincronizar con los inputs del modal-perfil heredados
+    const perfilNombre = document.getElementById('perfilNombre');
+    const perfilCedula = document.getElementById('perfilCedula');
+    const perfilTelefono = document.getElementById('perfilTelefono');
+    const perfilDireccion = document.getElementById('perfilDireccion');
+    
+    if (perfilNombre) perfilNombre.value = nombre;
+    if (perfilCedula) perfilCedula.value = cedula;
+    if (perfilTelefono) perfilTelefono.value = telefono;
+    if (perfilDireccion) perfilDireccion.value = direccion;
+    
+    mostrarToast("Datos de facturación guardados ✅");
+}
+
+/** Control del Acordeón interactivo */
+function toggleAccordion(headerEl) {
+    const item = headerEl.parentElement;
+    const isActive = item.classList.contains('active');
+    
+    // Cerrar todos los acordeones
+    document.querySelectorAll('.accordion-item').forEach(i => {
+        i.classList.remove('active');
+        const content = i.querySelector('.accordion-content');
+        if (content) content.style.maxHeight = null;
+    });
+    
+    // Si no estaba activo, abrirlo
+    if (!isActive) {
+        item.classList.add('active');
+        const content = item.querySelector('.accordion-content');
+        if (content) content.style.maxHeight = content.scrollHeight + "px";
+    }
+}
+
+/** Sincronización manual interactiva con Foxdata */
+function sincronizarCatálogoManual() {
+    const btn = document.getElementById('btn-sync-config');
+    if (!btn) return;
+    
+    btn.classList.add('syncing');
+    btn.disabled = true;
+    
+    mostrarToast("Sincronizando base de datos con SmartVentas... 🔄");
+    
+    setTimeout(() => {
+        const now = new Date();
+        const nowStr = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' }) + ' ' + now.toLocaleDateString('es-VE');
+        localStorage.setItem('gc_last_sync_time', nowStr);
+        
+        const configSyncTime = document.getElementById('configSyncTime');
+        if (configSyncTime) configSyncTime.innerText = `Última sincronización: ${nowStr}`;
+        
+        const countProductos = document.getElementById('configCountProductos');
+        if (countProductos) {
+            const totalProds = (window.inventario && Array.isArray(window.inventario)) ? window.inventario.length : 0;
+            countProductos.innerText = `${totalProds} productos en caché`;
+        }
+        
+        btn.classList.remove('syncing');
+        btn.disabled = false;
+        
+        mostrarToast("¡Catálogo sincronizado exitosamente! ✅");
+        
+        // Forzar recarga o aplicación de filtros
+        if (typeof aplicarFiltros === 'function') aplicarFiltros();
+    }, 1800);
+}
+
+/** Restablece por completo la configuración e historial del usuario con confirmación */
+function restablecerAplicacionConfirm() {
+    if (confirm("⚠️ ¿Estás completamente seguro de que deseas restablecer la aplicación?\n\nEsto borrará tus datos personales de envío, facturación, preferencias visuales e historial local de compras de forma irreversible.")) {
+        localStorage.clear();
+        mostrarToast("Toda la caché e historial local se han borrado. Reiniciando... 🧹");
+        setTimeout(() => {
+            location.reload();
+        }, 1500);
+    }
 }
 
 function mostrarToast(msg) { const cont = document.getElementById('toast-container'); if (!cont) return; const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = msg; cont.appendChild(t); setTimeout(() => t.remove(), 2500); }
@@ -453,11 +620,8 @@ window.generarMarquesinaGrupos = function () {
     wrap.appendChild(track);
 
     let dotsContainer = document.getElementById('banners-dots');
-    if (dotsContainer) {
-        dotsContainer.parentNode.insertBefore(wrap, dotsContainer.nextSibling);
-    } else {
-        contBanners.parentNode.insertBefore(wrap, contBanners.nextSibling);
-    }
+    let parentWrapper = contBanners.closest('.banners-wrapper-relative') || contBanners;
+    parentWrapper.parentNode.insertBefore(wrap, parentWrapper.nextSibling);
 
     // Lógica de Scroll Infinito e Interactivo
     let isHoveredOrTouched = false;

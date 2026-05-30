@@ -46,6 +46,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="stylesheet" href="assets/css/responsive.css">
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/config.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
@@ -106,8 +107,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
     </div>
 
-    <header class="site-header" role="banner"
-        style="position: sticky; top: 0; z-index: 2000; background: var(--color-bg, #0B132B); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+    <header class="site-header" role="banner">
         <div class="sticky-header-content">
             <div class="header-main-bar">
                 <div class="container header-main-container">
@@ -210,10 +210,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <main id="main-content" role="main">
 
-        <div class="banners-container" id="contenedorBanners">
-            <div class="promo-banner"
-                style="background: var(--item-bg); display:none; align-items:center; justify-content:center; color:var(--texto-claro); font-size:12px; font-weight:500; text-align:center; padding:20px; border: 1px solid var(--borde-color);">
-                 Banners <br>Cargando
+        <div class="banners-wrapper-relative" style="position: relative; max-width: 1280px; margin: 0 auto;">
+            <div class="banners-container" id="contenedorBanners" style="padding-bottom: 15px;">
+                <div class="promo-banner"
+                    style="background: var(--item-bg); display:none; align-items:center; justify-content:center; color:var(--texto-claro); font-size:12px; font-weight:500; text-align:center; padding:20px; border: 1px solid var(--borde-color);">
+                     Banners <br>Cargando
+                </div>
             </div>
         </div>
 
@@ -616,36 +618,229 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div id="modal-ajustes" class="modal-fullscreen">
         <div class="modal-content-wrapper">
             <div class="cart-header">
-                <h2>Ajustes</h2>
+                <h2>Panel de Ajustes</h2>
                 <button onclick="cerrarModal('modal-ajustes', 'nav-home')" aria-label="Cerrar ajustes"
                     class="modal-close-btn">
                     <i class="fa-solid fa-xmark" aria-hidden="true"></i>
                 </button>
             </div>
-            <div class="checkout-box" style="display:flex; justify-content:space-between; align-items:center;">
-                <label for="toggleDarkMode" style="font-weight:600; font-size: 14px; cursor: pointer;">🌙 Modo
-                    Oscuro</label>
-                <input type="checkbox" id="toggleDarkMode" onchange="toggleDark()"
-                    style="width:20px; height:20px; accent-color: var(--color-primary);"
-                    aria-label="Activar modo oscuro">
+            
+            <div class="settings-dashboard">
+                <!-- Barra de Pestañas (Navegación Izquierda en PC, superior en móvil) -->
+                <nav class="settings-nav-tabs">
+                    <button type="button" class="settings-tab-btn active" onclick="cambiarPestañaConfig('config-general', this)">
+                        <i class="fa-solid fa-sliders"></i> General
+                    </button>
+                    <button type="button" class="settings-tab-btn" onclick="cambiarPestañaConfig('config-perfil', this)">
+                        <i class="fa-solid fa-user-gear"></i> Mis Datos
+                    </button>
+                    <button type="button" class="settings-tab-btn" onclick="cambiarPestañaConfig('config-legales', this)">
+                        <i class="fa-solid fa-scale-balanced"></i> Soporte Legal
+                    </button>
+                    <button type="button" class="settings-tab-btn" onclick="cambiarPestañaConfig('config-sistema', this)">
+                        <i class="fa-solid fa-gears"></i> Sistema
+                    </button>
+                </nav>
+                
+                <!-- Área de Contenido de Ajustes -->
+                <div class="settings-content">
+                    
+                    <!-- Pestaña 1: General -->
+                    <div id="config-general" class="settings-pane active">
+                        <div class="settings-card">
+                            <h3 class="settings-card-title"><i class="fa-solid fa-palette"></i> Aspecto & Estilo</h3>
+                            <div class="settings-row">
+                                <div class="settings-info">
+                                    <span class="settings-label">Modo Oscuro</span>
+                                    <span class="settings-desc">Cambia el contraste visual de la interfaz para entornos de poca luz.</span>
+                                </div>
+                                <label class="settings-switch-label">
+                                    <input type="checkbox" id="toggleDarkMode" onchange="toggleDark()" aria-label="Modo oscuro">
+                                    <span class="settings-slider">
+                                        <i class="fa-solid fa-sun slider-icon icon-sun"></i>
+                                        <i class="fa-solid fa-moon slider-icon icon-moon"></i>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <h3 class="settings-card-title"><i class="fa-solid fa-filter"></i> Filtros de Catálogo</h3>
+                            <div class="settings-row">
+                                <div class="settings-info">
+                                    <span class="settings-label">Ver Productos Agotados</span>
+                                    <span class="settings-desc">Muestra los artículos sin inventario temporal en la lista general.</span>
+                                </div>
+                                <label class="settings-switch-label">
+                                    <input type="checkbox" id="settingsAgotados" onchange="toggleAgotadosConfig(this)" aria-label="Ver agotados">
+                                    <span class="settings-slider"></span>
+                                </label>
+                            </div>
+                            
+                            <div class="settings-row">
+                                <div class="settings-info">
+                                    <span class="settings-label">Vista de Compra Favorita</span>
+                                    <span class="settings-desc">Configura tu visualización preferida para comprar artículos.</span>
+                                </div>
+                                <select id="settingsModoVista" class="input-select" onchange="cambiarModoVistaConfig(this)" style="max-width: 140px; margin-top: 0; padding: 8px 12px;" aria-label="Vista favorita">
+                                    <option value="unidad">🍾 Por Unidad</option>
+                                    <option value="caja">📦 Por Caja</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pestaña 2: Perfil/Mis Datos -->
+                    <div id="config-perfil" class="settings-pane">
+                        <div class="settings-card">
+                            <h3 class="settings-card-title"><i class="fa-solid fa-address-card"></i> Datos de Facturación y Envío</h3>
+                            <p style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 15px;">Guarda tus datos una sola vez para realizar tus pedidos de forma instantánea vía WhatsApp.</p>
+                            
+                            <div class="input-group" style="margin-bottom: 12px;">
+                                <label for="configNombre" class="input-label" style="font-size:12px; font-weight:600; color:var(--color-text);">Nombre y Apellido</label>
+                                <input type="text" id="configNombre" class="input-text" placeholder="Ej: Juan Pérez">
+                            </div>
+                            <div class="input-group" style="margin-bottom: 12px;">
+                                <label for="configCedula" class="input-label" style="font-size:12px; font-weight:600; color:var(--color-text);">Cédula de Identidad</label>
+                                <input type="text" id="configCedula" class="input-text" placeholder="Ej: V-12345678" oninput="formatearCedula(this)">
+                            </div>
+                            <div class="input-group" style="margin-bottom: 12px;">
+                                <label for="configTelefono" class="input-label" style="font-size:12px; font-weight:600; color:var(--color-text);">Número de Teléfono</label>
+                                <input type="tel" id="configTelefono" class="input-text" placeholder="Ej: 0414-1234567" oninput="formatearTelefono(this)">
+                            </div>
+                            <div class="input-group" style="margin-bottom: 20px;">
+                                <label for="configDireccion" class="input-label" style="font-size:12px; font-weight:600; color:var(--color-text);">Dirección Exacta de Delivery</label>
+                                <div style="display:flex; gap: 8px;">
+                                    <input type="text" id="configDireccion" class="input-text" placeholder="Ej: Av. Principal, Casa #10" style="flex-grow: 1; margin-top: 0;">
+                                    <button type="button" id="btn-geo-config" onclick="obtenerUbicacion('configDireccion', 'btn-geo-config')"
+                                        style="background: var(--item-bg); border: 1px solid var(--color-border); border-radius: 10px; padding: 0 15px; cursor: pointer; color: var(--color-primary); font-size: 18px; transition: 0.2s;"
+                                        title="Usar mi ubicación actual"><i class="fa-solid fa-location-crosshairs"></i></button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-enviar" onclick="guardarDatosDesdeConfig()"
+                                style="background:var(--color-primary); box-shadow:0 4px 15px rgba(30,58,138,0.2); margin-top: 0;">
+                                <i class="fa-regular fa-floppy-disk"></i> Guardar Mis Datos
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Pestaña 3: Soporte Legal (Acordeones Integrados) -->
+                    <div id="config-legales" class="settings-pane">
+                        <div class="settings-card" style="padding: 15px;">
+                            <h3 class="settings-card-title"><i class="fa-solid fa-shield-halved"></i> Políticas & Términos</h3>
+                            <div class="settings-accordion" style="margin-top:15px;">
+                                
+                                <div class="accordion-item">
+                                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                                        <span>1. Zonas de Delivery</span>
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </button>
+                                    <div class="accordion-content">
+                                        <div class="accordion-body">
+                                            Llegamos a gran parte de la ciudad de Barinas. Ciertas zonas periféricas pueden tener un recargo en el costo del reparto por distancia o seguridad. El costo final será indicado por el operador en WhatsApp.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="accordion-item">
+                                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                                        <span>2. Control de Edad Mínima</span>
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </button>
+                                    <div class="accordion-content">
+                                        <div class="accordion-body">
+                                            <strong>Prohibida la venta de bebidas alcohólicas a menores de 18 años.</strong> Gran Catador promueve el consumo responsable. Nuestro personal de reparto está autorizado y obligado a verificar la cédula de identidad del comprador al momento de la entrega física.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="accordion-item">
+                                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                                        <span>3. Garantías de Producto</span>
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </button>
+                                    <div class="accordion-content">
+                                        <div class="accordion-body">
+                                            Por favor, verifique el estado e integridad de los artículos al recibirlos. No se aceptan reclamos ni devoluciones sobre botellas abiertas, con sellos fiscales rotos o productos perecederos después de firmar la conformidad del despacho.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="accordion-item">
+                                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
+                                        <span>4. Privacidad y Datos</span>
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </button>
+                                    <div class="accordion-content">
+                                        <div class="accordion-body">
+                                            Gran Catador respeta tu privacidad al 100%. Tus datos personales (nombre, cédula, teléfono y dirección) <strong>se almacenan exclusivamente de manera local</strong> en tu dispositivo mediante el navegador web (localStorage). Ninguna información es enviada a servidores de terceros ni procesada fuera de tus propios pedidos.
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                        
+                        <div class="settings-card" style="text-align: center;">
+                            <h3 class="settings-card-title"><i class="fa-solid fa-circle-question"></i> ¿Tienes Dudas?</h3>
+                            <p style="font-size:12px; color:var(--color-text-muted); margin-bottom:15px;">Ponte en contacto directo con nuestro equipo de atención y soporte al cliente en Barinas.</p>
+                            <button type="button" class="btn-enviar" onclick="abrirSoporteWhatsApp()" style="background:#25D366; box-shadow:0 4px 15px rgba(37,211,102,0.2); margin-top: 0;">
+                                <i class="fa-brands fa-whatsapp"></i> Chatear con Soporte Técnico
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Pestaña 4: Diagnóstico y Acciones de Sistema -->
+                    <div id="config-sistema" class="settings-pane">
+                        <div class="settings-card">
+                            <h3 class="settings-card-title"><i class="fa-solid fa-circle-nodes"></i> Estado de Sincronización</h3>
+                            <div class="settings-row">
+                                <div class="settings-info">
+                                    <span class="settings-label">Servicio API SmartVentas</span>
+                                    <span class="settings-desc">Estado actual de la conexión de datos.</span>
+                                </div>
+                                <span class="system-status-indicator online">
+                                    <span class="system-pulse"></span>
+                                    En Línea
+                                </span>
+                            </div>
+                            
+                            <div class="settings-row">
+                                <div class="settings-info">
+                                    <span class="settings-label">Artículos del Catálogo</span>
+                                    <span class="settings-desc">Número de productos almacenados en memoria caché local.</span>
+                                </div>
+                                <span style="font-size:13px; font-weight:700; color:var(--color-primary);" id="configCountProductos">Cargando...</span>
+                            </div>
+                            
+                            <div class="settings-row">
+                                <div class="settings-info">
+                                    <span class="settings-label">Última Actualización</span>
+                                    <span class="settings-desc" id="configSyncTime">Sincronizando...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <h3 class="settings-card-title"><i class="fa-solid fa-screwdriver-wrench"></i> Herramientas</h3>
+                            
+                            <div style="display:flex; flex-direction:column; gap:12px; margin-top:15px;">
+                                <button type="button" id="btn-sync-config" class="btn-settings-action sync" onclick="sincronizarCatálogoManual()">
+                                    <i class="fa-solid fa-arrows-rotate sync-spin-icon"></i> Sincronizar Precios e Inventario
+                                </button>
+                                
+                                <button type="button" class="btn-settings-action danger" onclick="restablecerAplicacionConfirm()">
+                                    <i class="fa-solid fa-trash-can"></i> Restablecer Toda la Aplicación
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <p style="text-align: center; font-size: 11px; color: var(--color-text-muted); line-height: 1.5; margin-top: 20px;">
+                            Gran Catador C.A. · Versión de App: 2.5<br>Soporte de Integración: Barinas, Venezuela.</p>
+                    </div>
+                    
+                </div>
             </div>
-            <div class="checkout-box" style="margin-top:15px; cursor:pointer;" onclick="abrirLegales()" role="button"
-                tabindex="0" aria-label="Ver políticas y soporte">
-                <span style="font-weight:600; font-size: 14px; display:flex; align-items:center;"><i
-                        class="fa-solid fa-scale-balanced"
-                        style="margin-right:10px; color: var(--color-primary); font-size: 18px;" aria-hidden="true"></i>
-                    Políticas y Soporte</span>
-            </div>
-            <div class="checkout-box" style="margin-top:15px; cursor:pointer;" onclick="limpiarCacheAdmin()"
-                role="button" tabindex="0" aria-label="Actualizar precios e inventario">
-                <span style="font-weight:600; font-size: 14px; display:flex; align-items:center;"><i
-                        class="fa-solid fa-arrows-rotate"
-                        style="margin-right:10px; color: var(--color-success); font-size: 18px;" aria-hidden="true"></i>
-                    Actualizar Precios e Inventario</span>
-            </div>
-            <p
-                style="text-align: center; margin-top: 30px; font-size: 11px; color: var(--color-text-muted); line-height: 1.5;">
-                Desarrollado para Gran Catador C.A.<br>Contacto Soporte Técnico: 0422-0012375</p>
         </div>
     </div>
 

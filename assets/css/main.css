@@ -6,28 +6,50 @@
 @import url('responsive.css');
 
 :root {
+  /* HSL Color System Base (Hue, Saturation, Lightness) */
+  --primary-h: 224;
+  --primary-s: 64%;
+  --primary-l: 33%;
+  
+  --accent-h: 38;
+  --accent-s: 92%;
+  --accent-l: 50%;
+  
+  --success-h: 161;
+  --success-s: 84%;
+  --success-l: 39%;
+  
+  --danger-h: 0;
+  --danger-s: 84%;
+  --danger-l: 60%;
+
+  /* Core Colors using HSL */
   --color-white: #FFFFFF;
-  --color-primary: #1E3A8A;
-  --color-primary-dark: #152C6B;
-  --color-accent: #F59E0B;
-  --color-accent-hover: #D97706;
+  --color-primary: hsl(var(--primary-h), var(--primary-s), var(--primary-l));
+  --color-primary-dark: hsl(var(--primary-h), var(--primary-s), calc(var(--primary-l) - 8%));
+  --color-accent: hsl(var(--accent-h), var(--accent-s), var(--accent-l));
+  --color-accent-hover: hsl(var(--accent-h), var(--accent-s), calc(var(--accent-l) - 10%));
   --color-bg: #F9FAFB;
   --color-card: #FFFFFF;
   --color-text: #111827;
   --color-text-muted: #6B7280;
   --color-border: #E5E7EB;
-  --color-success: #10B981;
-  --color-danger: #EF4444;
-  --color-badge-red: #EF4444;
-  --color-badge-orange: #F59E0B;
-  --color-badge-green: #10B981;
+  --color-success: hsl(var(--success-h), var(--success-s), var(--success-l));
+  --color-danger: hsl(var(--danger-h), var(--danger-s), var(--danger-l));
+  --color-badge-red: var(--color-danger);
+  --color-badge-orange: var(--color-accent);
+  --color-badge-green: var(--color-success);
+  
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 9999px;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+  
+  /* Premium Soft Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --shadow-premium: 0 30px 60px rgba(30, 58, 138, 0.05), 0 10px 20px rgba(0, 0, 0, 0.02);
 
   /* Variables legadas para compatibilidad con otras secciones */
   --azul-rey: var(--color-primary);
@@ -41,16 +63,24 @@
 }
 
 body.dark-mode {
-  --color-bg: #111827;
-  --color-card: #1F2937;
+  --color-bg: #0B132B;
+  --color-card: #121E3F;
   --color-text: #F9FAFB;
   --color-text-muted: #9CA3AF;
-  --color-border: #374151;
-  --item-bg: #1F2937;
+  --color-border: #1E293B;
+  --item-bg: #1E293B;
   --fondo: var(--color-bg);
   --texto-oscuro: var(--color-text);
   --texto-claro: var(--color-text-muted);
   --borde-color: var(--color-border);
+  
+  --color-primary: hsl(var(--primary-h), var(--primary-s), 50%);
+  --color-primary-dark: hsl(var(--primary-h), var(--primary-s), 40%);
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.5);
+  --shadow-premium: 0 30px 60px rgba(0, 0, 0, 0.55), 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
 * {
@@ -209,14 +239,16 @@ body.dark-mode .age-box {
 
 /* --- HEADER E-COMMERCE MODERNO --- */
 .site-header {
-  background-color: var(--color-white);
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
   z-index: 1000;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
-  transition: 0.3s background;
+  transition: background 0.3s, backdrop-filter 0.3s, box-shadow 0.3s;
 }
 
 .header-top-bar {
@@ -487,11 +519,17 @@ body.dark-mode .age-box {
 }
 
 /* Adaptación de Dark Mode para el nuevo Header */
-body.dark-mode .site-header,
+body.dark-mode .site-header {
+  background-color: rgba(18, 30, 63, 0.8) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
 body.dark-mode .header-main-bar,
 body.dark-mode .header-nav-bar {
-  background-color: #1f2937;
-  border-color: #374151;
+  background-color: transparent !important;
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 body.dark-mode .btn-menu-sidebar {
@@ -1853,12 +1891,10 @@ body.dark-mode .cart-header .panel-title {
 /* --- OPTIMIZACIÓN EXCLUSIVA PARA PC DE ESCRITORIO --- */
 @media (min-width: 768px) {
   .promo-banner {
-    min-width: calc(33.333% - 10px);
-    max-width: none;
-    height: 15vh;
-    /* 15% de la pantalla en PC y Laptops */
-    aspect-ratio: auto;
-    /* Anulamos la proporción fija */
+    min-width: 75%;
+    max-width: 800px;
+    aspect-ratio: 800 / 300;
+    height: auto !important;
   }
 
   .productos-grid {
@@ -1872,7 +1908,7 @@ body.dark-mode .cart-header .panel-title {
   }
 
   .main-footer-new {
-    padding-bottom: 40px;
+    padding-bottom: 0;
   }
 
   /* --- AJUSTES DEL HEADER EN PC --- */

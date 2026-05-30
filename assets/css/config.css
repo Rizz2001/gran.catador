@@ -1,0 +1,459 @@
+/* ==========================================================================
+   CONFIG.CSS - Hoja de Estilos Premium del Módulo de Configuración / Ajustes
+   ========================================================================== */
+
+/* --- Contenedor del Dashboard --- */
+.settings-dashboard {
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 70px); /* Restando cabecera */
+  background: var(--color-bg);
+  color: var(--color-text);
+  overflow: hidden;
+}
+
+/* --- Barra de Navegación por Pestañas (Premium Glassmorphic) --- */
+.settings-nav-tabs {
+  display: flex;
+  background: var(--color-card);
+  border-bottom: 1px solid var(--color-border);
+  padding: 5px 15px;
+  gap: 5px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.settings-nav-tabs::-webkit-scrollbar {
+  display: none; /* Safari & Chrome */
+}
+
+.settings-tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 12px 16px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.settings-tab-btn i {
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.settings-tab-btn:hover {
+  color: var(--color-primary);
+  background: rgba(var(--primary-h), var(--primary-s), 96%);
+}
+
+body.dark-mode .settings-tab-btn:hover {
+  color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.settings-tab-btn.active {
+  color: var(--color-primary);
+  background: rgba(var(--primary-h), var(--primary-s), 93%);
+  box-shadow: inset 0 -2px 0 var(--color-primary);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+body.dark-mode .settings-tab-btn.active {
+  color: var(--color-accent);
+  background: rgba(245, 158, 11, 0.1);
+  box-shadow: inset 0 -2px 0 var(--color-accent);
+}
+
+.settings-tab-btn.active i {
+  transform: scale(1.15);
+}
+
+/* --- Contenedor de las Vistas --- */
+.settings-content {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px 24px 40px;
+}
+
+.settings-pane {
+  display: none;
+  animation: fadeIn 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+.settings-pane.active {
+  display: block;
+}
+
+/* --- Agrupadores / Tarjetas de Configuración --- */
+.settings-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.settings-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.settings-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 10px;
+}
+
+.settings-card-title i {
+  color: var(--color-primary);
+}
+
+body.dark-mode .settings-card-title i {
+  color: var(--color-accent);
+}
+
+/* --- Filas de Ajustes (Switches, Selectores, etc.) --- */
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+body.dark-mode .settings-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.settings-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.settings-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-right: 15px;
+}
+
+.settings-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.settings-desc {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.4;
+}
+
+/* --- Premium Custom Switch/Toggle --- */
+.settings-switch-label {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.settings-switch-label input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.settings-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-border);
+  transition: .4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border-radius: 34px;
+}
+
+.settings-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Iconos de Sol y Luna integrados dentro del slider para el modo oscuro */
+.settings-slider .slider-icon {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  color: #FFF;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.settings-slider .icon-sun {
+  right: 8px;
+  color: #E5E7EB;
+  opacity: 1;
+}
+
+.settings-slider .icon-moon {
+  left: 8px;
+  color: #F59E0B;
+  opacity: 0;
+}
+
+input:checked + .settings-slider {
+  background-color: var(--color-primary);
+}
+
+body.dark-mode input:checked + .settings-slider {
+  background-color: var(--color-accent);
+}
+
+input:checked + .settings-slider:before {
+  transform: translateX(22px);
+}
+
+input:checked + .settings-slider .icon-sun {
+  opacity: 0;
+}
+
+input:checked + .settings-slider .icon-moon {
+  opacity: 1;
+}
+
+/* --- Acordeón Elegante (Legales) --- */
+.settings-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.accordion-item {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-card);
+}
+
+.accordion-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.3s ease;
+}
+
+.accordion-header:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+body.dark-mode .accordion-header:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.accordion-header i.fa-chevron-down {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.accordion-item.active .accordion-header i.fa-chevron-down {
+  transform: rotate(180deg);
+  color: var(--color-primary);
+}
+
+body.dark-mode .accordion-item.active .accordion-header i.fa-chevron-down {
+  color: var(--color-accent);
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  background: rgba(0, 0, 0, 0.01);
+}
+
+body.dark-mode .accordion-content {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.accordion-body {
+  padding: 0 20px 20px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.accordion-body strong {
+  color: var(--color-text);
+}
+
+/* --- Panel de Sistema / Conexión --- */
+.system-status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+}
+
+.system-status-indicator.online {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.system-pulse {
+  width: 6px;
+  height: 6px;
+  background-color: #10B981;
+  border-radius: 50%;
+  animation: pulse-glow 1.5s infinite alternate;
+}
+
+@keyframes pulse-glow {
+  0% {
+    transform: scale(0.8);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  100% {
+    transform: scale(1.2);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+}
+
+/* Botones Premium del Dashboard */
+.btn-settings-action {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.btn-settings-action.sync {
+  background: var(--color-primary);
+  color: white;
+  box-shadow: 0 4px 15px rgba(var(--primary-h), var(--primary-s), 33%, 0.2);
+}
+
+body.dark-mode .btn-settings-action.sync {
+  background: var(--color-accent);
+  color: #111827;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
+}
+
+.btn-settings-action.sync:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+}
+
+.btn-settings-action.danger {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--color-danger);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.btn-settings-action.danger:hover {
+  background: var(--color-danger);
+  color: white;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Spinner animado */
+.sync-spin-icon {
+  animation: none;
+}
+
+.syncing .sync-spin-icon {
+  animation: spin 1.2s infinite linear;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Ajustes de responsive para tabs */
+@media (min-width: 768px) {
+  .settings-dashboard {
+    flex-direction: row;
+  }
+  
+  .settings-nav-tabs {
+    flex-direction: column;
+    width: 240px;
+    border-bottom: none;
+    border-right: 1px solid var(--color-border);
+    padding: 20px 10px;
+    height: 100%;
+  }
+  
+  .settings-tab-btn {
+    width: 100%;
+    border-radius: var(--radius-sm);
+  }
+  
+  .settings-tab-btn.active {
+    border-radius: var(--radius-sm);
+    box-shadow: inset 4px 0 0 var(--color-primary);
+  }
+  
+  body.dark-mode .settings-tab-btn.active {
+    box-shadow: inset 4px 0 0 var(--color-accent);
+  }
+}

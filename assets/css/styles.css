@@ -68,7 +68,7 @@ textarea {
     background: linear-gradient(180deg, #0f172a 0%, #020617 100%);
     border-top: 2px solid var(--dorado, #F59E0B);
     color: #ffffff;
-    padding: 40px 0 100px 0;
+    padding: 40px 0 0 0;
     font-family: 'Poppins', sans-serif;
     margin-top: 40px;
     border-top-left-radius: 24px;
@@ -810,31 +810,70 @@ body.dark-mode .main-footer-new {
 /* Mobile fixes para el footer */
 @media (max-width: 600px) {
     .footer-container {
-        gap: 30px;
-        padding: 0 15px 30px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px 20px;
+        padding: 0 20px 40px;
     }
 
-    .footer-col {
+    /* Columna de Marca (1) y Contacto (4) ocupan todo el ancho y se centran */
+    .footer-col:nth-child(1) {
+        grid-column: 1 / -1;
         align-items: center;
         text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding-bottom: 24px;
     }
 
-    .footer-col h3::after {
+    .footer-col:nth-child(4) {
+        grid-column: 1 / -1;
+        align-items: center;
+        text-align: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        padding-top: 24px;
+    }
+
+    /* Columnas de navegación (2 y 3) se muestran lado a lado para mejor jerarquía y menor scroll */
+    .footer-col:nth-child(2),
+    .footer-col:nth-child(3) {
+        grid-column: span 1;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .footer-col h3 {
+        font-size: 14px;
+        margin-bottom: 15px;
+        letter-spacing: 0.5px;
+    }
+
+    .footer-col:nth-child(2) h3::after,
+    .footer-col:nth-child(3) h3::after {
+        left: 0;
+        transform: none;
+    }
+
+    .footer-col:nth-child(1) h3::after,
+    .footer-col:nth-child(4) h3::after {
         left: 50%;
         transform: translateX(-50%);
     }
 
     .footer-desc {
         max-width: 100%;
+        font-size: 12.5px;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.75);
     }
 
     .footer-contact-list li {
         justify-content: center;
         text-align: center;
+        font-size: 12.5px;
+        gap: 8px;
     }
 
     .footer-col ul li a:hover {
-        transform: scale(1.05);
+        transform: translateX(4px);
     }
 }
 
@@ -1514,25 +1553,26 @@ body.dark-mode .sidebar-subfilters .checkbox-item input[type="checkbox"]:checked
 /* --- MEJORAS PROFESIONALES DE FICHA DE PRODUCTO (SOLO PC) --- */
 @media (min-width: 1024px) {
     .producto-card {
-        transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), border-color 0.3s ease;
-        border-radius: 12px;
+        transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1), 
+                    border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        border-radius: var(--radius-lg, 16px);
         background: var(--color-card, #ffffff);
+        border: 1px solid var(--color-border);
         overflow: hidden;
-        /* Evita que la imagen se salga al hacer zoom */
     }
 
     .producto-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
-        border-color: var(--color-primary, #1E3A8A);
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-premium);
+        border-color: var(--color-primary);
         z-index: 2;
-        /* Lo eleva sobre otras tarjetas */
     }
 
     /* Ajuste de sombra y borde para el Modo Oscuro */
     body.dark-mode .producto-card:hover {
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
-        border-color: #60A5FA;
+        box-shadow: var(--shadow-premium);
+        border-color: var(--color-primary);
     }
 
     /* Efecto Zoom sutil en la imagen */
@@ -1785,36 +1825,63 @@ body.dark-mode #search-suggestions {
 
 /* --- BANNER DOTS --- */
 .banners-dots-container {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 8px;
-    margin-top: 10px;
-    margin-bottom: 5px;
-    width: 100%;
+    width: auto;
+    margin: 0;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 6px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .banner-dot {
-    width: 8px;
-    height: 8px;
+    pointer-events: auto;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background-color: var(--color-border, #E5E7EB);
+    background-color: rgba(255, 255, 255, 0.4);
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .banner-dot.active {
-    background-color: var(--color-primary, #1E3A8A);
-    width: 24px;
+    background-color: #ffffff;
+    width: 18px;
     border-radius: 10px;
 }
 
 body.dark-mode .banner-dot {
-    background-color: #374151;
+    background-color: rgba(255, 255, 255, 0.3);
 }
 
 body.dark-mode .banner-dot.active {
-    background-color: #60A5FA;
+    background-color: #ffffff;
+}
+
+@media (max-width: 767px) {
+    .banners-dots-container {
+        bottom: 12px;
+        padding: 4px 8px;
+        gap: 6px;
+    }
+    .banner-dot {
+        width: 5px;
+        height: 5px;
+    }
+    .banner-dot.active {
+        width: 14px;
+    }
 }
 
 /* --- MARQUESINA DE GRUPOS --- */
