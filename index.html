@@ -385,27 +385,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 </div>
             </div>
 
-            <!-- Columna 2: Enlaces Rápidos -->
+            <!-- Columna 2: Accesos Rápidos y Soporte -->
             <div class="footer-col">
-                <h3>Enlaces Rápidos</h3>
+                <h3>Accesos Rápidos</h3>
                 <ul>
                     <li><a href="#" onclick="event.preventDefault(); irInicio();"><i class="fa-solid fa-angle-right"></i> Inicio</a></li>
                     <li><a href="#" onclick="event.preventDefault(); abrirCarrito();"><i class="fa-solid fa-angle-right"></i> Mi Pedido</a></li>
-                    <li><a href="#" onclick="event.preventDefault(); abrirPerfil();"><i class="fa-solid fa-angle-right"></i> Mi Perfil</a></li>
-                    <li><a href="#" onclick="event.preventDefault(); abrirAjustes();"><i class="fa-solid fa-angle-right"></i> Ajustes</a></li>
-                </ul>
-            </div>
-
-            <!-- Columna 3: Información y Soporte -->
-            <div class="footer-col">
-                <h3>Atención al Cliente</h3>
-                <ul>
+                    <li><a href="#" onclick="event.preventDefault(); abrirPerfil();"><i class="fa-solid fa-angle-right"></i> Mi Perfil / Ajustes</a></li>
                     <li><a href="#" onclick="event.preventDefault(); abrirLegales();"><i class="fa-solid fa-angle-right"></i> Políticas y Privacidad</a></li>
                     <li><a href="#" onclick="event.preventDefault(); abrirSoporteWhatsApp();"><i class="fa-solid fa-angle-right"></i> Soporte Técnico</a></li>
                 </ul>
             </div>
 
-            <!-- Columna 4: Contacto -->
+            <!-- Columna 3: Contacto -->
             <div class="footer-col">
                 <h3>Contacto</h3>
                 <ul class="footer-contact-list">
@@ -733,7 +725,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     
                     <!-- Pestaña 3: Soporte Legal (Acordeones Integrados) -->
                     <div id="config-legales" class="settings-pane">
-                        <div class="settings-card" style="padding: 15px;">
+                        <div class="settings-card">
                             <h3 class="settings-card-title"><i class="fa-solid fa-shield-halved"></i> Políticas & Términos</h3>
                             <div class="settings-accordion" style="margin-top:15px;">
                                 
@@ -851,51 +843,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
     </div>
 
-    <div id="modal-legales" class="modal-fullscreen" style="z-index: 2500;">
-        <div class="modal-content-wrapper">
-            <div class="cart-header">
-                <h2>Legal y Soporte</h2>
-                <button onclick="cerrarModal('modal-legales', 'modal-ajustes')" aria-label="Volver a ajustes"
-                    class="modal-close-btn">
-                    <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
-                </button>
-            </div>
-            <div class="checkout-box">
-                <p style="font-size: 14px; font-weight: 700; color: var(--color-primary); margin-bottom: 5px;">1.
-                    Zonas de Delivery</p>
-                <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom:15px; line-height: 1.5;">
-                    Llegamos a gran parte de la ciudad. Ciertas zonas periféricas pueden tener recargo o no estar cubiertas por seguridad.</p>
-                <p style="font-size: 14px; font-weight: 700; color: var(--color-primary); margin-bottom: 5px;">2.
-                    Edad
-                    Mínima</p>
-                <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom:15px; line-height: 1.5;">
-                    Prohibida
-                    la venta de licores a menores de 18 años. El repartidor podrá exigir documento de identidad en
-                    la
-                    entrega.</p>
-                <p style="font-size: 14px; font-weight: 700; color: var(--color-primary); margin-bottom: 5px;">3.
-                    Políticas
-                    de Garantía</p>
-                <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 15px; line-height: 1.5;">
-                    Revise su pedido al
-                    momento de
-                    recibirlo. No aceptamos devoluciones de botellas abiertas o con sellos fiscales rotos.</p>
-                <p style="font-size: 14px; font-weight: 700; color: var(--color-primary); margin-bottom: 5px;">4.
-                    Privacidad de tus datos</p>
-                <p style="font-size: 13px; color: var(--color-text-muted); line-height: 1.5;">
-                    Gran Catador no recopila ni almacena tus datos en servidores externos. Tu nombre y dirección se
-                    guardan únicamente en tu dispositivo (localStorage del navegador) para facilitar futuros
-                    pedidos.
-                    Para eliminarlos, ve a Mi Perfil y borra la información, o limpia los datos del sitio desde la
-                    configuración de tu navegador. Dudas: <a href="https://wa.me/584245496366" target="_blank"
-                        style="color: var(--color-primary); text-decoration: underline;">wa.me/584245496366</a>
-                </p>
-            </div>
-            <button class="btn-enviar" onclick="abrirSoporteWhatsApp()"
-                style="background:#25D366; box-shadow:0 4px 15px rgba(37,211,102,0.3); margin-top:20px;"><i
-                    class="fa-brands fa-whatsapp" style="font-size: 18px;"></i> Chatear con Soporte</button>
-        </div>
-    </div>
+
 
     <!-- Botón Flotante: Volver Arriba -->
     <button id="btn-scroll-top" class="btn-scroll-top" onclick="scrollToTop()" aria-label="Volver arriba">

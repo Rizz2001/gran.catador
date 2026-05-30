@@ -151,8 +151,15 @@ window.limpiarBuscador = function (skipFilters = false) {
 }
 
 function abrirLegales() {
-    cerrarModal('all');
-    document.getElementById('modal-legales').style.display = 'flex';
+    abrirAjustes();
+    
+    // Buscar la pestaña de Soporte Legal en el panel de ajustes y activarla
+    const tabBtn = document.querySelector('.settings-tab-btn[onclick*="config-legales"]');
+    if (tabBtn) {
+        cambiarPestañaConfig('config-legales', tabBtn);
+    } else {
+        cambiarPestañaConfig('config-legales', null);
+    }
 }
 
 function abrirSoporteWhatsApp() {
@@ -485,7 +492,7 @@ function getIconForCategory(cat) {
     if (c.includes('RON')) return 'fa-bottle-droplet';
     if (c.includes('WHISKY')) return 'fa-glass-water';
     if (c.includes('VODKA') || c.includes('GINEBRA') || c.includes('ANIS') || c.includes('TEQUILA') || c.includes('COCUY')) return 'fa-wine-bottle';
-    if (c.includes('SNACK') || c.includes('CHUCHERIA')) return 'fa-cookie-bite';
+    if (c.includes('SNACK') || c.includes('CHUCHERIA') || c.includes('ALIMENTO') || c.includes('VIVERES') || c.includes('COMIDA') || c.includes('GALLETA') || c.includes('CHOCOLATE') || c.includes('DULCE') || c.includes('PASAPALO')) return 'fa-cookie-bite';
     if (c.includes('AGUA') || c.includes('BEBIDA') || c.includes('REFRESCO') || c.includes('JUGO')) return 'fa-bottle-water';
     if (c.includes('HIELO')) return 'fa-cubes';
     if (c.includes('CIGARRO') || c.includes('TABACO')) return 'fa-smoking';
@@ -1221,7 +1228,7 @@ function crearHTMLSeccionCategoriasAleatorias(productos, offset = 0) {
         const stockClass = isAgotado ? 'agotado' : 'disponible';
         const nombreB64 = codificarNombre(titulo);
         return `
-            <article class="grupo-aleatorio-card" aria-label="Quizás te interese ${titulo}">
+            <article class="grupo-aleatorio-card" onclick="abrirImagenLightbox('${imgSrc}', '${producto.codigo}')" style="cursor: pointer;" aria-label="Ver detalles de ${titulo}">
                 <div class="grupo-aleatorio-card-thumb">
                     <img src="${imgSrc}" alt="${titulo}" loading="lazy" onerror="this.src='logo.webp'">
                 </div>
@@ -1358,7 +1365,7 @@ function crearHTMLMasVendidos() {
         const nombreB64 = codificarNombre(nombre);
         const rankingBadge = index < 3 ? `<span class="mas-vendidos-card-tag">Top ${index + 1}</span>` : '';
         return `
-            <article class="mas-vendidos-card ${index < 3 ? 'featured' : ''}" onclick="document.getElementById('buscador').value='${nombreEscapado}'; aplicarFiltros(); document.getElementById('search-suggestions').style.display='none';" aria-label="Buscar ${nombre}">
+            <article class="mas-vendidos-card ${index < 3 ? 'featured' : ''}" onclick="abrirImagenLightbox('${imagen}', '${producto.codigo}')" style="cursor: pointer;" aria-label="Ver detalles de ${nombre}">
                 ${rankingBadge}
                 <span class="mas-vendidos-card-thumb"><img src="${imagen}" alt="${nombre}" loading="lazy" onerror="this.src='logo.webp'"></span>
                 <span class="mas-vendidos-card-info">
