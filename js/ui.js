@@ -410,12 +410,38 @@ function sincronizarCatálogoManual() {
 }
 
 /** Restablece por completo la configuración e historial del usuario con confirmación */
-function restablecerAplicacionConfirm() {
-    if (confirm("⚠️ ¿Estás completamente seguro de que deseas restablecer la aplicación?\n\nEsto borrará tus datos personales de envío, facturación, preferencias visuales e historial local de compras de forma irreversible.")) {
+async function restablecerAplicacionConfirm() {
+    if (confirm("⚠️ ¿Estás completamente seguro de que deseas restablecer la aplicación?\n\nEsto borrará tus datos personales, preferencias visuales, e historial local. Además, ELIMINARÁ la caché persistente del navegador para forzar la descarga inmediata de las últimas actualizaciones de diseño y código.")) {
+        
+        // 1. Borrar almacenamiento de estado local
         localStorage.clear();
-        mostrarToast("Toda la caché e historial local se han borrado. Reiniciando... 🧹");
+        sessionStorage.clear();
+        
+        // 2. Eliminar toda la caché persistente de archivos (Cache Storage API)
+        if ('caches' in window) {
+            try {
+                const keys = await caches.keys();
+                await Promise.all(keys.map(key => caches.delete(key)));
+            } catch (e) {
+                console.error("Error al borrar Cache Storage:", e);
+            }
+        }
+        
+        // 3. Desregistrar Service Workers para forzar la descarga de los nuevos recursos
+        if ('serviceWorker' in navigator) {
+            try {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(registrations.map(r => r.unregister()));
+            } catch (e) {
+                console.error("Error al desregistrar Service Worker:", e);
+            }
+        }
+        
+        mostrarToast("Caché profunda y datos locales eliminados. Reiniciando... 🧹");
+        
+        // 4. Recargar el navegador forzando descarga de red (hard reload)
         setTimeout(() => {
-            location.reload();
+            window.location.href = window.location.origin + window.location.pathname + '?v=' + new Date().getTime();
         }, 1500);
     }
 }
