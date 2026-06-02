@@ -650,7 +650,7 @@ function formatearProductoApi(item, codGrupo, nombreGrupo, codSubgrupoFallback, 
     let precioCajaNum = parseFoxdataNumber(precioGrupRaw);
     if (precioCajaNum <= 0) precioCajaNum = precioUsd * cantidadGrup;
 
-    let codigo = item.codArticulo ?? item.codigo ?? item.Codigo ?? item.CodArticulo ?? item.cod_articulo ?? item.id ?? item.Id ?? "";
+    let codigo = (item.codArticulo ?? item.codigo ?? item.Codigo ?? item.CodArticulo ?? item.cod_articulo ?? item.id ?? item.Id ?? "").toString().trim();
 
     let stock = 0;
     if (appState.stockMap && appState.stockMap.has(codigo)) {
