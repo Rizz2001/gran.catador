@@ -106,6 +106,14 @@ function cerrarModal(modalId, navId) {
 
 /** Restablece la vista al menú principal (Inicio) */
 function irInicio() {
+    if (window.history && window.history.pushState) {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('categoria') || url.searchParams.has('producto')) {
+            url.searchParams.delete('categoria');
+            url.searchParams.delete('producto');
+            window.history.pushState({}, '', url);
+        }
+    }
     cerrarModal('all');
     setActiveNav('nav-home');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -750,6 +758,17 @@ async function filtrarCategoria(cat, checkboxElement) {
 
     document.querySelectorAll('#contenedorCategorias input[type="checkbox"]').forEach(cb => cb.checked = false);
     if (checkboxElement) checkboxElement.checked = true;
+
+    if (window.history && window.history.pushState) {
+        const url = new URL(window.location.href);
+        if (cat === 'Todos' || cat === 'Favoritos') {
+            url.searchParams.delete('categoria');
+        } else {
+            url.searchParams.set('categoria', cat);
+        }
+        url.searchParams.delete('producto');
+        window.history.pushState({}, '', url);
+    }
 
     // Si seleccionamos "Todos" o "Favoritos", regresar a la vista de grupos
     if (cat === 'Todos' || cat === 'Favoritos') {
@@ -1498,8 +1517,22 @@ window.resetZoom = function (img) {
 // --- LIGHTBOX DE IMAGEN PARA PC ---
 window.abrirImagenLightbox = function (imgSrc, codigo) {
     let p = null;
-    if (codigo) {
+    if (codigo && typeof inventario !== 'undefined') {
         p = inventario.find(x => x.codigo === codigo);
+    }
+    
+    if (!imgSrc && p) {
+        imgSrc = p.Img1 || 'assets/img/logo_circle.png';
+        if(imgSrc && !imgSrc.startsWith('http') && !imgSrc.startsWith('data:')) {
+            const base = (typeof appState !== 'undefined' && appState.apiBaseUrl) ? appState.apiBaseUrl : 'https://api.smartventas.cloud';
+            imgSrc = `${base}${imgSrc.startsWith('/') ? '' : '/'}${imgSrc}`;
+        }
+    }
+
+    if (window.history && window.history.pushState && codigo) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('producto', codigo);
+        window.history.pushState({ lightbox: true }, '', url);
     }
 
     let lightbox = document.getElementById('image-lightbox-gc');
@@ -1507,11 +1540,22 @@ window.abrirImagenLightbox = function (imgSrc, codigo) {
         lightbox = document.createElement('div');
         lightbox.id = 'image-lightbox-gc';
 
+        const closeLightbox = function() {
+            lightbox.style.opacity = '0';
+            setTimeout(() => lightbox.style.display = 'none', 300);
+            if (window.history && window.history.pushState) {
+                const url = new URL(window.location.href);
+                if (url.searchParams.has('producto')) {
+                    url.searchParams.delete('producto');
+                    window.history.pushState({}, '', url);
+                }
+            }
+        };
+
         // Cierra el visor al hacer clic en el fondo oscuro
         lightbox.onclick = function (e) {
             if (e.target.closest('#lightbox-card-gc')) return;
-            lightbox.style.opacity = '0';
-            setTimeout(() => lightbox.style.display = 'none', 300);
+            closeLightbox();
         };
 
         let container = document.createElement('div');
@@ -1540,8 +1584,7 @@ window.abrirImagenLightbox = function (imgSrc, codigo) {
         closeBtn.id = 'lightbox-close-btn-gc';
         closeBtn.innerHTML = '<i class="fa-solid fa-xmark"></i>';
         closeBtn.onclick = function () {
-            lightbox.style.opacity = '0';
-            setTimeout(() => lightbox.style.display = 'none', 300);
+            closeLightbox();
         };
         lightbox.appendChild(closeBtn);
 
@@ -1622,3 +1665,60 @@ window.abrirImagenLightbox = function (imgSrc, codigo) {
     lightbox.style.opacity = '1';
     imgEl.style.transform = 'scale(1)';
 };
+
+// --- DEEP LINKING ---
+window.procesarRutasDeepLinking = function() {
+    if (!window.location.search) {
+        aplicarFiltros();
+        return;
+    }
+    const urlParams = new URLSearchParams(window.location.search);
+    const cat = urlParams.get('categoria');
+    const prod = urlParams.get('producto');
+
+    if (cat) {
+        // Encontrar el checkbox correspondiente
+        const catId = limpiarCategoria(cat).replace(/[^a-z0-9]/gi, '-').toLowerCase();
+        const cb = document.getElementById('cat-' + catId);
+        filtrarCategoria(cat, cb);
+    } else {
+        aplicarFiltros();
+    }
+
+    if (prod) {
+        setTimeout(() => {
+            abrirImagenLightbox(null, prod);
+        }, 500);
+    }
+};
+
+window.addEventListener('popstate', function(e) {
+    if (e.state && e.state.lightbox) {
+        // Estaba en un producto, pero ya cerramos o retrocedimos
+    } else {
+        // Cerrar lightbox si esta abierto
+        const lightbox = document.getElementById('image-lightbox-gc');
+        if (lightbox && lightbox.style.display !== 'none') {
+            lightbox.style.opacity = '0';
+            setTimeout(() => lightbox.style.display = 'none', 300);
+        }
+    }
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const cat = urlParams.get('categoria');
+    const prod = urlParams.get('producto');
+
+    if (cat) {
+        const catId = limpiarCategoria(cat).replace(/[^a-z0-9]/gi, '-').toLowerCase();
+        const cb = document.getElementById('cat-' + catId);
+        if (typeof categoriaActual !== 'undefined' && categoriaActual !== cat) {
+            filtrarCategoria(cat, cb);
+        }
+    } else if (typeof categoriaActual !== 'undefined' && categoriaActual !== 'Todos') {
+        irInicio();
+    }
+    
+    if (prod) {
+        abrirImagenLightbox(null, prod);
+    }
+});

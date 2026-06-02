@@ -630,7 +630,13 @@ async function cargarInventarioDesdeAPI() {
     // Renderizar los botones de grupos y los productos del grupo inicial
     if (typeof generarCategorias === 'function') generarCategorias();
     if (typeof generarMarquesinaGrupos === 'function') generarMarquesinaGrupos();
-    aplicarFiltros();
+    
+    if (typeof window.procesarRutasDeepLinking === 'function') {
+        window.procesarRutasDeepLinking();
+    } else {
+        aplicarFiltros();
+    }
+    
     updateApiProgress(100);
 
     // --- 3. INICIAR CARGA DE LOS DEMÁS GRUPOS EN SEGUNDO PLANO ---
