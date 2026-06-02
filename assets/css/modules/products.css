@@ -1,0 +1,885 @@
+﻿/* --- SKELETON LOADER PARA GRUPOS --- */
+@keyframes skeleton-pulse {
+    0% {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    50% {
+        background-color: rgba(0, 0, 0, 0.15);
+    }
+
+    100% {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+}
+
+@keyframes skeleton-pulse-dark {
+    0% {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    50% {
+        background-color: rgba(255, 255, 255, 0.12);
+    }
+
+    100% {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+}
+
+.skeleton-chip {
+    flex: 0 0 auto !important;
+    height: 42px;
+    border-radius: 25px !important;
+    background-color: rgba(0, 0, 0, 0.1);
+    animation: skeleton-pulse 1.5s infinite ease-in-out;
+    border: 1px solid transparent !important;
+}
+
+.dark-mode .skeleton-chip {
+    animation: skeleton-pulse-dark 1.5s infinite ease-in-out;
+}
+
+/* --- SKELETON GENÃ‰RICO PARA PRODUCTOS --- */
+.skeleton-box {
+    background-color: rgba(0, 0, 0, 0.08);
+    animation: skeleton-pulse 1.5s infinite ease-in-out;
+}
+
+.dark-mode .skeleton-box {
+    animation: skeleton-pulse-dark 1.5s infinite ease-in-out;
+}
+
+/* --- FULL-WIDTH EN PANTALLAS GRANDES --- */
+@media (min-width: 1440px) {
+    .footer-container {
+        max-width: none;
+        padding: 0 40px 40px;
+    }
+}
+
+/* --- AJUSTES DE GRILLA Y PRODUCTOS (RESPONSIVE) --- */
+
+/* Forzar 2 columnas en mÃ³viles con un espaciado adecuado */
+.productos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 10px;
+}
+
+/* AdaptaciÃ³n progresiva para pantallas mÃ¡s grandes (Tablets y PC) */
+@media (min-width: 768px) {
+    .productos-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        padding: 20px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .productos-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* Evitar deformaciÃ³n de las tarjetas y hacerlas uniformes */
+.producto-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    animation: card-fade-in 0.35s ease-out both;
+    will-change: transform, opacity;
+}
+
+/* AnimaciÃ³n de entrada para las tarjetas de producto */
+@keyframes card-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- MEJORAS PROFESIONALES DE FICHA DE PRODUCTO (SOLO PC) --- */
+@media (min-width: 1024px) {
+    .producto-card {
+        transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), 
+                    box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1), 
+                    border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        border-radius: var(--radius-lg, 16px);
+        background: var(--color-card, #ffffff);
+        border: 1px solid var(--color-border);
+        overflow: hidden;
+    }
+
+    .producto-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--shadow-premium);
+        border-color: var(--color-primary);
+        z-index: 2;
+    }
+
+    /* Ajuste de sombra y borde para el Modo Oscuro */
+    body.dark-mode .producto-card:hover {
+        box-shadow: var(--shadow-premium);
+        border-color: var(--color-primary);
+    }
+
+    /* Efecto Zoom sutil en la imagen */
+    .producto-card .product-img-container img {
+        transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+        cursor: zoom-in;
+    }
+
+    .producto-card:hover .product-img-container img {
+        transform: scale(1.08);
+    }
+
+    /* Ocultar el corazÃ³n hasta que se haga hover (salvo que ya sea favorito) */
+    .producto-card .btn-fav:not(.active) {
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.3s ease;
+    }
+
+    .producto-card:hover .btn-fav {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Resaltar dinÃ¡micamente el botÃ³n de agregar al carrito */
+    .producto-card .btn-add-cart {
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .producto-card:hover .btn-add-cart {
+        background-color: var(--color-primary, #1E3A8A);
+        color: #ffffff;
+        transform: scale(1.1);
+    }
+
+    body.dark-mode .producto-card:hover .btn-add-cart {
+        background-color: #60A5FA;
+        color: #0B132B;
+    }
+}
+
+/* Aspecto de imagen cuadrado estricto para que se adapte sin deformarse */
+.product-img-container {
+    aspect-ratio: 1 / 1 !important;
+    height: auto !important;
+    min-height: auto !important;
+    width: 100%;
+}
+
+/* Truncar textos de productos largos a un mÃ¡ximo de 2 lÃ­neas */
+.producto-titulo {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+    height: 34px !important;
+    /* AlineaciÃ³n perfecta si un texto ocupa 1 lÃ­nea y el del lado 2 lÃ­neas */
+    margin-bottom: 4px !important;
+    word-break: break-word !important;
+}
+
+/* --- BOTÃ“N CARGAR MÃS PRODUCTOS VISIBLE --- */
+.btn-cargar-mas {
+    display: block;
+    width: calc(100% - 40px);
+    max-width: 350px;
+    margin: 30px auto;
+    padding: 14px 20px;
+    background-color: var(--color-primary, #0a1430);
+    color: #ffffff;
+    border: none;
+    border-radius: 30px;
+    font-size: 15px;
+    font-weight: 700;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(30, 58, 138, 0.25);
+    transition: all 0.3s ease;
+}
+
+.btn-cargar-mas:active {
+    transform: scale(0.95);
+}
+
+.btn-cargar-mas:hover {
+    background-color: var(--color-accent, #F59E0B);
+    color: #000000;
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+}
+
+/* --- LOADER DE BOTELLA MEJORADO --- */
+.loader-container {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    min-height: 400px;
+}
+
+.loader-container p {
+    font-size: 13px !important;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-top: 25px;
+    letter-spacing: 0.5px;
+}
+
+/* --- BUSCADOR: LISTA FLOTANTE DE SUGERENCIAS --- */
+#search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-card, #ffffff);
+    border: 1px solid var(--color-border, #E5E7EB);
+    border-radius: 12px;
+    margin-top: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    max-height: 350px;
+    overflow-y: auto;
+    z-index: 3000;
+    display: none;
+}
+
+body.dark-mode #search-suggestions {
+    background: #121E3F;
+    border-color: #1E293B;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.search-suggestions-header,
+.search-suggestions-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px 0;
+    font-size: 13px;
+    color: var(--color-text);
+}
+
+.search-suggestions-header small {
+    color: var(--color-text-muted);
+    font-size: 12px;
+}
+
+.search-suggestions-list {
+    display: grid;
+    gap: 6px;
+    padding: 8px 12px 0;
+}
+
+.search-suggestion-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 10px 14px;
+    border-radius: 14px;
+    text-align: left;
+    transition: background 0.2s ease;
+}
+
+.search-suggestion-item:hover {
+    background: rgba(59, 130, 246, 0.09);
+}
+
+.search-suggestion-image {
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    object-fit: cover;
+    background: var(--color-bg);
+    flex-shrink: 0;
+}
+
+.search-suggestion-data {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.search-suggestion-title {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.3;
+    color: var(--color-text);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.search-suggestion-meta {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+}
+
+.search-suggestions-empty {
+    padding: 18px 16px 16px;
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+/* --- BANNER DOTS --- */
+.banners-dots-container {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: auto;
+    margin: 0;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 6px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.banner-dot {
+    pointer-events: auto;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.banner-dot.active {
+    background-color: #ffffff;
+    width: 18px;
+    border-radius: 10px;
+}
+
+body.dark-mode .banner-dot {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+body.dark-mode .banner-dot.active {
+    background-color: #ffffff;
+}
+
+@media (max-width: 767px) {
+    .banners-dots-container {
+        bottom: 12px;
+        padding: 4px 8px;
+        gap: 6px;
+    }
+    .banner-dot {
+        width: 5px;
+        height: 5px;
+    }
+    .banner-dot.active {
+        width: 14px;
+    }
+}
+
+/* =========================================
+   DARK MODE - MARCAS ALIADAS
+   ========================================= */
+body.dark-mode .marcas-aliadas-section {
+    background: linear-gradient(145deg, rgba(15, 23, 42, 0.8), rgba(30, 58, 138, 0.15) 100%);
+    border-color: rgba(56, 189, 248, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .marcas-aliadas-eyebrow {
+    color: #60a5fa;
+}
+
+body.dark-mode .marcas-aliadas-section h2 {
+    color: #f8fafc;
+}
+
+body.dark-mode .marcas-aliadas-description {
+    color: #cbd5e1;
+}
+
+body.dark-mode .marcas-aliadas-item {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .marcas-aliadas-item:hover {
+    background: rgba(30, 41, 59, 0.9);
+    border-color: rgba(56, 189, 248, 0.3);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .marcas-aliadas-item img {
+    filter: drop-shadow(0 2px 4px rgba(255, 255, 255, 0.15)) brightness(1.1);
+}
+
+@media (max-width: 1024px) {
+    .marcas-aliadas-section {
+        padding: 30px 22px;
+    }
+
+    .marcas-aliadas-item {
+        width: 136px;
+        padding: 16px;
+        margin: 0 10px;
+    }
+}
+
+@media (max-width: 767px) {
+    .marcas-aliadas-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .marcas-aliadas-section {
+        padding: 24px 18px;
+    }
+
+    .marcas-aliadas-section h2 {
+        font-size: 22px;
+    }
+
+    .marcas-aliadas-marquee {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .marcas-aliadas-track {
+        animation-duration: 20s;
+        min-width: max-content;
+    }
+
+    .marcas-aliadas-item {
+        width: 120px;
+        min-height: 76px;
+        padding: 14px;
+        margin: 0 8px;
+    }
+}
+
+/* --- LIGHTBOX UNIFICADO (Ficha de Producto) --- */
+#image-lightbox-gc {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100dvh;
+    background-color: rgba(11, 19, 43, 0.92);
+    z-index: 9999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 20px;
+    cursor: zoom-out;
+}
+
+#lightbox-container-gc {
+    width: 100%;
+    max-width: 850px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#lightbox-card-gc {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    max-height: 85vh;
+    border-radius: var(--radius-lg, 16px);
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    background: var(--color-card, #ffffff);
+    cursor: default;
+}
+
+#lightbox-img-wrapper-gc {
+    flex: 1.2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    position: relative;
+}
+
+#lightbox-img-gc {
+    max-width: 100%;
+    max-height: 50vh;
+    object-fit: contain;
+    transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+#lightbox-info-panel-gc {
+    flex: 1;
+    max-width: 380px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+#lightbox-close-btn-gc {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+    z-index: 10000;
+}
+
+#lightbox-close-btn-gc:hover {
+    background: rgba(239, 68, 68, 0.9);
+}
+
+/* --- LIGHTBOX RESPONSIVE (MÃ“VIL Y TABLET) --- */
+@media (max-width: 992px) {
+    #image-lightbox-gc {
+        padding: 15px;
+    }
+
+    #lightbox-card-gc {
+        flex-direction: column;
+        max-height: 92vh;
+        overflow-y: auto;
+    }
+
+    #lightbox-img-wrapper-gc {
+        padding: 20px;
+        height: 35vh;
+        flex: none;
+    }
+
+    #lightbox-img-gc {
+        max-height: 100%;
+    }
+
+    #lightbox-info-panel-gc {
+        width: 100%;
+        max-width: 100%;
+        padding: 20px;
+        flex: none;
+    }
+
+    #lightbox-close-btn-gc {
+        top: 15px;
+        right: 15px;
+        width: 35px;
+        height: 35px;
+        font-size: 18px;
+    }
+}
+
+/* ==========================================================================
+   SECCIÃ“N DE FILTROS Y ORDENAMIENTO ULTRA COMPACTA (SÃšPER PROFESIONAL)
+   ========================================================================== */
+
+/* Contenedor principal de herramientas */
+.tools-container {
+    margin-top: 8px !important;
+    margin-bottom: 12px !important;
+    padding: 8px 16px !important;
+    min-height: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 15px !important;
+    border-radius: var(--radius-md, 12px) !important;
+    background: var(--color-card) !important;
+    border: 1px solid var(--color-border) !important;
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05)) !important;
+}
+
+/* TÃ­tulo de la secciÃ³n */
+.tools-container .section-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--color-text) !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+    order: 1 !important;
+    flex: 0 1 auto !important;
+}
+
+/* Contenedor del selector de Modo de Vista (Por Unidad / Por Caja) */
+#toggle-modo-global.toggle-modo-container {
+    display: inline-flex !important;
+    align-items: center !important;
+    background: var(--item-bg, #f3f4f6) !important;
+    padding: 2px !important;
+    border-radius: var(--radius-full, 50px) !important;
+    border: 1px solid var(--color-border) !important;
+    margin: 0 !important;
+    order: 2 !important;
+    flex: 0 0 auto !important;
+}
+
+/* BotÃ³n individual del Modo de Vista */
+#toggle-modo-global .btn-modo {
+    border: none !important;
+    background: transparent !important;
+    padding: 4px 10px !important;
+    border-radius: var(--radius-full, 50px) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: var(--color-text-muted) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    text-align: center !important;
+}
+
+#toggle-modo-global .btn-modo.active {
+    background: var(--color-primary, #1E3A8A) !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode #toggle-modo-global.toggle-modo-container {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode #toggle-modo-global .btn-modo {
+    color: #9ca3af !important;
+}
+
+body.dark-mode #toggle-modo-global .btn-modo.active {
+    background: #ffffff !important;
+    color: #0b132b !important;
+}
+
+/* Contenedor de filtros y ordenamiento en el extremo derecho */
+.tools-container .filters-row-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    order: 3 !important;
+    flex: 0 0 auto !important;
+    flex-wrap: nowrap !important;
+}
+
+/* Envoltura del Checkbox "Ver Agotados" */
+.tools-container .filters-row {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: visible !important;
+}
+
+/* Pill del Checkbox de Agotados */
+.tools-container .chk-agotados {
+    background: var(--item-bg, #f3f4f6) !important;
+    color: var(--color-text) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-full, 50px) !important;
+    padding: 4px 8px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    height: 28px !important;
+    box-sizing: border-box !important;
+    transition: all 0.2s ease !important;
+}
+
+.tools-container .chk-agotados:hover {
+    background: var(--color-border) !important;
+}
+
+.tools-container .chk-agotados input[type="checkbox"] {
+    margin: 0 !important;
+    cursor: pointer !important;
+    width: 13px !important;
+    height: 13px !important;
+}
+
+.tools-container .chk-agotados #info-agotados-icon {
+    font-size: 10px !important;
+    margin-left: 2px !important;
+    color: var(--color-text-muted) !important;
+}
+
+/* Selector dropdown de Ordenamiento */
+.tools-container .sort-container {
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.tools-container .sort-select {
+    background-color: var(--item-bg, #f3f4f6) !important;
+    border: 1px solid var(--color-border) !important;
+    border-radius: var(--radius-full, 50px) !important;
+    padding: 4px 24px 4px 10px !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    color: var(--color-text) !important;
+    cursor: pointer !important;
+    outline: none !important;
+    height: 28px !important;
+    box-sizing: border-box !important;
+    background-position: right 8px top 50% !important;
+    background-size: 8px auto !important;
+}
+
+body.dark-mode .tools-container .chk-agotados,
+body.dark-mode .tools-container .sort-select {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .tools-container .chk-agotados:hover {
+    background-color: #334155 !important;
+}
+
+/* RESPONSIVE MÃ“VIL Y TABLET (Ajustes de flujo y compactaciÃ³n extrema) */
+@media (max-width: 767px) {
+    .tools-container {
+        margin-top: 6px !important;
+        margin-bottom: 8px !important;
+        padding: 6px 12px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    .tools-container .section-title {
+        font-size: 13px !important;
+        flex: 1 1 auto !important;
+        order: 1 !important;
+    }
+
+    #toggle-modo-global.toggle-modo-container {
+        order: 2 !important;
+        flex: 0 0 auto !important;
+    }
+
+    #toggle-modo-global .btn-modo {
+        padding: 3px 8px !important;
+        font-size: 10.5px !important;
+    }
+
+    .tools-container .filters-row-container {
+        flex: 1 1 100% !important;
+        order: 3 !important;
+        justify-content: space-between !important;
+        margin-top: 2px !important;
+        gap: 8px !important;
+    }
+
+    .tools-container .filters-row {
+        flex: 1 1 auto !important;
+    }
+
+    .tools-container .chk-agotados {
+        width: 100% !important;
+        justify-content: center !important;
+        font-size: 11px !important;
+        height: 26px !important;
+        padding: 3px 8px !important;
+    }
+
+    .tools-container .sort-container {
+        flex: 1 1 auto !important;
+    }
+
+    .tools-container .sort-select {
+        width: 100% !important;
+        font-size: 11px !important;
+        height: 26px !important;
+        padding: 3px 20px 3px 8px !important;
+    }
+}
+
+/* ==========================================================================
+   SECCIÃ“N DE CATEGORÃAS (MARQUESINA HORIZONTAL) ULTRA COMPACTA
+   ========================================================================== */
+
+.marquesina-grupos-section {
+    margin-top: 2px !important;
+    margin-bottom: 8px !important;
+    padding: 4px 0 !important;
+}
+
+.marquesina-group {
+    gap: 8px !important;
+    padding-right: 8px !important;
+}
+
+.marquesina-pill {
+    padding: 6px 14px !important;
+    font-size: 11.5px !important;
+    gap: 6px !important;
+    border-radius: var(--radius-full, 50px) !important;
+}
+
+.marquesina-pill i {
+    font-size: 13.5px !important;
+}
+
+@media (max-width: 768px) {
+    .marquesina-grupos-section {
+        margin-top: 2px !important;
+        margin-bottom: 6px !important;
+        padding: 3px 0 !important;
+    }
+
+    .marquesina-pill {
+        padding: 5px 12px !important;
+        font-size: 11px !important;
+        gap: 5px !important;
+    }
+
+    .marquesina-pill i {
+        font-size: 12.5px !important;
+    }
+}
