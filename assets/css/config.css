@@ -24,6 +24,7 @@
   position: sticky;
   top: 0;
   z-index: 10;
+  flex-shrink: 0;
 }
 
 .settings-nav-tabs::-webkit-scrollbar {
@@ -45,6 +46,8 @@
   align-items: center;
   gap: 8px;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .settings-tab-btn i {
@@ -54,7 +57,7 @@
 
 .settings-tab-btn:hover {
   color: var(--color-primary);
-  background: rgba(var(--primary-h), var(--primary-s), 96%);
+  background: hsl(var(--primary-h), var(--primary-s), 96%);
 }
 
 body.dark-mode .settings-tab-btn:hover {
@@ -64,7 +67,7 @@ body.dark-mode .settings-tab-btn:hover {
 
 .settings-tab-btn.active {
   color: var(--color-primary);
-  background: rgba(var(--primary-h), var(--primary-s), 93%);
+  background: hsl(var(--primary-h), var(--primary-s), 93%);
   box-shadow: inset 0 -2px 0 var(--color-primary);
   border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
@@ -82,6 +85,8 @@ body.dark-mode .settings-tab-btn.active {
 /* --- Contenedor de las Vistas --- */
 .settings-content {
   flex-grow: 1;
+  min-height: 0;
+  min-width: 0;
   overflow-y: auto;
   padding: 15px 15px 30px;
 }
@@ -292,6 +297,12 @@ input:checked + .settings-slider .icon-moon {
   cursor: pointer;
   text-align: left;
   transition: background 0.3s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.accordion-header:focus {
+  outline: none;
 }
 
 @media (min-width: 768px) {
@@ -360,44 +371,15 @@ body.dark-mode .accordion-content {
   color: var(--color-text);
 }
 
-/* --- Panel de Sistema / Conexión --- */
-.system-status-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
+
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.system-status-indicator.online {
-  background: rgba(16, 185, 129, 0.12);
-  color: #10B981;
-  border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.system-pulse {
-  width: 6px;
-  height: 6px;
-  background-color: #10B981;
-  border-radius: 50%;
-  animation: pulse-glow 1.5s infinite alternate;
-}
-
-@keyframes pulse-glow {
-  0% {
-    transform: scale(0.8);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-  }
-  100% {
-    transform: scale(1.2);
-    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
-  }
-}
-
-/* Botones Premium del Dashboard */
-.btn-settings-action {
+/* Botón Soporte Técnico (WhatsApp) */
+.btn-whatsapp-support {
   width: 100%;
   display: flex;
   align-items: center;
@@ -410,56 +392,23 @@ body.dark-mode .accordion-content {
   font-weight: 700;
   cursor: pointer;
   border: none;
+  background: #25D366;
+  color: white;
+  box-shadow: 0 4px 15px rgba(37, 211, 102, 0.2);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.btn-settings-action.sync {
-  background: var(--color-primary);
-  color: white;
-  box-shadow: 0 4px 15px rgba(var(--primary-h), var(--primary-s), 33%, 0.2);
-}
-
-body.dark-mode .btn-settings-action.sync {
-  background: var(--color-accent);
-  color: #111827;
-  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.2);
-}
-
-.btn-settings-action.sync:hover {
+.btn-whatsapp-support:hover {
   transform: translateY(-2px);
-  filter: brightness(1.1);
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+  filter: brightness(1.05);
 }
 
-.btn-settings-action.danger {
-  background: rgba(239, 68, 68, 0.08);
-  color: var(--color-danger);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.btn-settings-action.danger:hover {
-  background: var(--color-danger);
-  color: white;
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.25);
-  transform: translateY(-2px);
-}
-
-/* Spinner animado */
-.sync-spin-icon {
-  animation: none;
-}
-
-.syncing .sync-spin-icon {
-  animation: spin 1.2s infinite linear;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+.btn-whatsapp-support:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.2);
 }
 
 /* Ajustes de responsive para tabs */

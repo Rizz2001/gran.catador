@@ -262,40 +262,8 @@ function abrirAjustes() {
         modoVistaSelect.value = window.modoVistaGlobal || 'unidad';
     }
     
-    // Cargar datos de perfil/facturación en los campos correspondientes
-    const nombreVal = localStorage.getItem('gc_nombre') || '';
-    const cedulaVal = localStorage.getItem('gc_cedula') || '';
-    const telefonoVal = localStorage.getItem('gc_telefono') || '';
-    const direccionVal = localStorage.getItem('gc_direccion') || '';
-    
-    const configNombre = document.getElementById('configNombre');
-    const configCedula = document.getElementById('configCedula');
-    const configTelefono = document.getElementById('configTelefono');
-    const configDireccion = document.getElementById('configDireccion');
-    
-    if (configNombre) configNombre.value = nombreVal;
-    if (configCedula) configCedula.value = cedulaVal;
-    if (configTelefono) configTelefono.value = telefonoVal;
-    if (configDireccion) configDireccion.value = direccionVal;
-    
-    // Actualizar datos del sistema (número de productos)
-    const countProductos = document.getElementById('configCountProductos');
-    if (countProductos) {
-        const totalProds = (window.inventario && Array.isArray(window.inventario)) ? window.inventario.length : 0;
-        countProductos.innerText = `${totalProds} productos en caché`;
-    }
-    
-    // Actualizar fecha y hora de la última sincronización
-    const configSyncTime = document.getElementById('configSyncTime');
-    if (configSyncTime) {
-        let lastSync = localStorage.getItem('gc_last_sync_time');
-        if (!lastSync) {
-            const now = new Date();
-            lastSync = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' }) + ' ' + now.toLocaleDateString('es-VE');
-            localStorage.setItem('gc_last_sync_time', lastSync);
-        }
-        configSyncTime.innerText = `Última sincronización: ${lastSync}`;
-    }
+
+
 }
 
 function toggleDark() {
@@ -335,31 +303,6 @@ function cambiarModoVistaConfig(selectEl) {
     }
 }
 
-/** Guarda los datos de facturación desde el panel de Ajustes */
-function guardarDatosDesdeConfig() {
-    const nombre = document.getElementById('configNombre').value;
-    const cedula = document.getElementById('configCedula').value;
-    const telefono = document.getElementById('configTelefono').value;
-    const direccion = document.getElementById('configDireccion').value;
-    
-    localStorage.setItem('gc_nombre', nombre);
-    localStorage.setItem('gc_cedula', cedula);
-    localStorage.setItem('gc_telefono', telefono);
-    localStorage.setItem('gc_direccion', direccion);
-    
-    // Sincronizar con los inputs del modal-perfil heredados
-    const perfilNombre = document.getElementById('perfilNombre');
-    const perfilCedula = document.getElementById('perfilCedula');
-    const perfilTelefono = document.getElementById('perfilTelefono');
-    const perfilDireccion = document.getElementById('perfilDireccion');
-    
-    if (perfilNombre) perfilNombre.value = nombre;
-    if (perfilCedula) perfilCedula.value = cedula;
-    if (perfilTelefono) perfilTelefono.value = telefono;
-    if (perfilDireccion) perfilDireccion.value = direccion;
-    
-    mostrarToast("Datos de facturación guardados ✅");
-}
 
 /** Control del Acordeón interactivo */
 function toggleAccordion(headerEl) {
@@ -381,76 +324,7 @@ function toggleAccordion(headerEl) {
     }
 }
 
-/** Sincronización manual interactiva con Foxdata */
-function sincronizarCatálogoManual() {
-    const btn = document.getElementById('btn-sync-config');
-    if (!btn) return;
-    
-    btn.classList.add('syncing');
-    btn.disabled = true;
-    
-    mostrarToast("Sincronizando base de datos con SmartVentas... 🔄");
-    
-    setTimeout(() => {
-        const now = new Date();
-        const nowStr = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' }) + ' ' + now.toLocaleDateString('es-VE');
-        localStorage.setItem('gc_last_sync_time', nowStr);
-        
-        const configSyncTime = document.getElementById('configSyncTime');
-        if (configSyncTime) configSyncTime.innerText = `Última sincronización: ${nowStr}`;
-        
-        const countProductos = document.getElementById('configCountProductos');
-        if (countProductos) {
-            const totalProds = (window.inventario && Array.isArray(window.inventario)) ? window.inventario.length : 0;
-            countProductos.innerText = `${totalProds} productos en caché`;
-        }
-        
-        btn.classList.remove('syncing');
-        btn.disabled = false;
-        
-        mostrarToast("¡Catálogo sincronizado exitosamente! ✅");
-        
-        // Forzar recarga o aplicación de filtros
-        if (typeof aplicarFiltros === 'function') aplicarFiltros();
-    }, 1800);
-}
 
-/** Restablece por completo la configuración e historial del usuario con confirmación */
-async function restablecerAplicacionConfirm() {
-    if (confirm("⚠️ ¿Estás completamente seguro de que deseas restablecer la aplicación?\n\nEsto borrará tus datos personales, preferencias visuales, e historial local. Además, ELIMINARÁ la caché persistente del navegador para forzar la descarga inmediata de las últimas actualizaciones de diseño y código.")) {
-        
-        // 1. Borrar almacenamiento de estado local
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        // 2. Eliminar toda la caché persistente de archivos (Cache Storage API)
-        if ('caches' in window) {
-            try {
-                const keys = await caches.keys();
-                await Promise.all(keys.map(key => caches.delete(key)));
-            } catch (e) {
-                console.error("Error al borrar Cache Storage:", e);
-            }
-        }
-        
-        // 3. Desregistrar Service Workers para forzar la descarga de los nuevos recursos
-        if ('serviceWorker' in navigator) {
-            try {
-                const registrations = await navigator.serviceWorker.getRegistrations();
-                await Promise.all(registrations.map(r => r.unregister()));
-            } catch (e) {
-                console.error("Error al desregistrar Service Worker:", e);
-            }
-        }
-        
-        mostrarToast("Caché profunda y datos locales eliminados. Reiniciando... 🧹");
-        
-        // 4. Recargar el navegador forzando descarga de red (hard reload)
-        setTimeout(() => {
-            window.location.href = window.location.origin + window.location.pathname + '?v=' + new Date().getTime();
-        }, 1500);
-    }
-}
 
 function mostrarToast(msg) { const cont = document.getElementById('toast-container'); if (!cont) return; const t = document.createElement('div'); t.className = 'toast'; t.innerHTML = msg; cont.appendChild(t); setTimeout(() => t.remove(), 2500); }
 
