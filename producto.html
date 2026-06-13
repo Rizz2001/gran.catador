@@ -53,6 +53,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="stylesheet" href="assets/css/modules/products.css">
     <link rel="stylesheet" href="assets/css/modules/lightbox.css">
     <link rel="stylesheet" href="assets/css/modules/layout.css">
+    <link rel="stylesheet" href="assets/css/producto.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
@@ -161,7 +162,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <button class="icon-btn desktop-only" aria-label="Notificaciones">
                             <i class="fa-regular fa-bell"></i>
                         </button>
-                        <button class="icon-btn" onclick="window.location.href='carrito/'" aria-label="Carrito">
+                        <button class="icon-btn" onclick="window.location.href='carrito.html'" aria-label="Carrito">
                             <i class="fa-solid fa-cart-shopping"></i>
                             <span class="badge" id="cart-count">0</span>
                         </button>
@@ -194,15 +195,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <main id="main-content" role="main">
 
-        <div class="banners-wrapper-relative" style="position: relative; max-width: 1280px; margin: 0 auto;">
-            <div class="banners-container" id="contenedorBanners" style="padding-bottom: 15px;">
-                <div class="promo-banner"
-                    style="background: var(--item-bg); display:none; align-items:center; justify-content:center; color:var(--texto-claro); font-size:12px; font-weight:500; text-align:center; padding:20px; border: 1px solid var(--borde-color);">
-                     Banners <br>Cargando
-                </div>
-            </div>
-        </div>
-
         <div class="main-layout-container">
             <!-- MenÃº Lateral (Sidebar) de CategorÃ­as -->
             <aside id="sidebar-menu" class="sidebar-menu" aria-label="Filtros y CategorÃ­as">
@@ -233,152 +225,67 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             </aside>
 
             <div class="main-products-wrapper">
-                <div class="container tools-container">
-            <h2 class="section-title">Todos los productos</h2>
+                <div class="container product-page-container">
+            <!-- Breadcrumbs -->
+            <nav class="breadcrumb" aria-label="breadcrumbs" id="product-breadcrumb">
+                <a href="index.html">Inicio</a>
+                <span class="separator">/</span>
+                <span class="skeleton-text short"></span>
+            </nav>
 
-            <div class="filters-row-container">
-                <div class="filters-row">
-                    <label class="filter-chip chk-agotados" style="cursor:pointer;">
-                        <input type="checkbox" id="chkAgotados" onchange="aplicarFiltros()"
-                            style="accent-color:var(--color-primary);"> Ver Agotados
-                    </label>
+            <div class="product-main-layout">
+                <!-- Imagen del producto (Izquierda) -->
+                <div class="product-image-section">
+                    <div class="product-image-wrapper skeleton-box" id="product-image-wrapper">
+                        <!-- Imagen se inyecta por JS -->
+                    </div>
                 </div>
 
-                <div class="sort-container">
-                    <select id="ordenarSelect" class="sort-select" onchange="aplicarFiltros()">
-                        <option value="relevancia">Ordenar por: Relevancia</option>
-                        <option value="menor">Precio: Menor a Mayor</option>
-                        <option value="mayor">Precio: Mayor a Menor</option>
-                        <option value="az">Nombre: A-Z</option>
-                    </select>
+                <!-- Detalles y Compra (Derecha) -->
+                <div class="product-details-section">
+                    <div class="product-category-tag skeleton-text short" id="product-category"></div>
+                    <h1 class="product-title skeleton-text long" id="product-title"></h1>
+                    
+                    <div class="product-price-block skeleton-box">
+                        <div class="price-usd" id="product-price-usd"></div>
+                        <div class="price-bs" id="product-price-bs"></div>
+                    </div>
+
+                    <div class="product-stock-status skeleton-text" id="product-stock"></div>
+
+                    <div class="product-add-to-cart skeleton-box" id="product-action-block">
+                        <!-- Botones y selector de cantidad se inyectan por JS -->
+                    </div>
+                    
+                    <div class="product-quick-specs skeleton-box" id="product-quick-specs">
+                        <!-- Ficha tecnica rapida -->
+                    </div>
                 </div>
             </div>
+
+            <!-- DescripciÃ³n y Detalles (Abajo) -->
+            <div class="product-description-layout">
+                <div class="description-card">
+                    <h2>DescripciÃ³n del Producto</h2>
+                    <p id="product-description" class="skeleton-text multiple">
+                        Cargando informaciÃ³n del producto...
+                    </p>
+                </div>
+
+                <div class="specs-card">
+                    <h2>Ficha TÃ©cnica</h2>
+                    <div class="specs-grid" id="product-full-specs">
+                        <!-- Detalles tecnicos inyectados por JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- QuizÃ¡s te interese -->
+            <div id="productos-relacionados-root"></div>
         </div>
 
-
-        <div class="productos-grid" id="lista-productos">
-            <!-- Skeleton Loaders iniciales para mantener el layout estable (Evita CLS) -->
-            <div class="producto-card"
-                style="pointer-events:none; border: 1px solid var(--color-border); box-shadow: none;">
-                <div class="skeleton-box"
-                    style="width: 100%; height: 160px; border-radius: var(--radius-sm, 8px); margin-bottom: 12px;">
-                </div>
-                <div class="skeleton-box" style="width: 85%; height: 16px; border-radius: 4px; margin-bottom: 8px;">
-                </div>
-                <div class="skeleton-box" style="width: 60%; height: 12px; border-radius: 4px; margin-bottom: 15px;">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto;">
-                    <div class="skeleton-box" style="width: 45%; height: 24px; border-radius: 4px;"></div>
-                    <div class="skeleton-box" style="width: 36px; height: 36px; border-radius: 50%;"></div>
-                </div>
-            </div>
-            <div class="producto-card"
-                style="pointer-events:none; border: 1px solid var(--color-border); box-shadow: none;">
-                <div class="skeleton-box"
-                    style="width: 100%; height: 160px; border-radius: var(--radius-sm, 8px); margin-bottom: 12px;">
-                </div>
-                <div class="skeleton-box" style="width: 85%; height: 16px; border-radius: 4px; margin-bottom: 8px;">
-                </div>
-                <div class="skeleton-box" style="width: 60%; height: 12px; border-radius: 4px; margin-bottom: 15px;">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto;">
-                    <div class="skeleton-box" style="width: 45%; height: 24px; border-radius: 4px;"></div>
-                    <div class="skeleton-box" style="width: 36px; height: 36px; border-radius: 50%;"></div>
-                </div>
-            </div>
-            <div class="producto-card"
-                style="pointer-events:none; border: 1px solid var(--color-border); box-shadow: none;">
-                <div class="skeleton-box"
-                    style="width: 100%; height: 160px; border-radius: var(--radius-sm, 8px); margin-bottom: 12px;">
-                </div>
-                <div class="skeleton-box" style="width: 85%; height: 16px; border-radius: 4px; margin-bottom: 8px;">
-                </div>
-                <div class="skeleton-box" style="width: 60%; height: 12px; border-radius: 4px; margin-bottom: 15px;">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto;">
-                    <div class="skeleton-box" style="width: 45%; height: 24px; border-radius: 4px;"></div>
-                    <div class="skeleton-box" style="width: 36px; height: 36px; border-radius: 50%;"></div>
-                </div>
-            </div>
-            <div class="producto-card"
-                style="pointer-events:none; border: 1px solid var(--color-border); box-shadow: none;">
-                <div class="skeleton-box"
-                    style="width: 100%; height: 160px; border-radius: var(--radius-sm, 8px); margin-bottom: 12px;">
-                </div>
-                <div class="skeleton-box" style="width: 85%; height: 16px; border-radius: 4px; margin-bottom: 8px;">
-                </div>
-                <div class="skeleton-box" style="width: 60%; height: 12px; border-radius: 4px; margin-bottom: 15px;">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto;">
-                    <div class="skeleton-box" style="width: 45%; height: 24px; border-radius: 4px;"></div>
-                    <div class="skeleton-box" style="width: 36px; height: 36px; border-radius: 50%;"></div>
-                </div>
-            </div>
-            <div class="producto-card"
-                style="pointer-events:none; border: 1px solid var(--color-border); box-shadow: none;">
-                <div class="skeleton-box"
-                    style="width: 100%; height: 160px; border-radius: var(--radius-sm, 8px); margin-bottom: 12px;">
-                </div>
-                <div class="skeleton-box" style="width: 85%; height: 16px; border-radius: 4px; margin-bottom: 8px;">
-                </div>
-                <div class="skeleton-box" style="width: 60%; height: 12px; border-radius: 4px; margin-bottom: 15px;">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto;">
-                    <div class="skeleton-box" style="width: 45%; height: 24px; border-radius: 4px;"></div>
-                    <div class="skeleton-box" style="width: 36px; height: 36px; border-radius: 50%;"></div>
-                </div>
-            </div>
-            <div class="producto-card"
-                style="pointer-events:none; border: 1px solid var(--color-border); box-shadow: none;">
-                <div class="skeleton-box"
-                    style="width: 100%; height: 160px; border-radius: var(--radius-sm, 8px); margin-bottom: 12px;">
-                </div>
-                <div class="skeleton-box" style="width: 85%; height: 16px; border-radius: 4px; margin-bottom: 8px;">
-                </div>
-                <div class="skeleton-box" style="width: 60%; height: 12px; border-radius: 4px; margin-bottom: 15px;">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto;">
-                    <div class="skeleton-box" style="width: 45%; height: 24px; border-radius: 4px;"></div>
-                    <div class="skeleton-box" style="width: 36px; height: 36px; border-radius: 50%;"></div>
-                </div>
-            </div>
-            <div class="producto-card"
-                style="pointer-events:none; border: 1px solid var(--color-border); box-shadow: none;">
-                <div class="skeleton-box"
-                    style="width: 100%; height: 160px; border-radius: var(--radius-sm, 8px); margin-bottom: 12px;">
-                </div>
-                <div class="skeleton-box" style="width: 85%; height: 16px; border-radius: 4px; margin-bottom: 8px;">
-                </div>
-                <div class="skeleton-box" style="width: 60%; height: 12px; border-radius: 4px; margin-bottom: 15px;">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto;">
-                    <div class="skeleton-box" style="width: 45%; height: 24px; border-radius: 4px;"></div>
-                    <div class="skeleton-box" style="width: 36px; height: 36px; border-radius: 50%;"></div>
-                </div>
-            </div>
-            <div class="producto-card"
-                style="pointer-events:none; border: 1px solid var(--color-border); box-shadow: none;">
-                <div class="skeleton-box"
-                    style="width: 100%; height: 160px; border-radius: var(--radius-sm, 8px); margin-bottom: 12px;">
-                </div>
-                <div class="skeleton-box" style="width: 85%; height: 16px; border-radius: 4px; margin-bottom: 8px;">
-                </div>
-                <div class="skeleton-box" style="width: 60%; height: 12px; border-radius: 4px; margin-bottom: 15px;">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto;">
-                    <div class="skeleton-box" style="width: 45%; height: 24px; border-radius: 4px;"></div>
-                    <div class="skeleton-box" style="width: 36px; height: 36px; border-radius: 50%;"></div>
-                </div>
             </div>
         </div>
-
-        <button id="btn-cargar-mas" class="btn-cargar-mas" onclick="cargarMasProductos()">Cargar mÃ¡s
-            productos...</button>
-
-        <div id="marcas-aliadas-root"></div>
-
-        </div>
-    </div>
     </main>
 
     <footer class="main-footer-new" role="contentinfo">
@@ -790,6 +697,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <script src="js/modules/lightbox.js"></script>
 
     <script src="js/app.js"></script>
+    <script src="js/product-detail.js?v=1.0"></script>
 </body>
 
 </html>

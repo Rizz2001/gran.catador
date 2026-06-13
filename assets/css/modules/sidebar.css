@@ -1,4 +1,4 @@
-﻿/* --- SIDEBAR MENU (Filtros y CategorÃ­as) --- */
+/* --- SIDEBAR MENU (Filtros y CategorÃ­as) --- */
 .sidebar-overlay {
     position: fixed;
     top: 0;
@@ -39,9 +39,11 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    border-top-right-radius: 28px;
-    border-bottom-right-radius: 28px;
-    backdrop-filter: blur(14px);
+    /* Glassmorphism effect */
+    backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.6);
+    border-radius: 16px;
+    font-family: 'Inter', sans-serif;
 }
 
 body.dark-mode .sidebar-menu {
@@ -117,17 +119,15 @@ body.dark-mode .inner-back-btn:hover {
 .sidebar-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 22px 24px;
-    background: linear-gradient(135deg, #071e52 0%, #0d2464 100%);
-    color: #ffffff;
-    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1), 0 20px 40px rgba(15, 23, 42, 0.16);
+    justify-content: flex-end;
+    padding: 15px;
+    background: transparent;
+    color: var(--color-text);
     z-index: 10;
 }
 
 body.dark-mode .sidebar-header {
-    background: linear-gradient(135deg, rgba(23, 58, 114, 0.95), rgba(16, 34, 92, 0.92));
-    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08), 0 20px 44px rgba(0, 0, 0, 0.45);
+    background: transparent;
 }
 
 .sidebar-title {
@@ -376,4 +376,106 @@ body.dark-mode .sidebar-subfilters .checkbox-item input[type="checkbox"]:checked
 .horizontal-scroll-wrapper.is-scrollable-right:not(.is-scrollable-left) {
     -webkit-mask-image: linear-gradient(to left, transparent, black 30px);
     mask-image: linear-gradient(to left, transparent, black 30px);
+}
+
+/* =========================================
+   PC LAYOUT: PERMANENT SIDEBAR (>1024px)
+   ========================================= */
+@media (min-width: 1024px) {
+    .main-layout-container {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 0 10px;
+        gap: 20px;
+    }
+
+    .main-products-wrapper {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* 1. Sidebar Permanent */
+    .sidebar-menu {
+        position: sticky !important;
+        top: 100px !important; /* Altura debajo del header */
+        height: calc(100vh - 120px) !important;
+        transform: translateX(0) !important;
+        box-shadow: var(--shadow-sm) !important;
+        width: 240px !important;
+        border: 1px solid var(--color-border) !important;
+        border-radius: 4px !important;
+        flex-shrink: 0;
+        z-index: 100;
+        background: var(--color-card) !important;
+        padding-bottom: 15px;
+    }
+    
+    body.dark-mode .sidebar-menu {
+        border-color: #334155 !important;
+        box-shadow: var(--shadow-sm) !important;
+        background: var(--color-card) !important;
+    }
+
+    /* Minimalist styling adjustments for PC sidebar */
+    .sidebar-menu .sidebar-header {
+        display: none !important;
+    }
+    .sidebar-menu .sidebar-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--color-text);
+        opacity: 0.5;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .sidebar-menu .sidebar-section-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.5;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        padding: 0 15px;
+    }
+    .sidebar-menu .category-group {
+        padding: 4px 15px;
+    }
+    .sidebar-menu .checkbox-item label {
+        font-size: 13px;
+        padding: 4px 0;
+        opacity: 0.8;
+    }
+    .sidebar-menu .checkbox-item:hover label {
+        opacity: 1;
+    }
+
+    .sidebar-overlay {
+        display: none !important;
+    }
+    
+    .sidebar-close-btn {
+        display: none !important;
+    }
+
+    /* Eliminar offsets previos del header (vuelven a 100%) */
+    body {
+        padding-left: 0 !important;
+    }
+
+    .site-header {
+        left: 0 !important;
+        width: 100% !important;
+    }
+    
+    .header-top-bar {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+    
+    .btn-menu-sidebar {
+        display: none !important;
+    }
 }

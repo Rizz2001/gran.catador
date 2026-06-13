@@ -114,6 +114,11 @@ function cerrarModal(modalId, navId) {
 
 /** Restablece la vista al menú principal (Inicio) */
 function irInicio() {
+    const currentPath = window.location.pathname.toLowerCase();
+    if (currentPath.includes('producto.html') || currentPath.includes('carrito.html') || currentPath.includes('/carrito')) {
+        window.location.href = '../index.html';
+        return;
+    }
     if (window.history && window.history.pushState) {
         const url = new URL(window.location.href);
         if (url.searchParams.has('categoria') || url.searchParams.has('producto')) {
@@ -123,6 +128,7 @@ function irInicio() {
         }
     }
     cerrarModal('all');
+    if (typeof closeSidebar === 'function') closeSidebar();
     setActiveNav('nav-home');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -433,7 +439,7 @@ function generarCategorias() {
     divInicio.innerHTML = `
         <div class="checkbox-item">
             <input type="checkbox" id="cat-todos" ${categoriaActual === 'Todos' ? 'checked' : ''} onchange="irInicio()">
-            <label for="cat-todos"><i class="fa-solid fa-shop"></i> Inicio</label>
+            <label for="cat-todos">Todos los Departamentos</label>
         </div>
     `;
     cont.appendChild(divInicio);
@@ -451,7 +457,7 @@ function generarCategorias() {
                     <div class="checkbox-item">
                         <input type="checkbox" id="cat-${catIdLimpio}" ${limpiarCategoria(nombre) === limpiarCategoria(categoriaActual) ? 'checked' : ''} onchange="filtrarCategoria('${nombre}', this)">
                         <label for="cat-${catIdLimpio}">
-                            <i class="fa-solid ${getIconForCategory(nombre)}"></i> <span style="flex:1;">${nombre}</span>
+                            <span style="flex:1;">${nombre}</span>
                             <i class="fa-solid fa-xmark close-cat-icon" style="display:none; opacity: 0.8; font-size: 14px;"></i>
                         </label>
                     </div>
@@ -688,7 +694,7 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
         divTodos.className = 'checkbox-item';
         divTodos.innerHTML = `
             <input type="checkbox" id="subcat-todos" ${!subcategoriaActual ? 'checked' : ''}>
-            <label for="subcat-todos"><i class="fa-solid fa-list"></i> Todos</label>
+            <label for="subcat-todos">Todos</label>
         `;
         let cbTodos = divTodos.querySelector('input');
         cbTodos.onchange = function () {
@@ -717,7 +723,7 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
             divSub.className = 'checkbox-item';
             divSub.innerHTML = `
                 <input type="checkbox" id="subcat-${subIdLimpio}" ${(codSub === subcategoriaActual || limpiarCategoria(nombreSub) === subcategoriaActual) ? 'checked' : ''}>
-                <label for="subcat-${subIdLimpio}"><i class="fa-solid fa-angle-right"></i> ${nombreMostrado}</label>
+                <label for="subcat-${subIdLimpio}">${nombreMostrado}</label>
             `;
             let cb = divSub.querySelector('input');
             cb.onchange = async function () {
@@ -751,10 +757,18 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
     } else {
         if (typeof mostrarPanelGrupos === 'function') mostrarPanelGrupos();
         subcatContainer.innerHTML = '';
+        if (window.innerWidth <= 900 && typeof closeSidebar === 'function') {
+            closeSidebar();
+        }
     }
 }
 
 async function filtrarCategoria(cat, checkboxElement) {
+    if (window.location.pathname.includes('producto.html')) {
+        window.location.href = 'index.html?categoria=' + encodeURIComponent(cat);
+        return;
+    }
+
     if (categoriaActual === cat && checkboxElement && !checkboxElement.checked) {
         irInicio();
         return;
@@ -915,4 +929,20 @@ window.handleZoom = function (e, img) {
 window.resetZoom = function (img) {
     if (window.innerWidth < 1024) return;
     img.style.transformOrigin = 'center center';
+};
+
+// --- NAVEGACIÓN A DETALLE DE PRODUCTO ---
+window.irADetalle = function(codigo) {
+    if (window.appState && window.appState.inventario) {
+        // Intentar encontrar el producto en el inventario actual para pasarlo en caché
+        let p = window.appState.inventario.find(x => window.compararIDs ? window.compararIDs(x.codigo, codigo) : x.codigo == codigo);
+        if (p) {
+            try {
+                sessionStorage.setItem('gc_producto_actual', JSON.stringify(p));
+            } catch(e) {
+                console.warn("No se pudo guardar en sessionStorage", e);
+            }
+        }
+    }
+    window.location.href = 'producto.html?id=' + encodeURIComponent(codigo);
 };

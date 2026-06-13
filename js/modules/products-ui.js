@@ -1,4 +1,4 @@
-﻿// --- RENDERIZADO DE PRODUCTOS (Fase 5: Mejora de Rendimiento) ---
+// --- RENDERIZADO DE PRODUCTOS (Fase 5: Mejora de Rendimiento) ---
 function crearHTMLProducto(p) {
     const esModoCaja = (modoVistaGlobal === 'caja');
     const cantCaja = p.CantidadGrup || 12;
@@ -37,14 +37,14 @@ function crearHTMLProducto(p) {
     let imgSrc = obtenerImgProducto(p);
     let attempts = p.ImagenUrl ? 0 : 1;
     // Se retiran las clases de scroll-snap porque la vista en miniatura no debería ser scrolleable para mejor UX
-    let galeriasHTML = `<img loading="lazy" decoding="async" width="300" height="300" src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease; cursor: zoom-in;" onload="this.parentElement.classList.remove('skeleton-box');" onclick="event.stopPropagation(); abrirImagenLightbox(this.src, '${p.codigo}');">`;
+    let galeriasHTML = `<img loading="lazy" decoding="async" width="300" height="300" src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease; cursor: pointer;" onload="this.parentElement.classList.remove('skeleton-box');" onclick="event.stopPropagation(); irADetalle('${p.codigo.replace(/'/g, "\\'")}');">`;
 
     return `
         <div class="producto-card ${isAgotado ? 'agotado' : ''}">
             
             ${badgeHTML}
             
-            <div onclick="abrirImagenLightbox('${imgSrc}', '${p.codigo}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); abrirImagenLightbox('${imgSrc}', '${p.codigo}'); }" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;" role="button" tabindex="0" aria-label="Ver detalles de ${p.Nombre}">
+            <div onclick="irADetalle('${p.codigo.replace(/'/g, "\\'")}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); irADetalle('${p.codigo.replace(/'/g, "\\'")}'); }" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;" role="button" tabindex="0" aria-label="Ver detalles de ${p.Nombre}">
                 <div class="product-img-container skeleton-box" style="display: flex; justify-content: center; align-items: center; border-radius: 8px;">
                     ${galeriasHTML}
                 </div>
@@ -157,7 +157,7 @@ function crearHTMLSeccionCategoriasAleatorias(productos, offset = 0) {
         const stockClass = isAgotado ? 'agotado' : 'disponible';
         const nombreB64 = codificarNombre(titulo);
         return `
-            <article class="grupo-aleatorio-card" onclick="abrirImagenLightbox('${imgSrc}', '${producto.codigo}')" style="cursor: pointer;" aria-label="Ver detalles de ${titulo}">
+            <article class="grupo-aleatorio-card" onclick="irADetalle('${producto.codigo.replace(/'/g, "\\'")}')" style="cursor: pointer;" aria-label="Ver detalles de ${titulo}">
                 <div class="grupo-aleatorio-card-thumb">
                     <img src="${imgSrc}" alt="${titulo}" loading="lazy" onerror="this.src='logo.webp'">
                 </div>
@@ -294,7 +294,7 @@ function crearHTMLMasVendidos() {
         const nombreB64 = codificarNombre(nombre);
         const rankingBadge = index < 3 ? `<span class="mas-vendidos-card-tag">Top ${index + 1}</span>` : '';
         return `
-            <article class="mas-vendidos-card ${index < 3 ? 'featured' : ''}" onclick="abrirImagenLightbox('${imagen}', '${producto.codigo}')" style="cursor: pointer;" aria-label="Ver detalles de ${nombre}">
+            <article class="mas-vendidos-card ${index < 3 ? 'featured' : ''}" onclick="irADetalle('${producto.codigo.replace(/'/g, "\\'")}')" style="cursor: pointer;" aria-label="Ver detalles de ${nombre}">
                 ${rankingBadge}
                 <span class="mas-vendidos-card-thumb"><img src="${imagen}" alt="${nombre}" loading="lazy" onerror="this.src='logo.webp'"></span>
                 <span class="mas-vendidos-card-info">
@@ -357,11 +357,15 @@ function renderMarcasAliadas() {
 
 function renderizarPagina() {
     const cont = document.getElementById('lista-productos');
+    if (!cont) return; // Si no estamos en index.html, salir
+
     if (paginaActual === 1) cont.innerHTML = '';
 
     const inicio = (paginaActual - 1) * itemsPorPagina;
     const fin = paginaActual * itemsPorPagina;
     const pedazo = productosFiltradosGlobal.slice(inicio, fin);
+
+    const btnCargarMas = document.getElementById('btn-cargar-mas');
 
     if (productosFiltradosGlobal.length === 0) {
         if (paginaActual === 1) {
@@ -380,7 +384,7 @@ function renderizarPagina() {
                     <p style="font-size: 13px; margin-top: 5px;">No encontramos botellas con esa descripción.${msjExtra}</p>
                     <button onclick="irInicio()" class="cat-btn active" style="margin: 20px auto 0 auto; padding: 10px 20px;">Ver todo el catálogo</button>
                 </div>`;
-            document.getElementById('btn-cargar-mas').style.display = 'none';
+            if (btnCargarMas) btnCargarMas.style.display = 'none';
         }
         return;
     }
@@ -436,8 +440,9 @@ function renderizarPagina() {
     while (tempDiv.firstChild) fragment.appendChild(tempDiv.firstChild);
     cont.appendChild(fragment);
 
-    document.getElementById('btn-cargar-mas').style.display =
-        fin < productosFiltradosGlobal.length ? 'block' : 'none';
+    if (btnCargarMas) {
+        btnCargarMas.style.display = fin < productosFiltradosGlobal.length ? 'block' : 'none';
+    }
 }
 
 function cargarMasProductos() {

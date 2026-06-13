@@ -320,12 +320,23 @@ function vaciarCarrito() {
     }
 }
 
+function eliminarProductoDelCarrito(nombreB64) {
+    const nombre = decodificarNombre(nombreB64);
+    if (appState.carrito[nombre]) {
+        delete appState.carrito[nombre];
+        guardarCarritoLS();
+        actualizarCartCount();
+        renderizarCarrito();
+        mostrarToast("Producto eliminado");
+    }
+}
+
 function abrirCarrito() {
     if (window.location.href.includes('carrito')) {
         renderizarCarrito();
         return;
     }
-    window.location.href = 'carrito.html';
+    window.location.href = 'carrito/';
 }
 
 function repetirPedido(index) {
@@ -377,14 +388,14 @@ function renderizarCarrito() {
         let imgSrc = obtenerImgProducto(prodObj || { codigo: item.codigo });
         let attempts = (prodObj && prodObj.ImagenUrl) ? 0 : 1;
         let imgHTML = item.codigo
-            ? `<img loading="lazy" src="${imgSrc}" data-codigo="${item.codigo}" data-categoria="${item.categoria || ''}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" class="cart-item-img">`
-            : `<div class="cart-item-img-placeholder"><i class="fa-solid fa-wine-bottle"></i></div>`;
+            ? `<img loading="lazy" src="${imgSrc}" data-codigo="${item.codigo}" data-categoria="${item.categoria || ''}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" class="amazon-item-img">`
+            : `<div class="amazon-item-img-placeholder"><i class="fa-solid fa-wine-bottle"></i></div>`;
 
         let btnMinus = item.cantidad > 1
             ? '<i class="fa-solid fa-minus"></i>'
             : '<i class="fa-solid fa-trash-can" style="color: var(--color-danger);"></i>';
 
-        // ── STOCK INTELIGENTE: calcular si se puede agregar más ──────────────────
+        // 🧠 STOCK INTELIGENTE: calcular si se puede agregar más 🧠
         const nombreBase = nombre.replace(/ \((CAJA|UNIDAD)\)$/, '');
         const esCajaItem = nombre.includes('(CAJA)');
         const { stockDisponible, unidadesEnCarrito, unidadesRestantes, unidadesPorCaja } =
@@ -397,13 +408,11 @@ function renderizarCarrito() {
         // Badge de stock restante / límite
         let stockBadge = '';
         if (stockDisponible < 999) {
-            if (unidadesRestantes <= 0) {
-                stockBadge = `<span class="cart-stock-badge limit">🔴 Stock máximo en carrito</span>`;
-            } else if (unidadesRestantes <= 3) {
-                stockBadge = `<span class="cart-stock-badge warning">⚠️ Quedan ${unidadesRestantes} unid. disponibles</span>`;
-            } else {
-                stockBadge = `<span class="cart-stock-badge info">${stockDisponible} unid. en stock</span>`;
-            }
+            stockBadge = `<span style="font-size: 11px; color: ${bloquearSumar ? '#ea4335' : '#007600'}; margin-top: 5px; font-weight: 500; display:block;">
+                ${bloquearSumar ? 'Límite de stock alcanzado' : `En stock (${unidadesRestantes} disponibles)`}
+            </span>`;
+        } else {
+            stockBadge = `<span style="font-size: 11px; color: #007600; margin-top: 5px; font-weight: 500; display:block;">En stock</span>`;
         }
 
         let btnSumarAttrs = bloquearSumar
@@ -411,17 +420,27 @@ function renderizarCarrito() {
             : `class="cart-btn" onclick="cambiarCantB64('${nombreB64}', 1)"`;
 
         renderHTML += `
-            <div class="cart-item">
-                ${imgHTML}
-                <div class="cart-item-info cart-item-info-container">
-                    <p class="cart-item-title">${nombre}</p>
-                    <p class="cart-item-price">$${item.precio.toFixed(2)} <span class="cart-item-price-bs">/ ${(item.precio * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs</span></p>
-                    ${stockBadge}
+            <div class="amazon-cart-item fade-in">
+                <div class="amazon-item-img-container">
+                    ${imgHTML}
                 </div>
-                <div class="cart-controls">
-                    <button type="button" class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
-                    <span style="font-size:13px; font-weight:800; width:18px; text-align:center;">${item.cantidad}</span>
-                    <button type="button" ${btnSumarAttrs}><i class="fa-solid ${bloquearSumar ? 'fa-lock' : 'fa-plus'}"></i></button>
+                <div class="amazon-item-details">
+                    <div class="amazon-item-title-row">
+                        <h4 class="amazon-item-title">${nombre}</h4>
+                        <div class="amazon-item-price">$${subTotalItem.toFixed(2)}</div>
+                    </div>
+                    <div class="amazon-item-unit-price" style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">$${item.precio.toFixed(2)} c/u</div>
+                    ${stockBadge}
+                    
+                    <div class="amazon-item-actions">
+                        <div class="amazon-qty-control">
+                            <button type="button" class="btn-amazon-qty" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
+                            <span class="amazon-qty-value">${item.cantidad}</span>
+                            <button type="button" class="btn-amazon-qty" ${btnSumarAttrs}><i class="fa-solid ${bloquearSumar ? 'fa-lock' : 'fa-plus'}"></i></button>
+                        </div>
+                        <div class="amazon-action-divider"></div>
+                        <button type="button" class="btn-amazon-delete" onclick="eliminarProductoDelCarrito('${nombreB64}')">Eliminar</button>
+                    </div>
                 </div>
             </div>`;
     }
