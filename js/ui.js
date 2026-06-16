@@ -115,8 +115,12 @@ function cerrarModal(modalId, navId) {
 /** Restablece la vista al menú principal (Inicio) */
 function irInicio() {
     const currentPath = window.location.pathname.toLowerCase();
-    if (currentPath.includes('producto.html') || currentPath.includes('carrito.html') || currentPath.includes('/carrito')) {
+    if (currentPath.includes('/carrito') || currentPath.includes('/carrito/')) {
         window.location.href = '../index.html';
+        return;
+    }
+    if (currentPath.includes('producto.html') || currentPath.includes('carrito.html')) {
+        window.location.href = 'index.html';
         return;
     }
     if (window.history && window.history.pushState) {

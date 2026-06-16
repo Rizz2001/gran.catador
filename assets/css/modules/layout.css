@@ -1,4 +1,4 @@
-﻿/* --- MARQUEE TOP BAR --- */
+/* --- MARQUEE TOP BAR --- */
 .marquee-container {
     overflow: hidden;
     white-space: nowrap;
@@ -16,6 +16,98 @@
 @keyframes marquee-scroll {
     0% { transform: translateX(0); }
     100% { transform: translateX(-100%); }
+}
+
+/* --- HEADER: TASA BCV BADGE --- */
+.header-tasa-badge {
+    color: var(--dorado);
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(212, 175, 55, 0.08);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    margin-right: 10px;
+    transition: background 0.2s ease;
+}
+
+.header-tasa-badge:hover {
+    background: rgba(212, 175, 55, 0.14);
+}
+
+.header-tasa-badge .tasa-value {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.header-tasa-badge .tasa-separator {
+    opacity: 0.3;
+}
+
+.header-tasa-mobile {
+    background: rgba(245, 158, 11, 0.04);
+    border-bottom: 1px solid var(--color-border);
+    padding: 4px 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--dorado);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.header-tasa-mobile .tasa-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.header-tasa-mobile .tasa-value {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.header-tasa-mobile .tasa-separator {
+    opacity: 0.3;
+    color: var(--color-text);
+}
+
+/* --- STICKY HEADER SHADOW --- */
+.site-header.scrolled .sticky-header-content {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+body.dark-mode .site-header.scrolled .sticky-header-content {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* --- HEADER: BOTÓN INICIO --- */
+.header-btn-inicio {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: 15px;
+    transition: opacity 0.2s, transform 0.2s;
+}
+
+.header-btn-inicio:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
 }
 
 /* --- NUEVO FOOTER --- */

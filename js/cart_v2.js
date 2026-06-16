@@ -363,13 +363,13 @@ function renderizarCarrito() {
 
     if (Object.keys(appState.carrito).length === 0) {
         lista.innerHTML = `
-            <div style="text-align: center; padding: 60px 20px; color: var(--color-text-muted); display: flex; flex-direction: column; align-items: center;">
-                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.15; margin-bottom: 15px;">
-                    <path d="M8 16.0001H16M12 12.0001V20.0001M4.91355 4.08203L5.0291 3.55703C5.25375 2.64533 6.05952 2.00005 7.0001 2.00005H17.0001C17.9407 2.00005 18.7465 2.64533 18.9711 3.55703L20.0001 8.00006M4.91355 4.08203L4.50006 6.00006C3.42598 6.00006 2.53003 6.89591 2.53003 8.00006V17.0001C2.53003 18.1046 3.42598 19.0001 4.53003 19.0001H19.4701C20.5742 19.0001 21.4701 18.1046 21.4701 17.0001V8.00006C21.4701 6.89591 20.5742 6.00006 19.5001 6.00006L19.0865 4.08203" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="var(--color-text)"/>
+            <div class="premium-empty-cart">
+                <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 16.0001H16M12 12.0001V20.0001M4.91355 4.08203L5.0291 3.55703C5.25375 2.64533 6.05952 2.00005 7.0001 2.00005H17.0001C17.9407 2.00005 18.7465 2.64533 18.9711 3.55703L20.0001 8.00006M4.91355 4.08203L4.50006 6.00006C3.42598 6.00006 2.53003 6.89591 2.53003 8.00006V17.0001C2.53003 18.1046 3.42598 19.0001 4.53003 19.0001H19.4701C20.5742 19.0001 21.4701 18.1046 21.4701 17.0001V8.00006C21.4701 6.89591 20.5742 6.00006 19.5001 6.00006L19.0865 4.08203" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="currentColor"/>
                 </svg>
-                <h3 style="color: var(--color-text); font-size: 18px; font-weight: 800; letter-spacing: -0.5px;">Añade un Producto</h3>
-                <p style="font-size: 14px; margin-top: 8px; line-height: 1.5;">Agrega botellas.</p>
-                <button onclick="window.location.href='index.html'" class="btn-enviar" style="width: auto; padding: 12px 30px; margin-top: 25px; border-radius: var(--radius-full);">Explorar Catálogo</button>
+                <h3>Tu carrito está vacío</h3>
+                <p>Agrega licores, bebidas o víveres de nuestro catálogo para iniciar tu pedido.</p>
+                <button onclick="window.location.href='index.html'" class="btn-explore">Explorar Catálogo</button>
             </div>`;
         document.getElementById('checkout-sections').style.display = 'none';
         return;
@@ -388,8 +388,8 @@ function renderizarCarrito() {
         let imgSrc = obtenerImgProducto(prodObj || { codigo: item.codigo });
         let attempts = (prodObj && prodObj.ImagenUrl) ? 0 : 1;
         let imgHTML = item.codigo
-            ? `<img loading="lazy" src="${imgSrc}" data-codigo="${item.codigo}" data-categoria="${item.categoria || ''}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" class="amazon-item-img">`
-            : `<div class="amazon-item-img-placeholder"><i class="fa-solid fa-wine-bottle"></i></div>`;
+            ? `<img loading="lazy" src="${imgSrc}" data-codigo="${item.codigo}" data-categoria="${item.categoria || ''}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" class="premium-item-img">`
+            : `<div class="premium-item-img-placeholder"><i class="fa-solid fa-wine-bottle"></i></div>`;
 
         let btnMinus = item.cantidad > 1
             ? '<i class="fa-solid fa-minus"></i>'
@@ -420,26 +420,26 @@ function renderizarCarrito() {
             : `class="cart-btn" onclick="cambiarCantB64('${nombreB64}', 1)"`;
 
         renderHTML += `
-            <div class="amazon-cart-item fade-in">
-                <div class="amazon-item-img-container">
+            <div class="premium-cart-item fade-in">
+                <div class="premium-item-img-container">
                     ${imgHTML}
                 </div>
-                <div class="amazon-item-details">
-                    <div class="amazon-item-title-row">
-                        <h4 class="amazon-item-title">${nombre}</h4>
-                        <div class="amazon-item-price">$${subTotalItem.toFixed(2)}</div>
+                <div class="premium-item-details">
+                    <div class="premium-item-title-row">
+                        <h4 class="premium-item-title">${nombre}</h4>
+                        <div class="premium-item-price">$${subTotalItem.toFixed(2)}</div>
                     </div>
-                    <div class="amazon-item-unit-price" style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">$${item.precio.toFixed(2)} c/u</div>
+                    <div class="premium-item-unit-price" style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">$${item.precio.toFixed(2)} c/u</div>
                     ${stockBadge}
                     
-                    <div class="amazon-item-actions">
-                        <div class="amazon-qty-control">
-                            <button type="button" class="btn-amazon-qty" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
-                            <span class="amazon-qty-value">${item.cantidad}</span>
-                            <button type="button" class="btn-amazon-qty" ${btnSumarAttrs}><i class="fa-solid ${bloquearSumar ? 'fa-lock' : 'fa-plus'}"></i></button>
+                    <div class="premium-item-actions">
+                        <div class="premium-qty-control">
+                            <button type="button" class="btn-premium-qty" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
+                            <span class="premium-qty-value">${item.cantidad}</span>
+                            <button type="button" class="btn-premium-qty" ${btnSumarAttrs}><i class="fa-solid ${bloquearSumar ? 'fa-lock' : 'fa-plus'}"></i></button>
                         </div>
-                        <div class="amazon-action-divider"></div>
-                        <button type="button" class="btn-amazon-delete" onclick="eliminarProductoDelCarrito('${nombreB64}')">Eliminar</button>
+                        <div class="premium-action-divider"></div>
+                        <button type="button" class="btn-premium-delete" onclick="eliminarProductoDelCarrito('${nombreB64}')">Eliminar</button>
                     </div>
                 </div>
             </div>`;

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -129,7 +129,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                 style="height: 32px; width: 32px; border-radius: 4px; object-fit: contain;">
                             <span class="brand-text">Gran Catador</span>
                         </div>
-                        <button class="desktop-only" onclick="irInicio()" style="background: var(--color-primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-left: 15px; transition: opacity 0.2s;">
+                        <button class="desktop-only header-btn-inicio" onclick="irInicio()">
                             <i class="fa-solid fa-house"></i> Inicio
                         </button>
                     </div>
@@ -146,13 +146,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
 
                     <div class="header-right">
-                        <div class="desktop-only"
-                            style="color: var(--dorado); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; background: rgba(212, 175, 55, 0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.2); margin-right: 10px;"
-                            title="Tasas Oficiales BCV">
-                            <span style="display:flex; align-items:center; gap:4px;"><i
+                        <div class="desktop-only header-tasa-badge" title="Tasas Oficiales BCV">
+                            <span class="tasa-value"><i
                                     class="fa-solid fa-dollar-sign"></i> <span id="tasaValor">...</span></span>
-                            <span style="opacity: 0.3;">|</span>
-                            <span style="display:flex; align-items:center; gap:4px;"><i
+                            <span class="tasa-separator">|</span>
+                            <span class="tasa-value"><i
                                     class="fa-solid fa-euro-sign"></i> <span id="tasaEuroValor">...</span></span>
                         </div>
                         <button class="icon-btn desktop-only" onclick="abrirSoporteWhatsApp()"
@@ -176,13 +174,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
                 </div>
             </div>
-            <div class="mobile-only"
-                style="background: rgba(245, 158, 11, 0.05); border-bottom: 1px solid var(--color-border); padding: 4px 15px; display: flex; justify-content: center; align-items: center; color: var(--dorado); font-size: 11px; font-weight: 600;">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%;">
-                    <span style="display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-dollar-sign"></i>
+            <div class="mobile-only header-tasa-mobile">
+                <div class="tasa-inner">
+                    <span class="tasa-value"><i class="fa-solid fa-dollar-sign"></i>
                         <span id="tasaValorMobile">...</span></span>
-                    <span style="opacity: 0.3; color: var(--color-text);">|</span>
-                    <span style="display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-euro-sign"></i> <span
+                    <span class="tasa-separator">|</span>
+                    <span class="tasa-value"><i class="fa-solid fa-euro-sign"></i> <span
                             id="tasaEuroValorMobile">...</span></span>
                 </div>
             </div>
@@ -401,7 +398,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <h3>Accesos Rápidos</h3>
                 <ul>
                     <li><a href="#" onclick="event.preventDefault(); irInicio();"><i class="fa-solid fa-angle-right"></i> Inicio</a></li>
-                    <li><a href="carrito.html"><i class="fa-solid fa-angle-right"></i> Mi Pedido</a></li>
+                    <li><a href="carrito/"><i class="fa-solid fa-angle-right"></i> Mi Pedido</a></li>
                     <li><a href="#" onclick="event.preventDefault(); abrirPerfil();"><i class="fa-solid fa-angle-right"></i> Mi Perfil / Ajustes</a></li>
                     <li><a href="#" onclick="event.preventDefault(); abrirLegales();"><i class="fa-solid fa-angle-right"></i> Políticas y Privacidad</a></li>
                     <li><a href="#" onclick="event.preventDefault(); abrirSoporteWhatsApp();"><i class="fa-solid fa-angle-right"></i> Soporte Técnico</a></li>
@@ -422,34 +419,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <div class="footer-bottom">
             <p>© 2026 Gran Catador C.A. Todos los derechos reservados.</p>
         </div>
-    </footer>
-
-    <div id="toast-container"></div>
-
-    <div id="modal-cart" class="modal-fullscreen">
-        <div class="modal-content-wrapper amazon-cart-container">
-            <div class="amazon-cart-layout">
+     <div id="modal-cart" class="modal-fullscreen">
+        <div class="modal-content-wrapper premium-cart-container">
+            <div class="premium-cart-layout">
                 <!-- Columna Izquierda: Productos -->
-                <div class="amazon-cart-left">
+                <div class="premium-cart-left">
                     <a href="../" style="display: inline-block; margin-bottom: 15px; color: #007185; text-decoration: none; font-size: 14px;">
                         <i class="fa-solid fa-arrow-left"></i> Volver a la tienda
                     </a>
-                    <div class="cart-header amazon-cart-header">
+                    <div class="cart-header premium-cart-header">
                         <h2>Carrito de Compras</h2>
                         <div style="display:flex; gap:10px;">
-                            <button type="button" class="btn-trash amazon-btn-trash" onclick="vaciarCarrito()" aria-label="Vaciar carrito de compras">Descartar todos los artículos</button>
+                            <button type="button" class="btn-trash" onclick="vaciarCarrito()" aria-label="Vaciar carrito de compras">Descartar todos los artículos</button>
                         </div>
                     </div>
                     <p style="text-align: right; font-size: 13px; color: var(--color-text-muted); margin-bottom: 5px; padding-right: 15px;">Precio</p>
-                    <div id="lista-carrito" class="amazon-lista-carrito"></div>
+                    <div id="lista-carrito"></div>
                 </div>
 
                 <!-- Columna Derecha: Checkout / Subtotal -->
-                <div class="amazon-cart-right">
+                <div class="premium-cart-right">
                     <div id="checkout-sections" style="display:none;">
                         
                         <!-- Panel de Subtotal (Top) -->
-                        <div class="checkout-box amazon-subtotal-box">
+                        <div class="premium-checkout-box">
                             <div class="summary-row" style="font-size: 18px; margin-bottom: 15px;">
                                 <span style="font-weight: 400;">Subtotal:</span>
                                 <span class="total-usd" id="totalUsdModal" style="font-weight: 700;">$0.00</span>
@@ -457,7 +450,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             <div class="summary-row" style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 15px; justify-content: flex-end;">
                                 <span class="total-bs" id="totalBsModal">0,00 Bs</span>
                             </div>
-                            <button type="button" id="btn-whatsapp" class="btn-enviar amazon-btn-checkout" onclick="enviarPedido()">
+                            <button type="button" id="btn-whatsapp" class="btn-checkout-primary" onclick="enviarPedido()">
                                 Proceder al pago
                             </button>
                             <p id="msg-cerrado" style="text-align:center; color:#ea4335; font-size:12px; font-weight:bold; display:none; margin-top:10px;">
@@ -466,16 +459,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         </div>
 
                         <!-- Opciones de Entrega -->
-                        <div class="checkout-box">
+                        <div class="premium-checkout-box">
                             <p class="box-title"><i class="fa-solid fa-motorcycle"></i> Opciones de Entrega</p>
-                            <div class="delivery-toggles">
+                            <div class="premium-toggles">
                                 <input type="radio" id="ret" name="metodoEntrega" value="Retiro" checked onchange="toggleDireccion()">
-                                <label for="ret" class="toggle-btn">� � Tienda</label>
+                                <label for="ret" class="premium-toggle-btn"><i class="fa-solid fa-store"></i> Tienda</label>
                                 <input type="radio" id="del" name="metodoEntrega" value="Delivery" onchange="toggleDireccion()">
-                                <label for="del" class="toggle-btn">🛵 Delivery</label>
+                                <label for="del" class="premium-toggle-btn"><i class="fa-solid fa-motorcycle"></i> Delivery</label>
                             </div>
                             <div style="display:flex; gap: 8px; margin-top: 10px;">
-                                <input type="text" id="direccionDelivery" class="input-text" placeholder="Ingresa tu dirección exacta..." style="display:none; flex-grow: 1;">
+                                <input type="text" id="direccionDelivery" class="premium-input" placeholder="Ingresa tu dirección exacta..." style="display:none; flex-grow: 1;">
                                 <button id="btn-geo" onclick="obtenerUbicacion()" style="display:none; background: var(--item-bg); border: 1px solid var(--color-border); border-radius: 10px; padding: 0 15px; cursor: pointer; color: var(--color-primary); font-size: 18px; transition: 0.2s;" title="Usar mi ubicación actual">
                                     <i class="fa-solid fa-location-crosshairs"></i>
                                 </button>
@@ -483,19 +476,19 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             <button id="btnMap" class="btn-maps" onclick="abrirMapa()">
                                 <i class="fa-solid fa-location-dot"></i> Ver ruta a la tienda
                             </button>
-                            <textarea id="notasPedido" class="input-text" placeholder="Añadir opciones de regalo o notas..." style="margin-top:15px; height: 60px; resize: none;"></textarea>
+                            <textarea id="notasPedido" class="premium-input" placeholder="Añadir opciones de regalo o notas..." style="margin-top:15px; height: 60px; resize: none;"></textarea>
                         </div>
 
                         <!-- Método de Pago -->
-                        <div class="checkout-box">
+                        <div class="premium-checkout-box">
                             <p class="box-title"><i class="fa-solid fa-wallet"></i> Método de Pago</p>
-                            <div class="payment-toggles">
+                            <div class="premium-toggles three-cols">
                                 <input type="radio" id="pago-efectivo" name="metodoPago" value="Efectivo" onchange="actualizarMetodoPago()" checked>
-                                <label for="pago-efectivo" class="toggle-btn">💵 Efectivo</label>
+                                <label for="pago-efectivo" class="premium-toggle-btn"><i class="fa-solid fa-money-bill-wave"></i> Efectivo</label>
                                 <input type="radio" id="pago-movil" name="metodoPago" value="Pago Movil" onchange="actualizarMetodoPago()">
-                                <label for="pago-movil" class="toggle-btn">📱 P. Móvil</label>
+                                <label for="pago-movil" class="premium-toggle-btn"><i class="fa-solid fa-mobile-screen"></i> P. Móvil</label>
                                 <input type="radio" id="pago-zelle" name="metodoPago" value="Zelle" onchange="actualizarMetodoPago()">
-                                <label for="pago-zelle" class="toggle-btn">🟣 Zelle</label>
+                                <label for="pago-zelle" class="premium-toggle-btn"><i class="fa-brands fa-stripe-s"></i> Zelle</label>
                             </div>
 
                             <!-- Panel: Efectivo -->
@@ -503,7 +496,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                 <p style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 8px;">¿Con cuánto vas a pagar?</p>
                                 <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
                                     <span style="font-size:22px; color:var(--color-primary); font-weight:bold;">$</span>
-                                    <input type="number" id="montoPago" class="vuelto-input" placeholder="0.00" onkeyup="calcularVuelto()">
+                                    <input type="number" id="montoPago" class="premium-input" placeholder="0.00" onkeyup="calcularVuelto()">
                                 </div>
                                 <p id="res-vuelto" style="font-size:13px; margin-top:8px; display:none; font-weight:bold;"></p>
                             </div>
@@ -522,7 +515,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     <span>RIF: V-22582611</span>
                                     <button class="btn-copy-pago" onclick="copiarDatoPago('V-22582611', this)"><i class="fa-regular fa-copy"></i> Copiar</button>
                                 </div>
-                                <input type="text" id="refPagoMovil" class="input-text" placeholder="N° de Referencia (Opcional)" style="margin-top: 10px; text-align: center; font-size: 13px;">
+                                <input type="text" id="refPagoMovil" class="premium-input" placeholder="N° de Referencia (Opcional)" style="margin-top: 10px; text-align: center; font-size: 13px;">
                                 <p style="font-size: 11px; color: var(--color-primary); font-weight: bold; text-align: center; margin-top: 10px;"><i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp</p>
                             </div>
 
@@ -534,11 +527,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     <button class="btn-copy-pago" onclick="copiarDatoPago('grancatadorcorp@gmail.com', this)"><i class="fa-regular fa-copy"></i> Copiar</button>
                                 </div>
                                 <p style="font-size: 12px; margin-bottom: 8px;">A nombre de: <b>Ariadna Silva</b></p>
-                                <input type="text" id="refZelle" class="input-text" placeholder="Nombre del Titular Zelle (Opcional)" style="margin-top: 10px; text-align: center; font-size: 13px;">
+                                <input type="text" id="refZelle" class="premium-input" placeholder="Nombre del Titular Zelle (Opcional)" style="margin-top: 10px; text-align: center; font-size: 13px;">
                                 <p style="font-size: 11px; color: var(--color-primary); font-weight: bold; margin-top: 10px;"><i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp</p>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>

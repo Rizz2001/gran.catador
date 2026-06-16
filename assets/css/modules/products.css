@@ -1,4 +1,4 @@
-﻿/* --- SKELETON LOADER PARA GRUPOS --- */
+/* --- SKELETON LOADER PARA GRUPOS --- */
 @keyframes skeleton-pulse {
     0% {
         background-color: rgba(0, 0, 0, 0.05);
@@ -91,12 +91,29 @@
     height: 100%;
     animation: card-fade-in 0.35s ease-out both;
     will-change: transform, opacity;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(8px);
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid hsla(0,0%,0%,0.1);
+    background: var(--color-card);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--color-border);
     overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    padding: 10px;
+    position: relative;
+}
+
+.producto-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(30, 58, 138, 0.1);
+    border-color: rgba(30, 58, 138, 0.2);
+}
+
+body.dark-mode .producto-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .producto-card:hover {
+    box-shadow: 0 12px 32px rgba(96, 165, 250, 0.1);
+    border-color: rgba(96, 165, 250, 0.25);
 }
 
 /* Animación de entrada para las tarjetas de producto */
@@ -115,23 +132,7 @@
 /* --- MEJORAS PROFESIONALES DE FICHA DE PRODUCTO (SOLO PC) --- */
 @media (min-width: 1024px) {
     .producto-card {
-        transition: box-shadow 0.2s ease, border-color 0.2s ease;
-        border-radius: 4px;
-        background: var(--color-card, #ffffff);
-        border: 1px solid var(--color-border);
-        overflow: hidden;
-    }
-
-    .producto-card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        border-color: #d5d9d9;
-        z-index: 2;
-    }
-
-    /* Ajuste de sombra y borde para el Modo Oscuro */
-    body.dark-mode .producto-card:hover {
-        box-shadow: 0 4px 12px rgba(255,255,255,0.08);
-        border-color: #555;
+        border-radius: 14px;
     }
 
     /* Efecto Zoom sutil en la imagen */
@@ -141,7 +142,7 @@
     }
 
     .producto-card:hover .product-img-container img {
-        transform: scale(1.03);
+        transform: scale(1.05);
     }
 
     /* Ocultar el corazón hasta que se haga hover (salvo que ya sea favorito) */
@@ -156,18 +157,16 @@
         transform: scale(1);
     }
 
-    /* Resaltar din�micamente el bot�n de agregar al carrito */
+    /* Resaltar dinámicamente el botón de agregar al carrito */
     .producto-card .btn-add-cart {
         transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
-        box-shadow: 0 10px 24px rgba(245, 158, 11, 0.16);
-        border: 1px solid rgba(255,255,255,0.18);
     }
 
     .producto-card:hover .btn-add-cart {
         background-color: var(--color-primary, #1E3A8A);
         color: #ffffff;
-        transform: translateY(-2px) scale(1.08);
-        box-shadow: 0 14px 28px rgba(30, 58, 138, 0.18);
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(30, 58, 138, 0.25);
     }
 
     body.dark-mode .producto-card:hover .btn-add-cart {
@@ -182,6 +181,9 @@
     height: auto !important;
     min-height: auto !important;
     width: 100%;
+    background: var(--item-bg, #F3F4F6);
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 /* Truncar textos de productos largos a un máximo de 2 líneas */

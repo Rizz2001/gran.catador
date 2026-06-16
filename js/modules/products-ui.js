@@ -45,21 +45,21 @@ function crearHTMLProducto(p) {
             ${badgeHTML}
             
             <div onclick="irADetalle('${p.codigo.replace(/'/g, "\\'")}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); irADetalle('${p.codigo.replace(/'/g, "\\'")}'); }" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;" role="button" tabindex="0" aria-label="Ver detalles de ${p.Nombre}">
-                <div class="product-img-container skeleton-box" style="display: flex; justify-content: center; align-items: center; border-radius: 8px;">
+                <div class="product-img-container skeleton-box">
                     ${galeriasHTML}
                 </div>
                 
                 <h3 class="producto-titulo" title="${p.Nombre}">${p.Nombre}</h3>
             </div>
-            <p class="producto-stock" style="font-size: 12.5px; margin-top: 4px; margin-bottom: 8px; color: var(--color-text);">
+            <p class="producto-stock">
                 ${textoStock}
             </p>
             
             <div class="product-bottom">
                 <div class="product-price-container">
-                    <span style="font-size: 10px; color: var(--color-primary); font-weight: 800; letter-spacing: 0.5px; margin-bottom: -2px; display: block;">${textoUnidad}</span>
-                    <span class="product-price" style="font-size: 22px; font-weight: 900; line-height: 1.1;">$${precioUsdDin}</span>
-                    <span class="product-price-bs" style="font-size: 13px;">${precioBsDin} Bs</span>
+                    <span class="product-unit-label">${textoUnidad}</span>
+                    <span class="product-price">$${precioUsdDin}</span>
+                    <span class="product-price-bs">${precioBsDin} Bs</span>
                 </div>
                 
             <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" aria-label="Agregar ${p.Nombre} al carrito" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja})"`}>

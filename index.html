@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 
 <head>
@@ -53,6 +53,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="stylesheet" href="assets/css/modules/products.css">
     <link rel="stylesheet" href="assets/css/modules/lightbox.css">
     <link rel="stylesheet" href="assets/css/modules/layout.css">
+    <link rel="stylesheet" href="assets/css/modules/cart.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
@@ -127,7 +128,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                 style="height: 32px; width: 32px; border-radius: 4px; object-fit: contain;">
                             <span class="brand-text">Gran Catador</span>
                         </div>
-                        <button class="desktop-only" onclick="irInicio()" style="background: var(--color-primary); color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-left: 15px; transition: opacity 0.2s;">
+                        <button class="desktop-only header-btn-inicio" onclick="irInicio()">
                             <i class="fa-solid fa-house"></i> Inicio
                         </button>
                     </div>
@@ -144,14 +145,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
 
                     <div class="header-right">
-                        <div class="desktop-only"
-                            style="color: var(--dorado); font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; background: rgba(212, 175, 55, 0.1); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(212, 175, 55, 0.2); margin-right: 10px;"
-                            title="Tasas Oficiales BCV">
-                            <span style="display:flex; align-items:center; gap:4px;"><i
-                                    class="fa-solid fa-dollar-sign"></i> <span id="tasaValor">...</span></span>
-                            <span style="opacity: 0.3;">|</span>
-                            <span style="display:flex; align-items:center; gap:4px;"><i
-                                    class="fa-solid fa-euro-sign"></i> <span id="tasaEuroValor">...</span></span>
+                        <div class="desktop-only header-tasa-badge" title="Tasas Oficiales BCV">
+                            <span class="tasa-value"><i class="fa-solid fa-dollar-sign"></i> <span id="tasaValor">...</span></span>
+                            <span class="tasa-separator">|</span>
+                            <span class="tasa-value"><i class="fa-solid fa-euro-sign"></i> <span id="tasaEuroValor">...</span></span>
                         </div>
                         <button class="icon-btn desktop-only" onclick="abrirSoporteWhatsApp()"
                             aria-label="Soporte WhatsApp">
@@ -174,13 +171,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
                 </div>
             </div>
-            <div class="mobile-only"
-                style="background: rgba(245, 158, 11, 0.05); border-bottom: 1px solid var(--color-border); padding: 4px 15px; display: flex; justify-content: center; align-items: center; color: var(--dorado); font-size: 11px; font-weight: 600;">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%;">
-                    <span style="display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-dollar-sign"></i>
+            <div class="mobile-only header-tasa-mobile">
+                <div class="tasa-inner">
+                    <span class="tasa-value"><i class="fa-solid fa-dollar-sign"></i>
                         <span id="tasaValorMobile">...</span></span>
-                    <span style="opacity: 0.3; color: var(--color-text);">|</span>
-                    <span style="display:flex; align-items:center; gap:4px;"><i class="fa-solid fa-euro-sign"></i> <span
+                    <span class="tasa-separator">|</span>
+                    <span class="tasa-value"><i class="fa-solid fa-euro-sign"></i> <span
                             id="tasaEuroValorMobile">...</span></span>
                 </div>
             </div>
@@ -399,7 +395,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <h3>Accesos Rápidos</h3>
                 <ul>
                     <li><a href="#" onclick="event.preventDefault(); irInicio();"><i class="fa-solid fa-angle-right"></i> Inicio</a></li>
-                    <li><a href="carrito.html"><i class="fa-solid fa-angle-right"></i> Mi Pedido</a></li>
+                    <li><a href="carrito/"><i class="fa-solid fa-angle-right"></i> Mi Pedido</a></li>
                     <li><a href="#" onclick="event.preventDefault(); abrirPerfil();"><i class="fa-solid fa-angle-right"></i> Mi Perfil / Ajustes</a></li>
                     <li><a href="#" onclick="event.preventDefault(); abrirLegales();"><i class="fa-solid fa-angle-right"></i> Políticas y Privacidad</a></li>
                     <li><a href="#" onclick="event.preventDefault(); abrirSoporteWhatsApp();"><i class="fa-solid fa-angle-right"></i> Soporte Técnico</a></li>
@@ -425,154 +421,127 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div id="toast-container"></div>
 
     <div id="modal-cart" class="modal-fullscreen">
-        <div class="modal-content-wrapper">
-            <div class="cart-header">
-                <h2>Mi Pedido</h2>
-                <div style="display:flex; gap:10px;">
-                    <button type="button" class="btn-trash" onclick="vaciarCarrito()" aria-label="Vaciar carrito de compras"><i
-                            class="fa-solid fa-trash-can"></i></button>
-                    <button type="button" onclick="cerrarModal('modal-cart', 'nav-home')" aria-label="Cerrar carrito"
-                        class="modal-close-btn">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Lista de ítems del carrito -->
-            <div id="lista-carrito" style="flex-grow: 1;"></div>
-
-            <!-- Sección de checkout (entrega, pago, total) -->
-            <div id="checkout-sections" style="display:none;">
-
-                <!-- Opciones de Entrega -->
-                <div class="checkout-box">
-                    <p class="box-title"><i class="fa-solid fa-motorcycle"></i> Opciones de Entrega</p>
-                    <div class="delivery-toggles">
-                        <input type="radio" id="ret" name="metodoEntrega" value="Retiro" checked
-                            onchange="toggleDireccion()">
-                        <label for="ret" class="toggle-btn">🏪 Tienda</label>
-                        <input type="radio" id="del" name="metodoEntrega" value="Delivery" onchange="toggleDireccion()">
-                        <label for="del" class="toggle-btn">🛵 Delivery</label>
-                    </div>
-                    <div style="display:flex; gap: 8px; margin-top: 10px;">
-                        <input type="text" id="direccionDelivery" class="input-text"
-                            placeholder="Ingresa tu dirección exacta..." style="display:none; flex-grow: 1;">
-                        <button id="btn-geo" onclick="obtenerUbicacion()"
-                            style="display:none; background: var(--item-bg); border: 1px solid var(--color-border); border-radius: 10px; padding: 0 15px; cursor: pointer; color: var(--color-primary); font-size: 18px; transition: 0.2s;"
-                            title="Usar mi ubicación actual">
-                            <i class="fa-solid fa-location-crosshairs"></i>
+        <div class="modal-content-wrapper premium-cart-container">
+            <div class="premium-cart-layout">
+                <!-- Columna Izquierda: Productos -->
+                <div class="premium-cart-left">
+                    <div class="premium-cart-header">
+                        <h2>Mi Pedido</h2>
+                        <button type="button" class="btn-trash" onclick="vaciarCarrito()" aria-label="Vaciar carrito de compras">
+                            <i class="fa-solid fa-trash-can"></i> Vaciar Carrito
+                        </button>
+                        <button type="button" onclick="cerrarModal('modal-cart', 'nav-home')" aria-label="Cerrar carrito" class="modal-close-btn desktop-only" style="position: absolute; top: 15px; right: 20px;">
+                            <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
-                    <button id="btnMap" class="btn-maps" onclick="abrirMapa()">
-                        <i class="fa-solid fa-location-dot"></i> Ver ruta a la tienda
-                    </button>
-                    <textarea id="notasPedido" class="input-text"
-                        placeholder="Notas (Ej: Traer hielo extra, vuelto de $50)..."
-                        style="margin-top:15px; height: 60px; resize: none;"></textarea>
+                    <div id="lista-carrito" style="flex-grow: 1;"></div>
                 </div>
 
-                <!-- Método de Pago -->
-                <div class="checkout-box">
-                    <p class="box-title"><i class="fa-solid fa-wallet"></i> Método de Pago</p>
-                    <div class="payment-toggles">
-                        <input type="radio" id="pago-efectivo" name="metodoPago" value="Efectivo"
-                            onchange="actualizarMetodoPago()" checked>
-                        <label for="pago-efectivo" class="toggle-btn">💵 Efectivo</label>
-                        <input type="radio" id="pago-movil" name="metodoPago" value="Pago Movil"
-                            onchange="actualizarMetodoPago()">
-                        <label for="pago-movil" class="toggle-btn">📱 P. Móvil</label>
-                        <input type="radio" id="pago-zelle" name="metodoPago" value="Zelle"
-                            onchange="actualizarMetodoPago()">
-                        <label for="pago-zelle" class="toggle-btn">🟣 Zelle</label>
-                    </div>
-
-                    <!-- Panel: Efectivo -->
-                    <div id="box-efectivo" style="margin-top: 15px; text-align: center;">
-                        <p style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 8px;">¿Con cuánto vas
-                            a pagar?</p>
-                        <div style="display:flex; align-items:center; justify-content:center; gap:5px;">
-                            <span style="font-size:22px; color:var(--color-primary); font-weight:bold;">$</span>
-                            <input type="number" id="montoPago" class="vuelto-input" placeholder="0.00"
-                                onkeyup="calcularVuelto()">
-                        </div>
-                        <p id="res-vuelto" style="font-size:13px; margin-top:8px; display:none; font-weight:bold;"></p>
-                    </div>
-
-                    <!-- Panel: Pago Móvil -->
-                    <div id="box-pagomovil"
-                        style="margin-top: 15px; display:none; background: var(--color-bg); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--color-border); text-align: left;">
-                        <p
-                            style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing:0.5px;">
-                            Datos Pago Móvil</p>
-                        <div class="data-pago-row"
-                            style="border: none; padding: 4px 12px; background: transparent; margin-bottom: 0;">
-                            <span style="font-family: inherit; font-size: 13px;"><b>Banco:</b> Mercantil (0105)</span>
-                        </div>
-                        <div class="data-pago-row">
-                            <span>Tel: 0414-3732274</span>
-                            <button class="btn-copy-pago" onclick="copiarDatoPago('04143732274', this)">
-                                <i class="fa-regular fa-copy"></i> Copiar
+                <!-- Columna Derecha: Checkout -->
+                <div class="premium-cart-right">
+                    <div id="checkout-sections" style="display:none; flex-direction: column; gap: 20px;">
+                        
+                        <!-- Panel de Subtotal -->
+                        <div class="premium-checkout-box">
+                            <div class="summary-row">
+                                <span class="label">Total a Pagar</span>
+                                <div style="text-align: right;">
+                                    <span class="total-usd" id="totalUsdModal">$0.00</span>
+                                    <span class="total-bs" id="totalBsModal" style="display: block; margin-top: 4px;">0,00 Bs</span>
+                                </div>
+                            </div>
+                            <button type="button" id="btn-whatsapp" class="btn-checkout-primary" onclick="enviarPedido()">
+                                <i class="fa-brands fa-whatsapp" style="font-size: 20px;"></i> Enviar Pedido
                             </button>
+                            <p id="msg-cerrado" style="text-align:center; color:var(--color-danger); font-size:12px; font-weight:700; display:none; margin-top:10px;">
+                                La tienda está cerrada en este momento.
+                            </p>
                         </div>
-                        <div class="data-pago-row">
-                            <span>RIF: V-22582611</span>
-                            <button class="btn-copy-pago" onclick="copiarDatoPago('V-22582611', this)">
-                                <i class="fa-regular fa-copy"></i> Copiar
-                            </button>
-                        </div>
-                        <input type="text" id="refPagoMovil" class="input-text"
-                            placeholder="N° de Referencia (Opcional)"
-                            style="margin-top: 10px; text-align: center; font-size: 13px;">
-                        <p
-                            style="font-size: 11px; color: var(--color-primary); font-weight: bold; text-align: center; margin-top: 10px;">
-                            <i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp
-                        </p>
-                    </div>
 
-                    <!-- Panel: Zelle -->
-                    <div id="box-zelle"
-                        style="margin-top: 15px; display:none; background: var(--color-bg); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--color-border); text-align: center;">
-                        <p
-                            style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing:0.5px;">
-                            Datos Zelle</p>
-                        <div class="data-pago-row" style="margin-bottom: 4px;">
-                            <span style="color: #741b88;">grancatadorcorp@gmail.com</span>
-                            <button class="btn-copy-pago" onclick="copiarDatoPago('grancatadorcorp@gmail.com', this)">
-                                <i class="fa-regular fa-copy"></i> Copiar
+                        <!-- Opciones de Entrega -->
+                        <div class="premium-checkout-box">
+                            <p class="box-title"><i class="fa-solid fa-motorcycle"></i> Entrega</p>
+                            <div class="premium-toggles">
+                                <input type="radio" id="ret" name="metodoEntrega" value="Retiro" checked onchange="toggleDireccion()">
+                                <label for="ret" class="premium-toggle-btn"><i class="fa-solid fa-store"></i> Tienda</label>
+                                
+                                <input type="radio" id="del" name="metodoEntrega" value="Delivery" onchange="toggleDireccion()">
+                                <label for="del" class="premium-toggle-btn"><i class="fa-solid fa-motorcycle"></i> Delivery</label>
+                            </div>
+                            
+                            <div id="direccion-container" style="display:none; margin-top: 15px;">
+                                <div style="display:flex; gap: 10px;">
+                                    <input type="text" id="direccionDelivery" class="premium-input" placeholder="Tu dirección exacta..." style="flex-grow: 1;">
+                                    <button id="btn-geo" onclick="obtenerUbicacion()" style="background: rgba(30,58,138,0.1); border: none; border-radius: var(--radius-md); padding: 0 15px; cursor: pointer; color: var(--color-primary); font-size: 18px; transition: 0.2s;" title="Usar mi ubicación actual">
+                                        <i class="fa-solid fa-location-crosshairs"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <button id="btnMap" class="btn-maps" onclick="abrirMapa()" style="width: 100%; margin-top: 15px;">
+                                <i class="fa-solid fa-location-dot"></i> Ver ruta a la tienda
                             </button>
+                            
+                            <textarea id="notasPedido" class="premium-input" placeholder="Añadir notas al pedido (Ej: Hielo, Vuelto)..." style="margin-top:15px; height: 70px; resize: none;"></textarea>
                         </div>
-                        <p style="font-size: 12px; margin-bottom: 8px;">A nombre de: <b>Ariadna Silva</b></p>
-                        <input type="text" id="refZelle" class="input-text"
-                            placeholder="Nombre del Titular Zelle (Opcional)"
-                            style="margin-top: 10px; text-align: center; font-size: 13px;">
-                        <p style="font-size: 11px; color: var(--color-primary); font-weight: bold; margin-top: 10px;">
-                            <i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp
-                        </p>
+
+                        <!-- Método de Pago -->
+                        <div class="premium-checkout-box">
+                            <p class="box-title"><i class="fa-solid fa-wallet"></i> Pago</p>
+                            <div class="premium-toggles three-cols">
+                                <input type="radio" id="pago-efectivo" name="metodoPago" value="Efectivo" onchange="actualizarMetodoPago()" checked>
+                                <label for="pago-efectivo" class="premium-toggle-btn"><i class="fa-solid fa-money-bill-wave"></i> Efectivo</label>
+                                
+                                <input type="radio" id="pago-movil" name="metodoPago" value="Pago Movil" onchange="actualizarMetodoPago()">
+                                <label for="pago-movil" class="premium-toggle-btn"><i class="fa-solid fa-mobile-screen"></i> P. Móvil</label>
+                                
+                                <input type="radio" id="pago-zelle" name="metodoPago" value="Zelle" onchange="actualizarMetodoPago()">
+                                <label for="pago-zelle" class="premium-toggle-btn"><i class="fa-brands fa-stripe-s"></i> Zelle</label>
+                            </div>
+
+                            <!-- Panel: Efectivo -->
+                            <div id="box-efectivo" style="margin-top: 15px; text-align: center;">
+                                <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 10px; font-weight: 600;">¿Con cuánto vas a pagar?</p>
+                                <div style="display:flex; align-items:center; justify-content:center; gap:8px;">
+                                    <span style="font-size:24px; color:var(--color-primary); font-weight:800;">$</span>
+                                    <input type="number" id="montoPago" class="premium-input" placeholder="0.00" onkeyup="calcularVuelto()" style="width: 120px; font-size: 18px; text-align: center; font-weight: 700;">
+                                </div>
+                                <p id="res-vuelto" style="font-size:14px; margin-top:10px; display:none; font-weight:700; color: var(--color-accent);"></p>
+                            </div>
+
+                            <!-- Panel: Pago Móvil -->
+                            <div id="box-pagomovil" style="margin-top: 15px; display:none; background: var(--color-bg); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--color-border); text-align: left;">
+                                <div class="data-pago-row" style="border: none; padding: 4px 12px; background: transparent; margin-bottom: 0;">
+                                    <span style="font-family: inherit; font-size: 13px;"><b>Banco:</b> Mercantil (0105)</span>
+                                </div>
+                                <div class="data-pago-row">
+                                    <span>Tel: 0414-3732274</span>
+                                    <button class="btn-copy-pago" onclick="copiarDatoPago('04143732274', this)"><i class="fa-regular fa-copy"></i> Copiar</button>
+                                </div>
+                                <div class="data-pago-row">
+                                    <span>RIF: V-22582611</span>
+                                    <button class="btn-copy-pago" onclick="copiarDatoPago('V-22582611', this)"><i class="fa-regular fa-copy"></i> Copiar</button>
+                                </div>
+                                <input type="text" id="refPagoMovil" class="premium-input" placeholder="N° Referencia (Opcional)" style="margin-top: 12px; text-align: center; font-size: 13px;">
+                            </div>
+
+                            <!-- Panel: Zelle -->
+                            <div id="box-zelle" style="margin-top: 15px; display:none; background: var(--color-bg); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--color-border); text-align: center;">
+                                <div class="data-pago-row" style="margin-bottom: 8px;">
+                                    <span style="color: #741b88; font-weight: 600;">grancatadorcorp@gmail.com</span>
+                                    <button class="btn-copy-pago" onclick="copiarDatoPago('grancatadorcorp@gmail.com', this)"><i class="fa-regular fa-copy"></i> Copiar</button>
+                                </div>
+                                <p style="font-size: 13px; margin-bottom: 12px;">A nombre de: <b>Ariadna Silva</b></p>
+                                <input type="text" id="refZelle" class="premium-input" placeholder="Titular Zelle (Opcional)" style="text-align: center; font-size: 13px;">
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Total y botón enviar -->
-                <div class="checkout-box">
-                    <div class="summary-box">
-                        <div class="summary-row">
-                            <span>Total USD</span>
-                            <span class="total-usd" id="totalUsdModal">$0.00</span>
-                        </div>
-                        <div class="summary-row">
-                            <span>Total Bs</span>
-                            <span class="total-bs" id="totalBsModal">0,00 Bs</span>
-                        </div>
-                    </div>
-                    <button type="button" id="btn-whatsapp" class="btn-enviar" onclick="enviarPedido()" style="margin-top: 15px;">
-                        <i class="fa-brands fa-whatsapp" style="font-size: 20px;"></i> Enviar Pedido a WhatsApp
-                    </button>
-                    <p id="msg-cerrado"
-                        style="text-align:center; color:#ea4335; font-size:11px; font-weight:bold; display:none; margin-top:10px;">
-                        La tienda está cerrada en este momento.
-                    </p>
-                </div>
-
             </div>
+            <!-- Mobile Close button inside layout -->
+            <button type="button" onclick="cerrarModal('modal-cart', 'nav-home')" aria-label="Cerrar carrito" class="modal-close-btn mobile-only" style="position: absolute; top: 15px; right: 15px; background: var(--color-card); border: 1px solid var(--color-border); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; z-index: 100;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
     </div>
 
