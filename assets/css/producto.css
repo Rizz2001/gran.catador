@@ -59,23 +59,22 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    border: 1px solid var(--color-border);
-    border-left: 5px solid var(--color-primary);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
     aspect-ratio: 1 / 1;
     overflow: hidden;
-    transition: border-color 0.3s ease, border-left-color 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 body.dark-mode .product-image-wrapper {
-    border-left-color: var(--color-accent);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+    border-color: rgba(255,255,255,0.05);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
 }
 
 .product-image-wrapper:hover {
     border-color: var(--color-primary);
-    border-left-color: var(--color-primary);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 25px 60px rgba(30, 58, 138, 0.12);
+    transform: translateY(-4px);
 }
 
 body.dark-mode .product-image-wrapper:hover {
@@ -238,8 +237,8 @@ body.dark-mode .qty-btn:hover {
     font-weight: 700;
     letter-spacing: 0.5px;
     cursor: pointer;
-    box-shadow: 0 8px 25px rgba(30, 58, 138, 0.2);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 8px 20px rgba(30, 58, 138, 0.25);
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, background 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -251,16 +250,16 @@ body.dark-mode .qty-btn:hover {
 body.dark-mode .btn-add-main {
     background: linear-gradient(135deg, var(--color-accent) 0%, #d97706 100%);
     color: black;
-    box-shadow: 0 8px 25px rgba(245, 158, 11, 0.2);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.25);
 }
 
 .btn-add-main:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(30, 58, 138, 0.3);
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(30, 58, 138, 0.35);
 }
 
 body.dark-mode .btn-add-main:hover {
-    box-shadow: 0 12px 30px rgba(245, 158, 11, 0.3);
+    box-shadow: 0 15px 35px rgba(245, 158, 11, 0.35);
 }
 
 .btn-add-main:active {
@@ -437,8 +436,22 @@ body.dark-mode .description-card h2 i, body.dark-mode .specs-card h2 i {
 .spec-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    padding: 15px 0;
+    padding: 16px 20px;
     border-bottom: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    transition: background 0.2s ease;
+}
+
+.spec-row:nth-child(even) {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+body.dark-mode .spec-row:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.spec-row:hover {
+    background: rgba(30, 58, 138, 0.04);
 }
 
 .spec-row:last-child {
