@@ -88,7 +88,7 @@ textarea {
     background-color: var(--color-bg, #F9FAFB);
     padding-bottom: 30px;
     animation: slideUpModal 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    /* Ocultar la barra de scroll en el contenido del modal (mÃ³vil) */
+    /* Ocultar la barra de scroll en el contenido del modal (móvil) */
     -ms-overflow-style: none;
     /* IE y Edge */
     scrollbar-width: none;
@@ -248,7 +248,7 @@ textarea {
         text-align: left !important;
     }
 
-    /* Quitamos los bordes inferiores que se usaban para diseÃ±o de 1 columna */
+    /* Quitamos los bordes inferiores que se usaban para diseño de 1 columna */
     .footer-col:nth-child(1),
     .footer-col:nth-child(2),
     .footer-col:nth-child(3) {
@@ -263,7 +263,7 @@ textarea {
         text-align: left;
     }
 
-    /* Ajuste de lÃ­neas debajo del tÃ­tulo */
+    /* Ajuste de líneas debajo del título */
     .footer-col h3::after {
         left: 0 !important;
         transform: none !important;
@@ -373,16 +373,16 @@ textarea {
     /* Oculta scroll en Chrome/Safari/Webkit */
 }
 
-/* Convertir los viejos botones en pÃ­ldoras (Sobreescribe responsive.css) */
+/* Convertir los viejos botones en píldoras (Sobreescribe responsive.css) */
 .horizontal-filters .cat-btn {
     flex: 0 0 auto !important;
     min-width: max-content !important;
     width: auto !important;
     white-space: nowrap !important;
     border-radius: 25px !important;
-    /* MÃ¡s redondeados */
+    /* Más redondeados */
     padding: 5px 10px !important;
-    /* AÃºn mÃ¡s reducidos para observar mÃ¡s grupos */
+    /* Aún más reducidos para observar más grupos */
     background: var(--item-bg, #fff);
     border: 1px solid var(--borde-color, #ddd) !important;
     color: var(--color-text, #333);
@@ -393,7 +393,7 @@ textarea {
     flex-direction: row !important;
     align-items: center;
     gap: 4px !important;
-    /* SeparaciÃ³n menor */
+    /* Separación menor */
     cursor: pointer;
     user-select: none;
 }
@@ -426,9 +426,9 @@ textarea {
     width: auto !important;
     white-space: nowrap !important;
     border-radius: 8px !important;
-    /* MÃ¡s cuadrados, menos de "pÃ­ldora" */
+    /* Más cuadrados, menos de "píldora" */
     padding: 3px 8px !important;
-    /* Mucho mÃ¡s pequeÃ±os */
+    /* Mucho más pequeños */
     background: transparent;
     border: 1px solid var(--borde-color, #ddd) !important;
     color: var(--color-text-muted, #666);
@@ -484,7 +484,7 @@ textarea {
     right: -16px;
 }
 
-/* Ocultar en dispositivos mÃ³viles y tablets pequeÃ±as */
+/* Ocultar en dispositivos móviles y tablets pequeñas */
 @media (max-width: 1024px) {
     .scroll-arrow {
         display: none !important;

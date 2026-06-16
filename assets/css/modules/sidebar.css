@@ -1,4 +1,4 @@
-/* --- SIDEBAR MENU (Filtros y CategorÃ­as) --- */
+﻿/* --- SIDEBAR MENU (Filtros y Categorías) --- */
 .sidebar-overlay {
     position: fixed;
     top: 0;
@@ -276,7 +276,7 @@ body.dark-mode .checkbox-item input[type="checkbox"]:checked+label i {
     color: var(--dorado, #F59E0B);
 }
 
-/* --- JERARQUÃA DE SUBCATEGORÃAS (Sidebar) --- */
+/* --- JERARQUÍA DE SUBCATEGORÍAS (Sidebar) --- */
 .sidebar-subfilters {
     padding-left: 20px !important;
     margin-top: 4px;
@@ -355,7 +355,7 @@ body.dark-mode .sidebar-subfilters .checkbox-item input[type="checkbox"]:checked
     border-radius: 12px !important;
 }
 
-/* --- FADE GRADIENT (MÃSCARA DE SCROLL) --- */
+/* --- FADE GRADIENT (MÁSCARA DE SCROLL) --- */
 .horizontal-scroll-wrapper {
     position: relative;
     -webkit-mask-image: linear-gradient(to right, black, black);

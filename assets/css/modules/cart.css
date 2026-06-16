@@ -1,4 +1,4 @@
-/* ==========================================================================
+﻿/* ==========================================================================
    AMAZON STYLE CART LAYOUT
    ========================================================================== */
 
@@ -319,7 +319,7 @@
     transform: translateY(-1px);
 }
 
-/* Modo Oscuro (Ajustes AutomÃ¡ticos) */
+/* Modo Oscuro (Ajustes Automáticos) */
 [data-theme="dark"] .amazon-cart-left,
 [data-theme="dark"] .amazon-subtotal-box {
     background: var(--item-bg);

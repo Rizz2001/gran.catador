@@ -1,4 +1,4 @@
-/* --- SKELETON LOADER PARA GRUPOS --- */
+﻿/* --- SKELETON LOADER PARA GRUPOS --- */
 @keyframes skeleton-pulse {
     0% {
         background-color: rgba(0, 0, 0, 0.05);
@@ -40,7 +40,7 @@
     animation: skeleton-pulse-dark 1.5s infinite ease-in-out;
 }
 
-/* --- SKELETON GENÃ‰RICO PARA PRODUCTOS --- */
+/* --- SKELETON GENÉRICO PARA PRODUCTOS --- */
 .skeleton-box {
     background-color: rgba(0, 0, 0, 0.08);
     animation: skeleton-pulse 1.5s infinite ease-in-out;
@@ -60,7 +60,7 @@
 
 /* --- AJUSTES DE GRILLA Y PRODUCTOS (RESPONSIVE) --- */
 
-/* Forzar 2 columnas en mÃ³viles con un espaciado adecuado */
+/* Forzar 2 columnas en móviles con un espaciado adecuado */
 .productos-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -68,7 +68,7 @@
     padding: 10px;
 }
 
-/* AdaptaciÃ³n progresiva para pantallas mÃ¡s grandes (Tablets y PC) */
+/* Adaptación progresiva para pantallas más grandes (Tablets y PC) */
 @media (min-width: 768px) {
     .productos-grid {
         grid-template-columns: repeat(4, 1fr);
@@ -83,7 +83,7 @@
     }
 }
 
-/* Evitar deformaciÃ³n de las tarjetas y hacerlas uniformes */
+/* Evitar deformación de las tarjetas y hacerlas uniformes */
 .producto-card {
     display: flex;
     flex-direction: column;
@@ -99,7 +99,7 @@
     overflow: hidden;
 }
 
-/* AnimaciÃ³n de entrada para las tarjetas de producto */
+/* Animación de entrada para las tarjetas de producto */
 @keyframes card-fade-in {
     from {
         opacity: 0;
@@ -144,7 +144,7 @@
         transform: scale(1.03);
     }
 
-    /* Ocultar el corazÃ³n hasta que se haga hover (salvo que ya sea favorito) */
+    /* Ocultar el corazón hasta que se haga hover (salvo que ya sea favorito) */
     .producto-card .btn-fav:not(.active) {
         opacity: 0;
         transform: scale(0.8);
@@ -156,7 +156,7 @@
         transform: scale(1);
     }
 
-    /* Resaltar dinámicamente el botón de agregar al carrito */
+    /* Resaltar din�micamente el bot�n de agregar al carrito */
     .producto-card .btn-add-cart {
         transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
         box-shadow: 0 10px 24px rgba(245, 158, 11, 0.16);
@@ -184,7 +184,7 @@
     width: 100%;
 }
 
-/* Truncar textos de productos largos a un mÃ¡ximo de 2 lÃ­neas */
+/* Truncar textos de productos largos a un máximo de 2 líneas */
 .producto-titulo {
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
@@ -194,12 +194,12 @@
     font-size: 12px !important;
     line-height: 1.3 !important;
     height: 34px !important;
-    /* AlineaciÃ³n perfecta si un texto ocupa 1 lÃ­nea y el del lado 2 lÃ­neas */
+    /* Alineación perfecta si un texto ocupa 1 línea y el del lado 2 líneas */
     margin-bottom: 4px !important;
     word-break: break-word !important;
 }
 
-/* --- BOTÃ“N CARGAR MÃS PRODUCTOS VISIBLE --- */
+/* --- BOTÓN CARGAR MÁS PRODUCTOS VISIBLE --- */
 .btn-cargar-mas {
     display: block;
     width: calc(100% - 40px);
@@ -578,7 +578,7 @@ body.dark-mode .marcas-aliadas-item img {
     background: rgba(239, 68, 68, 0.9);
 }
 
-/* --- LIGHTBOX RESPONSIVE (MÃ“VIL Y TABLET) --- */
+/* --- LIGHTBOX RESPONSIVE (MÓVIL Y TABLET) --- */
 @media (max-width: 992px) {
     #image-lightbox-gc {
         padding: 15px;
@@ -617,7 +617,7 @@ body.dark-mode .marcas-aliadas-item img {
 }
 
 /* ==========================================================================
-   SECCIÃ“N DE FILTROS Y ORDENAMIENTO ULTRA COMPACTA (SÃšPER PROFESIONAL)
+   SECCIÓN DE FILTROS Y ORDENAMIENTO ULTRA COMPACTA (SÚPER PROFESIONAL)
    ========================================================================== */
 
 /* Contenedor principal de herramientas */
@@ -638,7 +638,7 @@ body.dark-mode .marcas-aliadas-item img {
     box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05)) !important;
 }
 
-/* TÃ­tulo de la secciÃ³n */
+/* Título de la sección */
 .tools-container .section-title {
     font-size: 14px !important;
     font-weight: 700 !important;
@@ -662,7 +662,7 @@ body.dark-mode .marcas-aliadas-item img {
     flex: 0 0 auto !important;
 }
 
-/* BotÃ³n individual del Modo de Vista */
+/* Botón individual del Modo de Vista */
 #toggle-modo-global .btn-modo {
     border: none !important;
     background: transparent !important;
@@ -784,7 +784,7 @@ body.dark-mode .tools-container .chk-agotados:hover {
     background-color: #334155 !important;
 }
 
-/* RESPONSIVE MÃ“VIL Y TABLET (Ajustes de flujo y compactaciÃ³n extrema) */
+/* RESPONSIVE MÓVIL Y TABLET (Ajustes de flujo y compactación extrema) */
 @media (max-width: 767px) {
     .tools-container {
         margin-top: 6px !important;
@@ -847,7 +847,7 @@ body.dark-mode .tools-container .chk-agotados:hover {
 }
 
 /* ==========================================================================
-   SECCIÃ“N DE CATEGORÃAS (MARQUESINA HORIZONTAL) ULTRA COMPACTA
+   SECCIÓN DE CATEGORÍAS (MARQUESINA HORIZONTAL) ULTRA COMPACTA
    ========================================================================== */
 
 .marquesina-grupos-section {
