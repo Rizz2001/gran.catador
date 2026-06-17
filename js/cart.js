@@ -352,13 +352,14 @@ function renderizarCarrito() {
 
     if (Object.keys(appState.carrito).length === 0) {
         lista.innerHTML = `
-            <div style="text-align: center; padding: 60px 20px; color: var(--color-text-muted); display: flex; flex-direction: column; align-items: center;">
-                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.15; margin-bottom: 15px;">
-                    <path d="M8 16.0001H16M12 12.0001V20.0001M4.91355 4.08203L5.0291 3.55703C5.25375 2.64533 6.05952 2.00005 7.0001 2.00005H17.0001C17.9407 2.00005 18.7465 2.64533 18.9711 3.55703L20.0001 8.00006M4.91355 4.08203L4.50006 6.00006C3.42598 6.00006 2.53003 6.89591 2.53003 8.00006V17.0001C2.53003 18.1046 3.42598 19.0001 4.53003 19.0001H19.4701C20.5742 19.0001 21.4701 18.1046 21.4701 17.0001V8.00006C21.4701 6.89591 20.5742 6.00006 19.5001 6.00006L19.0865 4.08203" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="var(--color-text)"/>
+            <div class="cart-empty-state">
+                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 20px;">
+                    <path d="M5 7h14l-1.5 9h-11L5 7zm3.5-3h7l1 3h-9l1-3z" fill="currentColor" opacity="0.15"/>
+                    <path d="M7 8h10l1 6H6l1-6zm2-4h4l.8 3H8.2L9 4z" fill="currentColor"/>
                 </svg>
-                <h3 style="color: var(--color-text); font-size: 18px; font-weight: 800; letter-spacing: -0.5px;">Añade un Producto</h3>
-                <p style="font-size: 14px; margin-top: 8px; line-height: 1.5;">Agrega botellas.</p>
-                <button onclick="window.location.href='index.html'" class="btn-enviar" style="width: auto; padding: 12px 30px; margin-top: 25px; border-radius: var(--radius-full);">Explorar Catálogo</button>
+                <h3>Tu carrito está vacío</h3>
+                <p>Agrega tus favoritos y continúa tu pedido rápido por WhatsApp.</p>
+                <button onclick="window.location.href='../index.html'" class="btn-checkout-primary">Volver a la tienda</button>
             </div>`;
         document.getElementById('checkout-sections').style.display = 'none';
         return;
@@ -414,22 +415,25 @@ function renderizarCarrito() {
         renderHTML += `
             <div class="cart-item">
                 ${imgHTML}
-                <div class="cart-item-info cart-item-body">
+                <div class="cart-item-body">
                     <div class="cart-item-header">
                         <div class="cart-item-details">
                             <p class="cart-item-title">${nombre}</p>
-                            <p class="cart-item-price">$${item.precio.toFixed(2)} <span class="cart-item-price-bs">/ ${(item.precio * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs</span></p>
+                            <p class="cart-item-unit">$${item.precio.toFixed(2)} <span class="cart-item-price-bs">/ ${(item.precio * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs</span></p>
                             ${stockBadge}
                         </div>
                         <div class="cart-item-actions">
-                            <div class="cart-controls" aria-label="Controles de cantidad">
-                                <button type="button" class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
-                                <span class="cart-item-qty">${item.cantidad}</span>
-                                <button type="button" ${btnSumarAttrs}><i class="fa-solid ${bloquearSumar ? 'fa-lock' : 'fa-plus'}"></i></button>
-                            </div>
-                            <button type="button" class="cart-btn cart-item-delete" onclick="cambiarCantB64('${nombreB64}', -${item.cantidad})" aria-label="Eliminar ${nombre}">
+                            <div class="cart-item-total">$${subTotalItem.toFixed(2)}</div>
+                            <button type="button" class="cart-item-delete" onclick="cambiarCantB64('${nombreB64}', -${item.cantidad})" aria-label="Eliminar ${nombre}">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
+                        </div>
+                    </div>
+                    <div class="cart-item-footer">
+                        <div class="cart-controls" aria-label="Controles de cantidad">
+                            <button type="button" class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
+                            <span class="cart-item-qty">${item.cantidad}</span>
+                            <button type="button" ${btnSumarAttrs}><i class="fa-solid ${bloquearSumar ? 'fa-lock' : 'fa-plus'}"></i></button>
                         </div>
                     </div>
                 </div>
