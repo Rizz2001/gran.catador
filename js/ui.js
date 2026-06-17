@@ -443,7 +443,10 @@ function generarCategorias() {
     divInicio.innerHTML = `
         <div class="checkbox-item">
             <input type="checkbox" id="cat-todos" ${categoriaActual === 'Todos' ? 'checked' : ''} onchange="irInicio()">
-            <label for="cat-todos">Todos los Departamentos</label>
+            <label for="cat-todos">
+                <i class="fa-solid ${getIconForCategory('Todos')}"></i>
+                <span style="flex:1;">Todos los Departamentos</span>
+            </label>
         </div>
     `;
     cont.appendChild(divInicio);
@@ -455,12 +458,14 @@ function generarCategorias() {
             let nombre = g.Nombre || g.nombre || g.Descripcion || g.descripcion || g.NombreGrupo || g.desc_grupo || g.DescGrupo;
             if (nombre) {
                 let catIdLimpio = limpiarCategoria(nombre).replace(/[^a-z0-9]/gi, '-').toLowerCase();
+                let iconClass = getIconForCategory(nombre);
                 let div = document.createElement('div');
                 div.className = 'category-group';
                 div.innerHTML = `
                     <div class="checkbox-item">
                         <input type="checkbox" id="cat-${catIdLimpio}" ${limpiarCategoria(nombre) === limpiarCategoria(categoriaActual) ? 'checked' : ''} onchange="filtrarCategoria('${nombre}', this)">
                         <label for="cat-${catIdLimpio}">
+                            <i class="fa-solid ${iconClass}"></i>
                             <span style="flex:1;">${nombre}</span>
                             <i class="fa-solid fa-xmark close-cat-icon" style="display:none; opacity: 0.8; font-size: 14px;"></i>
                         </label>

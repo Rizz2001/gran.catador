@@ -442,18 +442,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     <div id="checkout-sections" style="display:none;">
                         
                         <!-- Panel de Subtotal (Top) -->
-                        <div class="premium-checkout-box">
-                            <div class="summary-row" style="font-size: 18px; margin-bottom: 15px;">
-                                <span style="font-weight: 400;">Subtotal:</span>
-                                <span class="total-usd" id="totalUsdModal" style="font-weight: 700;">$0.00</span>
+                        <div class="premium-checkout-box order-summary-card">
+                            <div class="summary-heading">
+                                <span class="summary-title">Resumen del Pedido</span>
+                                <span class="summary-note">Revisa antes de enviar por WhatsApp</span>
                             </div>
-                            <div class="summary-row" style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 15px; justify-content: flex-end;">
+                            <div class="summary-row">
+                                <span>Subtotal</span>
+                                <span class="total-usd" id="totalUsdModal">$0.00</span>
+                            </div>
+                            <div class="summary-row summary-row--secondary">
+                                <span>Total estimado</span>
                                 <span class="total-bs" id="totalBsModal">0,00 Bs</span>
                             </div>
                             <button type="button" id="btn-whatsapp" class="btn-checkout-primary" onclick="enviarPedido()">
-                                Proceder al pago
+                                <i class="fa-brands fa-whatsapp"></i> Enviar Pedido por WhatsApp
                             </button>
-                            <p id="msg-cerrado" style="text-align:center; color:#ea4335; font-size:12px; font-weight:bold; display:none; margin-top:10px;">
+                            <p id="msg-cerrado" class="checkout-warning-text">
                                 La tienda está cerrada en este momento.
                             </p>
                         </div>
@@ -502,10 +507,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             </div>
 
                             <!-- Panel: Pago Móvil -->
-                            <div id="box-pagomovil" style="margin-top: 15px; display:none; background: var(--color-bg); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--color-border); text-align: left;">
-                                <p style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing:0.5px;">Datos Pago Móvil</p>
-                                <div class="data-pago-row" style="border: none; padding: 4px 12px; background: transparent; margin-bottom: 0;">
-                                    <span style="font-family: inherit; font-size: 13px;"><b>Banco:</b> Mercantil (0105)</span>
+                            <div id="box-pagomovil" class="payment-card" style="margin-top: 15px; display:none;">
+                                <div class="payment-card__header">
+                                    <span class="payment-card__label">Datos Pago Móvil</span>
+                                    <span class="payment-card__pill">Transferencia</span>
+                                </div>
+                                <div class="data-pago-row data-pago-row--inline">
+                                    <span><b>Banco:</b> Mercantil (0105)</span>
                                 </div>
                                 <div class="data-pago-row">
                                     <span>Tel: 0414-3732274</span>
@@ -515,20 +523,23 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     <span>RIF: V-22582611</span>
                                     <button class="btn-copy-pago" onclick="copiarDatoPago('V-22582611', this)"><i class="fa-regular fa-copy"></i> Copiar</button>
                                 </div>
-                                <input type="text" id="refPagoMovil" class="premium-input" placeholder="N° de Referencia (Opcional)" style="margin-top: 10px; text-align: center; font-size: 13px;">
-                                <p style="font-size: 11px; color: var(--color-primary); font-weight: bold; text-align: center; margin-top: 10px;"><i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp</p>
+                                <input type="text" id="refPagoMovil" class="premium-input" placeholder="N° de Referencia (Opcional)">
+                                <p class="payment-card__hint"><i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp</p>
                             </div>
 
                             <!-- Panel: Zelle -->
-                            <div id="box-zelle" style="margin-top: 15px; display:none; background: var(--color-bg); padding: 15px; border-radius: var(--radius-md); border: 1px solid var(--color-border); text-align: center;">
-                                <p style="font-size: 11px; color: var(--color-text-muted); margin-bottom: 8px; text-transform: uppercase; font-weight: bold; letter-spacing:0.5px;">Datos Zelle</p>
-                                <div class="data-pago-row" style="margin-bottom: 4px;">
-                                    <span style="color: #741b88;">grancatadorcorp@gmail.com</span>
+                            <div id="box-zelle" class="payment-card" style="margin-top: 15px; display:none;">
+                                <div class="payment-card__header">
+                                    <span class="payment-card__label">Datos Zelle</span>
+                                    <span class="payment-card__pill payment-card__pill--zelle">Zelle</span>
+                                </div>
+                                <div class="data-pago-row">
+                                    <span class="payment-highlight">grancatadorcorp@gmail.com</span>
                                     <button class="btn-copy-pago" onclick="copiarDatoPago('grancatadorcorp@gmail.com', this)"><i class="fa-regular fa-copy"></i> Copiar</button>
                                 </div>
-                                <p style="font-size: 12px; margin-bottom: 8px;">A nombre de: <b>Ariadna Silva</b></p>
-                                <input type="text" id="refZelle" class="premium-input" placeholder="Nombre del Titular Zelle (Opcional)" style="margin-top: 10px; text-align: center; font-size: 13px;">
-                                <p style="font-size: 11px; color: var(--color-primary); font-weight: bold; margin-top: 10px;"><i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp</p>
+                                <p class="payment-detail">A nombre de: <b>Ariadna Silva</b></p>
+                                <input type="text" id="refZelle" class="premium-input" placeholder="Nombre del Titular Zelle (Opcional)">
+                                <p class="payment-card__hint"><i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp</p>
                             </div>
                         </div>
                     </div>
@@ -741,7 +752,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <script src="js/utils.js"></script>
     <script src="js/state.js"></script>
-    <script src="js/cart_v2.js"></script>
+    <script src="js/cart.js"></script>
     <script src="js/ui.js"></script>
     
     <!-- Módulos JS extraídos -->

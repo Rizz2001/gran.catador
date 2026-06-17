@@ -1,9 +1,7 @@
 let inventario = [];
-let favoritos = JSON.parse(localStorage.getItem('gc_favs')) || [];
 let tasaOficial = 36.25; let tasaEuro = 40.00; let categoriaActual = 'Todos'; let debounceTimer;
-let isTiendaAbierta = true; let codigosRecomendados = []; let siempreDisponibles = [];
-let masVendidosCodigos = []; let masVendidosProductos = [];
-let marcasAliadasArchivos = [];
+let isTiendaAbierta = true;
+let masVendidosCodigos = [];
 let productosFiltradosGlobal = []; let itemsPorPagina = 30; let paginaActual = 1;
 
 let appSettings = { useApi: true, apiType: 'smartventas' };
@@ -190,8 +188,7 @@ async function cargarBannersLocales() {
                 listaBanners.forEach((img, idx) => {
                     let loadingAttr = idx === 0 ? '' : 'loading="lazy"';
                     let activeClass = idx === 0 ? 'active-banner' : '';
-                    // Removemos el scroll-snap-align en línea para respetar las reglas responsive de CSS
-                    bannersHTML += `<div class="promo-banner ${activeClass}"><img src="assets/banners/${img}" alt="Promo" style="border-radius: 12px; display: block; width: 100%; height: 100%; object-fit: cover;" ${loadingAttr} onerror="this.style.display='none'"></div>`;
+                    bannersHTML += `<div class="promo-banner ${activeClass}"><img src="assets/banners/${img}" alt="Promo" ${loadingAttr} onerror="this.style.display='none'"></div>`;
                 });
                 contBanners.innerHTML = bannersHTML;
 
@@ -307,8 +304,7 @@ async function cargarSiempreDisponiblesLocal() {
         if (resDisp.ok) {
             let textoDisp = await resDisp.text();
             let listaDisp = textoDisp.split(/[\n,]+/).map(b => b.trim()).filter(b => b !== "" && !b.startsWith("#"));
-            siempreDisponibles = [...new Set([...siempreDisponibles, ...listaDisp])];
-            appState.siempreDisponibles = siempreDisponibles;
+            appState.siempreDisponibles = [...new Set([...(appState.siempreDisponibles || []), ...listaDisp])];
         }
     } catch (error) { }
 }
@@ -383,7 +379,6 @@ async function cargarMarcasAliadasLocal() {
         } catch (error) { }
     }
 
-    marcasAliadasArchivos = archivos;
     appState.marcasAliadasArchivos = archivos;
 }
 
@@ -451,15 +446,17 @@ async function cargarConfiguracionDesdeAPI() {
         });
         if (response.ok) {
             const configs = await response.json();
+            let codigosRecomendadosLocal = appState.codigosRecomendados || [];
+            let siempreDisponiblesLocal = appState.siempreDisponibles || [];
             if (Array.isArray(configs)) {
                 configs.forEach(c => {
-                    if (c.clave === 'recomendados') codigosRecomendados = c.valor.split(/[\n,]+/).map(x => x.trim());
-                    if (c.clave === 'disponibles') siempreDisponibles = c.valor.split(/[\n,]+/).map(x => x.trim());
+                    if (c.clave === 'recomendados') codigosRecomendadosLocal = c.valor.split(/[\n,]+/).map(x => x.trim());
+                    if (c.clave === 'disponibles') siempreDisponiblesLocal = c.valor.split(/[\n,]+/).map(x => x.trim());
                     if (c.clave === 'tasa') { tasaOficial = parseFloat(c.valor); appState.tasaOficial = tasaOficial; }
                 });
             }
-            appState.codigosRecomendados = codigosRecomendados;
-            appState.siempreDisponibles = siempreDisponibles;
+            appState.codigosRecomendados = codigosRecomendadosLocal;
+            appState.siempreDisponibles = siempreDisponiblesLocal;
         }
     } catch (e) { }
 }
@@ -483,25 +480,9 @@ async function cargarInventario() {
         updateApiProgress(100, true);
         let listado = document.getElementById('lista-productos');
         if (listado) {
-            listado.innerHTML = `<div style="grid-column: span 2; text-align: center; padding: 30px; border: 1px solid red; border-radius: 10px;"><h3 style="color:red;">Error de Conexión</h3><p style="font-size:12px; margin-top:10px;">${e.message || 'Verifica la configuración de la API.'}</p></div>`;
+            listado.innerHTML = `<div class="api-error-card"><h3>Error de Conexión</h3><p>${e.message || 'Verifica la configuración de la API.'}</p></div>`;
         }
     }
-}
-
-function iniciarAutoActualizacion() {
-    // Evitar que se creen múltiples temporizadores paralelos
-    if (window.autoSyncTimer) clearInterval(window.autoSyncTimer);
-
-    // Ejecutar silenciosamente cada 1 minuto (60000 ms)
-    window.autoSyncTimer = setInterval(async () => {
-        try {
-            await cargarInventarioDesdeAPI();
-            localStorage.setItem('gc_inv_time_v4', new Date().getTime().toString());
-            aplicarFiltros(); // Refresca la vista automáticamente si detecta un cambio de precio/stock
-        } catch (e) {
-            updateApiProgress(100, true);
-        }
-    }, 60000);
 }
 
 async function cargarExistenciasGlobales(proxyBaseUrl) {

@@ -43,13 +43,18 @@
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
+  --radius-xl: 24px;
   --radius-full: 9999px;
   
   /* Premium Soft Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 8px 30px rgba(0, 0, 0, 0.04), 0 2px 8px rgba(0, 0, 0, 0.02);
-  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.03);
-  --shadow-premium: 0 30px 60px rgba(30, 58, 138, 0.05), 0 10px 20px rgba(0, 0, 0, 0.02);
+  --shadow-xxs: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-xs: 0 4px 12px rgba(15, 23, 42, 0.06);
+  --shadow-sm: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 16px 40px rgba(15, 23, 42, 0.1);
+  --shadow-lg: 0 24px 70px rgba(15, 23, 42, 0.12);
+  --shadow-floating: 0 32px 90px rgba(15, 23, 42, 0.1);
+  --glass-bg: rgba(255, 255, 255, 0.70);
+  --glass-border: rgba(148, 163, 184, 0.18);
 
   /* Variables legadas para compatibilidad con otras secciones */
   --azul-rey: var(--color-primary);
@@ -98,11 +103,22 @@ body.dark-mode {
 
 body {
   background-color: var(--fondo);
+  background-image: radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.08), transparent 24%),
+                    radial-gradient(circle at 90% 15%, rgba(34, 197, 94, 0.06), transparent 20%);
   color: var(--texto-oscuro);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background 0.3s, color 0.3s;
+  transition: background 0.3s ease, color 0.3s ease;
   scroll-behavior: smooth;
+}
+
+html {
+  min-height: 100%;
+  background: var(--fondo);
+}
+
+html {
+  background: var(--fondo);
 }
 
 input[type=number]::-webkit-inner-spin-button,
@@ -239,16 +255,17 @@ body.dark-mode .age-box {
 
 /* --- HEADER E-COMMERCE MODERNO --- */
 .site-header {
-  background-color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   position: sticky;
   top: 0;
   z-index: 1000;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-xs);
   display: flex;
   flex-direction: column;
-  transition: background 0.3s, backdrop-filter 0.3s, box-shadow 0.3s;
+  transition: background 0.3s ease, backdrop-filter 0.3s ease, box-shadow 0.3s ease, border-bottom-color 0.3s ease;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
 }
 
 .header-top-bar {
@@ -688,14 +705,14 @@ body.dark-mode .hero-banner {
   padding: 12px 24px;
   border-radius: var(--radius-full);
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
   border: none;
   cursor: pointer;
 }
 
 .btn-hero:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 15px rgba(245, 213, 71, 0.4);
+  transform: scale(1.04);
+  box-shadow: var(--shadow-md);
 }
 
 .hero-image {
@@ -765,6 +782,25 @@ body.dark-mode .hero-banner {
   transform: scale(0.98);
 }
 
+.api-error-card {
+  grid-column: span 2;
+  text-align: center;
+  padding: 30px;
+  border: 1px solid var(--color-danger);
+  border-radius: 10px;
+  background: var(--item-bg);
+}
+
+.api-error-card h3 {
+  color: var(--color-danger);
+  margin: 0 0 10px;
+}
+
+.api-error-card p {
+  font-size: 12px;
+  margin-top: 10px;
+}
+
 @media (min-width: 768px) {
   .promo-banner {
     min-width: 100%;
@@ -775,28 +811,27 @@ body.dark-mode .hero-banner {
 
 /* --- SECCIÓN DE PRODUCTOS Y FILTROS --- */
 .tools-container {
-  margin-top: 15px;
-  margin-bottom: 20px;
+  margin: 28px auto 18px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
   z-index: 10;
   position: relative;
-  background: var(--color-card);
-  padding: 12px 16px;
-  border-radius: 4px;
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  background: var(--glass-bg);
+  padding: 20px 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  box-shadow: var(--shadow-xs);
 }
 
 .section-title {
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 800;
   color: var(--color-text);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.6px;
   margin: 0;
   font-family: 'Inter', sans-serif;
   order: 1;
@@ -1081,29 +1116,30 @@ body.dark-mode .btn-modo.active {
 .productos-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-  padding: 0 16px 20px;
+  gap: 20px;
+  padding: 0 16px 28px;
   max-width: 1280px;
   margin: 0 auto;
 }
 
 .producto-card {
   background: var(--color-card);
-  border-radius: var(--radius-md);
-  padding: 14px;
+  border-radius: var(--radius-xl);
+  padding: 18px;
   box-shadow: var(--shadow-sm);
   display: flex;
   flex-direction: column;
   position: relative;
-  border: 1px solid var(--color-border);
-  transition: all 0.3s ease;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   cursor: pointer;
-  height: 100%;
+  min-height: 100%;
 }
 
 .producto-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.18);
 }
 
 body.dark-mode .producto-card {
