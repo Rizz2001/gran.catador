@@ -54,6 +54,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="stylesheet" href="assets/css/modules/lightbox.css">
     <link rel="stylesheet" href="assets/css/modules/layout.css">
     <link rel="stylesheet" href="assets/css/modules/cart.css">
+    <link rel="stylesheet" href="assets/css/modules/hero.css">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 
@@ -190,15 +191,27 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     <main id="main-content" role="main">
 
-        <div class="banners-wrapper-relative" style="position: relative; max-width: 1280px; margin: 0 auto;">
-            <div class="banners-container" id="contenedorBanners" style="padding-bottom: 15px;">
-                <div class="promo-banner"
-                    style="background: var(--item-bg); display:none; align-items:center; justify-content:center; color:var(--texto-claro); font-size:12px; font-weight:500; text-align:center; padding:20px; border: 1px solid var(--borde-color);">
-                     Banners <br>Cargando
+        <section id="hero">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <h1 class="hero-title">Supermercado y <span class="highlight">Bodegón</span></h1>
+                <p class="hero-subtitle">Calidad inigualable, variedad y rapidez. Compra y Disfruta.</p>
+                <div class="hero-actions">
+                    <button class="btn-hero-primary" onclick="document.getElementById('productos').scrollIntoView({behavior: 'smooth', block: 'start'})">Ver catálogo</button>
                 </div>
             </div>
-        </div>
+            
+            <div class="banners-wrapper-relative" style="position: relative; width: 100%; max-width: 1280px; margin: 0 auto; z-index: 2; margin-top: 40px;">
+                <div class="banners-container" id="contenedorBanners" style="padding-bottom: 15px;">
+                    <div class="promo-banner"
+                        style="background: var(--item-bg); display:none; align-items:center; justify-content:center; color:var(--texto-claro); font-size:12px; font-weight:500; text-align:center; padding:20px; border: 1px solid var(--borde-color);">
+                         Banners <br>Cargando
+                    </div>
+                </div>
+            </div>
+        </section>
 
+        <section id="productos">
         <div class="main-layout-container">
             <!-- Menú Lateral (Sidebar) de Categorías -->
             <aside id="sidebar-menu" class="sidebar-menu" aria-label="Filtros y Categorías">
@@ -375,6 +388,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
         </div>
     </div>
+    </section>
+
+    <section id="beneficios"></section>
+    <section id="testimonios"></section>
+    <section id="cta"></section>
+
     </main>
 
     <footer class="main-footer-new" role="contentinfo">

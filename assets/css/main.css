@@ -8,8 +8,8 @@
 :root {
   /* HSL Color System Base (Hue, Saturation, Lightness) */
   --primary-h: 224;
-  --primary-s: 64%;
-  --primary-l: 33%;
+  --primary-s: 59%;
+  --primary-l: 16%;
   
   --accent-h: 38;
   --accent-s: 92%;

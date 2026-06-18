@@ -196,6 +196,7 @@ body.dark-mode .site-header.scrolled .sticky-header-content {
     margin-top: 5px;
     margin-bottom: 15px;
     position: relative;
+    z-index: 2;
     display: none;
     /* Controlled by JS */
     scrollbar-width: none;
