@@ -382,9 +382,7 @@ function renderizarCarrito() {
             : `<div class="cart-item-img-placeholder"><i class="fa-solid fa-wine-bottle"></i></div>`;
         let imgHTML = `<div class="cart-item-image">${imgInnerHTML}</div>`;
 
-        let btnMinus = item.cantidad > 1
-            ? '<i class="fa-solid fa-minus"></i>'
-            : '<i class="fa-solid fa-trash-can" style="color: var(--color-danger);"></i>';
+        let btnMinus = '<i class="fa-solid fa-minus"></i>';
 
         // ── STOCK INTELIGENTE: calcular si se puede agregar más ──────────────────
         const nombreBase = nombre.replace(/ \((CAJA|UNIDAD)\)$/, '');
@@ -414,28 +412,24 @@ function renderizarCarrito() {
 
         renderHTML += `
             <div class="cart-item">
-                ${imgHTML}
-                <div class="cart-item-body">
-                    <div class="cart-item-header">
-                        <div class="cart-item-details">
-                            <p class="cart-item-title">${nombre}</p>
-                            <p class="cart-item-unit">$${item.precio.toFixed(2)} <span class="cart-item-price-bs">/ ${(item.precio * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs</span></p>
-                            ${stockBadge}
-                        </div>
-                        <div class="cart-item-actions">
-                            <div class="cart-item-total">$${subTotalItem.toFixed(2)}</div>
-                            <button type="button" class="cart-item-delete" onclick="cambiarCantB64('${nombreB64}', -${item.cantidad})" aria-label="Eliminar ${nombre}">
-                                <i class="fa-solid fa-trash-can"></i>
-                            </button>
-                        </div>
+                <div class="cart-item-left">
+                    ${imgHTML}
+                    <div class="cart-item-info">
+                        <p class="cart-item-title">${nombre}</p>
+                        <p class="cart-item-unit">$${item.precio.toFixed(2)} <span class="cart-item-price-bs">/ ${(item.precio * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs</span></p>
+                        ${stockBadge}
                     </div>
-                    <div class="cart-item-footer">
-                        <div class="cart-controls" aria-label="Controles de cantidad">
-                            <button type="button" class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
-                            <span class="cart-item-qty">${item.cantidad}</span>
-                            <button type="button" ${btnSumarAttrs}><i class="fa-solid ${bloquearSumar ? 'fa-lock' : 'fa-plus'}"></i></button>
-                        </div>
+                </div>
+                <div class="cart-item-right">
+                    <div class="cart-item-total">$${subTotalItem.toFixed(2)}</div>
+                    <div class="cart-controls" aria-label="Controles de cantidad">
+                        <button type="button" class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
+                        <span class="cart-item-qty">${item.cantidad}</span>
+                        <button type="button" ${btnSumarAttrs}><i class="fa-solid ${bloquearSumar ? 'fa-lock' : 'fa-plus'}"></i></button>
                     </div>
+                    <button type="button" class="cart-item-delete" onclick="cambiarCantB64('${nombreB64}', -${item.cantidad})" aria-label="Eliminar ${nombre}">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
                 </div>
             </div>`;
     }
