@@ -535,9 +535,11 @@ window.generarMarquesinaGrupos = function () {
         appState.gruposInventario.forEach(g => {
             let nombre = g.Nombre || g.nombre || g.Descripcion || g.descripcion || g.NombreGrupo || g.desc_grupo || g.DescGrupo;
             if (nombre) {
+                let safeName = nombre.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                let displayNombre = nombre.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                 let catIdLimpio = limpiarCategoria(nombre).replace(/[^a-z0-9]/gi, '-').toLowerCase();
-                html += `<div class="marquesina-pill" onclick="const cb = document.getElementById('cat-${catIdLimpio}'); if(cb) { cb.checked = true; } filtrarCategoria('${nombre}', cb)">
-                            <i class="fa-solid ${getIconForCategory(nombre)}"></i> <span>${nombre}</span>
+                html += `<div class="marquesina-pill" onclick="const cb = document.getElementById('cat-${catIdLimpio}'); if(cb) { cb.checked = true; } filtrarCategoria('${safeName}', cb)">
+                            <i class="fa-solid ${getIconForCategory(nombre)}"></i> <span>${displayNombre}</span>
                          </div>`;
             }
         });
