@@ -171,6 +171,12 @@ body.dark-mode .site-header.scrolled .sticky-header-content {
     justify-content: center;
 }
 
+@media (max-width: 767px) {
+    .btn-scroll-top {
+        bottom: 110px; /* Ensure it stays above bottom nav */
+    }
+}
+
 .btn-scroll-top.visible {
     opacity: 1;
     visibility: visible;

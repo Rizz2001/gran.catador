@@ -382,7 +382,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             
             <!-- Columna 1: Marca y Redes -->
             <div class="footer-col">
-                <img src="logo.webp" alt="Logo Gran Catador" class="footer-logo" onerror="this.style.display='none'" loading="lazy">
+                <img src="logo.webp" alt="Logo Gran Catador" class="footer-logo" width="65" height="65" onerror="this.style.display='none'" loading="lazy">
                 <p class="footer-desc">Gran Catador Supermercado y Bodegón. Para pedidos especiales, eventos o dudas, escríbenos directamente.</p>
                 <div class="footer-social-new">
                     <a href="https://wa.me/584245496366" target="_blank" aria-label="WhatsApp" class="social-btn whatsapp-btn"><i class="fa-brands fa-whatsapp"></i></a>
@@ -741,6 +741,29 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </div>
 
 
+
+    <!-- Bottom Navigation (Mobile Only) -->
+    <nav class="bottom-nav">
+        <a href="#" onclick="event.preventDefault(); irInicio();" class="nav-item active">
+            <i class="fa-solid fa-house"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="#" onclick="event.preventDefault(); document.getElementById('buscador').focus();" class="nav-item">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>Buscar</span>
+        </a>
+        <a href="#" onclick="event.preventDefault(); abrirCarrito();" class="nav-item" id="nav-cart-bottom">
+            <div class="nav-icon-badge">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span class="cart-badge" id="bottom-cart-count">0</span>
+            </div>
+            <span>Carrito</span>
+        </a>
+        <a href="#" onclick="event.preventDefault(); abrirPerfil();" class="nav-item">
+            <i class="fa-regular fa-user"></i>
+            <span>Perfil</span>
+        </a>
+    </nav>
 
     <!-- Botón Flotante: Volver Arriba -->
     <button id="btn-scroll-top" class="btn-scroll-top" onclick="scrollToTop()" aria-label="Volver arriba">

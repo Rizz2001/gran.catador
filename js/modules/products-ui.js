@@ -159,7 +159,7 @@ function crearHTMLSeccionCategoriasAleatorias(productos, offset = 0) {
         return `
             <article class="grupo-aleatorio-card" onclick="irADetalle('${producto.codigo.replace(/'/g, "\\'")}')" style="cursor: pointer;" aria-label="Ver detalles de ${titulo}">
                 <div class="grupo-aleatorio-card-thumb">
-                    <img src="${imgSrc}" alt="${titulo}" loading="lazy" onerror="this.src='logo.webp'">
+                    <img src="${imgSrc}" alt="${titulo}" width="150" height="150" loading="lazy" onerror="this.src='logo.webp'">
                 </div>
                 <div class="grupo-aleatorio-card-meta">
                     <span class="grupo-aleatorio-card-label">Quizás te interese</span>
@@ -296,7 +296,7 @@ function crearHTMLMasVendidos() {
         return `
             <article class="mas-vendidos-card ${index < 3 ? 'featured' : ''}" onclick="irADetalle('${producto.codigo.replace(/'/g, "\\'")}')" style="cursor: pointer;" aria-label="Ver detalles de ${nombre}">
                 ${rankingBadge}
-                <span class="mas-vendidos-card-thumb"><img src="${imagen}" alt="${nombre}" loading="lazy" onerror="this.src='logo.webp'"></span>
+                <span class="mas-vendidos-card-thumb"><img src="${imagen}" alt="${nombre}" width="84" height="84" loading="lazy" onerror="this.src='logo.webp'"></span>
                 <span class="mas-vendidos-card-info">
                     <span class="mas-vendidos-card-name">${nombre}</span>
                     <span class="mas-vendidos-card-price">${precio}</span>
@@ -326,7 +326,7 @@ function crearHTMLMarcasAliadas() {
 
     const items = archivos.map((archivo, index) => `
         <div class="marcas-aliadas-item">
-            <img src="${archivo}" alt="Marca Aliada ${index + 1}" loading="lazy" onerror="this.src='logo.webp'">
+            <img src="${archivo}" alt="Marca Aliada ${index + 1}" width="136" height="76" loading="lazy" onerror="this.src='logo.webp'">
         </div>`).join('');
 
     const contenido = archivos.length > 1 ? items + items : items;
