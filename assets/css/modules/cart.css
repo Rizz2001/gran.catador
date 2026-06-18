@@ -923,6 +923,12 @@ body.dark-mode .premium-input:focus {
         padding: 0;
     }
 
+    /* Flujo de Checkout: Ocultar lista de productos solo en móviles para pasos 2 y 3 */
+    .premium-cart-layout[data-checkout-step="2"] .premium-cart-left,
+    .premium-cart-layout[data-checkout-step="3"] .premium-cart-left {
+        display: none !important;
+    }
+
     .premium-cart-right {
         flex: 1 1 100%;
         width: 100%;

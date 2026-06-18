@@ -693,29 +693,25 @@ function cambiarCantB64(b64, d) {
 function setCheckoutStep(step) {
     appState.checkoutStep = step;
     
-    let step1Left = document.querySelector('.premium-cart-left');
     let step1Summary = document.getElementById('step-1-summary');
     let step2Options = document.getElementById('step-2-options');
     let step3Confirm = document.getElementById('step-3-confirm');
     
     // Fallback: si no se encuentran los elementos no hace nada (ej. no está en el carrito)
-    if (!step1Left || !step1Summary || !step2Options || !step3Confirm) return;
+    if (!step1Summary || !step2Options || !step3Confirm) return;
 
     if (step === 1) {
         // Paso 1: Mostrar lista de productos y botón "Procesar Compra"
-        step1Left.style.display = 'block';
         step1Summary.style.display = 'block';
         step2Options.style.display = 'none';
         step3Confirm.style.display = 'none';
     } else if (step === 2) {
-        // Paso 2: Mostrar Opciones de Entrega y Método de Pago, Ocultar lista
-        step1Left.style.display = 'none';
+        // Paso 2: Mostrar Opciones de Entrega y Método de Pago
         step1Summary.style.display = 'none';
         step2Options.style.display = 'block';
         step3Confirm.style.display = 'none';
     } else if (step === 3) {
         // Paso 3: Confirmación Final
-        step1Left.style.display = 'none';
         step1Summary.style.display = 'none';
         step2Options.style.display = 'none';
         step3Confirm.style.display = 'block';
@@ -725,5 +721,14 @@ function setCheckoutStep(step) {
         let totalBsEl = document.getElementById('totalBsModalFinal');
         if (totalUsdEl) totalUsdEl.innerText = document.getElementById('totalUsdModal').innerText;
         if (totalBsEl) totalBsEl.innerText = document.getElementById('totalBsModal').innerText;
+    }
+
+    // Control responsive de la columna izquierda (ocultar solo en móvil para pasos 2 y 3)
+    let layout = document.querySelector('.premium-cart-layout');
+    if (layout) {
+        layout.setAttribute('data-checkout-step', step);
+        // Aseguramos que el estilo inline no interfiera en desktop
+        let step1Left = document.querySelector('.premium-cart-left');
+        if (step1Left) step1Left.style.display = '';
     }
 }
