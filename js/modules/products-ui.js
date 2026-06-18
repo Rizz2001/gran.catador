@@ -32,6 +32,10 @@ function crearHTMLProducto(p) {
     let badgeHTML = '';
     if (isAgotado) {
         badgeHTML = `<div class="product-badge badge-agotado">AGOTADO</div>`;
+    } else if (window.productosOferta && window.productosOferta.includes(String(p.codigo || '').trim())) {
+        badgeHTML = `<div class="product-badge badge-oferta"><i class="fa-solid fa-tag"></i> OFERTA</div>`;
+    } else if (window.productosTop && window.productosTop.includes(String(p.codigo || '').trim())) {
+        badgeHTML = `<div class="product-badge badge-top"><i class="fa-solid fa-star"></i> TOP</div>`;
     }
 
     let imgSrc = obtenerImgProducto(p);
@@ -44,26 +48,29 @@ function crearHTMLProducto(p) {
             
             ${badgeHTML}
             
-            <div onclick="irADetalle('${p.codigo.replace(/'/g, "\\'")}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); irADetalle('${p.codigo.replace(/'/g, "\\'")}'); }" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;" role="button" tabindex="0" aria-label="Ver detalles de ${p.Nombre}">
+            <div class="product-card-content" onclick="irADetalle('${p.codigo.replace(/'/g, "\\'")}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); irADetalle('${p.codigo.replace(/'/g, "\\'")}'); }" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;" role="button" tabindex="0" aria-label="Ver detalles de ${p.Nombre}">
                 <div class="product-img-container skeleton-box">
                     ${galeriasHTML}
                 </div>
                 
                 <h3 class="producto-titulo" title="${p.Nombre}">${p.Nombre}</h3>
-            </div>
-            <p class="producto-stock">
-                ${textoStock}
-            </p>
-            
-            <div class="product-bottom">
-                <div class="product-price-container">
-                    <span class="product-unit-label">${textoUnidad}</span>
-                    <span class="product-price">$${precioUsdDin}</span>
-                    <span class="product-price-bs">${precioBsDin} Bs</span>
-                </div>
                 
-            <button class="btn-add-cart ${isAgotado ? 'disabled' : ''}" aria-label="Agregar ${p.Nombre} al carrito" title="Agregar al carrito" ${isAgotado ? 'disabled' : `onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja})"`}>
-                    <i class="fa-solid fa-plus"></i>
+                <p class="producto-stock">
+                    ${textoStock}
+                </p>
+                
+                <div class="product-price-wrapper">
+                    <span class="product-unit-label">${textoUnidad}</span>
+                    <div class="prices-row">
+                        <span class="product-price">$${precioUsdDin}</span>
+                        <span class="product-price-bs">${precioBsDin} Bs</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="product-bottom-action">
+                <button class="btn-buy-whatsapp ${isAgotado ? 'disabled' : ''}" aria-label="Comprar ${p.Nombre}" title="Comprar" ${isAgotado ? 'disabled' : `onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja})"`}>
+                    <i class="fa-brands fa-whatsapp"></i> Comprar
                 </button>
             </div>
         </div>
