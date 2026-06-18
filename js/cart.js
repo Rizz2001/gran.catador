@@ -444,6 +444,9 @@ function renderizarCarrito() {
     document.getElementById('totalUsdModal').innerText = `$${appState.totalCarrito.toFixed(2)}`;
     document.getElementById('totalBsModal').innerText = `${(appState.totalCarrito * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
     calcularVuelto();
+    
+    // Asegurar que siempre se inicie en el Paso 1 al abrir o refrescar el carrito
+    setCheckoutStep(1);
 }
 
 function cambiarCant(n, delta) {
@@ -681,4 +684,46 @@ function agregarAlCarritoB64(b64, p, btn, c = false, img = '', esCaja = false) {
 
 function cambiarCantB64(b64, d) {
     cambiarCant(decodificarNombre(b64), d);
+}
+
+/** 
+ * Maneja el flujo de checkout en pasos (Local State)
+ * @param {number} step - Paso actual (1, 2, 3)
+ */
+function setCheckoutStep(step) {
+    appState.checkoutStep = step;
+    
+    let step1Left = document.querySelector('.premium-cart-left');
+    let step1Summary = document.getElementById('step-1-summary');
+    let step2Options = document.getElementById('step-2-options');
+    let step3Confirm = document.getElementById('step-3-confirm');
+    
+    // Fallback: si no se encuentran los elementos no hace nada (ej. no está en el carrito)
+    if (!step1Left || !step1Summary || !step2Options || !step3Confirm) return;
+
+    if (step === 1) {
+        // Paso 1: Mostrar lista de productos y botón "Procesar Compra"
+        step1Left.style.display = 'block';
+        step1Summary.style.display = 'block';
+        step2Options.style.display = 'none';
+        step3Confirm.style.display = 'none';
+    } else if (step === 2) {
+        // Paso 2: Mostrar Opciones de Entrega y Método de Pago, Ocultar lista
+        step1Left.style.display = 'none';
+        step1Summary.style.display = 'none';
+        step2Options.style.display = 'block';
+        step3Confirm.style.display = 'none';
+    } else if (step === 3) {
+        // Paso 3: Confirmación Final
+        step1Left.style.display = 'none';
+        step1Summary.style.display = 'none';
+        step2Options.style.display = 'none';
+        step3Confirm.style.display = 'block';
+        
+        // Actualizar totales en la confirmación final por seguridad
+        let totalUsdEl = document.getElementById('totalUsdModalFinal');
+        let totalBsEl = document.getElementById('totalBsModalFinal');
+        if (totalUsdEl) totalUsdEl.innerText = document.getElementById('totalUsdModal').innerText;
+        if (totalBsEl) totalBsEl.innerText = document.getElementById('totalBsModal').innerText;
+    }
 }
