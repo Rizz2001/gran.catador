@@ -135,15 +135,24 @@ body.dark-mode .site-header.scrolled .sticky-header-content {
     margin: 0 auto;
 }
 
+.footer-links-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
 @media (min-width: 600px) {
     .footer-container {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr 1.5fr;
     }
 }
 
 @media (min-width: 768px) {
     .footer-container {
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: 1.2fr 2fr;
+    }
+    .footer-links-row {
+        gap: 40px;
     }
 }
 
