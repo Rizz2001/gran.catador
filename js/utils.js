@@ -11,7 +11,13 @@ const CONFIG_BUSQUEDA = {
     diccionarioSinonimos: {
         'birra': 'cerveza', 'birras': 'cerveza', 'curda': 'licor', 'cana': 'ron',
         'pasapalo': 'snack', 'pasapalos': 'snack', 'soda': 'refresco', 'fresco': 'refresco',
-        'whisky': 'whisky', 'whiskey': 'whisky', 'ginebra': 'gin', 'vodka': 'vodka'
+        'whisky': 'whisky', 'whiskey': 'whisky', 'whiskys': 'whisky', 'ginebra': 'gin', 'vodka': 'vodka',
+        'bucana': 'buchanan', 'buchana': 'buchanan', 'bucanas': 'buchanan', 'buchanans': 'buchanan',
+        'oldpar': 'parr', 'oldparr': 'parr', 'olpar': 'parr',
+        'tekila': 'tequila', 'cocui': 'cocuy',
+        'champaña': 'espumante', 'champagne': 'espumante', 'champana': 'espumante',
+        'cigarro': 'cigarros', 'tabaco': 'cigarros',
+        'cocacola': 'coca', 'pepsi': 'pepsi', 'chinotto': 'chinoto'
     }
 };
 
