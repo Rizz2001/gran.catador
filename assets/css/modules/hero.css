@@ -2,7 +2,7 @@
 #hero {
     position: relative;
     width: 100%;
-    min-height: 60vh;
+    min-height: 40vh;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -11,7 +11,7 @@
     background: radial-gradient(circle at center, #1A2642 0%, #0B132B 70%, #050914 100%);
     margin-bottom: 30px;
     border-bottom: 2px solid var(--dorado, #D4AF37);
-    padding: 60px 20px 20px 20px;
+    padding: 40px 20px;
 }
 
 .hero-overlay {
@@ -117,8 +117,8 @@
 
 @media (max-width: 768px) {
     #hero {
-        padding: 40px 20px;
-        min-height: 50vh;
+        padding: 30px 20px;
+        min-height: 35vh;
     }
     .hero-actions {
         flex-direction: column;

@@ -1,10 +1,14 @@
-﻿// --- FUNCIONES DEL SIDEBAR ---
+// --- FUNCIONES DEL SIDEBAR ---
 window.toggleSidebar = function () {
     const sidebar = document.getElementById('sidebar-menu');
     const overlay = document.getElementById('sidebar-overlay');
     if (sidebar && overlay) {
         sidebar.classList.add('open');
         overlay.classList.add('active');
+        // Prevent body scroll on mobile
+        if (window.innerWidth < 1024) {
+            document.body.style.overflow = 'hidden';
+        }
     }
 };
 
@@ -14,6 +18,7 @@ window.closeSidebar = function () {
     
     if (sidebar) sidebar.classList.remove('open');
     if (overlay) overlay.classList.remove('active');
+    document.body.style.overflow = '';
 };
 
 window.mostrarPanelGrupos = function () {

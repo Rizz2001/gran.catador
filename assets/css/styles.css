@@ -1,7 +1,6 @@
 /* --- TOQUES FINALES GLOBALES --- */
 html,
 body {
-    overflow-x: clip;
     width: 100%;
     position: relative;
 }

@@ -21,7 +21,6 @@ body,
 #main-content {
   font-family: 'Poppins', sans-serif;
   max-width: 100vw;
-  overflow-x: hidden;
   background-color: var(--fondo);
   color: var(--texto-oscuro);
   -webkit-font-smoothing: antialiased;

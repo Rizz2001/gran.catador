@@ -624,19 +624,6 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
         parentTitle.innerText = `Subgrupos de ${nombreCategoria}`;
     }
 
-    // Mostrar visualmente que está cargando
-    subcatContainer.innerHTML = '<div style="padding: 15px 5px; font-size: 13px; color: var(--color-primary); font-weight: 600; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando subgrupos...</div>';
-
-    // Animación Drill-down: Mostrar subgrupos, ocultar grupos
-    let panelGrupos = document.getElementById('categoria-section-main');
-    let panelSubgrupos = document.getElementById('subcategoria-section-main');
-    if (panelGrupos && panelSubgrupos) {
-        panelGrupos.classList.remove('active-panel');
-        panelGrupos.classList.add('hidden-panel');
-        panelSubgrupos.classList.remove('hidden-panel');
-        panelSubgrupos.classList.add('active-panel');
-    }
-
     // Buscar el código del grupo de forma segura
     let grupo = null;
     if (appState.gruposInventario) {
@@ -684,6 +671,16 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
 
     // 3. Renderizar en la pantalla
     if (subcategorias.length > 0) {
+        // Ejecutar animación drill-down aquí ya que sabemos que hay subgrupos
+        let panelGrupos = document.getElementById('categoria-section-main');
+        let panelSubgrupos = document.getElementById('subcategoria-section-main');
+        if (panelGrupos && panelSubgrupos) {
+            panelGrupos.classList.remove('active-panel');
+            panelGrupos.classList.add('hidden-panel');
+            panelSubgrupos.classList.remove('hidden-panel');
+            panelSubgrupos.classList.add('active-panel');
+        }
+
         // --- LÓGICA DE RESCATE AUTOMÁTICO ---
         let prodsGrupo = inventario.filter(p => p.CatId === codGrupo || p.Cat === limpiarCategoria(nombreCategoria));
         if (prodsGrupo.length === 0) {
@@ -705,7 +702,9 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
         divTodos.className = 'checkbox-item';
         divTodos.innerHTML = `
             <input type="checkbox" id="subcat-todos" ${!subcategoriaActual ? 'checked' : ''}>
-            <label for="subcat-todos">Todos</label>
+            <label for="subcat-todos">
+                <i class="fa-solid fa-layer-group"></i> Todos
+            </label>
         `;
         let cbTodos = divTodos.querySelector('input');
         cbTodos.onchange = function () {
@@ -734,7 +733,9 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
             divSub.className = 'checkbox-item';
             divSub.innerHTML = `
                 <input type="checkbox" id="subcat-${subIdLimpio}" ${(codSub === subcategoriaActual || limpiarCategoria(nombreSub) === subcategoriaActual) ? 'checked' : ''}>
-                <label for="subcat-${subIdLimpio}">${nombreMostrado}</label>
+                <label for="subcat-${subIdLimpio}">
+                    <i class="fa-solid fa-angle-right"></i> ${nombreMostrado}
+                </label>
             `;
             let cb = divSub.querySelector('input');
             cb.onchange = async function () {
@@ -762,13 +763,19 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
                 }
 
                 aplicarFiltros();
+                
+                // Auto-cerrar en móvil al seleccionar subcategoría para una mejor UX
+                if (window.innerWidth <= 1024 && typeof closeSidebar === 'function') {
+                    closeSidebar();
+                }
             };
             subcatContainer.appendChild(divSub);
         });
     } else {
+        // Si no hay subgrupos, nos aseguramos de estar en el panel de grupos (por si acaso) y cerramos
         if (typeof mostrarPanelGrupos === 'function') mostrarPanelGrupos();
         subcatContainer.innerHTML = '';
-        if (window.innerWidth <= 900 && typeof closeSidebar === 'function') {
+        if (window.innerWidth <= 1024 && typeof closeSidebar === 'function') {
             closeSidebar();
         }
     }
@@ -806,10 +813,24 @@ async function filtrarCategoria(cat, checkboxElement) {
     // Si seleccionamos "Todos" o "Favoritos", regresar a la vista de grupos
     if (cat === 'Todos' || cat === 'Favoritos') {
         if (typeof mostrarPanelGrupos === 'function') mostrarPanelGrupos();
+        // Auto-cerrar en móvil
+        if (window.innerWidth <= 1024 && typeof closeSidebar === 'function') {
+            closeSidebar();
+        }
     }
 
     let mTitle = document.getElementById('mobile-header-title');
     if (mTitle) mTitle.innerText = (cat === 'Todos') ? 'Inicio' : cat;
+
+    // Actualizar Hero Title dinámicamente
+    let heroTitle = document.querySelector('.hero-title');
+    if (heroTitle) {
+        if (cat === 'Todos' || cat === 'Favoritos') {
+            heroTitle.innerHTML = 'Supermercado y <span class="highlight">Bodegón</span>';
+        } else {
+            heroTitle.innerHTML = '<span class="highlight">' + cat + '</span>';
+        }
+    }
 
     // --- LAZY LOADING: Asegurarnos de que el grupo seleccionado ya esté descargado ---
     if (cat !== 'Todos' && cat !== 'Favoritos' && appState.gruposInventario) {
