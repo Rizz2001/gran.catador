@@ -223,61 +223,69 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="main-products-wrapper">
                 <div class="container product-page-container">
             <!-- Breadcrumbs -->
-            <nav class="breadcrumb" aria-label="breadcrumbs" id="product-breadcrumb">
+            <nav class="product__breadcrumb breadcrumb" aria-label="breadcrumbs" id="product-breadcrumb">
                 <a href="index.html">Inicio</a>
                 <span class="separator">/</span>
                 <span class="skeleton-text short"></span>
             </nav>
 
-            <div class="product-main-layout">
-                <!-- Imagen del producto (Izquierda) -->
-                <div class="product-image-section">
-                    <div class="product-image-wrapper skeleton-box" id="product-image-wrapper">
+            <div class="product__container">
+                <!-- Izquierda: Imagen principal (1) -->
+                <div class="product__gallery">
+                    <div class="product__image-wrapper skeleton-box" id="product-image-wrapper">
                         <!-- Imagen se inyecta por JS -->
                     </div>
                 </div>
 
-                <!-- Detalles y Compra (Derecha) -->
-                <div class="product-details-section">
-                    <div class="product-category-tag skeleton-text short" id="product-category"></div>
-                    <h1 class="product-title skeleton-text long" id="product-title"></h1>
+                <!-- Derecha: Información y detalles (2, 3, 4) -->
+                <div class="product__info">
+                    <!-- 2. Nombre, Precio, Switch, Acciones -->
+                    <div class="product__header-section">
+                        <div class="product__category skeleton-text short" id="product-category"></div>
+                        <h1 class="product__title skeleton-text long" id="product-title"></h1>
+                        
+                        <div class="product__price-box skeleton-box">
+                            <div class="product__price-usd" id="product-price-usd"></div>
+                            <div class="product__price-bs" id="product-price-bs"></div>
+                        </div>
+
+                        <div class="product__stock skeleton-text" id="product-stock"></div>
+
+                        <!-- Switch de Caja/Unidad -->
+                        <div class="product__switch-container">
+                            <span class="switch-label">Unidad</span>
+                            <label class="theme-switch">
+                                <input type="checkbox" id="toggle-caja-unidad" onchange="toggleModoVistaProducto(this)">
+                                <span class="slider round"></span>
+                            </label>
+                            <span class="switch-label">Caja</span>
+                        </div>
+
+                        <div class="product__actions skeleton-box" id="product-action-block">
+                            <!-- Botones y selector de cantidad se inyectan por JS -->
+                        </div>
+                    </div>
                     
-                    <div class="product-price-block skeleton-box">
-                        <div class="price-usd" id="product-price-usd"></div>
-                        <div class="price-bs" id="product-price-bs"></div>
+                    <!-- 3. Descripción -->
+                    <div class="product__description-box">
+                        <h2 class="product__section-title"><i class="fa-solid fa-file-lines"></i> Descripción</h2>
+                        <div id="product-description" class="product__description-text skeleton-text multiple">
+                            Cargando información del producto...
+                        </div>
                     </div>
 
-                    <div class="product-stock-status skeleton-text" id="product-stock"></div>
-
-                    <div class="product-add-to-cart product-action-block skeleton-box" id="product-action-block">
-                        <!-- Botones y selector de cantidad se inyectan por JS -->
-                    </div>
-                    
-                    <div class="product-quick-specs skeleton-box" id="product-quick-specs">
-                        <!-- Ficha tecnica rapida -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Descripción y Detalles (Abajo) -->
-            <div class="product-description-layout">
-                <div class="description-card">
-                    <h2><i class="fa-solid fa-file-lines"></i> Descripción del Producto</h2>
-                    <p id="product-description" class="skeleton-text multiple">
-                        Cargando información del producto...
-                    </p>
-                </div>
-
-                <div class="specs-card">
-                    <h2><i class="fa-solid fa-list-check"></i> Ficha Técnica</h2>
-                    <div class="specs-grid" id="product-full-specs">
-                        <!-- Detalles tecnicos inyectados por JS -->
+                    <!-- 4. Ficha Técnica -->
+                    <div class="product__specs-box">
+                        <h2 class="product__section-title"><i class="fa-solid fa-list-check"></i> Ficha Técnica</h2>
+                        <div class="product__specs-grid" id="product-full-specs">
+                            <!-- Detalles tecnicos inyectados por JS -->
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Quizás te interese -->
-            <div id="productos-relacionados-root"></div>
+            <div id="productos-relacionados-root" class="product__related"></div>
         </div>
 
             </div>

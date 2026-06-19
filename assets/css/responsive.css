@@ -1,3 +1,6 @@
+/* ==========================================================================
+   5. RESPONSIVE (Media Queries)
+   ========================================================================== */
 /* --- OPTIMIZACIÓN RESPONSIVE TABLET / MÓVIL --- */
 @media (max-width: 1024px) {
     .header-main-container {

@@ -1,4 +1,4 @@
-﻿/* --- TOQUES FINALES GLOBALES --- */
+/* --- TOQUES FINALES GLOBALES --- */
 html,
 body {
     overflow-x: clip;
@@ -17,11 +17,6 @@ input,
 select,
 textarea {
     transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease, transform 0.28s ease;
-}
-
-button,
-a {
-    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
 }
 
 *:focus-visible {
@@ -346,24 +341,7 @@ a {
     /* Permite que los tooltips y sombras se vean */
 }
 
-button,
-a,
-i,
-input,
-select,
-textarea {
-    transition: background-color 0.28s ease, color 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease, transform 0.28s ease;
-}
 
-button,
-a {
-    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
-}
-
-*:focus-visible {
-    outline: 2px solid var(--color-primary, #004d40);
-    outline-offset: 2px;
-}
 
 #contenedorCategorias {
     background-color: transparent !important;

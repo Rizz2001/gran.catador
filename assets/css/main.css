@@ -1,10 +1,36 @@
-/* --- Tipografía --- */
+/* ==========================================================================
+   1. RESET & TIPOGRAFÍA
+   ========================================================================== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* --- Importación de Módulos --- */
-@import url('styles.css');
-@import url('responsive.css');
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
 
+html {
+  min-height: 100%;
+  background: var(--fondo);
+  scroll-behavior: smooth;
+}
+
+body,
+#main-content {
+  font-family: 'Poppins', sans-serif;
+  max-width: 100vw;
+  overflow-x: hidden;
+  background-color: var(--fondo);
+  color: var(--texto-oscuro);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================================================
+   2. VARIABLES (Root & Dark Mode)
+   ========================================================================== */
 :root {
   /* HSL Color System Base (Hue, Saturation, Lightness) */
   --primary-h: 224;
@@ -105,41 +131,7 @@ body.dark-mode #store-status {
   border-color: var(--color-accent) !important;
 }
 
-*, *::before, *::after {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-  outline: none;
-}
 
-.premium-title {
-  font-family: 'Montserrat', sans-serif;
-}
-
-body,
-#main-content {
-  font-family: 'Poppins', sans-serif;
-  max-width: 100vw;
-  overflow-x: hidden;
-  background-color: var(--fondo);
-  background-image: radial-gradient(circle at 10% 10%, rgba(59, 130, 246, 0.08), transparent 24%),
-                    radial-gradient(circle at 90% 15%, rgba(34, 197, 94, 0.06), transparent 20%);
-  color: var(--texto-oscuro);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  transition: background 0.3s ease, color 0.3s ease;
-  scroll-behavior: smooth;
-}
-
-html {
-  min-height: 100%;
-  background: var(--fondo);
-}
-
-html {
-  background: var(--fondo);
-}
 
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
@@ -266,6 +258,9 @@ body.dark-mode .age-box {
   font-weight: bold;
 }
 
+/* ==========================================================================
+   3. LAYOUT (Estructura, Header, Footer)
+   ========================================================================== */
 /* --- CONTENEDOR PRINCIPAL --- */
 .container {
   max-width: 1280px;
@@ -664,6 +659,9 @@ body.dark-mode .nav-link.active {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* ==========================================================================
+   4. COMPONENTES (Botones, Cards, UI Elements)
+   ========================================================================== */
 /* --- HERO BANNER --- */
 .hero-banner {
   background-color: var(--color-primary);

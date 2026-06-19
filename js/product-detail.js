@@ -92,16 +92,22 @@ function renderizarProducto(p) {
     let stockStatusHTML = '';
     
     if (p.StockNum >= 999 || (p.StockStr || '').toString().toLowerCase() === 'disponible') {
-        stockStatusHTML = `<span class="product-stock-status available"><i class="fa-solid fa-check-circle"></i> Disponible</span>`;
+        stockStatusHTML = `<span class="product__stock available"><i class="fa-solid fa-check-circle"></i> Disponible</span>`;
     } else if (isAgotado && p.StockNum > 0) {
-        stockStatusHTML = `<span class="product-stock-status warning"><i class="fa-solid fa-triangle-exclamation"></i> Solo ${p.StockNum} und disponibles (No alcanza p/ caja)</span>`;
+        stockStatusHTML = `<span class="product__stock warning"><i class="fa-solid fa-triangle-exclamation"></i> Solo ${p.StockNum} und disponibles (No alcanza p/ caja)</span>`;
     } else if (isAgotado) {
-        stockStatusHTML = `<span class="product-stock-status out"><i class="fa-solid fa-circle-xmark"></i> Agotado</span>`;
+        stockStatusHTML = `<span class="product__stock out"><i class="fa-solid fa-circle-xmark"></i> Agotado</span>`;
     } else {
-        stockStatusHTML = `<span class="product-stock-status ${p.StockNum <= 5 ? 'warning' : 'available'}"><i class="fa-solid fa-check-circle"></i> ${p.StockNum} und disponibles</span>`;
+        stockStatusHTML = `<span class="product__stock ${p.StockNum <= 5 ? 'warning' : 'available'}"><i class="fa-solid fa-check-circle"></i> ${p.StockNum} und disponibles</span>`;
     }
 
     const nombreB64 = typeof codificarNombre === 'function' ? codificarNombre(p.Nombre) : btoa(encodeURIComponent(p.Nombre));
+
+    // Sync switch
+    const toggleCaja = document.getElementById('toggle-caja-unidad');
+    if (toggleCaja) {
+        toggleCaja.checked = esModoCaja;
+    }
 
     // Breadcrumb
     document.getElementById('product-breadcrumb').innerHTML = `
@@ -143,25 +149,7 @@ function renderizarProducto(p) {
         </button>
     `;
 
-    // Ficha rápida
-    const quickSpecs = document.getElementById('product-quick-specs');
-    quickSpecs.classList.remove('skeleton-box');
-    quickSpecs.innerHTML = `
-        <div class="quick-spec-item">
-            <i class="fa-solid fa-box quick-spec-icon"></i>
-            <div class="quick-spec-text">
-                <span class="quick-spec-label">Presentación</span>
-                <span class="quick-spec-val">${p.Medida || p.UnidadSimple || 'Unidad'}</span>
-            </div>
-        </div>
-        <div class="quick-spec-item">
-            <i class="fa-solid fa-layer-group quick-spec-icon"></i>
-            <div class="quick-spec-text">
-                <span class="quick-spec-label">Empaque</span>
-                <span class="quick-spec-val">${cantCaja} Unds / ${p.UnidadGrup || 'Caja'}</span>
-            </div>
-        </div>
-    `;
+
 
     // Descripcion larga
     const descEl = document.getElementById('product-description');
@@ -241,6 +229,20 @@ window.agregarDesdeDetalle = function(nombreB64, precioNum, imgSrc, esModoCaja) 
             // Pasamos true en sumarAlerta solo en la última para no espamear
             const mostrarAlerta = (i === cantidad - 1);
             agregarAlCarritoB64(nombreB64, precioNum, btnMock, mostrarAlerta, imgSrc, esModoCaja);
+        }
+    }
+};
+
+window.toggleModoVistaProducto = function(checkbox) {
+    const modo = checkbox.checked ? 'caja' : 'unidad';
+    try { modoVistaGlobal = modo; } catch (e) { window.modoVistaGlobal = modo; }
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    if(productId && window.appState && window.appState.inventario) {
+        let producto = window.appState.inventario.find(p => (window.compararIDs ? window.compararIDs(p.codigo, productId) : p.codigo == productId));
+        if(producto) {
+            renderizarProducto(producto);
         }
     }
 };
