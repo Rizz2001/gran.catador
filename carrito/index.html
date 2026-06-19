@@ -161,11 +161,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                         <button class="icon-btn desktop-only" aria-label="Notificaciones">
                             <i class="fa-regular fa-bell"></i>
                         </button>
-                        <button class="icon-btn" onclick="window.location.href='carrito/'" aria-label="Carrito">
+                        <button class="icon-btn desktop-only" onclick="window.location.href='carrito/'" aria-label="Carrito">
                             <i class="fa-solid fa-cart-shopping"></i>
                             <span class="badge" id="cart-count">0</span>
                         </button>
-                        <button class="icon-btn" onclick="abrirPerfil()" aria-label="Mi Perfil">
+                        <button class="icon-btn desktop-only" onclick="abrirPerfil()" aria-label="Mi Perfil">
                             <i class="fa-regular fa-user"></i>
                         </button>
                         <button class="icon-btn" onclick="abrirAjustes()" aria-label="Ajustes">
@@ -426,16 +426,22 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <div class="premium-cart-layout">
                 <!-- Columna Izquierda: Productos -->
                 <div class="premium-cart-left">
-                    <a href="../" style="display: inline-block; margin-bottom: 15px; color: #007185; text-decoration: none; font-size: 14px;">
-                        <i class="fa-solid fa-arrow-left"></i> Volver a la tienda
-                    </a>
+                    <div class="cart-mobile-top-bar mobile-only">
+                        <a href="../" class="btn-volver-tienda"><i class="fa-solid fa-arrow-left"></i> Volver a la tienda</a>
+                        <button type="button" class="btn-trash-mobile" onclick="vaciarCarrito()"><i class="fa-solid fa-trash-can"></i> Descartar</button>
+                    </div>
+                    <div class="desktop-only">
+                        <a href="../" style="display: inline-block; margin-bottom: 15px; color: #007185; text-decoration: none; font-size: 14px;">
+                            <i class="fa-solid fa-arrow-left"></i> Volver a la tienda
+                        </a>
+                    </div>
                     <div class="cart-header premium-cart-header">
                         <h2>Carrito de Compras</h2>
-                        <div style="display:flex; gap:10px;">
+                        <div class="desktop-only" style="display:flex; gap:10px;">
                             <button type="button" class="btn-trash" onclick="vaciarCarrito()" aria-label="Vaciar carrito de compras">Descartar todos los artículos</button>
                         </div>
                     </div>
-                    <p style="text-align: right; font-size: 13px; color: var(--color-text-muted); margin-bottom: 5px; padding-right: 15px;">Precio</p>
+                    <p class="desktop-only" style="text-align: right; font-size: 13px; color: var(--color-text-muted); margin-bottom: 5px; padding-right: 15px;">Precio</p>
                     <div id="lista-carrito"></div>
                 </div>
 
@@ -464,13 +470,12 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                             </p>
                         </div>
 
-                        <!-- STEP 2: Opciones de Entrega y Pago -->
-                        <div id="step-2-options" style="display:none;">
+                        <!-- STEP 2: Opciones de Entrega -->
+                        <div id="step-2-delivery" class="checkout-step-container" style="display:none;">
                             <button type="button" class="btn-checkout-secondary" onclick="setCheckoutStep(1)" style="margin-bottom: 15px; width: 100%; background: var(--item-bg); border: 1px solid var(--color-border); padding: 12px; border-radius: var(--radius-md); color: var(--color-text); cursor: pointer; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
                                 <i class="fa-solid fa-arrow-left"></i> Volver a la lista
                             </button>
 
-                            <!-- Opciones de Entrega -->
                             <div class="premium-checkout-box">
                                 <p class="box-title"><i class="fa-solid fa-motorcycle"></i> Opciones de Entrega</p>
                                 <div class="premium-toggles">
@@ -491,9 +496,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                 <textarea id="notasPedido" class="premium-input" placeholder="Añadir opciones de regalo o notas..." style="margin-top:15px; height: 60px; resize: none;"></textarea>
                             </div>
 
-                            <!-- Método de Pago -->
+                            <button type="button" class="btn-checkout-primary" onclick="setCheckoutStep(3)" style="margin-top: 15px;">
+                                Continuar a Método de Pago
+                            </button>
+                        </div>
+
+                        <!-- STEP 3: Método de Pago -->
+                        <div id="step-3-payment" class="checkout-step-container" style="display:none;">
+                            <button type="button" class="btn-checkout-secondary" onclick="setCheckoutStep(2)" style="margin-bottom: 15px; width: 100%; background: var(--item-bg); border: 1px solid var(--color-border); padding: 12px; border-radius: var(--radius-md); color: var(--color-text); cursor: pointer; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <i class="fa-solid fa-arrow-left"></i> Volver a Opciones de Entrega
+                            </button>
+
                             <div class="premium-checkout-box">
-                                <p class="box-title"><i class="fa-solid fa-wallet"></i> Método de Pago</p>
+                                <div class="box-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <span><i class="fa-solid fa-wallet"></i> Método de Pago</span>
+                                    <span style="font-size: 14px; font-weight: 800; color: var(--color-primary); background: rgba(30,58,138,0.05); padding: 4px 10px; border-radius: 8px;">
+                                        <span id="totalUsdStep3">$0.00</span> <span style="font-size: 12px; font-weight: 600; color: var(--color-text-muted); margin-left: 4px;">(<span id="totalBsStep3">0,00 Bs</span>)</span>
+                                    </span>
+                                </div>
                                 <div class="premium-toggles three-cols">
                                     <input type="radio" id="pago-efectivo" name="metodoPago" value="Efectivo" onchange="actualizarMetodoPago()" checked>
                                     <label for="pago-efectivo" class="premium-toggle-btn"><i class="fa-solid fa-money-bill-wave"></i> Efectivo</label>
@@ -550,15 +570,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                 </div>
                             </div>
                             
-                            <button type="button" class="btn-checkout-primary" onclick="setCheckoutStep(3)" style="margin-top: 15px;">
+                            <button type="button" class="btn-checkout-primary" onclick="setCheckoutStep(4)" style="margin-top: 15px;">
                                 Continuar a Confirmación
                             </button>
                         </div>
 
-                        <!-- STEP 3: Confirmación Final -->
-                        <div id="step-3-confirm" style="display:none;">
-                            <button type="button" class="btn-checkout-secondary" onclick="setCheckoutStep(2)" style="margin-bottom: 15px; width: 100%; background: var(--item-bg); border: 1px solid var(--color-border); padding: 12px; border-radius: var(--radius-md); color: var(--color-text); cursor: pointer; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                <i class="fa-solid fa-arrow-left"></i> Volver a Opciones
+                        <!-- STEP 4: Confirmación Final -->
+                        <div id="step-4-confirm" class="checkout-step-container" style="display:none;">
+                            <button type="button" class="btn-checkout-secondary" onclick="setCheckoutStep(3)" style="margin-bottom: 15px; width: 100%; background: var(--item-bg); border: 1px solid var(--color-border); padding: 12px; border-radius: var(--radius-md); color: var(--color-text); cursor: pointer; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <i class="fa-solid fa-arrow-left"></i> Volver a Método de Pago
                             </button>
 
                             <div class="premium-checkout-box order-summary-card">

@@ -700,33 +700,52 @@ function cambiarCantB64(b64, d) {
 
 /** 
  * Maneja el flujo de checkout en pasos (Local State)
- * @param {number} step - Paso actual (1, 2, 3)
+ * @param {number} step - Paso actual (1, 2, 3, 4)
  */
 function setCheckoutStep(step) {
     appState.checkoutStep = step;
     
     let step1Summary = document.getElementById('step-1-summary');
-    let step2Options = document.getElementById('step-2-options');
-    let step3Confirm = document.getElementById('step-3-confirm');
+    let step2Delivery = document.getElementById('step-2-delivery');
+    let step3Payment = document.getElementById('step-3-payment');
+    let step4Confirm = document.getElementById('step-4-confirm');
     
-    // Fallback: si no se encuentran los elementos no hace nada (ej. no está en el carrito)
-    if (!step1Summary || !step2Options || !step3Confirm) return;
+    // Fallback: si no se encuentran los elementos no hace nada
+    if (!step1Summary || !step2Delivery || !step3Payment || !step4Confirm) return;
+
+    if (step === 3) {
+        // Validación de Delivery antes de pasar al método de pago
+        let radioEntrega = document.querySelector('input[name="metodoEntrega"]:checked');
+        let metodoEntrega = radioEntrega ? radioEntrega.value : 'Retiro';
+        if (metodoEntrega === 'Delivery') {
+            let dir = document.getElementById('direccionDelivery');
+            if (dir && !dir.value.trim()) {
+                alert("Por favor, ingresa tu dirección para el delivery antes de continuar.");
+                appState.checkoutStep = 2; // Revertir estado
+                return;
+            }
+        }
+    }
+
+    // Ocultar todos con animación (si se usa CSS para esto)
+    step1Summary.style.display = 'none';
+    step2Delivery.style.display = 'none';
+    step3Payment.style.display = 'none';
+    step4Confirm.style.display = 'none';
 
     if (step === 1) {
-        // Paso 1: Mostrar lista de productos y botón "Procesar Compra"
         step1Summary.style.display = 'block';
-        step2Options.style.display = 'none';
-        step3Confirm.style.display = 'none';
     } else if (step === 2) {
-        // Paso 2: Mostrar Opciones de Entrega y Método de Pago
-        step1Summary.style.display = 'none';
-        step2Options.style.display = 'block';
-        step3Confirm.style.display = 'none';
+        step2Delivery.style.display = 'block';
     } else if (step === 3) {
-        // Paso 3: Confirmación Final
-        step1Summary.style.display = 'none';
-        step2Options.style.display = 'none';
-        step3Confirm.style.display = 'block';
+        step3Payment.style.display = 'block';
+        
+        let totalUsdEl3 = document.getElementById('totalUsdStep3');
+        let totalBsEl3 = document.getElementById('totalBsStep3');
+        if (totalUsdEl3) totalUsdEl3.innerText = document.getElementById('totalUsdModal').innerText;
+        if (totalBsEl3) totalBsEl3.innerText = document.getElementById('totalBsModal').innerText;
+    } else if (step === 4) {
+        step4Confirm.style.display = 'block';
         
         // Actualizar totales en la confirmación final por seguridad
         let totalUsdEl = document.getElementById('totalUsdModalFinal');
@@ -735,12 +754,13 @@ function setCheckoutStep(step) {
         if (totalBsEl) totalBsEl.innerText = document.getElementById('totalBsModal').innerText;
     }
 
-    // Control responsive de la columna izquierda (ocultar solo en móvil para pasos 2 y 3)
+    // Control responsive de la columna izquierda (ocultar solo en móvil para pasos 2, 3 y 4)
     let layout = document.querySelector('.premium-cart-layout');
     if (layout) {
-        layout.setAttribute('data-checkout-step', step);
-        // Aseguramos que el estilo inline no interfiera en desktop
-        let step1Left = document.querySelector('.premium-cart-left');
-        if (step1Left) step1Left.style.display = '';
+        if (step > 1) {
+            layout.classList.add('checkout-active');
+        } else {
+            layout.classList.remove('checkout-active');
+        }
     }
 }
