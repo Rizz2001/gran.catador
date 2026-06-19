@@ -833,13 +833,26 @@ function debounceBusqueda(event) {
     // Un solo timer: aplicarFiltros calcula y pasa resultados a mostrarSugerencias
     debounceTimer = setTimeout(() => {
         aplicarFiltros();
-        // Lógica para Escáner de Códigos de Barras: Si se presiona Enter y hay 1 solo resultado, abrirlo.
-        if (teclaPresionada === 'Enter' && productosFiltradosGlobal && productosFiltradosGlobal.length === 1) {
-            cerrarSugerencias();
-            if (typeof abrirImagenLightbox === 'function') {
-                let p = productosFiltradosGlobal[0];
-                let imgSrc = obtenerImgProducto(p);
-                abrirImagenLightbox(imgSrc, p.codigo);
+        
+        // Auto-Scroll suave hacia los resultados si hay búsqueda
+        if (query.trim().length > 0) {
+            const contBanners = document.getElementById('contenedorBanners');
+            const offset = (contBanners && contBanners.style.display !== 'none') ? contBanners.getBoundingClientRect().bottom + window.scrollY : 0;
+            if (window.scrollY > offset + 100) {
+                window.scrollTo({ top: Math.max(0, offset - 20), behavior: 'smooth' });
+            }
+        }
+
+        // Si se presiona Enter, ocultar teclado (móviles) y chequear escáner
+        if (teclaPresionada === 'Enter') {
+            if (event.target && typeof event.target.blur === 'function') event.target.blur();
+            if (productosFiltradosGlobal && productosFiltradosGlobal.length === 1) {
+                cerrarSugerencias();
+                if (typeof abrirImagenLightbox === 'function') {
+                    let p = productosFiltradosGlobal[0];
+                    let imgSrc = obtenerImgProducto(p);
+                    abrirImagenLightbox(imgSrc, p.codigo);
+                }
             }
         }
     }, 280);

@@ -43,17 +43,32 @@ function crearHTMLProducto(p) {
     // Se retiran las clases de scroll-snap porque la vista en miniatura no debería ser scrolleable para mejor UX
     let galeriasHTML = `<img loading="lazy" decoding="async" width="300" height="300" src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease; cursor: pointer;" onload="this.parentElement.classList.remove('skeleton-box');" onclick="event.stopPropagation(); irADetalle('${p.codigo.replace(/'/g, "\\'")}');">`;
 
+    let displayNombre = p.Nombre;
+    try {
+        const queryRaw = (document.getElementById('buscador')?.value || '').trim();
+        if (queryRaw) {
+            const qNorm = quitarAcentos(queryRaw).toLowerCase();
+            const words = qNorm.split(/\\s+/).filter(w => w.length > 1);
+            if (words.length > 0) {
+                const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
+                const regexStr = words.map(w => escapeRegExp(w)).join('|');
+                const regex = new RegExp(`(${regexStr})`, 'gi');
+                displayNombre = displayNombre.replace(regex, '<span style="color: var(--color-primary); font-weight: bold; background-color: rgba(30,58,138,0.1); border-radius: 2px;">$1</span>');
+            }
+        }
+    } catch(e){}
+
     return `
         <div class="producto-card ${isAgotado ? 'agotado' : ''}">
             
             ${badgeHTML}
             
-            <div class="product-card-content" onclick="irADetalle('${p.codigo.replace(/'/g, "\\'")}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); irADetalle('${p.codigo.replace(/'/g, "\\'")}'); }" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;" role="button" tabindex="0" aria-label="Ver detalles de ${p.Nombre}">
+            <div class="product-card-content" onclick="irADetalle('${p.codigo.replace(/'/g, "\\\\'")}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); irADetalle('${p.codigo.replace(/'/g, "\\\\'")}'); }" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;" role="button" tabindex="0" aria-label="Ver detalles de ${p.Nombre}">
                 <div class="product-img-container skeleton-box">
                     ${galeriasHTML}
                 </div>
                 
-                <h3 class="producto-titulo" title="${p.Nombre}">${p.Nombre}</h3>
+                <h3 class="producto-titulo" title="${p.Nombre}">${displayNombre}</h3>
                 
                 <p class="producto-stock">
                     ${textoStock}
@@ -378,8 +393,15 @@ function renderizarPagina() {
         if (paginaActual === 1) {
             const queryRaw = (document.getElementById('buscador')?.value || '').trim();
             let msjExtra = '';
-            if (queryRaw.length > 0 && categoriaActual !== 'Todos') {
-                msjExtra = `<br><span style="color: var(--color-primary); font-weight: 600; display: inline-block; margin-top: 10px; background: rgba(30,58,138,0.1); padding: 6px 12px; border-radius: 8px;"><i class="fa-solid fa-globe"></i> Se buscó en todo el catálogo</span>`;
+            let tituloVacio = 'No encontramos esa botella';
+            let descVacia = 'No encontramos botellas con esa descripción.';
+
+            if (queryRaw.length > 0) {
+                tituloVacio = `Sin resultados para "${queryRaw}"`;
+                descVacia = `No pudimos encontrar "${queryRaw}" en nuestro inventario.`;
+                if (categoriaActual !== 'Todos') {
+                    msjExtra = `<br><span style="color: var(--color-primary); font-weight: 600; display: inline-block; margin-top: 10px; background: rgba(30,58,138,0.1); padding: 6px 12px; border-radius: 8px;"><i class="fa-solid fa-globe"></i> Se buscó en todo el catálogo</span>`;
+                }
             }
 
             cont.innerHTML = `
@@ -387,9 +409,9 @@ function renderizarPagina() {
                     <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity: 0.1; margin-bottom: 15px;">
                         <path d="M15.0001 12.0001H15.0101M12.0001 12.0001H12.0101M9.00006 12.0001H9.01006M5.53105 4.53105C5.82394 4.23816 6.17606 4 6.55006 4H17.45C17.824 4 18.1761 4.23816 18.469 4.53105C18.7619 4.82394 19 5.17606 19 5.55005V17.45C19 17.824 18.7619 18.1761 18.469 18.469C18.1761 18.7619 17.824 19 17.45 19H6.55006C6.17606 19 5.82394 18.7619 5.53105 18.469C5.23816 18.1761 5.00006 17.824 5.00006 17.45V5.55005C5.00006 5.17606 5.23816 4.82394 5.53105 4.53105ZM10.0001 21.0001V20.0001M14.0001 21.0001V20.0001M3.00006 8.00005H4.00006M3.00006 12.0001H4.00006M3.00006 16.0001H4.00006M20.0001 8.00005H21.0001M20.0001 12.0001H21.0001M20.0001 16.0001H21.0001M8.00006 3.00005V4.00005M12.0001 3.00005V4.00005M16.0001 3.00005V4.00005" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="var(--color-text)"/>
                     </svg>
-                    <h3 style="color: var(--texto-oscuro); font-size: 16px; font-weight: bold;">No encontramos esa botella</h3>
-                    <p style="font-size: 13px; margin-top: 5px;">No encontramos botellas con esa descripción.${msjExtra}</p>
-                    <button onclick="irInicio()" class="cat-btn active" style="margin: 20px auto 0 auto; padding: 10px 20px;">Ver todo el catálogo</button>
+                    <h3 style="color: var(--texto-oscuro); font-size: 16px; font-weight: bold;">${tituloVacio}</h3>
+                    <p style="font-size: 13px; margin-top: 5px;">${descVacia}${msjExtra}</p>
+                    <button onclick="document.getElementById('buscador').value=''; aplicarFiltros();" class="cat-btn active" style="margin: 20px auto 0 auto; padding: 10px 20px;">Limpiar búsqueda</button>
                 </div>`;
             if (btnCargarMas) btnCargarMas.style.display = 'none';
         }
