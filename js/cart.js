@@ -159,6 +159,13 @@ function animarAlCarrito(btnElement, imgSrc) {
 
 /** Añade un producto al estado del carrito y lanza efectos visuales */
 function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = '', esCaja = false) {
+    // --- VALIDACIÓN HORARIO ---
+    if (typeof appState !== 'undefined' && appState.isTiendaAbierta === false) {
+        mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
+        return;
+    }
+    // --- FIN VALIDACIÓN HORARIO ---
+
     // --- VALIDACIÓN DE STOCK ---
     if (!tieneStockSuficiente(nombre, esCaja)) {
         return; // Detener si no hay stock
@@ -451,6 +458,11 @@ function renderizarCarrito() {
 
 function cambiarCant(n, delta) {
     if (delta > 0) {
+        if (typeof appState !== 'undefined' && appState.isTiendaAbierta === false) {
+            mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
+            return;
+        }
+
         const esCaja = n.includes('(CAJA)');
         const nombreBase = n.replace(/ \((CAJA|UNIDAD)\)$/, '');
 

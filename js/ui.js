@@ -60,15 +60,21 @@ window.verificarEdad = function() {
 function checkHorario() {
     try {
         let d = new Date();
-        let formatter = new Intl.DateTimeFormat('es-VE', { hour: 'numeric', hour12: false, timeZone: 'America/Caracas' });
-        let horaCaracas = parseInt(formatter.format(d));
+        let formatter = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', hour12: false, timeZone: 'America/Caracas' });
+        let parts = formatter.format(d).split(':');
+        let horaCaracas = parseInt(parts[0]);
+        let minutoCaracas = parseInt(parts[1]);
+        if (horaCaracas === 24) horaCaracas = 0;
+
         let badge = document.getElementById('store-status');
         let btnWs = document.getElementById('btn-whatsapp');
         let msgCerrado = document.getElementById('msg-cerrado');
 
         if (!badge) return;
 
-        if (horaCaracas >= 8 && horaCaracas < 21) {
+        let isAbierto = (horaCaracas >= 8 && horaCaracas < 20) || (horaCaracas === 20 && minutoCaracas <= 30);
+
+        if (isAbierto) {
             try { isTiendaAbierta = true; } catch (e) { window.isTiendaAbierta = true; }
             if (typeof appState !== 'undefined') appState.isTiendaAbierta = true;
             badge.innerHTML = "🟢 ABIERTO";
