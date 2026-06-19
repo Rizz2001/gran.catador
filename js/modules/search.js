@@ -1,4 +1,4 @@
-﻿// --- SUGERENCIAS E INTERACCIONES ---
+// --- SUGERENCIAS E INTERACCIONES ---
 /**
  * Muestra el panel de sugerencias usando resultados ya calculados por aplicarFiltros.
  * No hace una segunda pasada al inventario.
@@ -6,88 +6,9 @@
  * @param {Array} resultados - Productos ya filtrados y ordenados por score
  */
 function mostrarSugerencias(q, resultados) {
+    // Funcionalidad desactivada: los resultados se actualizan directamente en la página.
     const cont = document.getElementById('search-suggestions');
-    const input = document.getElementById('buscador');
-    if (!cont || !input) return;
-
-    const query = q ? q.trim() : '';
-    if (query.length === 0) {
-        cont.style.display = 'none';
-        return;
-    }
-
-    cont.innerHTML = '';
-    cont.style.display = 'block';
-
-    const header = document.createElement('div');
-    header.className = 'search-suggestions-header';
-    header.innerHTML = `<span>Buscando <strong>${query}</strong></span><small>${resultados.length} resultado${resultados.length === 1 ? '' : 's'}</small>`;
-    cont.appendChild(header);
-
-    if (resultados.length === 0) {
-        const empty = document.createElement('div');
-        empty.className = 'search-suggestions-empty';
-        empty.innerHTML = '<strong>No se encontraron productos.</strong><p>Prueba otra marca, medida o categoría.</p>';
-        cont.appendChild(empty);
-        return;
-    }
-
-    const lista = document.createElement('div');
-    lista.className = 'search-suggestions-list';
-    resultados.slice(0, 6).forEach(producto => {
-        const item = document.createElement('button');
-        item.type = 'button';
-        item.className = 'search-suggestion-item';
-        item.onclick = () => {
-            input.value = producto.Nombre || '';
-            cont.style.display = 'none';
-            aplicarFiltros();
-            input.focus();
-        };
-
-        const imagen = document.createElement('img');
-        imagen.className = 'search-suggestion-image';
-        imagen.src = obtenerImgProducto(producto);
-        imagen.alt = producto.Nombre || 'Producto';
-        imagen.onerror = () => { imagen.src = 'logo.webp'; };
-
-        const datos = document.createElement('div');
-        datos.className = 'search-suggestion-data';
-        const titulo = document.createElement('div');
-        titulo.className = 'search-suggestion-title';
-        titulo.textContent = producto.Nombre || 'Producto';
-        const meta = document.createElement('div');
-        meta.className = 'search-suggestion-meta';
-        const categoria = producto.Cat || producto.SubCat || 'Producto';
-        const precio = producto.PrecioStr ? `$${producto.PrecioStr}` : '';
-        meta.textContent = `${categoria}${precio ? ' · ' + precio : ''}`;
-
-        datos.appendChild(titulo);
-        datos.appendChild(meta);
-        item.appendChild(imagen);
-        item.appendChild(datos);
-        lista.appendChild(item);
-    });
-    cont.appendChild(lista);
-
-    const footer = document.createElement('div');
-    footer.className = 'search-suggestions-footer';
-    const resultCount = document.createElement('span');
-    resultCount.className = 'search-suggestions-result-count';
-    resultCount.textContent = `${resultados.length} coincidencia${resultados.length === 1 ? '' : 's'}`;
-    const action = document.createElement('button');
-    action.type = 'button';
-    action.className = 'search-suggestions-action';
-    action.textContent = resultados.length > 6 ? 'Ver todos los resultados' : 'Ver resultados';
-    action.onclick = () => {
-        cont.style.display = 'none';
-        input.focus();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
-    footer.appendChild(resultCount);
-    footer.appendChild(action);
-    cont.appendChild(footer);
+    if (cont) cont.style.display = 'none';
 }
 function cerrarSugerencias() { const cont = document.getElementById('search-suggestions'); if (cont) cont.style.display = 'none'; }
 document.addEventListener('click', (e) => { if (!e.target.closest('.search-pill') && !e.target.closest('.search-container')) cerrarSugerencias(); });
