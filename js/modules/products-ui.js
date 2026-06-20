@@ -444,6 +444,9 @@ function renderizarPagina() {
     const itemsPorFila = obtenerItemsPorFila(cont);
     const insertAfterIndex = itemsPorFila * 3;
 
+    let bannersActivos = (window.bannersGrid || []).filter(b => b.activo);
+    let freqBanner = window.bannersGridFrecuencia || 12;
+
     const tempDiv = document.createElement('div');
     const contenidoArray = [];
 
@@ -454,6 +457,25 @@ function renderizarPagina() {
         if (posicion % insertAfterIndex === 0 && posicion < pedazo.length) {
             const seccionId = Math.floor(index / insertAfterIndex);
             contenidoArray.push(crearHTMLSeccionCategoriasAleatorias(productosFiltradosGlobal, seccionId));
+        }
+
+        // Lógica para inyectar Banner de Publicidad (PC)
+        if (posicion % freqBanner === 0 && bannersActivos.length > 0 && posicion < pedazo.length) {
+            let idxBanner = (Math.floor(posicion / freqBanner) - 1) % bannersActivos.length;
+            let banner = bannersActivos[idxBanner];
+            if (banner && banner.imagen) {
+                let actionAttr = banner.codigoProducto 
+                    ? `href="#" onclick="event.preventDefault(); irADetalle('${banner.codigoProducto}');"` 
+                    : `href="${banner.url || '#'}"`;
+
+                contenidoArray.push(`
+                    <div class="banner-publicidad-grid">
+                        <a ${actionAttr}>
+                            <img src="${banner.imagen}" alt="${banner.alt || 'Publicidad'}" loading="lazy" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'100%\\\' height=\\\'150\\\'><rect width=\\\'100%\\\' height=\\\'100%\\\' fill=\\\'#f1f5f9\\\'/><text x=\\\'50%\\\' y=\\\'50%\\\' font-family=\\\'sans-serif\\\' font-size=\\\'20\\\' fill=\\\'#64748b\\\' text-anchor=\\\'middle\\\' dy=\\\'.3em\\\'>Banner no encontrado</text></svg>'; this.style.border='2px dashed #cbd5e1';">
+                        </a>
+                    </div>
+                `);
+            }
         }
 
         if (mostrarMasVendidos && index === insertAfterIndex - 1) {
