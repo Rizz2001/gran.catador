@@ -117,7 +117,7 @@ function mostrarToastError(titulo, detalle) {
     setTimeout(() => t.remove(), 3500);
 }
 
-/** Anima un producto volando hacia el icono del carrito flotante */
+/** Anima un producto volando hacia el icono del carrito */
 function animarAlCarrito(btnElement, imgSrc) {
     if (!btnElement || !imgSrc) return;
 
@@ -205,7 +205,7 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = 
         btnElement.style.background = "#fff";
         btnElement.style.color = "var(--verde-btn)";
 
-        // --- NUEVO: Texto flotante "¡Agregado al carrito!" debajo del botón ---
+        // --- NUEVO: Texto de confirmación "¡Agregado al carrito!" debajo del botón ---
         let parent = btnElement.parentElement;
         parent.style.position = 'relative'; // Convertir al padre en el punto de anclaje
 
@@ -485,22 +485,25 @@ function cambiarCant(n, delta) {
 }
 
 function toggleDireccion() {
-    let met = document.querySelector('input[name="metodoEntrega"]:checked').value;
+    let inputMetodo = document.querySelector('input[name="metodoEntrega"]:checked');
+    if (!inputMetodo) return; // Salir si el DOM no tiene el checkout (ej: en index.html)
+    
+    let met = inputMetodo.value;
     let dirInput = document.getElementById('direccionDelivery');
     let btnGeo = document.getElementById('btn-geo');
     let btnMap = document.getElementById('btnMap');
 
     if (met === 'Delivery') {
-        dirInput.style.display = 'block';
+        if (dirInput) dirInput.style.display = 'block';
         if (btnGeo) btnGeo.style.display = 'block';
-        btnMap.style.display = 'none';
-        if (localStorage.getItem('gc_direccion') && !dirInput.value) {
+        if (btnMap) btnMap.style.display = 'none';
+        if (dirInput && localStorage.getItem('gc_direccion') && !dirInput.value) {
             dirInput.value = localStorage.getItem('gc_direccion');
         }
     } else {
-        dirInput.style.display = 'none';
+        if (dirInput) dirInput.style.display = 'none';
         if (btnGeo) btnGeo.style.display = 'none';
-        btnMap.style.display = 'block';
+        if (btnMap) btnMap.style.display = 'block';
     }
 }
 
