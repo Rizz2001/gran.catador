@@ -1,4 +1,4 @@
-const CACHE_NAME = 'grancatador-v16';
+const CACHE_NAME = 'grancatador-v17';
 const urlsToCache = [
   './index.html',
   './assets/css/main.css',

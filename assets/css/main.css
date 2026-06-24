@@ -1980,10 +1980,14 @@ body.dark-mode .cart-header .panel-title {
 /* --- OPTIMIZACIÓN EXCLUSIVA PARA PC DE ESCRITORIO --- */
 @media (min-width: 768px) {
   .promo-banner {
-    min-width: 75%;
-    max-width: 800px;
-    aspect-ratio: 800 / 300;
+    min-width: 100%;
+    max-width: 100%;
+    aspect-ratio: auto;
     height: auto !important;
+  }
+  .promo-banner img {
+    height: auto;
+    object-fit: contain;
   }
 
   .productos-grid {
@@ -2069,8 +2073,11 @@ body.dark-mode .cart-header .panel-title {
 @media (min-width: 1440px) {
 
   .container,
-  .productos-grid {
-    max-width: none;
+  .productos-grid,
+  .banners-wrapper-relative,
+  .hero-banner,
+  .main-layout-container {
+    max-width: none !important;
     padding-left: 40px;
     padding-right: 40px;
   }
