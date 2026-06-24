@@ -1,4 +1,4 @@
-const CACHE_NAME = 'grancatador-v17';
+const CACHE_NAME = 'grancatador-v22';
 const urlsToCache = [
   './index.html',
   './assets/css/main.css',
@@ -37,6 +37,19 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Para fotos y diseño -> Usar el guardado del teléfono para que cargue como un rayo.
-  event.respondWith(caches.match(event.request).then(response => response || fetch(event.request)));
+  // Para fotos y diseño -> Stale-While-Revalidate: carga ultrarrápida desde caché, pero actualiza en segundo plano.
+  event.respondWith(
+    caches.match(event.request).then(cachedResponse => {
+      const fetchPromise = fetch(event.request).then(networkResponse => {
+        if (networkResponse && networkResponse.ok) {
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, networkResponse.clone());
+          });
+        }
+        return networkResponse;
+      }).catch(() => {}); // Ignorar errores de red en el background
+      
+      return cachedResponse || fetchPromise;
+    })
+  );
 });

@@ -511,12 +511,7 @@ body.dark-mode #search-suggestions {
     width: auto;
     margin: 0;
     pointer-events: none;
-    background: rgba(0, 0, 0, 0.4);
     padding: 6px 12px;
-    border-radius: 20px;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .banner-dot {
@@ -1051,7 +1046,7 @@ body.dark-mode .tools-container .chk-agotados:hover {
     margin-bottom: 0px; /* Sin margen extra si el grid ya tiene gap */
     border-radius: var(--radius-lg, 16px);
     overflow: hidden;
-    display: none; /* Por defecto oculto en móviles */
+    display: block; /* Ahora visible en todos los dispositivos */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -1075,9 +1070,4 @@ body.dark-mode .tools-container .chk-agotados:hover {
     border-radius: var(--radius-lg, 16px);
 }
 
-/* Mostrar solo en Tablets grandes y PC */
-@media (min-width: 768px) {
-    .banner-publicidad-grid {
-        display: block;
-    }
-}
+/* Banners visibles en todos los dispositivos */

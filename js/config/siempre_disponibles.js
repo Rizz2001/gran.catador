@@ -1,0 +1,6 @@
+// Coloca aquí los códigos de barras de los productos que siempre tendrán stock.
+// Puedes poner un código por línea. Ejemplo:
+
+export const siempreDisponibles = [
+  "00021"
+];

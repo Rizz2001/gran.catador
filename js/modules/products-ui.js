@@ -445,7 +445,8 @@ function renderizarPagina() {
     const insertAfterIndex = itemsPorFila * 3;
 
     let bannersActivos = (window.bannersGrid || []).filter(b => b.activo);
-    let freqBanner = window.bannersGridFrecuencia || 12;
+    let baseFreq = window.bannersGridFrecuencia || 12;
+    let freqBanner = (window.innerWidth < 768) ? 6 : baseFreq;
 
     const tempDiv = document.createElement('div');
     const contenidoArray = [];

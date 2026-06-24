@@ -4,7 +4,7 @@
 
 /** Guarda el estado actual del carrito en LocalStorage */
 function guardarCarritoLS() {
-    localStorage.setItem('gc_cart', JSON.stringify(appState.carrito));
+    safeSetItem('gc_cart', JSON.stringify(appState.carrito));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -159,10 +159,26 @@ function animarAlCarrito(btnElement, imgSrc) {
 
 /** Añade un producto al estado del carrito y lanza efectos visuales */
 function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = '', esCaja = false) {
-    // --- VALIDACIÓN HORARIO ---
-    if (typeof appState !== 'undefined' && appState.isTiendaAbierta === false) {
-        mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
-        return;
+    // --- VALIDACIÓN HORARIO EN TIEMPO REAL ---
+    try {
+        let d = new Date();
+        let formatter = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', hour12: false, timeZone: 'America/Caracas' });
+        let parts = formatter.format(d).split(':');
+        let horaCaracas = parseInt(parts[0]);
+        let minutoCaracas = parseInt(parts[1]);
+        if (horaCaracas === 24) horaCaracas = 0;
+        let isAbierto = (horaCaracas >= 8 && horaCaracas < 20) || (horaCaracas === 20 && minutoCaracas <= 30);
+        
+        if (!isAbierto) {
+            mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
+            return;
+        }
+    } catch (e) {
+        // Fallback al estado global si falla la zona horaria
+        if (typeof window.isTiendaAbierta !== 'undefined' && window.isTiendaAbierta === false) {
+            mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
+            return;
+        }
     }
     // --- FIN VALIDACIÓN HORARIO ---
 
@@ -340,7 +356,7 @@ function abrirCarrito() {
 }
 
 function repetirPedido(index) {
-    let hist = JSON.parse(localStorage.getItem('gc_historial')) || [];
+    let hist = JSON.parse(safeGetItem('gc_historial')) || [];
     let ped = hist[index];
     if (!ped) return;
 
@@ -458,10 +474,27 @@ function renderizarCarrito() {
 
 function cambiarCant(n, delta) {
     if (delta > 0) {
-        if (typeof appState !== 'undefined' && appState.isTiendaAbierta === false) {
-            mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
-            return;
+        // --- VALIDACIÓN HORARIO EN TIEMPO REAL ---
+        try {
+            let d = new Date();
+            let formatter = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', hour12: false, timeZone: 'America/Caracas' });
+            let parts = formatter.format(d).split(':');
+            let horaCaracas = parseInt(parts[0]);
+            let minutoCaracas = parseInt(parts[1]);
+            if (horaCaracas === 24) horaCaracas = 0;
+            let isAbierto = (horaCaracas >= 8 && horaCaracas < 20) || (horaCaracas === 20 && minutoCaracas <= 30);
+            
+            if (!isAbierto) {
+                mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
+                return;
+            }
+        } catch (e) {
+            if (typeof window.isTiendaAbierta !== 'undefined' && window.isTiendaAbierta === false) {
+                mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
+                return;
+            }
         }
+        // --- FIN VALIDACIÓN HORARIO ---
 
         const esCaja = n.includes('(CAJA)');
         const nombreBase = n.replace(/ \((CAJA|UNIDAD)\)$/, '');
@@ -497,8 +530,8 @@ function toggleDireccion() {
         if (dirInput) dirInput.style.display = 'block';
         if (btnGeo) btnGeo.style.display = 'block';
         if (btnMap) btnMap.style.display = 'none';
-        if (dirInput && localStorage.getItem('gc_direccion') && !dirInput.value) {
-            dirInput.value = localStorage.getItem('gc_direccion');
+        if (dirInput && safeGetItem('gc_direccion') && !dirInput.value) {
+            dirInput.value = safeGetItem('gc_direccion');
         }
     } else {
         if (dirInput) dirInput.style.display = 'none';
@@ -572,9 +605,9 @@ function enviarPedido() {
     if (!appState.isTiendaAbierta) return alert("Lo sentimos, Gran Catador está cerrado en este momento.");
 
     // Validación de datos de perfil obligatorios
-    let nombreUser = (localStorage.getItem('gc_nombre') || '').trim();
-    let cedulaUser = (localStorage.getItem('gc_cedula') || '').trim();
-    let telefonoUser = (localStorage.getItem('gc_telefono') || '').trim();
+    let nombreUser = (safeGetItem('gc_nombre') || '').trim();
+    let cedulaUser = (safeGetItem('gc_cedula') || '').trim();
+    let telefonoUser = (safeGetItem('gc_telefono') || '').trim();
 
     if (!nombreUser || !cedulaUser || !telefonoUser) {
         alert("⚠️ Datos incompletos.\nPor favor, completa tu Nombre, Cédula y Teléfono en tu perfil antes de hacer el pedido.");
@@ -597,7 +630,7 @@ function enviarPedido() {
     }
 
     // Generar registro histórico del pedido
-    let historial = JSON.parse(localStorage.getItem('gc_historial')) || [];
+    let historial = JSON.parse(safeGetItem('gc_historial')) || [];
     let fechaDate = new Date();
     let fechaStr = fechaDate.toLocaleDateString('es-VE') + " - " + fechaDate.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
 
@@ -615,7 +648,7 @@ function enviarPedido() {
 
     historial.unshift(nuevoPedido);
     if (historial.length > 5) historial.pop(); // Solo se guardan los últimos 5
-    localStorage.setItem('gc_historial', JSON.stringify(historial));
+    safeSetItem('gc_historial', JSON.stringify(historial));
 
     // Comienza la construcción del mensaje de WhatsApp
     let msg = `🔥 *NUEVO PEDIDO - GRAN CATADOR* 🔥\n\n👤 *Cliente:* ${nombreUser}\n🪪 *Cédula:* ${cedulaUser}\n📱 *Teléfono:* ${telefonoUser}\n--------------------------------\n`;
@@ -633,7 +666,7 @@ function enviarPedido() {
         let dir = document.getElementById('direccionDelivery').value.trim();
         if (!dir) return alert("Por favor, ingresa tu dirección para el delivery.");
         msg += `📍 *Dirección:* ${dir}\n`;
-        if (!localStorage.getItem('gc_direccion')) localStorage.setItem('gc_direccion', dir);
+        if (!safeGetItem('gc_direccion')) safeSetItem('gc_direccion', dir);
     }
 
     let notas = document.getElementById('notasPedido').value.trim();
@@ -664,7 +697,7 @@ function enviarPedido() {
     msg += `\n💰 *TOTAL A PAGAR: $${appState.totalCarrito.toFixed(2)}*\n💱 _(Tasa BCV: ${appState.tasaOficial.toFixed(2)} Bs)_`;
 
     // Limpieza post-compra
-    localStorage.removeItem('gc_inv_time_v3');
+    safeRemoveItem('gc_inv_time_v3');
     appState.carrito = {};
     guardarCarritoLS();
     actualizarCartCount();

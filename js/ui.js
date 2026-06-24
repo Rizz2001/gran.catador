@@ -7,7 +7,7 @@
 const isBot = /bot|google|baidu|bing|msn|duckduckbot|teoma|slurp|yandex|spider|crawler|robot/i.test(navigator.userAgent);
 
 try {
-    if (localStorage.getItem('ageVerified') === 'true' || isBot) {
+    if (safeGetItem('ageVerified') === 'true' || isBot) {
         let ag = document.getElementById('age-gate');
         if (ag) ag.style.display = 'none';
     }
@@ -48,13 +48,41 @@ window.verificarEdad = function() {
     if (mDiff < 0 || (mDiff === 0 && today.getDate() < birth.getDate())) age--;
 
     if (age >= 18) {
-        try { localStorage.setItem('ageVerified', 'true'); } catch(e) {}
+        try { safeSetItem('ageVerified', 'true'); } catch(e) {}
         document.getElementById('age-gate').style.display = 'none';
     } else {
         err.innerText = "Lo sentimos, debes ser mayor de 18 a�os.";
         err.style.display = "block";
     }
 }
+
+// Auto-focus logic for age gate
+document.addEventListener('DOMContentLoaded', () => {
+    const ageD = document.getElementById('age-d');
+    const ageM = document.getElementById('age-m');
+    const ageY = document.getElementById('age-y');
+    
+    if(ageD && ageM && ageY) {
+        ageD.addEventListener('input', function() {
+            if(this.value.length >= 2) {
+                this.value = this.value.slice(0, 2);
+                ageM.focus();
+            }
+        });
+        ageM.addEventListener('input', function() {
+            if(this.value.length >= 2) {
+                this.value = this.value.slice(0, 2);
+                ageY.focus();
+            }
+        });
+        ageY.addEventListener('input', function() {
+            if(this.value.length >= 4) {
+                this.value = this.value.slice(0, 4);
+                window.verificarEdad();
+            }
+        });
+    }
+});
 
 /** Verifica si la tienda se encuentra en horario laboral */
 function checkHorario() {
@@ -204,16 +232,16 @@ function abrirPerfil() {
     cerrarModal('all');
     setActiveNav('nav-user');
     document.getElementById('modal-perfil').style.display = 'flex';
-    document.getElementById('perfilNombre').value = localStorage.getItem('gc_nombre') || '';
-    document.getElementById('perfilDireccion').value = localStorage.getItem('gc_direccion') || '';
+    document.getElementById('perfilNombre').value = safeGetItem('gc_nombre') || '';
+    document.getElementById('perfilDireccion').value = safeGetItem('gc_direccion') || '';
 
     let inputCedula = document.getElementById('perfilCedula');
-    if (inputCedula) inputCedula.value = localStorage.getItem('gc_cedula') || '';
+    if (inputCedula) inputCedula.value = safeGetItem('gc_cedula') || '';
 
     let inputTelefono = document.getElementById('perfilTelefono');
-    if (inputTelefono) inputTelefono.value = localStorage.getItem('gc_telefono') || '';
+    if (inputTelefono) inputTelefono.value = safeGetItem('gc_telefono') || '';
 
-    let hist = JSON.parse(localStorage.getItem('gc_historial')) || [];
+    let hist = JSON.parse(safeGetItem('gc_historial')) || [];
     let listCont = document.getElementById('historial-lista');
 
     if (hist.length === 0) {
@@ -240,14 +268,14 @@ function abrirPerfil() {
 
 /** Guarda las preferencias del perfil del usuario */
 function guardarPerfil() {
-    localStorage.setItem('gc_nombre', document.getElementById('perfilNombre').value);
-    localStorage.setItem('gc_direccion', document.getElementById('perfilDireccion').value);
+    safeSetItem('gc_nombre', document.getElementById('perfilNombre').value);
+    safeSetItem('gc_direccion', document.getElementById('perfilDireccion').value);
 
     let inputCedula = document.getElementById('perfilCedula');
-    if (inputCedula) localStorage.setItem('gc_cedula', inputCedula.value);
+    if (inputCedula) safeSetItem('gc_cedula', inputCedula.value);
 
     let inputTelefono = document.getElementById('perfilTelefono');
-    if (inputTelefono) localStorage.setItem('gc_telefono', inputTelefono.value);
+    if (inputTelefono) safeSetItem('gc_telefono', inputTelefono.value);
 
     mostrarToast("Datos guardados ✅");
     cerrarModal('modal-perfil', 'nav-home');
@@ -300,7 +328,7 @@ function abrirAjustes() {
 
 function toggleDark() {
     document.body.classList.toggle('dark-mode');
-    localStorage.setItem('gc_dark', document.body.classList.contains('dark-mode'));
+    safeSetItem('gc_dark', document.body.classList.contains('dark-mode'));
     
     // Sincronizar el checkbox por si hay más de uno
     const darkChk = document.getElementById('toggleDarkMode');

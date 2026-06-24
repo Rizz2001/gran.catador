@@ -9,9 +9,9 @@ window.appState = {
     productosFiltrados: [],
 
     // Datos del Usuario
-    carrito: JSON.parse(localStorage.getItem('gc_cart')) || {},
+    carrito: JSON.parse(safeGetItem('gc_cart')) || {},
     totalCarrito: 0,
-    favoritos: JSON.parse(localStorage.getItem('gc_favs')) || [],
+    favoritos: JSON.parse(safeGetItem('gc_favs')) || [],
 
     // Configuración y Negocio
     tasaOficial: 36.25,

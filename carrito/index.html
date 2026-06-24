@@ -56,8 +56,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="stylesheet" href="assets/css/modules/layout.css">
     <link rel="stylesheet" href="assets/css/modules/cart.css">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js" defer></script>
+    <script src="js/config/badges_oferta.js" defer></script>
+    <script src="js/config/badges_top.js" defer></script>
+    <script src="js/config/banners_grid.js" defer></script>
+    <script src="js/utils.js" defer></script>
+    <script src="js/state.js" defer></script>
+    <script src="js/cart.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    
+    <!-- Módulos JS extraídos -->
+    <script src="js/modules/sidebar.js" defer></script>
+    <script src="js/modules/search.js" defer></script>
+    <script src="js/modules/products-ui.js" defer></script>
+    <script src="js/modules/lightbox.js" defer></script>
 
+    <script src="js/app.js" defer></script>
     <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -829,22 +843,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button id="btn-scroll-top" class="btn-scroll-top" onclick="scrollToTop()" aria-label="Volver arriba">
         <i class="fa-solid fa-chevron-up"></i>
     </button>
-
-    <script src="js/config/badges_oferta.js" defer></script>
-    <script src="js/config/badges_top.js" defer></script>
-    <script src="js/config/banners_grid.js" defer></script>
-    <script src="js/utils.js" defer></script>
-    <script src="js/state.js" defer></script>
-    <script src="js/cart.js" defer></script>
-    <script src="js/ui.js" defer></script>
     
-    <!-- Módulos JS extraídos -->
-    <script src="js/modules/sidebar.js" defer></script>
-    <script src="js/modules/search.js" defer></script>
-    <script src="js/modules/products-ui.js" defer></script>
-    <script src="js/modules/lightbox.js" defer></script>
-
-    <script src="js/app.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const mc = document.getElementById('main-content');

@@ -1,3 +1,15 @@
+// --- Safe Storage Fallback ---
+window.memoryStorageFallback = {};
+window.safeGetItem = function(key) {
+    try { return window.localStorage.getItem(key); } catch(e) { return window.memoryStorageFallback[key] || null; }
+};
+window.safeSetItem = function(key, value) {
+    try { window.localStorage.setItem(key, value); } catch(e) { window.memoryStorageFallback[key] = value; }
+};
+window.safeRemoveItem = function(key) {
+    try { window.localStorage.removeItem(key); } catch(e) { delete window.memoryStorageFallback[key]; }
+};
+
 /**
  * utils.js - Funciones de utilidad general y configuración
  * Este archivo no debe contener lógica de negocio (carrito, inventario) 

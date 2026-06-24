@@ -1,0 +1,6 @@
+export const banners = [
+  "Conoce.jpg",
+  "caroreña1.jpg",
+  "Conoce2.jpg",
+  "caroreña2.jpg"
+];

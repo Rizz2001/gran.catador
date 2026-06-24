@@ -1,6 +1,6 @@
 /**
  * Configuración de Banners Publicitarios para la cuadrícula de productos
- * Solo se mostrarán en dispositivos PC y Tablets (anchos de pantalla mayores a 768px).
+ * Ahora configurado para mostrarse en todos los dispositivos (Móvil, Tablet y PC).
  * Puedes añadir, modificar o eliminar banners desde aquí.
  */
 

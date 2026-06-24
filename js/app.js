@@ -86,7 +86,7 @@ function normalizarCodigo(codigo) {
     }
     return valor.toLowerCase();
 }
-if (localStorage.getItem('gc_dark') === 'true') document.body.classList.add('dark-mode');
+if (safeGetItem('gc_dark') === 'true') document.body.classList.add('dark-mode');
 
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').then(reg => { reg.update(); }).catch(() => { }); }); }
 
@@ -110,8 +110,8 @@ async function obtenerTasaDolar() {
                 tasaOficial = parseFloat(tasaPromedio);
                 appState.tasaOficial = tasaOficial;
                 // Guardar en localStorage para persistencia
-                localStorage.setItem('tasaDolar', tasaOficial.toString());
-                localStorage.setItem('tasaDolarTime', new Date().getTime().toString());
+                safeSetItem('tasaDolar', tasaOficial.toString());
+                safeSetItem('tasaDolarTime', new Date().getTime().toString());
                 return true;
             }
         }
@@ -123,13 +123,13 @@ async function obtenerTasaDolar() {
                 let texto = await resTasa.text();
                 tasaOficial = parseFloat(texto.trim().replace(',', '.'));
                 appState.tasaOficial = tasaOficial;
-                localStorage.setItem('tasaDolar', tasaOficial.toString());
-                localStorage.setItem('tasaDolarTime', new Date().getTime().toString());
+                safeSetItem('tasaDolar', tasaOficial.toString());
+                safeSetItem('tasaDolarTime', new Date().getTime().toString());
                 return true;
             }
         } catch (fallbackError) {
             // Si hay tasa guardada en localStorage, usarla
-            const tasaGuardada = localStorage.getItem('tasaDolar');
+            const tasaGuardada = safeGetItem('tasaDolar');
             if (tasaGuardada) {
                 tasaOficial = parseFloat(tasaGuardada);
                 appState.tasaOficial = tasaOficial;
@@ -148,12 +148,12 @@ async function obtenerTasaEuro() {
             if (data && Array.isArray(data) && data.length > 0) {
                 const tasaPromedio = data[0].promedio || data[0].precio || 40.00;
                 tasaEuro = parseFloat(tasaPromedio);
-                localStorage.setItem('tasaEuro', tasaEuro.toString());
+                safeSetItem('tasaEuro', tasaEuro.toString());
                 return true;
             }
         }
     } catch (error) {
-        const tasaGuardada = localStorage.getItem('tasaEuro');
+        const tasaGuardada = safeGetItem('tasaEuro');
         if (tasaGuardada) tasaEuro = parseFloat(tasaGuardada);
     }
     return false;
@@ -161,9 +161,9 @@ async function obtenerTasaEuro() {
 
 async function cargarBannersLocales() {
     try {
-        let resBan = await fetch('data/config/banners.txt?v=' + new Date().getTime());
-        if (resBan.ok) {
-            let textoBan = await resBan.text(); let listaBanners = textoBan.split(/[\n,]+/).map(b => b.trim()).filter(b => b !== "");
+        const module = await import('./config/banners.js?v=' + new Date().getTime());
+        if (module && module.banners) {
+            let listaBanners = module.banners;
             let contBanners = document.getElementById('contenedorBanners');
             if (listaBanners.length > 0 && contBanners) {
                 contBanners.innerHTML = '';
@@ -300,10 +300,9 @@ async function cargarBannersLocales() {
 
 async function cargarSiempreDisponiblesLocal() {
     try {
-        let resDisp = await fetch('data/config/siempre_disponibles.txt?v=' + new Date().getTime());
-        if (resDisp.ok) {
-            let textoDisp = await resDisp.text();
-            let listaDisp = textoDisp.split(/[\n,]+/).map(b => b.trim()).filter(b => b !== "" && !b.startsWith("#"));
+        const module = await import('./config/siempre_disponibles.js?v=' + new Date().getTime());
+        if (module && module.siempreDisponibles) {
+            let listaDisp = module.siempreDisponibles;
             appState.siempreDisponibles = [...new Set([...(appState.siempreDisponibles || []), ...listaDisp])];
         }
     } catch (error) { }
@@ -311,16 +310,9 @@ async function cargarSiempreDisponiblesLocal() {
 
 async function cargarMasVendidosLocal() {
     try {
-        const res = await fetch('data/config/mas_vendidos.txt?v=' + new Date().getTime());
-        if (res.ok) {
-            const texto = await res.text();
-            masVendidosCodigos = texto
-                .split(/[\n,]+/)
-                .map(line => line.trim())
-                .filter(line => line !== '' && !line.startsWith('#'))
-                .map(line => line.replace(/["']/g, ''))
-                .map(line => line.trim());
-            masVendidosCodigos = [...new Set(masVendidosCodigos)];
+        const module = await import('./config/mas_vendidos.js?v=' + new Date().getTime());
+        if (module && module.masVendidos) {
+            masVendidosCodigos = [...new Set(module.masVendidos)];
             appState.masVendidosCodigos = masVendidosCodigos;
         }
     } catch (error) { }
@@ -363,14 +355,9 @@ async function cargarMarcasAliadasLocal() {
     let archivos = await listarMarcasAliadasDesdeCarpeta();
     if (!archivos.length) {
         try {
-            const res = await fetch('data/config/marcas_aliadas.txt?v=' + new Date().getTime());
-            if (res.ok) {
-                const texto = await res.text();
-                archivos = texto
-                    .split(/[\n,]+/)
-                    .map(line => line.trim())
-                    .filter(line => line !== '' && !line.startsWith('#'))
-                    .map(line => line.replace(/['"]/g, ''))
+            const module = await import('./config/marcas_aliadas.js?v=' + new Date().getTime());
+            if (module && module.marcasAliadas) {
+                archivos = module.marcasAliadas
                     .map(line => normalizarNombreArchivo(line))
                     .filter(line => /\.(jpe?g|png|webp|svg)$/i.test(line))
                     .map(line => line.startsWith('http') ? line : `assets/img/marcas-aliadas/${line.replace(/^.*\/(.+)$/, '$1')}`);
