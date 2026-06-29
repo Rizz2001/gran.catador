@@ -140,6 +140,7 @@ input[type=number]::-webkit-outer-spin-button {
 
 input[type=number] {
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 body.dark-mode .cat-btn {
@@ -1270,6 +1271,7 @@ body.dark-mode .product-img-container img {
   color: var(--color-text);
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1875,6 +1877,7 @@ body.dark-mode .cart-header .panel-title {
     text-align: center;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -2065,7 +2068,7 @@ body.dark-mode .cart-header .panel-title {
 
 @media (min-width: 1024px) {
   .productos-grid {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
   }
 }
 

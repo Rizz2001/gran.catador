@@ -77,10 +77,10 @@
     }
 }
 
-/* Forzar 4 columnas exactas en PC */
+/* Forzar 5 columnas exactas en PC */
 @media (min-width: 1024px) {
     .productos-grid {
-        grid-template-columns: repeat(4, 1fr) !important;
+        grid-template-columns: repeat(5, 1fr) !important;
     }
 }
 

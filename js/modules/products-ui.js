@@ -448,7 +448,8 @@ function renderizarPagina() {
 
     let bannersActivos = (window.bannersGrid || []).filter(b => b.activo);
     let baseFreq = window.bannersGridFrecuencia || 12;
-    let freqBanner = (window.innerWidth < 768) ? 6 : baseFreq;
+    // Asegurar que freqBanner sea múltiplo de itemsPorFila para no romper la grilla (evita filas incompletas)
+    let freqBanner = Math.max(1, Math.round(baseFreq / itemsPorFila)) * itemsPorFila;
 
     const tempDiv = document.createElement('div');
     const contenidoArray = [];
