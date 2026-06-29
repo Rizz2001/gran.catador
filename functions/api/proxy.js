@@ -20,9 +20,9 @@ export async function onRequest(context) {
         let urlFoxdata = "";
 
         if (imagePath) {
-            urlFoxdata = `https://apismartventas.foxdata.app${imagePath}`;
+            urlFoxdata = `https://n1.apismartventas.foxdata.app${imagePath}`;
         } else {
-            urlFoxdata = `https://apismartventas.foxdata.app/api/v1/syn/${endpoint}`;
+            urlFoxdata = `https://n1.apismartventas.foxdata.app/api/v1/syn/${endpoint}`;
 
             // Pasar los parámetros extras de la URL original a Foxdata (como codSubgrupo)
             const params = new URLSearchParams(requestUrl.searchParams);

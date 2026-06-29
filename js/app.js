@@ -318,6 +318,25 @@ async function cargarMasVendidosLocal() {
     } catch (error) { }
 }
 
+async function cargarSoloUnidadLocal() {
+    try {
+        const module = await import('./config/solo_unidad.js?v=' + new Date().getTime());
+        if (module && module.soloUnidad) {
+            window.soloUnidad = module.soloUnidad;
+        }
+    } catch (error) { }
+}
+
+async function cargarSoloCajaLocal() {
+    try {
+        const module = await import('./config/solo_caja.js?v=' + new Date().getTime());
+        if (module && module.soloCaja) {
+            window.soloCaja = module.soloCaja;
+        }
+    } catch (error) { }
+}
+
+
 async function cargarManifestImagenesProductos() {
     try {
         const response = await fetch('assets/img/productos/manifest.json?v=' + new Date().getTime());
@@ -416,6 +435,8 @@ async function obtenerArchivosExternos() {
     promesasConfig.push(cargarSiempreDisponiblesLocal());
     promesasConfig.push(cargarMasVendidosLocal());
     promesasConfig.push(cargarMarcasAliadasLocal());
+    promesasConfig.push(cargarSoloUnidadLocal());
+    promesasConfig.push(cargarSoloCajaLocal());
     promesasConfig.push(cargarManifestImagenesProductos());
 
     await Promise.all(promesasConfig);

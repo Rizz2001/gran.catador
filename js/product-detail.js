@@ -71,7 +71,10 @@ function iniciarCargaProducto(productId) {
 }
 
 function renderizarProducto(p) {
-    const esModoCaja = (typeof modoVistaGlobal !== 'undefined' ? modoVistaGlobal : 'unidad') === 'caja';
+    let esModoCaja = (typeof modoVistaGlobal !== 'undefined' ? modoVistaGlobal : 'unidad') === 'caja';
+    if (window.soloUnidad && window.soloUnidad.includes(p.Nombre)) esModoCaja = false;
+    else if (window.soloCaja && window.soloCaja.includes(p.Nombre)) esModoCaja = true;
+
     const cantCaja = p.CantidadGrup || 12;
     const isAgotado = esModoCaja ? (p.StockNum < cantCaja && p.StockNum < 999) : p.StockNum <= 0;
     
@@ -91,12 +94,18 @@ function renderizarProducto(p) {
     let imgSrc = obtenerImgProducto(p);
     let stockStatusHTML = '';
     
-    if (p.StockNum >= 999 || (p.StockStr || '').toString().toLowerCase() === 'disponible') {
-        stockStatusHTML = `<span class="product__stock available"><i class="fa-solid fa-check-circle"></i> Disponible</span>`;
-    } else if (isAgotado && p.StockNum > 0) {
-        stockStatusHTML = `<span class="product__stock warning"><i class="fa-solid fa-triangle-exclamation"></i> Solo ${p.StockNum} und disponibles (No alcanza p/ caja)</span>`;
-    } else if (isAgotado) {
-        stockStatusHTML = `<span class="product__stock out"><i class="fa-solid fa-circle-xmark"></i> Agotado</span>`;
+    if (isAgotado) {
+        stockStatusHTML = `<span class="product__stock danger"><i class="fa-solid fa-triangle-exclamation"></i> Agotado en ${esModoCaja ? 'Cajas' : 'Unidad'}</span>`;
+    } else if (p.StockNum <= 5 && !esModoCaja) {
+        stockStatusHTML = `<span class="product__stock warning"><i class="fa-solid fa-triangle-exclamation"></i> ¡Últimas ${p.StockNum} und!</span>`;
+    } else if (esModoCaja && (p.StockNum < (cantCaja * 2))) {
+        // Stock bajo en cajas (menos de 2 cajas disponibles)
+        let cajasDisp = Math.floor(p.StockNum / cantCaja);
+        if (cajasDisp > 0) {
+            stockStatusHTML = `<span class="product__stock warning"><i class="fa-solid fa-triangle-exclamation"></i> ¡Solo ${cajasDisp} caja(s) disponible(s)!</span>`;
+        } else {
+            stockStatusHTML = `<span class="product__stock warning"><i class="fa-solid fa-triangle-exclamation"></i> Solo ${p.StockNum} und disponibles (No alcanza p/ caja)</span>`;
+        }
     } else {
         stockStatusHTML = `<span class="product__stock ${p.StockNum <= 5 ? 'warning' : 'available'}"><i class="fa-solid fa-check-circle"></i> ${p.StockNum} und disponibles</span>`;
     }
@@ -107,6 +116,18 @@ function renderizarProducto(p) {
     const toggleCaja = document.getElementById('toggle-caja-unidad');
     if (toggleCaja) {
         toggleCaja.checked = esModoCaja;
+        
+        const forceUnidad = window.soloUnidad && window.soloUnidad.includes(p.Nombre);
+        const forceCaja = window.soloCaja && window.soloCaja.includes(p.Nombre);
+        
+        const switchContainer = toggleCaja.closest('.product__switch-container');
+        if (switchContainer) {
+            if (forceUnidad || forceCaja) {
+                switchContainer.style.display = 'none';
+            } else {
+                switchContainer.style.display = '';
+            }
+        }
     }
 
     // Breadcrumb

@@ -1,4 +1,4 @@
-﻿// --- LIGHTBOX DE IMAGEN PARA PC ---
+// --- LIGHTBOX DE IMAGEN PARA PC ---
 window.abrirImagenLightbox = function (imgSrc, codigo) {
     let p = null;
     if (codigo && typeof inventario !== 'undefined') {
@@ -84,7 +84,9 @@ window.abrirImagenLightbox = function (imgSrc, codigo) {
     let imgWrapper = document.getElementById('lightbox-img-wrapper-gc');
 
     if (p) {
-        const esModoCaja = (modoVistaGlobal === 'caja');
+        let esModoCaja = (modoVistaGlobal === 'caja');
+        if (window.soloUnidad && window.soloUnidad.includes(p.Nombre)) esModoCaja = false;
+        else if (window.soloCaja && window.soloCaja.includes(p.Nombre)) esModoCaja = true;
         const cantCaja = p.CantidadGrup || 12;
         const isAgotado = esModoCaja ? (p.StockNum < cantCaja && p.StockNum < 999) : p.StockNum <= 0;
         const precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;

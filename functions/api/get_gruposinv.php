@@ -17,7 +17,7 @@ if (empty($authHeader)) {
     exit;
 }
 
-$apiUrl = 'https://apismartventas.foxdata.app/api/v1/syn/gruposinv';
+$apiUrl = 'https://n1.apismartventas.foxdata.app/api/v1/syn/gruposinv';
 
 $ch = curl_init($apiUrl);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

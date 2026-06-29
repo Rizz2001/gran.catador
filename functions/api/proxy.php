@@ -17,9 +17,9 @@ $endpoint = isset($_GET['endpoint']) ? $_GET['endpoint'] : 'gruposinv';
 $imagePath = isset($_GET['imagePath']) ? $_GET['imagePath'] : null;
 
 if ($imagePath) {
-    $urlFoxdata = 'https://apismartventas.foxdata.app' . $imagePath;
+    $urlFoxdata = 'https://n1.apismartventas.foxdata.app' . $imagePath;
 } else {
-    $urlFoxdata = 'https://apismartventas.foxdata.app/api/v1/syn/' . $endpoint;
+    $urlFoxdata = 'https://n1.apismartventas.foxdata.app/api/v1/syn/' . $endpoint;
     
     // Redirigir cualquier parámetro extra (como codSubgrupo) hacia la API destino
     $queryParams = $_GET;

@@ -1,6 +1,8 @@
 // --- RENDERIZADO DE PRODUCTOS (Fase 5: Mejora de Rendimiento) ---
 function crearHTMLProducto(p) {
-    const esModoCaja = (modoVistaGlobal === 'caja');
+    let esModoCaja = (modoVistaGlobal === 'caja');
+    if (window.soloUnidad && window.soloUnidad.includes(p.Nombre)) esModoCaja = false;
+    else if (window.soloCaja && window.soloCaja.includes(p.Nombre)) esModoCaja = true;
     const cantCaja = p.CantidadGrup || 12;
     const isAgotado = esModoCaja ? (p.StockNum < cantCaja && p.StockNum < 999) : p.StockNum <= 0;
     const nombreB64 = codificarNombre(p.Nombre);
