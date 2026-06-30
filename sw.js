@@ -31,8 +31,8 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   
-  // ESTRATEGIA SEGURA: Para HTML, JS, TXT y CSV -> SIEMPRE buscar internet primero. Si no hay señal, usar el guardado.
-  if (event.request.mode === 'navigate' || url.pathname.endsWith('.js') || url.pathname.endsWith('.html') || url.pathname.endsWith('.txt') || url.pathname.endsWith('.csv')) {
+  // ESTRATEGIA SEGURA: Para HTML, JS y TXT -> SIEMPRE buscar internet primero. Si no hay señal, usar el guardado.
+  if (event.request.mode === 'navigate' || url.pathname.endsWith('.js') || url.pathname.endsWith('.html') || url.pathname.endsWith('.txt')) {
     event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
     return;
   }
