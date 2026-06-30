@@ -747,6 +747,11 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
             subcatContainer.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
             this.checked = true;
 
+            if (window.location.pathname.includes('producto.html')) {
+                window.location.href = 'index.html?categoria=' + encodeURIComponent(nombreCategoria);
+                return;
+            }
+
             let prods = inventario.filter(p => p.CatId === codGrupo || p.Cat === limpiarCategoria(nombreCategoria));
             if (prods.length === 0) {
                 if (typeof mostrarSkeletonProductos === 'function') mostrarSkeletonProductos();
@@ -777,6 +782,11 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
                 try { subcategoriaActual = codSub; window.subcategoriaNombreActual = nombreSub; } catch (e) { window.subcategoriaActual = codSub; window.subcategoriaNombreActual = nombreSub; }
                 subcatContainer.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
                 this.checked = true;
+
+                if (window.location.pathname.includes('producto.html')) {
+                    window.location.href = `index.html?categoria=${encodeURIComponent(nombreCategoria)}&subcategoria=${encodeURIComponent(codSub)}&nomsub=${encodeURIComponent(nombreSub)}`;
+                    return;
+                }
 
                 if (codGrupo && codSub) {
                     let yaTengoProductos = inventario.some(p => (p.SubCatId && p.SubCatId.toString() === codSub) || (window.subcategoriaNombreActual && limpiarCategoria(p.SubCat) === limpiarCategoria(window.subcategoriaNombreActual)));
@@ -817,8 +827,13 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
 
 async function filtrarCategoria(cat, checkboxElement) {
     if (window.location.pathname.includes('producto.html')) {
-        window.location.href = 'index.html?categoria=' + encodeURIComponent(cat);
-        return;
+        // Si eligen Todos o Favoritos, redirigimos de una vez a la home
+        if (cat === 'Todos' || cat === 'Favoritos') {
+            window.location.href = 'index.html?categoria=' + encodeURIComponent(cat);
+            return;
+        }
+        // Para otras categorías, dejamos que el script actualice variables
+        // y abra el panel de subcategorías (drill-down en sidebar).
     }
 
     if (categoriaActual === cat && checkboxElement && !checkboxElement.checked) {

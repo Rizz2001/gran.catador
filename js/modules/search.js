@@ -41,14 +41,13 @@ function mostrarSugerencias(q, resultados) {
         item.onclick = () => {
             if (typeof debounceTimer !== 'undefined') clearTimeout(debounceTimer);
             input.value = producto.Nombre || '';
-            aplicarFiltros(); // Actualizar la página principal
-            cont.style.display = 'none'; // Ocultar DE INMEDIATO DESPUÉS para que no se vuelva a abrir
-            input.blur(); // Quitar foco para ocultar teclado en móviles
+            cont.style.display = 'none';
+            input.blur();
             
-            const listado = document.getElementById('lista-productos');
-            if (listado) {
-                const offset = listado.getBoundingClientRect().top + window.scrollY - 100;
-                window.scrollTo({ top: Math.max(0, offset), behavior: 'smooth' });
+            if (typeof irADetalle === 'function') {
+                irADetalle(producto.codigo);
+            } else {
+                window.location.href = 'producto.html?id=' + encodeURIComponent(producto.codigo);
             }
         };
 

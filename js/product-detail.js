@@ -209,6 +209,49 @@ function renderizarProducto(p) {
         const relSub = rootRelacionados.querySelector('.grupo-aleatorio-subtitle');
         if (relSub) relSub.textContent = `Más opciones en ${formatearTitulo(p.Cat)}`;
     }
+
+    // --- SINCRONIZAR SIDEBAR EN PRODUCTO.HTML ---
+    // Asegurar que el menú lateral refleje automáticamente la categoría y subcategoría del producto actual
+    try {
+        let catStr = p.Cat || p.categoria || p.Categoria;
+        let subcatStr = (p.SubCatId || p.SubCat || p.subcategoria || p.Subcategoria || '').toString().trim();
+        let subcatName = (p.SubCat || p.subcategoria || p.Subcategoria || '').toString().trim();
+        
+        if (catStr) {
+            try { 
+                categoriaActual = catStr; 
+                subcategoriaActual = subcatStr || null; 
+                if (subcatName) subcategoriaNombreActual = subcatName; 
+            } catch (e) { 
+                window.categoriaActual = catStr; 
+                window.subcategoriaActual = subcatStr || null; 
+                if (subcatName) window.subcategoriaNombreActual = subcatName; 
+            }
+
+            // Esperar a que los grupos estén cargados antes de renderizar para evitar condiciones de carrera
+            let intentosSidebar = 0;
+            const sidebarInterval = setInterval(() => {
+                if (window.appState && window.appState.gruposInventario && window.appState.gruposInventario.length > 0) {
+                    clearInterval(sidebarInterval);
+                    
+                    // Actualizar visualmente los checkboxes del panel principal de grupos
+                    if (typeof window.generarCategorias === 'function') {
+                        window.generarCategorias();
+                    }
+
+                    // Ejecutar el drill-down del sidebar y renderizar las subcategorías correspondientes
+                    if (typeof window.cargarSubcategoriasAPI === 'function') {
+                        window.cargarSubcategoriasAPI(catStr);
+                    }
+                }
+                
+                intentosSidebar++;
+                if (intentosSidebar > 100) clearInterval(sidebarInterval); // 10s timeout
+            }, 100);
+        }
+    } catch (e) {
+        console.warn("No se pudo sincronizar el estado del sidebar con el producto", e);
+    }
 }
 
 function mostrarErrorProducto() {

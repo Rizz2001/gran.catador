@@ -547,3 +547,131 @@ body.dark-mode .main-footer-new {
     font-size: 12px;
     color: #bbb;
 }
+
+/* Nuevas clases extraídas de los estilos inline de los modales (Clean Architecture) */
+.modal-perfil-wrapper {
+    background: var(--color-bg);
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.modal-perfil-header {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.modal-perfil-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 0;
+}
+.modal-perfil-close {
+    background: rgba(0,0,0,0.05);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-perfil-close i {
+    font-size: 18px;
+}
+.modal-perfil-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+.modal-perfil-desc {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    margin-bottom: 25px;
+}
+.modal-perfil-card {
+    background: var(--color-card);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    border: 1px solid var(--color-border);
+    margin-bottom: 20px;
+}
+.modal-perfil-card.mb-25 {
+    margin-bottom: 25px;
+}
+.modal-perfil-card-title {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-primary);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.modal-perfil-input {
+    background: var(--item-bg);
+    border-radius: 12px;
+    border: 1px solid var(--color-border);
+    padding: 14px;
+    font-size: 15px;
+}
+.input-group.mb-0 {
+    margin-bottom: 0;
+}
+.modal-perfil-geo-row {
+    display: flex;
+    gap: 10px;
+}
+.modal-perfil-geo-input {
+    flex-grow: 1;
+    margin-top: 0;
+}
+.modal-perfil-geo-btn {
+    background: rgba(30,58,138,0.1);
+    border: none;
+    border-radius: 12px;
+    padding: 0 16px;
+    cursor: pointer;
+    color: var(--color-primary);
+    font-size: 18px;
+    transition: 0.2s;
+    flex-shrink: 0;
+}
+.modal-perfil-save-btn {
+    width: 100%;
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    box-shadow: 0 8px 25px rgba(30,58,138,0.3);
+    transition: transform 0.2s;
+    margin-bottom: 30px;
+}
+.modal-perfil-history-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 15px;
+}
+.modal-ajustes-select {
+    max-width: 140px;
+    margin-top: 0;
+    padding: 8px 12px;
+}
+.modal-ajustes-accordion {
+    margin-top: 15px;
+}
+.text-center {
+    text-align: center;
+}
+.modal-ajustes-support-desc {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-bottom: 15px;
+}

@@ -192,6 +192,11 @@ body.dark-mode .sidebar-menu {
     margin: 0;
 }
 
+.sidebar-filters .checkbox-item input[type="checkbox"],
+.sidebar-subfilters .checkbox-item input[type="checkbox"] {
+    display: none !important;
+}
+
 .sidebar-filters .checkbox-item label,
 .sidebar-subfilters .checkbox-item label {
     width: 100% !important;

@@ -51,10 +51,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="stylesheet" href="assets/css/modules/modals.css">
     <link rel="stylesheet" href="assets/css/modules/sidebar.css">
     <link rel="stylesheet" href="assets/css/modules/products.css?v=2.1">
-    <link rel="stylesheet" href="assets/css/modules/lightbox.css">
     <link rel="stylesheet" href="assets/css/modules/layout.css">
     <link rel="stylesheet" href="assets/css/modules/cart.css">
     <link rel="stylesheet" href="assets/css/modules/hero.css">
+
+        <!-- Componentes Web -->
+    <script src="js/components/AppAgeGate.js" defer></script>
+    <script src="js/components/AppHeader.js" defer></script>
+    <script src="js/components/AppSidebar.js" defer></script>
+    <script src="js/components/AppFooter.js" defer></script>
+    <script src="js/components/AppModals.js" defer></script>
+    <script src="js/components/AppBottomNav.js" defer></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js" defer></script>
     <script src="js/config/badges_oferta.js" defer></script>
@@ -69,7 +76,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <script src="js/modules/sidebar.js" defer></script>
     <script src="js/modules/search.js" defer></script>
     <script src="js/modules/products-ui.js?v=2.1" defer></script>
-    <script src="js/modules/lightbox.js" defer></script>
+
 
     <script src="js/app.js" defer></script>
     <script type="application/ld+json">
@@ -106,102 +113,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KS9QQBL4"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <!-- End Google Tag Manager (noscript) -->
-    <div id="age-gate">
-        <div class="age-box">
-            <h2 class="premium-title" style="color:var(--dorado); margin-bottom: 5px; font-size:26px;">GRAN CATADOR</h2>
-            <p style="font-size: 12px; margin-bottom: 20px; color: var(--texto-claro);">Ingresa tu fecha de nacimiento
-            </p>
-            <div class="dob-container">
-                <input type="number" id="age-d" class="dob-input" placeholder="DD" min="1" max="31" aria-label="Día de nacimiento">
-                <input type="number" id="age-m" class="dob-input" placeholder="MM" min="1" max="12" aria-label="Mes de nacimiento">
-                <input type="number" id="age-y" class="dob-input" placeholder="AAAA" min="1900" max="2026" aria-label="Año de nacimiento">
-            </div>
-            <button onclick="verificarEdad()" class="age-btn">ENTRAR</button>
-            <p id="age-error" class="age-error">Debes ser mayor de 18 años.</p>
-        </div>
-    </div>
+    <app-age-gate></app-age-gate>
 
-    <div class="header-top-bar marquee-container">
-        <div class="marquee-text">
-            <span style="font-weight: 600; letter-spacing: 0.5px;">
-                🕒 Horarios: Lunes a Domingos de 8:00 AM a 9:00 PM &nbsp;|&nbsp; Gran Catador Supermercado y Bodegón
-            </span>
-        </div>
-    </div>
-
-    <header class="site-header" role="banner">
-        <div class="sticky-header-content">
-            <div class="header-main-bar">
-                <div class="container header-main-container">
-
-                    <div class="header-left">
-                        <button onclick="toggleSidebar()" class="btn-menu-sidebar" aria-label="Abrir Menú">
-                            <i class="fa-solid fa-bars"></i> <span>Menú</span>
-                        </button>
-                        <div class="header-brand" onclick="irInicio()" style="cursor: pointer;">
-                            <img src="logo.webp" alt="Logo Gran Catador" width="1000" height="750" loading="eager"
-                                style="height: 32px; width: 32px; border-radius: 4px; object-fit: contain;">
-                            <span class="brand-text">Gran Catador</span>
-                        </div>
-                        <button class="desktop-only header-btn-inicio" onclick="irInicio()">
-                            <i class="fa-solid fa-house"></i> Inicio
-                        </button>
-                    </div>
-
-                    <div class="header-center">
-                        <div class="search-pill">
-                            <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                            <input type="text" id="buscador" placeholder="Buscar productos..." aria-label="Buscar productos"
-                                onkeyup="debounceBusqueda(event)" autocomplete="off">
-                            <i class="fa-solid fa-circle-xmark clear-search-icon" id="clear-search"
-                                onclick="limpiarBuscador()" aria-label="Limpiar búsqueda"></i>
-                            <div id="search-suggestions"></div>
-                        </div>
-                    </div>
-
-                    <div class="header-right">
-                        <div class="desktop-only header-tasa-badge" title="Tasas Oficiales BCV">
-                            <span class="tasa-value"><i class="fa-solid fa-dollar-sign"></i> <span id="tasaValor">...</span></span>
-                            <span class="tasa-separator">|</span>
-                            <span class="tasa-value"><i class="fa-solid fa-euro-sign"></i> <span id="tasaEuroValor">...</span></span>
-                        </div>
-                        <button class="icon-btn desktop-only" onclick="abrirSoporteWhatsApp()"
-                            aria-label="Soporte WhatsApp">
-                            <i class="fa-brands fa-whatsapp"></i>
-                        </button>
-
-                        <button class="icon-btn desktop-only" aria-label="Notificaciones">
-                            <i class="fa-regular fa-bell"></i>
-                        </button>
-                        <button class="icon-btn desktop-only" onclick="window.location.href='carrito/'" aria-label="Carrito">
-                            <i class="fa-solid fa-cart-shopping"></i>
-                            <span class="badge" id="cart-count">0</span>
-                        </button>
-                        <button class="icon-btn desktop-only" onclick="abrirPerfil()" aria-label="Mi Perfil">
-                            <i class="fa-regular fa-user"></i>
-                        </button>
-                        <button class="icon-btn" onclick="abrirAjustes()" aria-label="Ajustes">
-                            <i class="fa-solid fa-gear"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="mobile-only header-tasa-mobile">
-                <div class="tasa-inner">
-                    <span class="tasa-value"><i class="fa-solid fa-dollar-sign"></i>
-                        <span id="tasaValorMobile">...</span></span>
-                    <span class="tasa-separator">|</span>
-                    <span class="tasa-value"><i class="fa-solid fa-euro-sign"></i> <span
-                            id="tasaEuroValorMobile">...</span></span>
-                </div>
-            </div>
-
-            <span id="store-status" style="display:none;"></span>
-        </div>
-    </header>
+    <app-header></app-header>
 
     <!-- Overlay para Menú Lateral -->
-    <div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+    
 
     <main id="main-content" role="main">
 
@@ -228,45 +145,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         <section id="productos">
         <div class="main-layout-container">
             <!-- Menú Lateral (Sidebar) de Categorías -->
-            <aside id="sidebar-menu" class="sidebar-menu" aria-label="Filtros y Categorías">
-                <div class="sidebar-header">
-                    <div class="sidebar-logo">
-                        <img src="logo.webp" alt="Logo Gran Catador">
-                        <h3 class="sidebar-title">Gran Catador</h3>
-                    </div>
-                    <button onclick="closeSidebar()" class="sidebar-close-btn" aria-label="Cerrar menú">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-
-                <div class="sidebar-content" style="position: relative; overflow-x: hidden; height: 100%;">
-                    
-                    <!-- Panel Principal: Grupos -->
-                    <div id="categoria-section-main" class="sidebar-section drilldown-panel active-panel">
-                        <h4 class="sidebar-section-title">Explorar Grupos</h4>
-                        <div class="sidebar-filters" id="contenedorCategorias"></div>
-                    </div>
-
-                    <!-- Panel Secundario: Subgrupos -->
-                    <div id="subcategoria-section-main" class="sidebar-section drilldown-panel hidden-panel">
-                        <button onclick="volverAGrupos()" class="sidebar-back-btn inner-back-btn" aria-label="Volver a Grupos">
-                            <i class="fa-solid fa-chevron-left"></i> Volver a Grupos
-                        </button>
-                        <h4 class="sidebar-section-title" id="submenu-parent-title" style="margin-top: 15px;">Subgrupos</h4>
-                        <div class="sidebar-subfilters" id="contenedorSubcategoriasSidebar"></div>
-                    </div>
-                    
-                </div>
-                
-                <div class="sidebar-footer">
-                    <a href="https://wa.me/584245496366" target="_blank" class="sidebar-footer-link">
-                        <i class="fa-brands fa-whatsapp" style="font-size: 18px; color: #25D366;"></i> Asistencia por WhatsApp
-                    </a>
-                    <a href="https://www.instagram.com/elcatador.bnas/" target="_blank" class="sidebar-footer-link">
-                        <i class="fa-brands fa-instagram" style="font-size: 18px; color: #E1306C;"></i> Síguenos en Instagram
-                    </a>
-                </div>
-            </aside>
+            <app-sidebar></app-sidebar>
 
             <div class="main-products-wrapper">
                 <div class="container tools-container">
@@ -416,277 +295,13 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
     </main>
 
-    <footer class="main-footer-new" role="contentinfo">
-        <div class="container footer-container">
-            
-            <!-- Columna 1: Marca y Redes -->
-            <div class="footer-col brand-col">
-                <img src="logo.webp" alt="Logo Gran Catador" class="footer-logo" width="65" height="65" onerror="this.style.display='none'" loading="lazy">
-                <p class="footer-desc">Gran Catador Supermercado y Bodegón. Para pedidos especiales, eventos o dudas, escríbenos directamente.</p>
-                <div class="footer-social-new">
-                    <a href="https://wa.me/584245496366" target="_blank" aria-label="WhatsApp" class="social-btn whatsapp-btn"><i class="fa-brands fa-whatsapp"></i></a>
-                    <a href="https://www.instagram.com/elcatador.bnas/" target="_blank" aria-label="Instagram" class="social-btn instagram-btn"><i class="fa-brands fa-instagram"></i></a>
-                </div>
-            </div>
+    <app-footer></app-footer>
 
-            <div class="footer-links-row">
-                <!-- Columna 2: Accesos Rápidos y Soporte -->
-                <div class="footer-col">
-                    <h3>Accesos Rápidos</h3>
-                    <ul>
-                        <li><a href="#" onclick="event.preventDefault(); irInicio();"><i class="fa-solid fa-angle-right"></i> Inicio</a></li>
-                        <li><a href="carrito/"><i class="fa-solid fa-angle-right"></i> Mi Pedido</a></li>
-                        <li><a href="#" onclick="event.preventDefault(); abrirPerfil();"><i class="fa-solid fa-angle-right"></i> Mi Perfil / Ajustes</a></li>
-                        <li><a href="#" onclick="event.preventDefault(); abrirLegales();"><i class="fa-solid fa-angle-right"></i> Políticas y Privacidad</a></li>
-                        <li><a href="#" onclick="event.preventDefault(); abrirSoporteWhatsApp();"><i class="fa-solid fa-angle-right"></i> Soporte Técnico</a></li>
-                    </ul>
-                </div>
-
-                <!-- Columna 3: Contacto -->
-                <div class="footer-col">
-                    <h3>Contacto</h3>
-                    <ul class="footer-contact-list">
-                        <li><i class="fa-solid fa-location-dot"></i> <span>Barinas, Venezuela.</span></li>
-                        <li><i class="fa-brands fa-whatsapp"></i> <span>+58 424-5496366</span></li>
-                        <li><i class="fa-regular fa-clock"></i> <span>Lun-Dom: 8:00 AM - 9:00 PM</span></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <p>© 2026 Gran Catador C.A. Todos los derechos reservados.</p>
-        </div>
-    </footer>
-
-    <div id="toast-container"></div>
+    <app-modals></app-modals>
 
 
 
-    <div id="modal-perfil" class="modal-fullscreen">
-        <div class="modal-content-wrapper" style="background: var(--color-bg); max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; height: 100%;">
-            <div class="cart-header" style="border-bottom: none; padding-bottom: 0;">
-                <h2 style="font-size: 22px; font-weight: 700; color: var(--color-text); margin: 0;">Mi Perfil</h2>
-                <button onclick="cerrarModal('modal-perfil', 'nav-home')" aria-label="Cerrar perfil" class="modal-close-btn" style="background: rgba(0,0,0,0.05); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
-                    <i class="fa-solid fa-xmark" aria-hidden="true" style="font-size: 18px;"></i>
-                </button>
-            </div>
-            
-            <div style="padding: 20px; overflow-y: auto; flex-grow: 1;">
-                <p style="font-size: 14px; color: var(--color-text-muted); margin-bottom: 25px;">Tus datos se guardarán localmente para agilizar tus compras.</p>
-                
-                <div style="background: var(--color-card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--color-border); margin-bottom: 20px;">
-                    <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--color-primary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;"><i class="fa-regular fa-id-badge"></i> Datos Personales</h3>
-                    
-                    <div class="input-group" style="margin-bottom: 15px;">
-                        <input type="text" id="perfilNombre" class="input-text" placeholder="Nombre y Apellido" style="background: var(--item-bg); border-radius: 12px; border: 1px solid var(--color-border); padding: 14px; font-size: 15px;">
-                    </div>
-                    <div class="input-group" style="margin-bottom: 15px;">
-                        <input type="text" id="perfilCedula" class="input-text" placeholder="Cédula (Ej: V-12345678)" oninput="formatearCedula(this)" style="background: var(--item-bg); border-radius: 12px; border: 1px solid var(--color-border); padding: 14px; font-size: 15px;">
-                    </div>
-                    <div class="input-group" style="margin-bottom: 0;">
-                        <input type="tel" id="perfilTelefono" class="input-text" placeholder="Teléfono (Ej: 0414-1234567)" oninput="formatearTelefono(this)" style="background: var(--item-bg); border-radius: 12px; border: 1px solid var(--color-border); padding: 14px; font-size: 15px;">
-                    </div>
-                </div>
-
-                <div style="background: var(--color-card); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); border: 1px solid var(--color-border); margin-bottom: 25px;">
-                    <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; color: var(--color-primary); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-location-dot"></i> Dirección de Delivery</h3>
-                    
-                    <div style="display:flex; gap: 10px;">
-                        <input type="text" id="perfilDireccion" class="input-text" placeholder="Ej: Av. Principal, Casa #10" style="flex-grow: 1; margin-top: 0; background: var(--item-bg); border-radius: 12px; border: 1px solid var(--color-border); padding: 14px; font-size: 15px;">
-                        <button id="btn-geo-perfil" onclick="obtenerUbicacion('perfilDireccion', 'btn-geo-perfil')" style="background: rgba(30,58,138,0.1); border: none; border-radius: 12px; padding: 0 16px; cursor: pointer; color: var(--color-primary); font-size: 18px; transition: 0.2s; flex-shrink: 0;" title="Usar mi ubicación actual">
-                            <i class="fa-solid fa-location-crosshairs"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <button class="btn-enviar" onclick="guardarPerfil()" style="width: 100%; border-radius: 14px; padding: 16px; font-size: 16px; font-weight: 600; letter-spacing: 0.5px; background: var(--color-primary); color: white; border: none; box-shadow: 0 8px 25px rgba(30,58,138,0.3); transition: transform 0.2s; margin-bottom: 30px;">
-                    Guardar Cambios
-                </button>
-
-                <div>
-                    <h3 style="font-size: 16px; font-weight: 700; color: var(--color-text); margin-bottom: 15px;">Tus Últimos Pedidos</h3>
-                    <div id="historial-lista"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-ajustes" class="modal-fullscreen">
-        <div class="modal-content-wrapper">
-            <div class="cart-header">
-                <h2>Panel de Ajustes</h2>
-                <button onclick="cerrarModal('modal-ajustes', 'nav-home')" aria-label="Cerrar ajustes"
-                    class="modal-close-btn">
-                    <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-                </button>
-            </div>
-            
-            <div class="settings-dashboard">
-                <!-- Barra de Pestañas (Navegación Izquierda en PC, superior en móvil) -->
-                <nav class="settings-nav-tabs">
-                    <button type="button" class="settings-tab-btn active" onclick="cambiarPestanaConfig('config-general', this)">
-                        <i class="fa-solid fa-sliders"></i> General
-                    </button>
-
-                    <button type="button" class="settings-tab-btn" onclick="cambiarPestanaConfig('config-legales', this)">
-                        <i class="fa-solid fa-scale-balanced"></i> Soporte Legal
-                    </button>
-
-                </nav>
-                
-                <!-- Área de Contenido de Ajustes -->
-                <div class="settings-content">
-                    
-                    <!-- Pestaña 1: General -->
-                    <div id="config-general" class="settings-pane active">
-                        <div class="settings-card">
-                            <h3 class="settings-card-title"><i class="fa-solid fa-palette"></i> Aspecto & Estilo</h3>
-                            <div class="settings-row">
-                                <div class="settings-info">
-                                    <span class="settings-label">Modo Oscuro</span>
-                                    <span class="settings-desc">Cambia el contraste visual de la interfaz para entornos de poca luz.</span>
-                                </div>
-                                <label class="settings-switch-label">
-                                    <input type="checkbox" id="toggleDarkMode" onchange="toggleDark()" aria-label="Modo oscuro">
-                                    <span class="settings-slider">
-                                        <i class="fa-solid fa-sun slider-icon icon-sun"></i>
-                                        <i class="fa-solid fa-moon slider-icon icon-moon"></i>
-                                    </span>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div class="settings-card">
-                            <h3 class="settings-card-title"><i class="fa-solid fa-filter"></i> Filtros de Catálogo</h3>
-                            <div class="settings-row">
-                                <div class="settings-info">
-                                    <span class="settings-label">Ver Productos Agotados</span>
-                                    <span class="settings-desc">Muestra los artículos sin inventario temporal en la lista general.</span>
-                                </div>
-                                <label class="settings-switch-label">
-                                    <input type="checkbox" id="settingsAgotados" onchange="toggleAgotadosConfig(this)" aria-label="Ver agotados">
-                                    <span class="settings-slider"></span>
-                                </label>
-                            </div>
-                            
-                            <div class="settings-row">
-                                <div class="settings-info">
-                                    <span class="settings-label">Vista de Compra Favorita</span>
-                                    <span class="settings-desc">Configura tu visualización preferida para comprar artículos.</span>
-                                </div>
-                                <select id="settingsModoVista" class="input-select" onchange="cambiarModoVistaConfig(this)" style="max-width: 140px; margin-top: 0; padding: 8px 12px;" aria-label="Vista favorita">
-                                    <option value="unidad">🍾 Por Unidad</option>
-                                    <option value="caja">📦 Por Caja</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    
-
-                    
-                    <!-- Pestaña 3: Soporte Legal (Acordeones Integrados) -->
-                    <div id="config-legales" class="settings-pane">
-                        <div class="settings-card">
-                            <h3 class="settings-card-title"><i class="fa-solid fa-shield-halved"></i> Políticas & Términos</h3>
-                            <div class="settings-accordion" style="margin-top:15px;">
-                                
-                                <div class="accordion-item">
-                                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
-                                        <span>1. Zonas de Delivery</span>
-                                        <i class="fa-solid fa-chevron-down"></i>
-                                    </button>
-                                    <div class="accordion-content">
-                                        <div class="accordion-body">
-                                            Llegamos a gran parte de la ciudad de Barinas. Ciertas zonas periféricas pueden tener un recargo en el costo del reparto por distancia o seguridad. El costo final será indicado por el operador en WhatsApp.
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="accordion-item">
-                                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
-                                        <span>2. Control de Edad Mínima</span>
-                                        <i class="fa-solid fa-chevron-down"></i>
-                                    </button>
-                                    <div class="accordion-content">
-                                        <div class="accordion-body">
-                                            <strong>Prohibida la venta de bebidas alcohólicas a menores de 18 años.</strong> Gran Catador promueve el consumo responsable. Nuestro personal de reparto está autorizado y obligado a verificar la cédula de identidad del comprador al momento de la entrega física.
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="accordion-item">
-                                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
-                                        <span>3. Garantías de Producto</span>
-                                        <i class="fa-solid fa-chevron-down"></i>
-                                    </button>
-                                    <div class="accordion-content">
-                                        <div class="accordion-body">
-                                            Por favor, verifique el estado e integridad de los artículos al recibirlos. No se aceptan reclamos ni devoluciones sobre botellas abiertas, con sellos fiscales rotos o productos perecederos después de firmar la conformidad del despacho.
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <div class="accordion-item">
-                                    <button type="button" class="accordion-header" onclick="toggleAccordion(this)">
-                                        <span>4. Privacidad y Datos</span>
-                                        <i class="fa-solid fa-chevron-down"></i>
-                                    </button>
-                                    <div class="accordion-content">
-                                        <div class="accordion-body">
-                                            Gran Catador respeta tu privacidad al 100%. Tus datos personales (nombre, cédula, teléfono y dirección) <strong>se almacenan exclusivamente de manera local</strong> en tu dispositivo mediante el navegador web (localStorage). Ninguna información es enviada a servidores de terceros ni procesada fuera de tus propios pedidos.
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                            </div>
-                        </div>
-                        
-                        <div class="settings-card" style="text-align: center;">
-                            <h3 class="settings-card-title"><i class="fa-solid fa-circle-question"></i> ¿Tienes Dudas?</h3>
-                            <p style="font-size:12px; color:var(--color-text-muted); margin-bottom:15px;">Ponte en contacto directo con nuestro equipo de atención y soporte al cliente en Barinas.</p>
-                            <button type="button" class="btn-whatsapp-support" onclick="abrirSoporteWhatsApp()">
-                                <i class="fa-brands fa-whatsapp"></i> Chatear con Soporte Técnico
-                            </button>
-                        </div>
-                    </div>
-                    
-
-                    
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
-    <!-- Bottom Navigation (Mobile Only) -->
-    <nav class="bottom-nav">
-        <a href="#" onclick="event.preventDefault(); irInicio();" class="nav-item active">
-            <i class="fa-solid fa-house"></i>
-            <span>Inicio</span>
-        </a>
-        <a href="#" onclick="event.preventDefault(); document.getElementById('buscador').focus();" class="nav-item">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <span>Buscar</span>
-        </a>
-        <a href="#" onclick="event.preventDefault(); abrirCarrito();" class="nav-item" id="nav-cart-bottom">
-            <div class="nav-icon-badge">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span class="cart-badge" id="bottom-cart-count">0</span>
-            </div>
-            <span>Carrito</span>
-        </a>
-        <a href="#" onclick="event.preventDefault(); abrirPerfil();" class="nav-item">
-            <i class="fa-regular fa-user"></i>
-            <span>Perfil</span>
-        </a>
-    </nav>
-
-    <!-- Botón Flotante: Volver Arriba -->
-    <button id="btn-scroll-top" class="btn-scroll-top" onclick="scrollToTop()" aria-label="Volver arriba">
-        <i class="fa-solid fa-chevron-up"></i>
-    </button>
+    <app-bottom-nav></app-bottom-nav>
     
 
 </body>

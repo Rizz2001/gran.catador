@@ -2236,3 +2236,13 @@ body.dark-mode .chk-agotados[data-tooltip]:hover::after {
 body.dark-mode .chk-agotados[data-tooltip]:hover::before {
   border-top-color: var(--color-primary);
 }
+
+/* Solución para Web Components (Light DOM): Permite que los elementos hijos se comporten como si estuvieran directamente en el DOM principal sin la caja contenedora (resuelve problemas con position: fixed, absolute, display: flex, etc.) */
+app-header, 
+app-sidebar, 
+app-footer, 
+app-modals, 
+app-bottom-nav, 
+app-age-gate {
+  display: contents;
+}

@@ -856,10 +856,10 @@ function debounceBusqueda(event) {
             if (event.target && typeof event.target.blur === 'function') event.target.blur();
             if (productosFiltradosGlobal && productosFiltradosGlobal.length === 1) {
                 cerrarSugerencias();
-                if (typeof abrirImagenLightbox === 'function') {
-                    let p = productosFiltradosGlobal[0];
-                    let imgSrc = obtenerImgProducto(p);
-                    abrirImagenLightbox(imgSrc, p.codigo);
+                if (typeof window.irADetalle === 'function') {
+                    window.irADetalle(productosFiltradosGlobal[0].codigo);
+                } else {
+                    window.location.href = 'producto.html?id=' + encodeURIComponent(productosFiltradosGlobal[0].codigo);
                 }
             }
         }
