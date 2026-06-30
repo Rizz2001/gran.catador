@@ -800,3 +800,8 @@ function setCheckoutStep(step) {
         }
     }
 }
+
+// Inicializar el contador visual del carrito cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    actualizarCartCount();
+});
