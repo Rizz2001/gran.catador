@@ -966,3 +966,32 @@ function aplicarFiltros() {
 
 // --- INICIO DE LA APLICACIÓN ---
 cargarInventario();
+
+// --- CAROUSEL DE CATEGORÍAS DESTACADAS ---
+window.seleccionarCategoriaDestacada = function(catId) {
+    let checkbox = document.getElementById('cat-' + catId.replace(/ /g, '-'));
+    
+    if (!checkbox) {
+        // Buscar por texto en los labels
+        const labels = document.querySelectorAll('.category-group label');
+        for (let label of labels) {
+            if (label.innerText.toLowerCase().includes(catId)) {
+                checkbox = label.querySelector('input');
+                break;
+            }
+        }
+    }
+
+    if (checkbox) {
+        // Simulamos el click para que dispare todo el flujo natural (filtrarCategoria)
+        checkbox.click();
+        
+        // Scroll a la sección de productos
+        const prodSec = document.getElementById('productos');
+        if (prodSec) {
+            prodSec.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+    } else {
+        console.warn("Categoría no encontrada en el DOM:", catId);
+    }
+};

@@ -54,6 +54,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="stylesheet" href="assets/css/modules/layout.css">
     <link rel="stylesheet" href="assets/css/modules/cart.css">
     <link rel="stylesheet" href="assets/css/modules/hero.css">
+    <link rel="stylesheet" href="assets/css/modules/featured-categories.css">
 
         <!-- Componentes Web -->
     <script src="js/components/AppAgeGate.js" defer></script>
@@ -62,6 +63,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <script src="js/components/AppFooter.js" defer></script>
     <script src="js/components/AppModals.js" defer></script>
     <script src="js/components/AppBottomNav.js" defer></script>
+    <script src="js/components/AppFeaturedCategories.js" defer></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js" defer></script>
     <script src="js/config/badges_oferta.js" defer></script>
@@ -148,6 +150,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <app-sidebar></app-sidebar>
 
             <div class="main-products-wrapper">
+                
+                <!-- Carrusel de Categorías Destacadas (Dinámico) -->
+                <app-featured-categories></app-featured-categories>
+
                 <div class="container tools-container">
             <h2 class="section-title">Todos los productos</h2>
 
