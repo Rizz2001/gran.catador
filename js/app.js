@@ -8,6 +8,21 @@ let appSettings = { useApi: true, apiType: 'smartventas' };
 
 let modoVistaGlobal = 'unidad';
 let subcategoriaActual = null;
+window.subcategoriaNombreActual = null;
+
+// Leer parámetros de URL si venimos de otra página
+if (typeof window !== 'undefined' && window.location && window.location.search) {
+    const urlParamsApp = new URLSearchParams(window.location.search);
+    if (urlParamsApp.has('categoria')) {
+        categoriaActual = urlParamsApp.get('categoria');
+    }
+    if (urlParamsApp.has('subcategoria')) {
+        subcategoriaActual = urlParamsApp.get('subcategoria');
+    }
+    if (urlParamsApp.has('nomsub')) {
+        window.subcategoriaNombreActual = urlParamsApp.get('nomsub');
+    }
+}
 
 // Asegurar que appState exista y tenga su estructura base
 window.appState = window.appState || { inventario: [], filtros: {}, carrito: {} };
