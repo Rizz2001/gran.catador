@@ -120,8 +120,9 @@ async function obtenerTasaDolar() {
         if (response.ok) {
             const data = await response.json();
             if (data && Array.isArray(data) && data.length > 0) {
-                // Usar la tasa promedio o la oficial
-                const tasaPromedio = data[0].promedio || data[0].precio || 36.25;
+                // Asegurar que tomamos la tasa oficial del BCV
+                let tasaObj = data.find(d => d.fuente === 'oficial') || data[0];
+                const tasaPromedio = tasaObj.promedio || tasaObj.precio || 36.25;
                 tasaOficial = parseFloat(tasaPromedio);
                 appState.tasaOficial = tasaOficial;
                 // Guardar en localStorage para persistencia

@@ -398,7 +398,6 @@ function renderizarCarrito() {
     for (let nombre in appState.carrito) {
         let nombreB64 = codificarNombre(nombre);
         let item = appState.carrito[nombre];
-        item.precio = parseFloat(item.precio.toFixed(2)); // Forzar redondeo para limpiar cachés viejos
         let subTotalItem = parseFloat((item.precio * item.cantidad).toFixed(2));
         appState.totalCarrito += subTotalItem;
 
@@ -449,7 +448,7 @@ function renderizarCarrito() {
                     </div>
                 </div>
                 <div class="cart-item-right">
-                    <div class="cart-item-total">$${subTotalItem.toFixed(2)} <span class="cart-item-price-bs" style="font-size: 0.85em; opacity: 0.9;">/ ${(subTotalItem * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs</span></div>
+                    <div class="cart-item-total">$${subTotalItem.toFixed(2)}</div>
                     <div class="cart-controls" aria-label="Controles de cantidad">
                         <button type="button" class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
                         <span class="cart-item-qty">${item.cantidad}</span>
