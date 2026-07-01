@@ -443,7 +443,7 @@ function renderizarCarrito() {
                     ${imgHTML}
                     <div class="cart-item-info">
                         <p class="cart-item-title">${nombre}</p>
-                        <p class="cart-item-unit">$${item.precio.toFixed(2)} <span class="cart-item-price-bs">/ ${(item.precio * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs</span></p>
+                        <p class="cart-item-unit">$${item.precio.toFixed(2)} <span class="cart-item-price-bs">/ ${(item.precio * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs</span></p>
                         ${stockBadge}
                     </div>
                 </div>
