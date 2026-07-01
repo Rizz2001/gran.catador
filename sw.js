@@ -1,13 +1,13 @@
-const CACHE_NAME = 'grancatador-v23';
+const CACHE_NAME = 'grancatador-v25';
 const urlsToCache = [
   './index.html',
   './assets/css/main.css',
   './assets/css/responsive.css',
   './js/utils.js',
   './js/state.js',
-  './js/cart.js?v=2.2',
+  './js/cart.js?v=2.4',
   './js/ui.js',
-  './js/app.js?v=2.2',
+  './js/app.js?v=2.4',
   './logo.webp',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Poppins:wght@400;500;600&display=swap'
