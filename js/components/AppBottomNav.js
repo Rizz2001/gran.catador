@@ -36,7 +36,7 @@ class AppBottomNav extends HTMLElement {
             const items = this.querySelectorAll('.nav-item');
             if (path.includes('/carrito')) {
                 if(items[2]) items[2].classList.add('active');
-            } else if (path.includes('producto.html')) {
+            } else if (path.includes('producto')) {
                 // Ninguno activo o mantener Inicio activo, lo dejamos sin active
             } else {
                 if(items[0]) items[0].classList.add('active');

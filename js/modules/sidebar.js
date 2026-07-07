@@ -34,7 +34,7 @@ window.mostrarPanelGrupos = function () {
 
 window.volverAGrupos = function () {
     mostrarPanelGrupos();
-    if (!window.location.pathname.includes('producto.html')) {
+    if (!window.location.pathname.includes('producto')) {
         irInicio(); // Reset to "Todos" filter gracefully
     }
 };

@@ -153,7 +153,7 @@ function irInicio() {
         window.location.href = '../index.html';
         return;
     }
-    if (currentPath.includes('producto.html') || currentPath.includes('carrito.html')) {
+    if (currentPath.includes('producto') || currentPath.includes('carrito')) {
         window.location.href = 'index.html';
         return;
     }
@@ -747,7 +747,7 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
             subcatContainer.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
             this.checked = true;
 
-            if (window.location.pathname.includes('producto.html')) {
+            if (window.location.pathname.includes('producto')) {
                 window.location.href = 'index.html?categoria=' + encodeURIComponent(nombreCategoria);
                 return;
             }
@@ -783,7 +783,7 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
                 subcatContainer.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
                 this.checked = true;
 
-                if (window.location.pathname.includes('producto.html')) {
+                if (window.location.pathname.includes('producto')) {
                     window.location.href = `index.html?categoria=${encodeURIComponent(nombreCategoria)}&subcategoria=${encodeURIComponent(codSub)}&nomsub=${encodeURIComponent(nombreSub)}`;
                     return;
                 }
@@ -826,7 +826,7 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
 }
 
 async function filtrarCategoria(cat, checkboxElement) {
-    if (window.location.pathname.includes('producto.html')) {
+    if (window.location.pathname.includes('producto')) {
         // Redirigimos siempre a index.html al seleccionar cualquier categoría desde el detalle
         window.location.href = 'index.html?categoria=' + encodeURIComponent(cat);
         return;
