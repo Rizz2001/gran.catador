@@ -827,13 +827,9 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
 
 async function filtrarCategoria(cat, checkboxElement) {
     if (window.location.pathname.includes('producto.html')) {
-        // Si eligen Todos o Favoritos, redirigimos de una vez a la home
-        if (cat === 'Todos' || cat === 'Favoritos') {
-            window.location.href = 'index.html?categoria=' + encodeURIComponent(cat);
-            return;
-        }
-        // Para otras categorías, dejamos que el script actualice variables
-        // y abra el panel de subcategorías (drill-down en sidebar).
+        // Redirigimos siempre a index.html al seleccionar cualquier categoría desde el detalle
+        window.location.href = 'index.html?categoria=' + encodeURIComponent(cat);
+        return;
     }
 
     if (categoriaActual === cat && checkboxElement && !checkboxElement.checked) {
