@@ -537,113 +537,6 @@ function generarCategorias() {
     }
 }
 
-window.generarMarquesinaGrupos = function () {
-    let contBanners = document.getElementById('contenedorBanners');
-    if (!contBanners) return;
-
-    // Remover si ya existe para evitar duplicados al recargar
-    let existing = document.getElementById('marquesina-grupos-container');
-    if (existing) existing.remove();
-
-    // Detener la animación anterior si existe
-    if (window.marquesinaAnimId) cancelAnimationFrame(window.marquesinaAnimId);
-
-    if (!appState.gruposInventario || appState.gruposInventario.length === 0) return;
-
-    let wrap = document.createElement('div');
-    wrap.id = 'marquesina-grupos-container';
-    wrap.className = 'marquesina-grupos-section';
-
-    try {
-        const queryRaw = (document.getElementById('buscador')?.value || '').trim();
-        wrap.style.display = (categoriaActual === 'Todos' && queryRaw.length === 0) ? 'block' : 'none';
-    } catch (e) {
-        wrap.style.display = 'none';
-    }
-
-    let track = document.createElement('div');
-    track.className = 'marquesina-track';
-
-    let createPills = () => {
-        let html = '';
-        appState.gruposInventario.forEach(g => {
-            let nombre = g.Nombre || g.nombre || g.Descripcion || g.descripcion || g.NombreGrupo || g.desc_grupo || g.DescGrupo;
-            if (nombre) {
-                let safeName = nombre.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-                let displayNombre = nombre.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-                let catIdLimpio = limpiarCategoria(nombre).replace(/[^a-z0-9]/gi, '-').toLowerCase();
-                html += `<div class="marquesina-pill" onclick="const cb = document.getElementById('cat-${catIdLimpio}'); if(cb) { cb.checked = true; } filtrarCategoria('${safeName}', cb)">
-                            <i class="fa-solid ${getIconForCategory(nombre)}"></i> <span>${displayNombre}</span>
-                         </div>`;
-            }
-        });
-        return html;
-    };
-
-    let pillsHTML = createPills();
-    // Se agrupa y duplica para asegurar una rotación infinita interactiva
-    track.innerHTML = `<div class="marquesina-group">${pillsHTML}</div><div class="marquesina-group">${pillsHTML}</div>`;
-
-    wrap.appendChild(track);
-
-    let dotsContainer = document.getElementById('banners-dots');
-    let parentWrapper = contBanners.closest('.banners-wrapper-relative') || contBanners;
-    parentWrapper.parentNode.insertBefore(wrap, parentWrapper.nextSibling);
-
-    // Lógica de Scroll Infinito e Interactivo
-    let isHoveredOrTouched = false;
-    let scrollSpeed = 0.2; // Velocidad de auto-scroll (más sutil y elegante)
-    let scrollPos = 0;
-
-    // Ajustamos eventos para detener la animación al interactuar
-    wrap.addEventListener('mouseenter', () => isHoveredOrTouched = true);
-    wrap.addEventListener('mouseleave', () => isHoveredOrTouched = false);
-    wrap.addEventListener('touchstart', () => isHoveredOrTouched = true, { passive: true });
-    wrap.addEventListener('touchend', () => {
-        setTimeout(() => isHoveredOrTouched = false, 1200); // Pequeña pausa antes de reanudar
-    });
-
-    // Si el usuario hace scroll manual, permitimos el desplazamiento
-    wrap.addEventListener('scroll', () => {
-        let firstGroup = track.querySelector('.marquesina-group');
-        if (!firstGroup) return;
-
-        let maxScroll = firstGroup.offsetWidth;
-
-        // Efecto infinito imperceptible
-        if (wrap.scrollLeft >= maxScroll) { // Bucle hacia la derecha
-            wrap.scrollLeft -= maxScroll;
-        } else if (isHoveredOrTouched && wrap.scrollLeft <= 0) { // Bucle hacia la izquierda (solo con interacción del usuario)
-            // Al llegar al inicio, saltamos al inicio del segundo grupo para un bucle sin fin
-            wrap.scrollLeft += maxScroll;
-        }
-
-        // Sincronizamos la variable de JS con el scroll real del usuario
-        if (isHoveredOrTouched) {
-            scrollPos = wrap.scrollLeft;
-        }
-    }, { passive: true });
-
-    const autoScroll = () => {
-        // Si el contenedor está oculto, no hacemos cálculos para ahorrar CPU
-        if (wrap.style.display !== 'none' && !isHoveredOrTouched) {
-            let firstGroup = track.querySelector('.marquesina-group');
-            if (firstGroup) {
-                let maxScroll = firstGroup.offsetWidth;
-                scrollPos += scrollSpeed;
-
-                if (scrollPos >= maxScroll) {
-                    scrollPos -= maxScroll;
-                }
-
-                wrap.scrollLeft = scrollPos;
-            }
-        }
-        window.marquesinaAnimId = requestAnimationFrame(autoScroll);
-    };
-
-    window.marquesinaAnimId = requestAnimationFrame(autoScroll);
-}
 
 async function cargarSubcategoriasAPI(nombreCategoria) {
     let catIdLimpio = limpiarCategoria(nombreCategoria).replace(/[^a-z0-9]/gi, '-').toLowerCase();
@@ -1023,3 +916,4 @@ window.irADetalle = function(codigo) {
     }
     window.location.href = 'producto.html?id=' + encodeURIComponent(codigo);
 };
+

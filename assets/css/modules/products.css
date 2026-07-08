@@ -869,52 +869,7 @@ body.dark-mode .tools-container .chk-agotados:hover {
     }
 }
 
-/* ==========================================================================
-   SECCIÓN DE CATEGORÍAS (MARQUESINA HORIZONTAL) ULTRA COMPACTA
-   ========================================================================== */
 
-.marquesina-grupos-section {
-    margin-top: 2px !important;
-    margin-bottom: 8px !important;
-    padding: 4px 0 !important;
-}
-
-.marquesina-group {
-    gap: 8px !important;
-    padding-right: 8px !important;
-}
-
-.marquesina-pill {
-    display: inline-flex !important;
-    align-items: center !important;
-    white-space: nowrap !important;
-    padding: 6px 14px !important;
-    font-size: 11.5px !important;
-    gap: 6px !important;
-    border-radius: var(--radius-full, 50px) !important;
-}
-
-.marquesina-pill i {
-    font-size: 13.5px !important;
-}
-
-@media (max-width: 768px) {
-    .marquesina-grupos-section {
-        margin-top: 2px !important;
-        margin-bottom: 6px !important;
-        padding: 3px 0 !important;
-    }
-
-    .marquesina-pill {
-        padding: 5px 12px !important;
-        font-size: 11px !important;
-        gap: 5px !important;
-    }
-
-    .marquesina-pill i {
-        font-size: 12.5px !important;
-    }
-}
 
 /* ==========================================================================
    BANNERS PUBLICITARIOS EN GRILLA DE PRODUCTOS (EXCLUSIVO PC/TABLET)

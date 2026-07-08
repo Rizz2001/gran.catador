@@ -642,7 +642,6 @@ async function cargarInventarioDesdeAPI() {
     // --- INYECTAR EN PANTALLA ---
     // Renderizar los botones de grupos y los productos del grupo inicial
     if (typeof generarCategorias === 'function') generarCategorias();
-    if (typeof generarMarquesinaGrupos === 'function') generarMarquesinaGrupos();
     
     if (typeof window.procesarRutasDeepLinking === 'function') {
         window.procesarRutasDeepLinking();
