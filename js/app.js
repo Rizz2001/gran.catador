@@ -1,5 +1,5 @@
 let inventario = [];
-let tasaOficial = 36.25; let tasaEuro = 40.00; let categoriaActual = 'Todos'; let debounceTimer;
+let tasaOficial = parseFloat(safeGetItem('tasaDolar')) || 0; let tasaEuro = parseFloat(safeGetItem('tasaEuro')) || 0; let categoriaActual = 'Todos'; let debounceTimer;
 let isTiendaAbierta = true;
 let masVendidosCodigos = [];
 let productosFiltradosGlobal = []; let itemsPorPagina = 30; let paginaActual = 1;
@@ -122,7 +122,7 @@ async function obtenerTasaDolar() {
             if (data && Array.isArray(data) && data.length > 0) {
                 // Asegurar que tomamos la tasa oficial del BCV
                 let tasaObj = data.find(d => d.fuente === 'oficial') || data[0];
-                const tasaPromedio = tasaObj.promedio || tasaObj.precio || 36.25;
+                const tasaPromedio = tasaObj.promedio || tasaObj.precio || (tasaOficial > 0 ? tasaOficial : 0);
                 tasaOficial = parseFloat(tasaPromedio);
                 appState.tasaOficial = tasaOficial;
                 // Guardar en localStorage para persistencia
@@ -432,6 +432,7 @@ async function obtenerArchivosExternos() {
         obtenerTasaDolar().then(() => {
             let tasaEl = document.getElementById('tasaValor'); if (tasaEl) tasaEl.innerText = tasaOficial.toFixed(2) + " Bs";
             let tasaElMob = document.getElementById('tasaValorMobile'); if (tasaElMob) tasaElMob.innerText = tasaOficial.toFixed(2) + " Bs";
+            if (typeof renderizarCarrito === 'function') renderizarCarrito();
         }),
         obtenerTasaEuro().then(() => {
             let tasaEuroEl = document.getElementById('tasaEuroValor'); if (tasaEuroEl) tasaEuroEl.innerText = tasaEuro.toFixed(2) + " Bs";
@@ -476,7 +477,11 @@ async function cargarConfiguracionDesdeAPI() {
                 configs.forEach(c => {
                     if (c.clave === 'recomendados') codigosRecomendadosLocal = c.valor.split(/[\n,]+/).map(x => x.trim());
                     if (c.clave === 'disponibles') siempreDisponiblesLocal = c.valor.split(/[\n,]+/).map(x => x.trim());
-                    if (c.clave === 'tasa') { tasaOficial = parseFloat(c.valor); appState.tasaOficial = tasaOficial; }
+                    if (c.clave === 'tasa') { 
+                        tasaOficial = parseFloat(c.valor); 
+                        appState.tasaOficial = tasaOficial; 
+                        if (typeof renderizarCarrito === 'function') renderizarCarrito();
+                    }
                 });
             }
             appState.codigosRecomendados = codigosRecomendadosLocal;

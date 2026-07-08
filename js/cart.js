@@ -375,7 +375,10 @@ function repetirPedido(index) {
 /** Dibuja los productos en la vista del Carrito de Compras (Performance Optimizado) */
 function renderizarCarrito() {
     const lista = document.getElementById('lista-carrito');
+    if (!lista) return; // Safeguard if called on pages without the cart UI
+    
     appState.totalCarrito = 0;
+    appState.totalCarritoBs = 0;
 
     if (Object.keys(appState.carrito).length === 0) {
         lista.innerHTML = `
@@ -399,7 +402,10 @@ function renderizarCarrito() {
         let nombreB64 = codificarNombre(nombre);
         let item = appState.carrito[nombre];
         let subTotalItem = parseFloat((item.precio * item.cantidad).toFixed(2));
+        let subTotalItemBs = parseFloat((subTotalItem * appState.tasaOficial).toFixed(2));
+        
         appState.totalCarrito += subTotalItem;
+        appState.totalCarritoBs += subTotalItemBs;
 
         let prodObj = appState.inventario.find(x => x.codigo === item.codigo);
         let imgSrc = obtenerImgProducto(prodObj || { codigo: item.codigo });
@@ -448,7 +454,7 @@ function renderizarCarrito() {
                     </div>
                 </div>
                 <div class="cart-item-right">
-                    <div class="cart-item-total">$${subTotalItem.toFixed(2)}</div>
+                    <div class="cart-item-total">$${subTotalItem.toFixed(2)}<br><span style="font-size:12px; color:var(--color-text-muted); font-weight:normal; display:block;">${subTotalItemBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs</span></div>
                     <div class="cart-controls" aria-label="Controles de cantidad">
                         <button type="button" class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
                         <span class="cart-item-qty">${item.cantidad}</span>
@@ -464,8 +470,10 @@ function renderizarCarrito() {
     lista.innerHTML = renderHTML;
 
     appState.totalCarrito = parseFloat(appState.totalCarrito.toFixed(2));
+    appState.totalCarritoBs = parseFloat(appState.totalCarritoBs.toFixed(2));
+    
     document.getElementById('totalUsdModal').innerText = `$${appState.totalCarrito.toFixed(2)}`;
-    document.getElementById('totalBsModal').innerText = `${(appState.totalCarrito * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
+    document.getElementById('totalBsModal').innerText = `${appState.totalCarritoBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
     calcularVuelto();
     
     // Asegurar que siempre se inicie en el Paso 1 al abrir o refrescar el carrito
@@ -694,7 +702,7 @@ function enviarPedido() {
         msg += `📎 _[Capture adjunto en el siguiente mensaje]_\n`;
     }
 
-    msg += `\n💰 *TOTAL A PAGAR: $${appState.totalCarrito.toFixed(2)}*\n💱 _(Tasa BCV: ${appState.tasaOficial.toFixed(2)} Bs)_`;
+    msg += `\n💰 *TOTAL A PAGAR: $${appState.totalCarrito.toFixed(2)}* / *${appState.totalCarritoBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs*\n💱 _(Tasa BCV: ${appState.tasaOficial.toFixed(2)} Bs)_`;
 
     // Limpieza post-compra
     safeRemoveItem('gc_inv_time_v3');

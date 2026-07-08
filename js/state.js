@@ -14,7 +14,7 @@ window.appState = {
     favoritos: JSON.parse(safeGetItem('gc_favs')) || [],
 
     // Configuración y Negocio
-    tasaOficial: 36.25,
+    tasaOficial: parseFloat(safeGetItem('tasaDolar')) || 0,
     isTiendaAbierta: true,
 
     // Estado de la Interfaz (UI)
