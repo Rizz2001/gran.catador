@@ -940,3 +940,94 @@ body.dark-mode .tools-container .chk-agotados:hover {
 
 
 
+
+
+
+/* --- Carousel Related Products --- */
+.related-carousel-container {
+  position: relative;
+  width: 100%;
+}
+
+.related-carousel-track {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 0;
+  scrollbar-width: none;
+  align-items: stretch;
+}
+
+.related-carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.related-carousel-track .producto-card {
+  width: 180px;
+  flex-shrink: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;
+}
+
+.related-carousel-track .producto-card .product-card-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.related-carousel-track .producto-card .producto-titulo {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 42px;
+  max-height: 42px;
+}
+
+.related-carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  color: #333;
+  transition: background 0.3s, color 0.3s;
+}
+
+.related-carousel-btn:hover {
+  background: #1d3557;
+  color: white;
+}
+
+.related-carousel-btn.left {
+  left: -20px;
+}
+
+.related-carousel-btn.right {
+  right: -20px;
+}
+
+@media (max-width: 768px) {
+  .related-carousel-track .producto-card {
+    width: 150px;
+  }
+  .related-carousel-btn {
+    display: none;
+  }
+}

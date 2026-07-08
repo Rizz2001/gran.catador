@@ -346,17 +346,17 @@ function cargarProductosRelacionados(productoActual, todosLosProductos) {
     // Mezclar aleatoriamente el array resultante
     productosFiltrados.sort(() => 0.5 - Math.random());
 
-    let productosAMostrar = productosFiltrados.slice(0, 4);
+    let productosAMostrar = productosFiltrados.slice(0, 10);
 
     // Fallback: Si no hay suficientes, rellenar con otros al azar en stock
-    if (productosAMostrar.length < 4) {
+    if (productosAMostrar.length < 10) {
       let fallback = todosLosProductos.filter(p => 
         String(p.codigo) !== String(productoActual.codigo) && 
         p.StockNum > 0 &&
         !productosAMostrar.find(pm => String(pm.codigo) === String(p.codigo))
       );
       fallback.sort(() => 0.5 - Math.random()); // Mezclar fallback también
-      productosAMostrar = productosAMostrar.concat(fallback.slice(0, 4 - productosAMostrar.length));
+      productosAMostrar = productosAMostrar.concat(fallback.slice(0, 10 - productosAMostrar.length));
     }
 
     if (productosAMostrar.length === 0) {
@@ -368,24 +368,41 @@ function cargarProductosRelacionados(productoActual, todosLosProductos) {
 
     let html = `<section class="related-products-section">
       <h2 style="font-size: 1.5rem; margin-bottom: 20px;">También te podría interesar</h2>
-      <div class="related-products-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">`;
+      <div class="related-carousel-container" style="position: relative;">
+        <button class="related-carousel-btn left" onclick="scrollRelatedProducts(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+        <div class="related-carousel-track" id="related-carousel-track">`;
 
+    let itemsHTML = '';
     productosAMostrar.forEach(producto => {
       if (typeof crearHTMLProducto === 'function') {
-        html += crearHTMLProducto(producto);
+        itemsHTML += crearHTMLProducto(producto);
       } else {
         // Fallback en caso extremadamente raro de que la función global no esté disponible
         let imgSrc = typeof obtenerImgProducto === 'function' ? obtenerImgProducto(producto) : (producto.imagen || 'assets/img/placeholder.webp');
-        html += `<div class="producto-card" onclick="irADetalle('${producto.codigo.replace(/'/g, "\\'")}')" style="cursor: pointer; padding: 10px; border: 1px solid #eee; border-radius: 8px; text-align: center;">
+        itemsHTML += `<div class="producto-card" onclick="irADetalle('${producto.codigo.replace(/'/g, "\\'")}')" style="cursor: pointer; padding: 10px; border: 1px solid #eee; border-radius: 8px; text-align: center;">
           <img src="${imgSrc}" style="width: 100%; height: 180px; object-fit: contain;">
           <h3 style="font-size: 0.9rem; margin-top: 10px;">${producto.Nombre || 'Producto'}</h3>
         </div>`;
       }
     });
 
-    html += `</div></section>`;
+    html += itemsHTML;
+
+    html += `   </div>
+        <button class="related-carousel-btn right" onclick="scrollRelatedProducts(1)"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </section>`;
+    
     rootRelacionados.innerHTML = html;
   } catch (e) {
     console.error("Error cargando productos relacionados:", e);
   }
 }
+
+window.scrollRelatedProducts = function(direction) {
+  const track = document.getElementById('related-carousel-track');
+  if (track) {
+    const cardWidth = track.querySelector('.producto-card') ? track.querySelector('.producto-card').offsetWidth : 180;
+    track.scrollBy({ left: direction * (cardWidth + 15), behavior: 'smooth' });
+  }
+};
