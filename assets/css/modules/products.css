@@ -1,4 +1,4 @@
-/* --- SKELETON LOADER PARA GRUPOS --- */
+﻿/* --- SKELETON LOADER PARA GRUPOS --- */
 @keyframes skeleton-pulse {
     0% {
         background-color: rgba(0, 0, 0, 0.05);
@@ -40,7 +40,7 @@
     animation: skeleton-pulse-dark 1.5s infinite ease-in-out;
 }
 
-/* --- SKELETON GENÉRICO PARA PRODUCTOS --- */
+/* --- SKELETON GENÃ‰RICO PARA PRODUCTOS --- */
 .skeleton-box {
     background-color: rgba(0, 0, 0, 0.08);
     animation: skeleton-pulse 1.5s infinite ease-in-out;
@@ -60,7 +60,7 @@
 
 /* --- AJUSTES DE GRILLA Y PRODUCTOS (RESPONSIVE) --- */
 
-/* Grilla fluida responsiva para móviles */
+/* Grilla fluida responsiva para mÃ³viles */
 .productos-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
@@ -68,7 +68,7 @@
     padding: 14px;
 }
 
-/* Adaptación fluida para pantallas más grandes (Tablets) */
+/* AdaptaciÃ³n fluida para pantallas mÃ¡s grandes (Tablets) */
 @media (min-width: 768px) {
     .productos-grid {
         grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
@@ -84,7 +84,7 @@
     }
 }
 
-/* Evitar deformación de las tarjetas y hacerlas uniformes */
+/* Evitar deformaciÃ³n de las tarjetas y hacerlas uniformes */
 .producto-card {
     display: flex;
     flex-direction: column;
@@ -185,7 +185,7 @@
     white-space: nowrap;
 }
 
-/* Botón Comprar por WhatsApp */
+/* BotÃ³n Comprar por WhatsApp */
 .product-bottom-action {
     padding: 0 16px 16px 16px;
 }
@@ -246,7 +246,7 @@ body.dark-mode .producto-card:hover {
     border-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Animación de entrada para las tarjetas de producto */
+/* AnimaciÃ³n de entrada para las tarjetas de producto */
 @keyframes card-fade-in {
     from {
         opacity: 0;
@@ -274,7 +274,7 @@ body.dark-mode .producto-card:hover {
         transform: scale(1.05);
     }
 
-    /* Ocultar el corazón hasta que se haga hover (salvo que ya sea favorito) */
+    /* Ocultar el corazÃ³n hasta que se haga hover (salvo que ya sea favorito) */
     .producto-card .btn-fav:not(.active) {
         opacity: 0;
         transform: scale(0.8);
@@ -286,7 +286,7 @@ body.dark-mode .producto-card:hover {
         transform: scale(1);
     }
 
-    /* Resaltar dinámicamente el botón de agregar al carrito */
+    /* Resaltar dinÃ¡micamente el botÃ³n de agregar al carrito */
     .producto-card .btn-add-cart {
         transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
         min-width: 44px;
@@ -336,7 +336,7 @@ body.dark-mode .producto-card:hover {
     transform: scale(1.04);
 }
 
-/* Truncar textos de productos largos a un máximo de 2 líneas */
+/* Truncar textos de productos largos a un mÃ¡ximo de 2 lÃ­neas */
 .producto-titulo {
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
@@ -347,12 +347,12 @@ body.dark-mode .producto-card:hover {
     font-size: 12px !important;
     line-height: 1.4 !important;
     height: 2.8em !important;
-    /* Alineación perfecta si un texto ocupa 1 línea y el del lado 2 líneas */
+    /* AlineaciÃ³n perfecta si un texto ocupa 1 lÃ­nea y el del lado 2 lÃ­neas */
     margin-bottom: 4px !important;
     word-break: break-word !important;
 }
 
-/* --- BOTÓN CARGAR MÁS PRODUCTOS VISIBLE --- */
+/* --- BOTÃ“N CARGAR MÃS PRODUCTOS VISIBLE --- */
 .btn-cargar-mas {
     display: block;
     width: calc(100% - 40px);
@@ -640,7 +640,7 @@ body.dark-mode .marcas-aliadas-item img {
 }
 
 /* ==========================================================================
-   SECCIÓN DE FILTROS Y ORDENAMIENTO ULTRA COMPACTA (SÚPER PROFESIONAL)
+   SECCIÃ“N DE FILTROS Y ORDENAMIENTO ULTRA COMPACTA (SÃšPER PROFESIONAL)
    ========================================================================== */
 
 /* Contenedor principal de herramientas */
@@ -661,7 +661,7 @@ body.dark-mode .marcas-aliadas-item img {
     box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05)) !important;
 }
 
-/* Título de la sección */
+/* TÃ­tulo de la secciÃ³n */
 .tools-container .section-title {
     font-size: 14px !important;
     font-weight: 700 !important;
@@ -685,7 +685,7 @@ body.dark-mode .marcas-aliadas-item img {
     flex: 0 0 auto !important;
 }
 
-/* Botón individual del Modo de Vista */
+/* BotÃ³n individual del Modo de Vista */
 #toggle-modo-global .btn-modo {
     border: none !important;
     background: transparent !important;
@@ -807,7 +807,7 @@ body.dark-mode .tools-container .chk-agotados:hover {
     background-color: #334155 !important;
 }
 
-/* RESPONSIVE MÓVIL Y TABLET (Ajustes de flujo y compactación extrema) */
+/* RESPONSIVE MÃ“VIL Y TABLET (Ajustes de flujo y compactaciÃ³n extrema) */
 @media (max-width: 767px) {
     .tools-container {
         margin-top: 6px !important;
@@ -905,3 +905,38 @@ body.dark-mode .tools-container .chk-agotados:hover {
 }
 
 /* Banners visibles en todos los dispositivos */
+
+/* --- Sección de Productos Relacionados --- */
+.related-products-section {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.related-products-section h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2rem;
+  color: #333;
+}
+
+.related-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 20px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

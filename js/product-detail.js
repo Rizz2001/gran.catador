@@ -6,7 +6,7 @@ function formatearTitulo(str) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Evitar conflictos con la inicialización normal de index.html
+    // Evitar conflictos con la inicializaciÃ³n normal de index.html
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
 
@@ -19,22 +19,22 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function iniciarCargaProducto(productId) {
-    // 1. Intentar cargar desde caché (navegación instantánea y segura)
+    // 1. Intentar cargar desde cachÃ© (navegaciÃ³n instantÃ¡nea y segura)
     try {
         const cached = sessionStorage.getItem('gc_producto_actual');
         if (cached) {
             const p = JSON.parse(cached);
-            // Validar que el código coincida
+            // Validar que el cÃ³digo coincida
             if (window.compararIDs ? window.compararIDs(p.codigo, productId) : p.codigo == productId) {
                 renderizarProducto(p);
-                return; // Termina la inicialización sin esperar la API
+                return; // Termina la inicializaciÃ³n sin esperar la API
             }
         }
     } catch (e) {
         console.warn("No se pudo leer de sessionStorage", e);
     }
 
-    // 2. Si no hay caché, esperar a que la app esté inicializada y buscar el producto
+    // 2. Si no hay cachÃ©, esperar a que la app estÃ© inicializada y buscar el producto
     let intentos = 0;
     
     const checkInterval = setInterval(() => {
@@ -57,12 +57,12 @@ function iniciarCargaProducto(productId) {
             return;
         }
 
-        // Si no está, chequear si todavía se están cargando grupos
+        // Si no estÃ¡, chequear si todavÃ­a se estÃ¡n cargando grupos
         const totalGrupos = window.appState.gruposInventario ? window.appState.gruposInventario.length : 0;
         const gruposCargados = window.appState.gruposCargados ? window.appState.gruposCargados.length : 0;
         
         if (totalGrupos > 0 && gruposCargados >= totalGrupos) {
-            // Ya cargó todo y no lo encontró
+            // Ya cargÃ³ todo y no lo encontrÃ³
             clearInterval(checkInterval);
             mostrarErrorProducto();
         }
@@ -97,12 +97,12 @@ function renderizarProducto(p) {
     if (isAgotado) {
         stockStatusHTML = `<span class="product__stock danger"><i class="fa-solid fa-triangle-exclamation"></i> Agotado en ${esModoCaja ? 'Cajas' : 'Unidad'}</span>`;
     } else if (p.StockNum <= 5 && !esModoCaja) {
-        stockStatusHTML = `<span class="product__stock warning"><i class="fa-solid fa-triangle-exclamation"></i> ¡Últimas ${p.StockNum} und!</span>`;
+        stockStatusHTML = `<span class="product__stock warning"><i class="fa-solid fa-triangle-exclamation"></i> Â¡Ãšltimas ${p.StockNum} und!</span>`;
     } else if (esModoCaja && (p.StockNum < (cantCaja * 2))) {
         // Stock bajo en cajas (menos de 2 cajas disponibles)
         let cajasDisp = Math.floor(p.StockNum / cantCaja);
         if (cajasDisp > 0) {
-            stockStatusHTML = `<span class="product__stock warning"><i class="fa-solid fa-triangle-exclamation"></i> ¡Solo ${cajasDisp} caja(s) disponible(s)!</span>`;
+            stockStatusHTML = `<span class="product__stock warning"><i class="fa-solid fa-triangle-exclamation"></i> Â¡Solo ${cajasDisp} caja(s) disponible(s)!</span>`;
         } else {
             stockStatusHTML = `<span class="product__stock warning"><i class="fa-solid fa-triangle-exclamation"></i> Solo ${p.StockNum} und disponibles (No alcanza p/ caja)</span>`;
         }
@@ -156,7 +156,7 @@ function renderizarProducto(p) {
     // Stock
     document.getElementById('product-stock').outerHTML = stockStatusHTML;
 
-    // Acción
+    // AcciÃ³n
     const actionBlock = document.getElementById('product-action-block');
     actionBlock.classList.remove('skeleton-box');
     actionBlock.innerHTML = `
@@ -175,13 +175,13 @@ function renderizarProducto(p) {
     // Descripcion larga
     const descEl = document.getElementById('product-description');
     descEl.classList.remove('skeleton-text', 'multiple');
-    descEl.innerHTML = p.DescAdicional ? p.DescAdicional.replace(/\n/g, '<br>') : 'No hay descripción adicional disponible para este producto. Para más información, contáctanos vía WhatsApp.';
+    descEl.innerHTML = p.DescAdicional ? p.DescAdicional.replace(/\n/g, '<br>') : 'No hay descripciÃ³n adicional disponible para este producto. Para mÃ¡s informaciÃ³n, contÃ¡ctanos vÃ­a WhatsApp.';
 
     // Especificaciones completas
     document.getElementById('product-full-specs').innerHTML = `
-        <div class="spec-row"><span class="spec-name">Código:</span> <span class="spec-value">${p.codigo}</span></div>
-        <div class="spec-row"><span class="spec-name">Categoría:</span> <span class="spec-value">${formatearTitulo(p.Cat)}</span></div>
-        <div class="spec-row"><span class="spec-name">Subcategoría:</span> <span class="spec-value">${formatearTitulo(p.SubCat || p.Cat)}</span></div>
+        <div class="spec-row"><span class="spec-name">CÃ³digo:</span> <span class="spec-value">${p.codigo}</span></div>
+        <div class="spec-row"><span class="spec-name">CategorÃ­a:</span> <span class="spec-value">${formatearTitulo(p.Cat)}</span></div>
+        <div class="spec-row"><span class="spec-name">SubcategorÃ­a:</span> <span class="spec-value">${formatearTitulo(p.SubCat || p.Cat)}</span></div>
         <div class="spec-row"><span class="spec-name">Medida/Peso:</span> <span class="spec-value">${p.Medida || 'N/A'}</span></div>
         <div class="spec-row"><span class="spec-name">Unidad de Manejo:</span> <span class="spec-value">${p.UnidadSimple || 'Unidad'}</span></div>
         <div class="spec-row"><span class="spec-name">Unidades por Mayor:</span> <span class="spec-value">${cantCaja} por ${p.UnidadGrup || 'Caja'}</span></div>
@@ -194,24 +194,11 @@ function renderizarProducto(p) {
         <img src="${imgSrc}" alt="${p.Nombre}" id="main-product-image" onerror="imgFallbackFolder(this)">
     `;
 
-    // Productos Relacionados (usando la función de ui.js si existe)
-    if (typeof crearHTMLSeccionCategoriasAleatorias === 'function') {
-        const rootRelacionados = document.getElementById('productos-relacionados-root');
-        // Filtramos para que salgan de la misma categoría preferiblemente
-        let relacionados = window.appState.inventario.filter(invP => invP.CatId === p.CatId && invP.codigo !== p.codigo);
-        if (relacionados.length < 10) relacionados = window.appState.inventario.slice(0, 50); // Fallback
-        
-        rootRelacionados.innerHTML = crearHTMLSeccionCategoriasAleatorias(relacionados, Math.floor(Math.random() * 5));
-        
-        // Modificar el título de la sección
-        const relTitle = rootRelacionados.querySelector('.grupo-aleatorio-title');
-        if (relTitle) relTitle.textContent = "Productos Relacionados";
-        const relSub = rootRelacionados.querySelector('.grupo-aleatorio-subtitle');
-        if (relSub) relSub.textContent = `Más opciones en ${formatearTitulo(p.Cat)}`;
-    }
+    // Productos Relacionados (Nueva SecciÃ³n Custom)
+    cargarProductosRelacionados(p, window.appState.inventario);
 
     // --- SINCRONIZAR SIDEBAR EN PRODUCTO.HTML ---
-    // Asegurar que el menú lateral refleje automáticamente la categoría y subcategoría del producto actual
+    // Asegurar que el menÃº lateral refleje automÃ¡ticamente la categorÃ­a y subcategorÃ­a del producto actual
     try {
         let catStr = p.Cat || p.categoria || p.Categoria;
         let subcatStr = (p.SubCatId || p.SubCat || p.subcategoria || p.Subcategoria || '').toString().trim();
@@ -228,7 +215,7 @@ function renderizarProducto(p) {
                 if (subcatName) window.subcategoriaNombreActual = subcatName; 
             }
 
-            // Esperar a que los grupos estén cargados antes de renderizar para evitar condiciones de carrera
+            // Esperar a que los grupos estÃ©n cargados antes de renderizar para evitar condiciones de carrera
             let intentosSidebar = 0;
             const sidebarInterval = setInterval(() => {
                 if (window.appState && window.appState.gruposInventario && window.appState.gruposInventario.length > 0) {
@@ -239,7 +226,7 @@ function renderizarProducto(p) {
                         window.generarCategorias();
                     }
 
-                    // Ejecutar el drill-down del sidebar y renderizar las subcategorías correspondientes
+                    // Ejecutar el drill-down del sidebar y renderizar las subcategorÃ­as correspondientes
                     if (typeof window.cargarSubcategoriasAPI === 'function') {
                         window.cargarSubcategoriasAPI(catStr);
                     }
@@ -261,7 +248,7 @@ function mostrarErrorProducto() {
             <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
                 <i class="fa-solid fa-circle-exclamation" style="font-size: 60px; color: #ea4335; margin-bottom: 20px;"></i>
                 <h1 style="font-size: 24px; color: var(--color-text); margin-bottom: 10px;">Producto no encontrado</h1>
-                <p style="color: var(--color-text-muted); margin-bottom: 30px;">El producto que estás buscando no existe o ya no está disponible en nuestro catálogo.</p>
+                <p style="color: var(--color-text-muted); margin-bottom: 30px;">El producto que estÃ¡s buscando no existe o ya no estÃ¡ disponible en nuestro catÃ¡logo.</p>
                 <a href="index.html" class="btn-add-main" style="display: inline-flex; width: auto; padding: 0 30px;"><i class="fa-solid fa-arrow-left"></i> Volver a la tienda</a>
             </div>
         `;
@@ -270,27 +257,27 @@ function mostrarErrorProducto() {
     }
 }
 
-// Interfaz para el botón de agregar
+// Interfaz para el botÃ³n de agregar
 window.agregarDesdeDetalle = function(nombreB64, precioNum, imgSrc, esModoCaja) {
     const qtyInput = document.getElementById('prod-qty');
     const cantidad = parseInt(qtyInput.value) || 1;
     
-    // Necesitamos pasar un elemento "btn" falso para la animación si es requerida por la función original
+    // Necesitamos pasar un elemento "btn" falso para la animaciÃ³n si es requerida por la funciÃ³n original
     const btnMock = document.querySelector('.btn-add-main');
     
-    // La función agregarAlCarritoB64 existe en cart.js (espera cantidad como parte del modal o por defecto 1)
-    // Ya que no podemos modificar agregarAlCarritoB64 para aceptar cantidad directa fácilmente sin tocar cart.js,
-    // llamaremos la función N veces, o mejor usamos una adición manual si la API lo permite, 
-    // pero lo mejor es usar la función de cart.js
+    // La funciÃ³n agregarAlCarritoB64 existe en cart.js (espera cantidad como parte del modal o por defecto 1)
+    // Ya que no podemos modificar agregarAlCarritoB64 para aceptar cantidad directa fÃ¡cilmente sin tocar cart.js,
+    // llamaremos la funciÃ³n N veces, o mejor usamos una adiciÃ³n manual si la API lo permite, 
+    // pero lo mejor es usar la funciÃ³n de cart.js
     
-    // Decodificamos y usamos la lógica directa de agregar
+    // Decodificamos y usamos la lÃ³gica directa de agregar
     if (typeof agregarAlCarritoDirecto === 'function') {
         // Si tienes una funcion directa
     } else {
-        // En cart.js la función es agregarAlCarritoB64(nombreBase64, precioNum, botonElem, sumarAlerta, imgSrc, esCaja)
+        // En cart.js la funciÃ³n es agregarAlCarritoB64(nombreBase64, precioNum, botonElem, sumarAlerta, imgSrc, esCaja)
         // Agregamos tantas veces como cantidad
         for(let i=0; i<cantidad; i++) {
-            // Pasamos true en sumarAlerta solo en la última para no espamear
+            // Pasamos true en sumarAlerta solo en la Ãºltima para no espamear
             const mostrarAlerta = (i === cantidad - 1);
             agregarAlCarritoB64(nombreB64, precioNum, btnMock, mostrarAlerta, imgSrc, esModoCaja);
         }
@@ -310,3 +297,95 @@ window.toggleModoVistaProducto = function(checkbox) {
         }
     }
 };
+
+
+
+/**
+ * Renderiza productos sugeridos basados en la categoría del producto actual.
+ */
+function cargarProductosRelacionados(productoActual, todosLosProductos) {
+  try {
+    const rootRelacionados = document.getElementById('productos-relacionados-root');
+    if (!rootRelacionados) return;
+
+    // Si el inventario aún no ha cargado (ej. se cargó el producto desde caché)
+    // entonces esperamos hasta que appState.inventario esté listo.
+    if (!todosLosProductos || !Array.isArray(todosLosProductos) || todosLosProductos.length === 0) {
+      let reintentos = 0;
+      const intervalo = setInterval(() => {
+        reintentos++;
+        if (window.appState && window.appState.inventario && window.appState.inventario.length > 0) {
+          clearInterval(intervalo);
+          cargarProductosRelacionados(productoActual, window.appState.inventario);
+        } else if (reintentos > 100) { // Timeout 10 seg
+          clearInterval(intervalo);
+          rootRelacionados.style.display = 'none';
+        }
+      }, 100);
+      return;
+    }
+
+    const catActual = (productoActual.Cat || productoActual.categoria || productoActual.Categoria || '').toLowerCase().trim();
+    const catIdActual = productoActual.CatId;
+
+    let productosFiltrados = todosLosProductos.filter(producto => {
+      // Excluir el producto actual
+      if (String(producto.codigo) === String(productoActual.codigo)) return false;
+      
+      // Excluir productos sin stock
+      if (!producto.StockNum || producto.StockNum <= 0) return false;
+      
+      // Coincidencia de categoría
+      const catProd = (producto.Cat || producto.categoria || producto.Categoria || '').toLowerCase().trim();
+      if (catActual && catProd === catActual) return true;
+      if (catIdActual && producto.CatId === catIdActual) return true;
+      
+      return false;
+    });
+
+    // Mezclar aleatoriamente el array resultante
+    productosFiltrados.sort(() => 0.5 - Math.random());
+
+    let productosAMostrar = productosFiltrados.slice(0, 4);
+
+    // Fallback: Si no hay suficientes, rellenar con otros al azar en stock
+    if (productosAMostrar.length < 4) {
+      let fallback = todosLosProductos.filter(p => 
+        String(p.codigo) !== String(productoActual.codigo) && 
+        p.StockNum > 0 &&
+        !productosAMostrar.find(pm => String(pm.codigo) === String(p.codigo))
+      );
+      fallback.sort(() => 0.5 - Math.random()); // Mezclar fallback también
+      productosAMostrar = productosAMostrar.concat(fallback.slice(0, 4 - productosAMostrar.length));
+    }
+
+    if (productosAMostrar.length === 0) {
+      rootRelacionados.style.display = 'none';
+      return;
+    } else {
+      rootRelacionados.style.display = 'block';
+    }
+
+    let html = `<section class="related-products-section">
+      <h2 style="font-size: 1.5rem; margin-bottom: 20px;">También te podría interesar</h2>
+      <div class="related-products-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">`;
+
+    productosAMostrar.forEach(producto => {
+      if (typeof crearHTMLProducto === 'function') {
+        html += crearHTMLProducto(producto);
+      } else {
+        // Fallback en caso extremadamente raro de que la función global no esté disponible
+        let imgSrc = typeof obtenerImgProducto === 'function' ? obtenerImgProducto(producto) : (producto.imagen || 'assets/img/placeholder.webp');
+        html += `<div class="producto-card" onclick="irADetalle('${producto.codigo.replace(/'/g, "\\'")}')" style="cursor: pointer; padding: 10px; border: 1px solid #eee; border-radius: 8px; text-align: center;">
+          <img src="${imgSrc}" style="width: 100%; height: 180px; object-fit: contain;">
+          <h3 style="font-size: 0.9rem; margin-top: 10px;">${producto.Nombre || 'Producto'}</h3>
+        </div>`;
+      }
+    });
+
+    html += `</div></section>`;
+    rootRelacionados.innerHTML = html;
+  } catch (e) {
+    console.error("Error cargando productos relacionados:", e);
+  }
+}
