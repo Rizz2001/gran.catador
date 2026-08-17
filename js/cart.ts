@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * cart.js - Lógica del carrito de compras y checkout
  */
@@ -19,8 +20,8 @@ function guardarCarritoLS() {
  * @param {string} nombreBase - Nombre del producto SIN sufijo (UNIDAD/CAJA).
  * @returns {{ prodObj: Object|null, stockDisponible: number, unidadesEnCarrito: number, unidadesRestantes: number, unidadesPorCaja: number }}
  */
-function calcularStockRestante(nombreBase) {
-    const prodObj = appState.inventario.find(x => x.Nombre === nombreBase);
+function calcularStockRestante(nombreBase: any) {
+    const prodObj = appState.inventario.find(( x: any ) => x.Nombre === nombreBase);
 
     if (!prodObj) {
         return { prodObj: null, stockDisponible: 999, unidadesEnCarrito: 0, unidadesRestantes: 999, unidadesPorCaja: 12 };
@@ -49,7 +50,7 @@ function calcularStockRestante(nombreBase) {
  * @param {boolean} esCaja - True si se intenta agregar una caja completa.
  * @returns {boolean}
  */
-function tieneStockSuficiente(nombreBase, esCaja) {
+function tieneStockSuficiente(nombreBase: any, esCaja: any) {
     const { prodObj, stockDisponible, unidadesEnCarrito, unidadesRestantes, unidadesPorCaja } =
         calcularStockRestante(nombreBase);
 
@@ -90,7 +91,7 @@ function tieneStockSuficiente(nombreBase, esCaja) {
  * Muestra un toast de error con título y detalle.
  * Si el toast simple ya existe, lo reemplaza con uno más rico.
  */
-function mostrarToastError(titulo, detalle) {
+function mostrarToastError(titulo: any, detalle: any) {
     const cont = document.getElementById('toast-container');
     if (!cont) { mostrarToast(titulo); return; }
 
@@ -100,7 +101,7 @@ function mostrarToastError(titulo, detalle) {
 
     const t = document.createElement('div');
     t.className = 'toast toast-error';
-    t.style.cssText = [
+    (<HTMLElement>t)?.style?.cssText = [
         'background: linear-gradient(135deg, #ff4b4b, #c0392b)',
         'border-left: 4px solid #ff1a1a',
         'min-width: 240px',
@@ -118,7 +119,7 @@ function mostrarToastError(titulo, detalle) {
 }
 
 /** Anima un producto volando hacia el icono del carrito */
-function animarAlCarrito(btnElement, imgSrc) {
+function animarAlCarrito(btnElement: any, imgSrc: any) {
     if (!btnElement || !imgSrc) return;
 
     // Buscar el icono del carrito activo (header en PC, nav en móvil)
@@ -138,27 +139,27 @@ function animarAlCarrito(btnElement, imgSrc) {
 
     flyingImg.src = imgSrc;
     flyingImg.className = 'flying-img';
-    flyingImg.style.left = `${btnRect.left}px`;
-    flyingImg.style.top = `${btnRect.top}px`;
+    (<HTMLElement>flyingImg)?.style?.left = `${btnRect.left}px`;
+    (<HTMLElement>flyingImg)?.style?.top = `${btnRect.top}px`;
     document.body.appendChild(flyingImg);
 
     setTimeout(() => {
-        flyingImg.style.left = `${cartRect.left + (cartRect.width / 2) - 7.5}px`;
-        flyingImg.style.top = `${cartRect.top + (cartRect.height / 2) - 7.5}px`;
-        flyingImg.style.width = '15px';
-        flyingImg.style.height = '15px';
-        flyingImg.style.opacity = '0.3';
+        (<HTMLElement>flyingImg)?.style?.left = `${cartRect.left + (cartRect.width / 2) - 7.5}px`;
+        (<HTMLElement>flyingImg)?.style?.top = `${cartRect.top + (cartRect.height / 2) - 7.5}px`;
+        (<HTMLElement>flyingImg)?.style?.width = '15px';
+        (<HTMLElement>flyingImg)?.style?.height = '15px';
+        (<HTMLElement>flyingImg)?.style?.opacity = '0.3';
     }, 10);
 
     setTimeout(() => {
         flyingImg.remove();
-        cartIcon.style.transform = 'scale(1.2)';
-        setTimeout(() => cartIcon.style.transform = 'scale(1)', 200);
+        (<HTMLElement>cartIcon)?.style?.transform = 'scale(1.2)';
+        setTimeout(() => (<HTMLElement>cartIcon)?.style?.transform = 'scale(1)', 200);
     }, 600);
 }
 
 /** Añade un producto al estado del carrito y lanza efectos visuales */
-function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = '', esCaja = false) {
+function agregarAlCarrito(nombre: any, precio: any, btnElement: any, isCross = false, imgSrc = '', esCaja = false) {
     // --- VALIDACIÓN HORARIO EN TIEMPO REAL ---
     try {
         let d = new Date();
@@ -191,7 +192,7 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = 
     let nombreFinal = esCaja ? `${nombre} (CAJA)` : `${nombre} (UNIDAD)`;
 
     // Buscar el código para guardar la imagen en el carrito
-    let prodObj = appState.inventario.find(x => x.Nombre === nombre);
+    let prodObj = appState.inventario.find(( x: any ) => x.Nombre === nombre);
 
     if (appState.carrito[nombreFinal]) {
         appState.carrito[nombreFinal].cantidad++;
@@ -218,12 +219,12 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = 
     if (btnElement) {
         let iconoOriginal = btnElement.innerHTML;
         btnElement.innerHTML = '<i class="fa-solid fa-check"></i>';
-        btnElement.style.background = "#fff";
-        btnElement.style.color = "var(--verde-btn)";
+        (<HTMLElement>btnElement)?.style?.background = "#fff";
+        (<HTMLElement>btnElement)?.style?.color = "var(--verde-btn)";
 
         // --- NUEVO: Texto de confirmación "¡Agregado al carrito!" debajo del botón ---
         let parent = btnElement.parentElement;
-        parent.style.position = 'relative'; // Convertir al padre en el punto de anclaje
+        (<HTMLElement>parent)?.style?.position = 'relative'; // Convertir al padre en el punto de anclaje
 
         // Limpiar mensaje anterior si el usuario hace clics muy rápidos
         let oldMsg = parent.querySelector('.cart-msg-toast');
@@ -232,43 +233,43 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = 
         let msgConf = document.createElement('div');
         msgConf.className = 'cart-msg-toast';
         msgConf.innerText = "¡Agregado al carrito!";
-        msgConf.style.position = 'absolute';
-        msgConf.style.background = 'var(--color-success, #10B981)';
-        msgConf.style.color = 'white';
-        msgConf.style.fontSize = '10px';
-        msgConf.style.fontWeight = '700';
-        msgConf.style.padding = '4px 8px';
-        msgConf.style.borderRadius = '6px';
-        msgConf.style.whiteSpace = 'nowrap';
-        msgConf.style.pointerEvents = 'none'; // Para que no bloquee clics accidentales
-        msgConf.style.zIndex = '100';
-        msgConf.style.opacity = '0';
-        msgConf.style.transform = 'translateY(-5px)';
-        msgConf.style.transition = 'all 0.3s ease';
-        msgConf.style.boxShadow = 'var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.1))';
+        (<HTMLElement>msgConf)?.style?.position = 'absolute';
+        (<HTMLElement>msgConf)?.style?.background = 'var(--color-success, #10B981)';
+        (<HTMLElement>msgConf)?.style?.color = 'white';
+        (<HTMLElement>msgConf)?.style?.fontSize = '10px';
+        (<HTMLElement>msgConf)?.style?.fontWeight = '700';
+        (<HTMLElement>msgConf)?.style?.padding = '4px 8px';
+        (<HTMLElement>msgConf)?.style?.borderRadius = '6px';
+        (<HTMLElement>msgConf)?.style?.whiteSpace = 'nowrap';
+        (<HTMLElement>msgConf)?.style?.pointerEvents = 'none'; // Para que no bloquee clics accidentales
+        (<HTMLElement>msgConf)?.style?.zIndex = '100';
+        (<HTMLElement>msgConf)?.style?.opacity = '0';
+        (<HTMLElement>msgConf)?.style?.transform = 'translateY(-5px)';
+        (<HTMLElement>msgConf)?.style?.transition = 'all 0.3s ease';
+        (<HTMLElement>msgConf)?.style?.boxShadow = 'var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.1))';
 
         // Posicionamiento dinámico: A la derecha y justo debajo del botón
-        msgConf.style.right = '0';
-        msgConf.style.top = (btnElement.offsetTop + btnElement.offsetHeight + 6) + 'px';
+        (<HTMLElement>msgConf)?.style?.right = '0';
+        (<HTMLElement>msgConf)?.style?.top = (btnElement.offsetTop + btnElement.offsetHeight + 6) + 'px';
 
         parent.appendChild(msgConf);
 
         // Desencadenar animación de entrada fluida
         requestAnimationFrame(() => {
-            msgConf.style.opacity = '1';
-            msgConf.style.transform = 'translateY(0)';
+            (<HTMLElement>msgConf)?.style?.opacity = '1';
+            (<HTMLElement>msgConf)?.style?.transform = 'translateY(0)';
         });
 
         setTimeout(() => {
             btnElement.innerHTML = iconoOriginal;
-            btnElement.style.background = esCaja ? "var(--dorado)" : "var(--verde-btn)";
-            btnElement.style.color = esCaja ? "black" : "#fff";
+            (<HTMLElement>btnElement)?.style?.background = esCaja ? "var(--dorado)" : "var(--verde-btn)";
+            (<HTMLElement>btnElement)?.style?.color = esCaja ? "black" : "#fff";
         }, 500);
 
         // Desaparecer y remover del código luego de 2 segundos
         setTimeout(() => {
-            msgConf.style.opacity = '0';
-            msgConf.style.transform = 'translateY(-5px)';
+            (<HTMLElement>msgConf)?.style?.opacity = '0';
+            (<HTMLElement>msgConf)?.style?.transform = 'translateY(-5px)';
             setTimeout(() => msgConf.remove(), 300);
         }, 2000);
     }
@@ -277,7 +278,7 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = 
     if (!isCross && !esCaja && prodObj) {
         let catMayus = (prodObj.Cat || '').toUpperCase();
         let activadoresCrossSell = ["RON", "WHISKY", "VODKA", "GINEBRA", "LICOR", "TEQUILA"];
-        if (activadoresCrossSell.some(keyword => catMayus.includes(keyword))) {
+        if (activadoresCrossSell.some(( keyword: any ) => catMayus.includes(keyword))) {
             sugerirAcompañante();
         }
     }
@@ -288,9 +289,9 @@ function sugerirAcompañante() {
     let sugerencias = [];
 
     if (appState.codigosRecomendados && appState.codigosRecomendados.length > 0) {
-        sugerencias = (appState.inventario || []).filter(p => appState.codigosRecomendados.includes(p.codigo) && p.StockNum > 0).slice(0, 3);
+        sugerencias = (appState.inventario || []).filter(( p: any ) => appState.codigosRecomendados.includes(p.codigo) && p.StockNum > 0).slice(0, 3);
     } else {
-        sugerencias = (appState.inventario || []).filter(p => (p.Nombre.includes("HIELO") || p.Nombre.includes("COLA") || p.Nombre.includes("REFRESCO")) && p.StockNum > 0).slice(0, 3);
+        sugerencias = (appState.inventario || []).filter(( p: any ) => (p.Nombre.includes("HIELO") || p.Nombre.includes("COLA") || p.Nombre.includes("REFRESCO")) && p.StockNum > 0).slice(0, 3);
     }
 
     if (sugerencias.length > 0) {
@@ -298,7 +299,7 @@ function sugerirAcompañante() {
         let modal = document.getElementById('modal-cross-sell');
 
         if (cont && modal) {
-            cont.innerHTML = sugerencias.map(p => {
+            cont.innerHTML = sugerencias.map(( p: any ) => {
                 let nombreB64 = codificarNombre(p.Nombre);
                 let imgSrc = obtenerImgProducto(p);
                 let attempts = p.ImagenUrl ? 0 : 1;
@@ -311,14 +312,14 @@ function sugerirAcompañante() {
                     </div>`;
             }).join('');
 
-            modal.style.display = 'flex';
+            (<HTMLElement>modal)?.style?.display = 'flex';
         }
     }
 }
 
 function cerrarCrossSell() {
     let modal = document.getElementById('modal-cross-sell');
-    if (modal) modal.style.display = 'none';
+    if (modal) (<HTMLElement>modal)?.style?.display = 'none';
 }
 
 function actualizarCartCount() {
@@ -355,13 +356,13 @@ function abrirCarrito() {
     window.location.href = 'carrito/';
 }
 
-function repetirPedido(index) {
-    let hist = JSON.parse(safeGetItem('gc_historial')) || [];
+function repetirPedido(index: any) {
+    let hist = JSON.parse((safeGetItem('gc_historial') || '')) || [];
     let ped = hist[index];
     if (!ped) return;
 
     appState.carrito = {};
-    ped.items.forEach(i => {
+    ped.items.forEach(( i: any ) => {
         appState.carrito[i.nombre] = { precio: i.precio, cantidad: i.cantidad, codigo: i.codigo || '', categoria: i.categoria || '' };
     });
 
@@ -391,11 +392,11 @@ function renderizarCarrito() {
                 <p>Agrega tus favoritos y continúa tu pedido rápido por WhatsApp.</p>
                 <button onclick="window.location.href='../index.html'" class="btn-checkout-primary">Volver a la tienda</button>
             </div>`;
-        document.getElementById('checkout-sections').style.display = 'none';
+        document.getElementById('checkout-sections')?.style.display = 'none';
         return;
     }
 
-    document.getElementById('checkout-sections').style.display = 'block';
+    document.getElementById('checkout-sections')?.style.display = 'block';
 
     let renderHTML = '';
     for (let nombre in appState.carrito) {
@@ -407,7 +408,7 @@ function renderizarCarrito() {
         appState.totalCarrito += subTotalItem;
         appState.totalCarritoBs += subTotalItemBs;
 
-        let prodObj = appState.inventario.find(x => x.codigo === item.codigo);
+        let prodObj = appState.inventario.find(( x: any ) => x.codigo === item.codigo);
         let imgSrc = obtenerImgProducto(prodObj || { codigo: item.codigo });
         let attempts = (prodObj && prodObj.ImagenUrl) ? 0 : 1;
         let imgInnerHTML = item.codigo
@@ -472,15 +473,15 @@ function renderizarCarrito() {
     appState.totalCarrito = parseFloat(appState.totalCarrito.toFixed(2));
     appState.totalCarritoBs = parseFloat(appState.totalCarritoBs.toFixed(2));
     
-    document.getElementById('totalUsdModal').innerText = `$${appState.totalCarrito.toFixed(2)}`;
-    document.getElementById('totalBsModal').innerText = `${appState.totalCarritoBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
+    document.getElementById('totalUsdModal')?.innerText = `$${appState.totalCarrito.toFixed(2)}`;
+    document.getElementById('totalBsModal')?.innerText = `${appState.totalCarritoBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
     calcularVuelto();
     
     // Asegurar que siempre se inicie en el Paso 1 al abrir o refrescar el carrito
     setCheckoutStep(1);
 }
 
-function cambiarCant(n, delta) {
+function cambiarCant(n: any, delta: any) {
     if (delta > 0) {
         // --- VALIDACIÓN HORARIO EN TIEMPO REAL ---
         try {
@@ -535,16 +536,16 @@ function toggleDireccion() {
     let btnMap = document.getElementById('btnMap');
 
     if (met === 'Delivery') {
-        if (dirInput) dirInput.style.display = 'block';
-        if (btnGeo) btnGeo.style.display = 'block';
-        if (btnMap) btnMap.style.display = 'none';
-        if (dirInput && safeGetItem('gc_direccion') && !dirInput.value) {
-            dirInput.value = safeGetItem('gc_direccion');
+        if (dirInput) (<HTMLElement>dirInput)?.style?.display = 'block';
+        if (btnGeo) (<HTMLElement>btnGeo)?.style?.display = 'block';
+        if (btnMap) (<HTMLElement>btnMap)?.style?.display = 'none';
+        if (dirInput && (safeGetItem('gc_direccion') || '') && !dirInput.value) {
+            dirInput.value = (safeGetItem('gc_direccion') || '');
         }
     } else {
-        if (dirInput) dirInput.style.display = 'none';
-        if (btnGeo) btnGeo.style.display = 'none';
-        if (btnMap) btnMap.style.display = 'block';
+        if (dirInput) (<HTMLElement>dirInput)?.style?.display = 'none';
+        if (btnGeo) (<HTMLElement>btnGeo)?.style?.display = 'none';
+        if (btnMap) (<HTMLElement>btnMap)?.style?.display = 'block';
     }
 }
 
@@ -583,27 +584,27 @@ function actualizarMetodoPago() {
     let val = radioElem ? radioElem.value : (selectElem ? selectElem.value : 'Efectivo');
 
     let boxE = document.getElementById('box-efectivo');
-    if (boxE) boxE.style.display = (val === 'Efectivo') ? 'block' : 'none';
+    if (boxE) (<HTMLElement>boxE)?.style?.display = (val === 'Efectivo') ? 'block' : 'none';
 
     let boxPm = document.getElementById('box-pagomovil');
-    if (boxPm) boxPm.style.display = (val === 'Pago Movil' || val === 'PagoMovil') ? 'block' : 'none';
+    if (boxPm) (<HTMLElement>boxPm)?.style?.display = (val === 'Pago Movil' || val === 'PagoMovil') ? 'block' : 'none';
 
     let boxZ = document.getElementById('box-zelle');
-    if (boxZ) boxZ.style.display = (val === 'Zelle') ? 'block' : 'none';
+    if (boxZ) (<HTMLElement>boxZ)?.style?.display = (val === 'Zelle') ? 'block' : 'none';
 }
 
 function calcularVuelto() {
-    let pago = parseFloat(document.getElementById('montoPago').value) || 0;
+    let pago = parseFloat((<HTMLInputElement>document.getElementById('montoPago'))?.value) || 0;
     let res = document.getElementById('res-vuelto');
 
     if (pago > 0 && pago > appState.totalCarrito) {
         let vUsd = parseFloat((pago - appState.totalCarrito).toFixed(2));
         let vBs = parseFloat((vUsd * appState.tasaOficial).toFixed(2));
-        res.style.display = 'block';
-        res.style.color = 'var(--verde-btn)';
+        (<HTMLElement>res)?.style?.display = 'block';
+        (<HTMLElement>res)?.style?.color = 'var(--verde-btn)';
         res.innerHTML = `Vuelto: $${vUsd.toFixed(2)} / ${vBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
     } else {
-        res.style.display = 'none';
+        (<HTMLElement>res)?.style?.display = 'none';
     }
 }
 
@@ -613,9 +614,9 @@ function enviarPedido() {
     if (!appState.isTiendaAbierta) return alert("Lo sentimos, Gran Catador está cerrado en este momento.");
 
     // Validación de datos de perfil obligatorios
-    let nombreUser = (safeGetItem('gc_nombre') || '').trim();
-    let cedulaUser = (safeGetItem('gc_cedula') || '').trim();
-    let telefonoUser = (safeGetItem('gc_telefono') || '').trim();
+    let nombreUser = ((safeGetItem('gc_nombre') || '') || '').trim();
+    let cedulaUser = ((safeGetItem('gc_cedula') || '') || '').trim();
+    let telefonoUser = ((safeGetItem('gc_telefono') || '') || '').trim();
 
     if (!nombreUser || !cedulaUser || !telefonoUser) {
         alert("⚠️ Datos incompletos.\nPor favor, completa tu Nombre, Cédula y Teléfono en tu perfil antes de hacer el pedido.");
@@ -638,14 +639,14 @@ function enviarPedido() {
     }
 
     // Generar registro histórico del pedido
-    let historial = JSON.parse(safeGetItem('gc_historial')) || [];
+    let historial = JSON.parse((safeGetItem('gc_historial') || '')) || [];
     let fechaDate = new Date();
     let fechaStr = fechaDate.toLocaleDateString('es-VE') + " - " + fechaDate.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
 
     let nuevoPedido = {
         fecha: fechaStr,
         total: appState.totalCarrito,
-        items: Object.keys(appState.carrito).map(k => ({
+        items: Object.keys(appState.carrito).map(( k: any ) => ({
             nombre: k,
             precio: appState.carrito[k].precio,
             cantidad: appState.carrito[k].cantidad,
@@ -671,13 +672,13 @@ function enviarPedido() {
     msg += `📦 *Entrega:* ${entrega}\n`;
 
     if (entrega === 'Delivery') {
-        let dir = document.getElementById('direccionDelivery').value.trim();
+        let dir = (<HTMLInputElement>document.getElementById('direccionDelivery'))?.value.trim();
         if (!dir) return alert("Por favor, ingresa tu dirección para el delivery.");
         msg += `📍 *Dirección:* ${dir}\n`;
-        if (!safeGetItem('gc_direccion')) safeSetItem('gc_direccion', dir);
+        if (!(safeGetItem('gc_direccion') || '')) safeSetItem('gc_direccion', dir);
     }
 
-    let notas = document.getElementById('notasPedido').value.trim();
+    let notas = (<HTMLInputElement>document.getElementById('notasPedido'))?.value.trim();
     if (notas) msg += `📝 *Notas:* ${notas}\n`;
 
     let selectMetodo = document.getElementById('metodoPagoSelect');
@@ -686,16 +687,16 @@ function enviarPedido() {
     msg += `💳 *Método de Pago:* ${metodo}\n`;
 
     if (metodo === 'Efectivo') {
-        let pago = parseFloat(document.getElementById('montoPago').value) || 0;
+        let pago = parseFloat((<HTMLInputElement>document.getElementById('montoPago'))?.value) || 0;
         if (pago > appState.totalCarrito) {
             msg += `💵 _Paga con $${pago.toFixed(2)}_\n🟢 _Requiere vuelto: $${(pago - appState.totalCarrito).toFixed(2)}_\n`;
         }
     } else {
         if (metodo === 'Pago Movil' || metodo === 'PagoMovil') {
-            let refPm = document.getElementById('refPagoMovil') ? document.getElementById('refPagoMovil').value.trim() : '';
+            let refPm = document.getElementById('refPagoMovil') ? (<HTMLInputElement>document.getElementById('refPagoMovil'))?.value.trim() : '';
             if (refPm) msg += `🧾 *Referencia:* ${refPm}\n`;
         } else if (metodo === 'Zelle') {
-            let refZelle = document.getElementById('refZelle') ? document.getElementById('refZelle').value.trim() : '';
+            let refZelle = document.getElementById('refZelle') ? (<HTMLInputElement>document.getElementById('refZelle'))?.value.trim() : '';
             if (refZelle) msg += `👤 *Titular Zelle:* ${refZelle}\n`;
         }
 
@@ -724,21 +725,21 @@ function enviarPedido() {
     let originalHTML = btnEnviar.innerHTML;
     btnEnviar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparando WhatsApp...';
     btnEnviar.classList.add('disabled');
-    btnEnviar.disabled = true;
+    (<HTMLButtonElement>btnEnviar)?.disabled = true;
 
     setTimeout(() => {
         btnEnviar.innerHTML = originalHTML;
         btnEnviar.classList.remove('disabled');
-        btnEnviar.disabled = false;
+        (<HTMLButtonElement>btnEnviar)?.disabled = false;
     }, 800);
 }
 
 /** Helpers para base64 que se enlazan desde HTML de forma segura */
-function agregarAlCarritoB64(b64, p, btn, c = false, img = '', esCaja = false) {
+function agregarAlCarritoB64(b64: any, p: any, btn: any, c = false, img = '', esCaja = false) {
     agregarAlCarrito(decodificarNombre(b64), p, btn, c, img, esCaja);
 }
 
-function cambiarCantB64(b64, d) {
+function cambiarCantB64(b64: any, d: any) {
     cambiarCant(decodificarNombre(b64), d);
 }
 
@@ -746,7 +747,7 @@ function cambiarCantB64(b64, d) {
  * Maneja el flujo de checkout en pasos (Local State)
  * @param {number} step - Paso actual (1, 2, 3, 4)
  */
-function setCheckoutStep(step) {
+function setCheckoutStep(step: any) {
     appState.checkoutStep = step;
     
     let step1Summary = document.getElementById('step-1-summary');
@@ -772,30 +773,30 @@ function setCheckoutStep(step) {
     }
 
     // Ocultar todos con animación (si se usa CSS para esto)
-    step1Summary.style.display = 'none';
-    step2Delivery.style.display = 'none';
-    step3Payment.style.display = 'none';
-    step4Confirm.style.display = 'none';
+    (<HTMLElement>step1Summary)?.style?.display = 'none';
+    (<HTMLElement>step2Delivery)?.style?.display = 'none';
+    (<HTMLElement>step3Payment)?.style?.display = 'none';
+    (<HTMLElement>step4Confirm)?.style?.display = 'none';
 
     if (step === 1) {
-        step1Summary.style.display = 'block';
+        (<HTMLElement>step1Summary)?.style?.display = 'block';
     } else if (step === 2) {
-        step2Delivery.style.display = 'block';
+        (<HTMLElement>step2Delivery)?.style?.display = 'block';
     } else if (step === 3) {
-        step3Payment.style.display = 'block';
+        (<HTMLElement>step3Payment)?.style?.display = 'block';
         
         let totalUsdEl3 = document.getElementById('totalUsdStep3');
         let totalBsEl3 = document.getElementById('totalBsStep3');
-        if (totalUsdEl3) totalUsdEl3.innerText = document.getElementById('totalUsdModal').innerText;
-        if (totalBsEl3) totalBsEl3.innerText = document.getElementById('totalBsModal').innerText;
+        if (totalUsdEl3) totalUsdEl3.innerText = document.getElementById('totalUsdModal')?.innerText;
+        if (totalBsEl3) totalBsEl3.innerText = document.getElementById('totalBsModal')?.innerText;
     } else if (step === 4) {
-        step4Confirm.style.display = 'block';
+        (<HTMLElement>step4Confirm)?.style?.display = 'block';
         
         // Actualizar totales en la confirmación final por seguridad
         let totalUsdEl = document.getElementById('totalUsdModalFinal');
         let totalBsEl = document.getElementById('totalBsModalFinal');
-        if (totalUsdEl) totalUsdEl.innerText = document.getElementById('totalUsdModal').innerText;
-        if (totalBsEl) totalBsEl.innerText = document.getElementById('totalBsModal').innerText;
+        if (totalUsdEl) totalUsdEl.innerText = document.getElementById('totalUsdModal')?.innerText;
+        if (totalBsEl) totalBsEl.innerText = document.getElementById('totalBsModal')?.innerText;
     }
 
     // Control responsive de la columna izquierda (ocultar solo en móvil para pasos 2, 3 y 4)
@@ -813,3 +814,28 @@ function setCheckoutStep(step) {
 document.addEventListener('DOMContentLoaded', () => {
     actualizarCartCount();
 });
+export {};
+
+// Exponer funciones al scope global para que los botones en HTML funcionen
+(window as any).guardarCarritoLS = guardarCarritoLS;
+(window as any).calcularStockRestante = calcularStockRestante;
+(window as any).tieneStockSuficiente = tieneStockSuficiente;
+(window as any).mostrarToastError = mostrarToastError;
+(window as any).animarAlCarrito = animarAlCarrito;
+(window as any).agregarAlCarrito = agregarAlCarrito;
+(window as any).cerrarCrossSell = cerrarCrossSell;
+(window as any).actualizarCartCount = actualizarCartCount;
+(window as any).vaciarCarrito = vaciarCarrito;
+(window as any).abrirCarrito = abrirCarrito;
+(window as any).repetirPedido = repetirPedido;
+(window as any).renderizarCarrito = renderizarCarrito;
+(window as any).cambiarCant = cambiarCant;
+(window as any).toggleDireccion = toggleDireccion;
+(window as any).obtenerUbicacion = obtenerUbicacion;
+(window as any).abrirMapa = abrirMapa;
+(window as any).actualizarMetodoPago = actualizarMetodoPago;
+(window as any).calcularVuelto = calcularVuelto;
+(window as any).enviarPedido = enviarPedido;
+(window as any).agregarAlCarritoB64 = agregarAlCarritoB64;
+(window as any).cambiarCantB64 = cambiarCantB64;
+(window as any).setCheckoutStep = setCheckoutStep;

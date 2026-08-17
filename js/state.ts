@@ -9,12 +9,12 @@ window.appState = {
     productosFiltrados: [],
 
     // Datos del Usuario
-    carrito: JSON.parse(safeGetItem('gc_cart')) || {},
+    carrito: JSON.parse(safeGetItem('gc_cart') || 'null') || {},
     totalCarrito: 0,
-    favoritos: JSON.parse(safeGetItem('gc_favs')) || [],
+    favoritos: JSON.parse(safeGetItem('gc_favs') || 'null') || [],
 
     // Configuración y Negocio
-    tasaOficial: parseFloat(safeGetItem('tasaDolar')) || 0,
+    tasaOficial: parseFloat(safeGetItem('tasaDolar') || '0') || 0,
     isTiendaAbierta: true,
 
     // Estado de la Interfaz (UI)
