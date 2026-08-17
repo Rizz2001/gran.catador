@@ -1,6 +1,5 @@
-// @ts-nocheck
 /**
- * cart.js - Lógica del carrito de compras y checkout
+ * cart.ts - Lógica del carrito de compras y checkout
  */
 
 /** Guarda el estado actual del carrito en LocalStorage */
@@ -28,7 +27,7 @@ function calcularStockRestante(nombreBase: any) {
     }
 
     const stockDisponible = prodObj.StockNum;
-    const unidadesPorCaja = prodObj.CantidadGrup > 0 ? prodObj.CantidadGrup : 12;
+    const unidadesPorCaja = (prodObj.CantidadGrup && prodObj.CantidadGrup > 0) ? prodObj.CantidadGrup : 12;
 
     // Stock ilimitado: devolver directamente sin calcular carrito
     if (stockDisponible >= 999) {
@@ -196,12 +195,15 @@ function agregarAlCarrito(nombre: any, precio: any, btnElement: any, isCross = f
 
     if (appState.carrito[nombreFinal]) {
         appState.carrito[nombreFinal].cantidad++;
+        appState.carrito[nombreFinal].subtotal = appState.carrito[nombreFinal].cantidad * appState.carrito[nombreFinal].precio;
     } else {
         appState.carrito[nombreFinal] = {
             precio: precio,
             cantidad: 1,
+            subtotal: precio,
             codigo: prodObj ? prodObj.codigo : '',
-            categoria: prodObj ? prodObj.Cat : ''
+            categoria: prodObj ? (prodObj.Grupo || prodObj.Subgrupo) : '',
+            esCaja: esCaja
         };
     }
 
@@ -289,14 +291,14 @@ function sugerirAcompañante() {
     let sugerencias = [];
 
     if (appState.codigosRecomendados && appState.codigosRecomendados.length > 0) {
-        sugerencias = (appState.inventario || []).filter(( p: any ) => appState.codigosRecomendados.includes(p.codigo) && p.StockNum > 0).slice(0, 3);
+        sugerencias = (appState.inventario || []).filter(( p: any ) => appState.codigosRecomendados!.includes(p.codigo) && p.StockNum > 0).slice(0, 3);
     } else {
         sugerencias = (appState.inventario || []).filter(( p: any ) => (p.Nombre.includes("HIELO") || p.Nombre.includes("COLA") || p.Nombre.includes("REFRESCO")) && p.StockNum > 0).slice(0, 3);
     }
 
     if (sugerencias.length > 0) {
-        let cont = document.getElementById('cross-sell-items');
-        let modal = document.getElementById('modal-cross-sell');
+        let cont = document.getElementById('cross-sell-items') as HTMLElement | null;
+        let modal = document.getElementById('modal-cross-sell') as HTMLElement | null;
 
         if (cont && modal) {
             cont.innerHTML = sugerencias.map(( p: any ) => {
@@ -318,8 +320,8 @@ function sugerirAcompañante() {
 }
 
 function cerrarCrossSell() {
-    let modal = document.getElementById('modal-cross-sell');
-    if (modal) (<HTMLElement>modal).style.display = 'none';
+    let modal = document.getElementById('modal-cross-sell') as HTMLElement | null;
+    if (modal) modal.style.display = 'none';
 }
 
 function actualizarCartCount() {
@@ -328,10 +330,10 @@ function actualizarCartCount() {
         totalItems += appState.carrito[key].cantidad;
     }
     const cartCountElem = document.getElementById('cart-count');
-    if (cartCountElem) cartCountElem.innerText = totalItems;
+    if (cartCountElem) cartCountElem.innerText = totalItems.toString();
     
     const bottomCartCountElem = document.getElementById('bottom-cart-count');
-    if (bottomCartCountElem) bottomCartCountElem.innerText = totalItems;
+    if (bottomCartCountElem) bottomCartCountElem.innerText = totalItems.toString();
 }
 
 function vaciarCarrito() {
@@ -356,14 +358,15 @@ function abrirCarrito() {
     window.location.href = 'carrito/';
 }
 
-function repetirPedido(index: any) {
-    let hist = JSON.parse((safeGetItem('gc_historial') || '')) || [];
+function repetirPedido(index: number) {
+    let histStr = safeGetItem('gc_historial');
+    let hist = histStr ? JSON.parse(histStr) : [];
     let ped = hist[index];
     if (!ped) return;
 
     appState.carrito = {};
     ped.items.forEach(( i: any ) => {
-        appState.carrito[i.nombre] = { precio: i.precio, cantidad: i.cantidad, codigo: i.codigo || '', categoria: i.categoria || '' };
+        appState.carrito[i.nombre] = { precio: i.precio, cantidad: i.cantidad, subtotal: i.precio * i.cantidad, codigo: i.codigo || '', categoria: i.categoria || '' };
     });
 
     guardarCarritoLS();
@@ -392,11 +395,13 @@ function renderizarCarrito() {
                 <p>Agrega tus favoritos y continúa tu pedido rápido por WhatsApp.</p>
                 <button onclick="window.location.href='../index.html'" class="btn-checkout-primary">Volver a la tienda</button>
             </div>`;
-        document.getElementById('checkout-sections').style.display = 'none';
+        let checkoutSections = document.getElementById('checkout-sections');
+        if (checkoutSections) checkoutSections.style.display = 'none';
         return;
     }
 
-    document.getElementById('checkout-sections').style.display = 'block';
+    let checkoutSections = document.getElementById('checkout-sections');
+    if (checkoutSections) checkoutSections.style.display = 'block';
 
     let renderHTML = '';
     for (let nombre in appState.carrito) {
@@ -473,8 +478,8 @@ function renderizarCarrito() {
     appState.totalCarrito = parseFloat(appState.totalCarrito.toFixed(2));
     appState.totalCarritoBs = parseFloat(appState.totalCarritoBs.toFixed(2));
     
-    document.getElementById('totalUsdModal').innerText = `$${appState.totalCarrito.toFixed(2)}`;
-    document.getElementById('totalBsModal').innerText = `${appState.totalCarritoBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
+    document.getElementById('totalUsdModal')!.innerText = `$${appState.totalCarrito.toFixed(2)}`;
+    document.getElementById('totalBsModal')!.innerText = `${appState.totalCarritoBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
     calcularVuelto();
     
     // Asegurar que siempre se inicie en el Paso 1 al abrir o refrescar el carrito
@@ -527,7 +532,7 @@ function cambiarCant(n: any, delta: any) {
 }
 
 function toggleDireccion() {
-    let inputMetodo = document.querySelector('input[name="metodoEntrega"]:checked');
+    let inputMetodo = document.querySelector('input[name="metodoEntrega"]:checked') as HTMLInputElement | null;
     if (!inputMetodo) return; // Salir si el DOM no tiene el checkout (ej: en index.html)
     
     let met = inputMetodo.value;
@@ -539,8 +544,8 @@ function toggleDireccion() {
         if (dirInput) (<HTMLElement>dirInput).style.display = 'block';
         if (btnGeo) (<HTMLElement>btnGeo).style.display = 'block';
         if (btnMap) (<HTMLElement>btnMap).style.display = 'none';
-        if (dirInput && (safeGetItem('gc_direccion') || '') && !dirInput.value) {
-            dirInput.value = (safeGetItem('gc_direccion') || '');
+        if (dirInput && (safeGetItem('gc_direccion') || '') && !(dirInput as HTMLInputElement).value) {
+            (dirInput as HTMLInputElement).value = (safeGetItem('gc_direccion') || '');
         }
     } else {
         if (dirInput) (<HTMLElement>dirInput).style.display = 'none';
@@ -558,7 +563,7 @@ function obtenerUbicacion(inputId = 'direccionDelivery', btnId = 'btn-geo') {
 
         navigator.geolocation.getCurrentPosition(function (pos) {
             let link = `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
-            let input = document.getElementById(inputId);
+            let input = document.getElementById(inputId) as HTMLInputElement | null;
             if (input) input.value = (input.value ? input.value + ' - ' : '') + '📍 Ubicación GPS: ' + link;
             if (btn) {
                 btn.innerHTML = '<i class="fa-solid fa-check" style="color: #10B981;"></i>';
@@ -579,8 +584,8 @@ function abrirMapa() {
 
 function actualizarMetodoPago() {
     // Soporta tanto el <select> original como un grupo de botones tipo radio
-    let selectElem = document.getElementById('metodoPagoSelect');
-    let radioElem = document.querySelector('input[name="metodoPago"]:checked');
+    let selectElem = document.getElementById('metodoPagoSelect') as HTMLSelectElement | null;
+    let radioElem = document.querySelector('input[name="metodoPago"]:checked') as HTMLInputElement | null;
     let val = radioElem ? radioElem.value : (selectElem ? selectElem.value : 'Efectivo');
 
     let boxE = document.getElementById('box-efectivo');
@@ -602,7 +607,7 @@ function calcularVuelto() {
         let vBs = parseFloat((vUsd * appState.tasaOficial).toFixed(2));
         (<HTMLElement>res).style.display = 'block';
         (<HTMLElement>res).style.color = 'var(--verde-btn)';
-        res.innerHTML = `Vuelto: $${vUsd.toFixed(2)} / ${vBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
+        (<HTMLElement>res).innerHTML = `Vuelto: $${vUsd.toFixed(2)} / ${vBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
     } else {
         (<HTMLElement>res).style.display = 'none';
     }
@@ -668,7 +673,7 @@ function enviarPedido() {
     }
     msg += `--------------------------------\n`;
 
-    let entrega = document.querySelector('input[name="metodoEntrega"]:checked').value;
+    let entrega = (document.querySelector('input[name="metodoEntrega"]:checked') as HTMLInputElement).value;
     msg += `📦 *Entrega:* ${entrega}\n`;
 
     if (entrega === 'Delivery') {
@@ -681,8 +686,8 @@ function enviarPedido() {
     let notas = (<HTMLInputElement>document.getElementById('notasPedido'))?.value.trim();
     if (notas) msg += `📝 *Notas:* ${notas}\n`;
 
-    let selectMetodo = document.getElementById('metodoPagoSelect');
-    let radioMetodo = document.querySelector('input[name="metodoPago"]:checked');
+    let selectMetodo = document.getElementById('metodoPagoSelect') as HTMLSelectElement | null;
+    let radioMetodo = document.querySelector('input[name="metodoPago"]:checked') as HTMLInputElement | null;
     let metodo = radioMetodo ? radioMetodo.value : (selectMetodo ? selectMetodo.value : 'Efectivo');
     msg += `💳 *Método de Pago:* ${metodo}\n`;
 
@@ -703,7 +708,7 @@ function enviarPedido() {
         msg += `📎 _[Capture adjunto en el siguiente mensaje]_\n`;
     }
 
-    msg += `\n💰 *TOTAL A PAGAR: $${appState.totalCarrito.toFixed(2)}* / *${appState.totalCarritoBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs*\n💱 _(Tasa BCV: ${appState.tasaOficial.toFixed(2)} Bs)_`;
+    msg += `\n💰 *TOTAL A PAGAR: $${appState.totalCarrito.toFixed(2)}* / *${appState.totalCarritoBs!.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs*\n💱 _(Tasa BCV: ${appState.tasaOficial.toFixed(2)} Bs)_`;
 
     // Limpieza post-compra
     safeRemoveItem('gc_inv_time_v3');
@@ -722,14 +727,15 @@ function enviarPedido() {
 
     // Feedback visual en el botón antes de redirigir
     let btnEnviar = document.getElementById('btn-whatsapp');
+    if (!btnEnviar) return;
     let originalHTML = btnEnviar.innerHTML;
     btnEnviar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparando WhatsApp...';
     btnEnviar.classList.add('disabled');
     (<HTMLButtonElement>btnEnviar).disabled = true;
 
     setTimeout(() => {
-        btnEnviar.innerHTML = originalHTML;
-        btnEnviar.classList.remove('disabled');
+        btnEnviar!.innerHTML = originalHTML;
+        btnEnviar!.classList.remove('disabled');
         (<HTMLButtonElement>btnEnviar).disabled = false;
     }, 800);
 }
@@ -760,10 +766,10 @@ function setCheckoutStep(step: any) {
 
     if (step === 3) {
         // Validación de Delivery antes de pasar al método de pago
-        let radioEntrega = document.querySelector('input[name="metodoEntrega"]:checked');
+        let radioEntrega = document.querySelector('input[name="metodoEntrega"]:checked') as HTMLInputElement | null;
         let metodoEntrega = radioEntrega ? radioEntrega.value : 'Retiro';
         if (metodoEntrega === 'Delivery') {
-            let dir = document.getElementById('direccionDelivery');
+            let dir = document.getElementById('direccionDelivery') as HTMLInputElement | null;
             if (dir && !dir.value.trim()) {
                 alert("Por favor, ingresa tu dirección para el delivery antes de continuar.");
                 appState.checkoutStep = 2; // Revertir estado
@@ -787,16 +793,16 @@ function setCheckoutStep(step: any) {
         
         let totalUsdEl3 = document.getElementById('totalUsdStep3');
         let totalBsEl3 = document.getElementById('totalBsStep3');
-        if (totalUsdEl3) totalUsdEl3.innerText = document.getElementById('totalUsdModal')?.innerText;
-        if (totalBsEl3) totalBsEl3.innerText = document.getElementById('totalBsModal')?.innerText;
+        if (totalUsdEl3) totalUsdEl3.innerText = document.getElementById('totalUsdModal')?.innerText || '';
+        if (totalBsEl3) totalBsEl3.innerText = document.getElementById('totalBsModal')?.innerText || '';
     } else if (step === 4) {
         (<HTMLElement>step4Confirm).style.display = 'block';
         
         // Actualizar totales en la confirmación final por seguridad
         let totalUsdEl = document.getElementById('totalUsdModalFinal');
         let totalBsEl = document.getElementById('totalBsModalFinal');
-        if (totalUsdEl) totalUsdEl.innerText = document.getElementById('totalUsdModal')?.innerText;
-        if (totalBsEl) totalBsEl.innerText = document.getElementById('totalBsModal')?.innerText;
+        if (totalUsdEl) totalUsdEl.innerText = document.getElementById('totalUsdModal')?.innerText || '';
+        if (totalBsEl) totalBsEl.innerText = document.getElementById('totalBsModal')?.innerText || '';
     }
 
     // Control responsive de la columna izquierda (ocultar solo en móvil para pasos 2, 3 y 4)

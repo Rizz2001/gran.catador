@@ -21,6 +21,7 @@ export interface CartItem {
     codigo: string;
     nombre?: string;
     categoria?: string;
+    esCaja?: boolean;
 }
 
 export interface FiltrosState {
@@ -73,5 +74,6 @@ declare global {
         actualizarCarrito: () => void;
         tieneStockSuficiente: (n: string, c: boolean) => boolean;
         compararIDs: (a: any, b: any) => boolean;
+        isTiendaAbierta?: boolean;
     }
 }
