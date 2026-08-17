@@ -1,6 +1,5 @@
-class AppFooter extends HTMLElement {
-    connectedCallback() {
-        this.innerHTML = `
+const footerTemplate = document.createElement('template');
+footerTemplate.innerHTML = `
     <footer class="main-footer-new" role="contentinfo">
         <div class="container footer-container">
             
@@ -19,11 +18,11 @@ class AppFooter extends HTMLElement {
                 <div class="footer-col">
                     <h3>Accesos Rápidos</h3>
                     <ul>
-                        <li><a href="#" onclick="event.preventDefault(); window.location.href='index.html';"><i class="fa-solid fa-angle-right"></i> Inicio</a></li>
-                        <li><a href="#" onclick="event.preventDefault(); window.location.href='carrito/';"><i class="fa-solid fa-angle-right"></i> Mi Pedido</a></li>
-                        <li><a href="#" onclick="event.preventDefault(); abrirPerfil();"><i class="fa-solid fa-angle-right"></i> Mi Perfil / Ajustes</a></li>
-                        <li><a href="#" onclick="event.preventDefault(); abrirLegales();"><i class="fa-solid fa-angle-right"></i> Políticas y Privacidad</a></li>
-                        <li><a href="#" onclick="event.preventDefault(); abrirSoporteWhatsApp();"><i class="fa-solid fa-angle-right"></i> Soporte Técnico</a></li>
+                        <li><a href="#" class="footer-link-inicio"><i class="fa-solid fa-angle-right"></i> Inicio</a></li>
+                        <li><a href="#" class="footer-link-carrito"><i class="fa-solid fa-angle-right"></i> Mi Pedido</a></li>
+                        <li><a href="#" class="footer-link-perfil"><i class="fa-solid fa-angle-right"></i> Mi Perfil / Ajustes</a></li>
+                        <li><a href="#" class="footer-link-legales"><i class="fa-solid fa-angle-right"></i> Políticas y Privacidad</a></li>
+                        <li><a href="#" class="footer-link-soporte"><i class="fa-solid fa-angle-right"></i> Soporte Técnico</a></li>
                     </ul>
                 </div>
 
@@ -43,7 +42,20 @@ class AppFooter extends HTMLElement {
             <p>© 2026 Gran Catador C.A. Todos los derechos reservados.</p>
         </div>
     </footer>
-        `;
+`;
+
+class AppFooter extends HTMLElement {
+    connectedCallback() {
+        if (!this.hasChildNodes()) {
+            this.appendChild(footerTemplate.content.cloneNode(true));
+            
+            // Attach event listeners
+            this.querySelector('.footer-link-inicio').addEventListener('click', (e) => { e.preventDefault(); window.location.href='index.html'; });
+            this.querySelector('.footer-link-carrito').addEventListener('click', (e) => { e.preventDefault(); window.location.href='carrito/'; });
+            this.querySelector('.footer-link-perfil').addEventListener('click', (e) => { e.preventDefault(); if(typeof abrirPerfil === 'function') abrirPerfil(); });
+            this.querySelector('.footer-link-legales').addEventListener('click', (e) => { e.preventDefault(); if(typeof abrirLegales === 'function') abrirLegales(); });
+            this.querySelector('.footer-link-soporte').addEventListener('click', (e) => { e.preventDefault(); if(typeof abrirSoporteWhatsApp === 'function') abrirSoporteWhatsApp(); });
+        }
     }
 }
 customElements.define('app-footer', AppFooter);

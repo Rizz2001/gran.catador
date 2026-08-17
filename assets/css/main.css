@@ -2246,3 +2246,18 @@ app-bottom-nav,
 app-age-gate {
   display: contents;
 }
+
+/* ==========================================================================
+   UTILIDADES (Generadas en Auditoría)
+   ========================================================================== */
+.interactive-label {
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+.interactive-label:hover {
+    background: var(--color-border);
+}
+.accent-checkbox {
+    accent-color: var(--color-primary);
+    cursor: pointer;
+}

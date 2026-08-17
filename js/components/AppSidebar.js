@@ -1,8 +1,7 @@
-class AppSidebar extends HTMLElement {
-    connectedCallback() {
-        this.innerHTML = `
+const sidebarTemplate = document.createElement('template');
+sidebarTemplate.innerHTML = `
     <!-- Overlay para Menú Lateral -->
-    <div id="sidebar-overlay" class="sidebar-overlay" onclick="closeSidebar()"></div>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
     <!-- Menú Lateral (Sidebar) de Categorías -->
     <aside id="sidebar-menu" class="sidebar-menu" aria-label="Filtros y Categorías">
@@ -11,7 +10,7 @@ class AppSidebar extends HTMLElement {
                 <img src="logo.webp" alt="Logo Gran Catador">
                 <h3 class="sidebar-title">Gran Catador</h3>
             </div>
-            <button onclick="closeSidebar()" class="sidebar-close-btn" aria-label="Cerrar menú">
+            <button class="sidebar-close-btn" aria-label="Cerrar menú">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -26,7 +25,7 @@ class AppSidebar extends HTMLElement {
 
             <!-- Panel Secundario: Subgrupos -->
             <div id="subcategoria-section-main" class="sidebar-section drilldown-panel hidden-panel">
-                <button onclick="volverAGrupos()" class="sidebar-back-btn inner-back-btn" aria-label="Volver a Grupos">
+                <button class="sidebar-back-btn inner-back-btn" aria-label="Volver a Grupos">
                     <i class="fa-solid fa-chevron-left"></i> Volver a Grupos
                 </button>
                 <h4 class="sidebar-section-title" id="submenu-parent-title" style="margin-top: 15px;">Subgrupos</h4>
@@ -44,7 +43,18 @@ class AppSidebar extends HTMLElement {
             </a>
         </div>
     </aside>
-        `;
+`;
+
+class AppSidebar extends HTMLElement {
+    connectedCallback() {
+        if (!this.hasChildNodes()) {
+            this.appendChild(sidebarTemplate.content.cloneNode(true));
+            
+            // Attach event listeners
+            this.querySelector('#sidebar-overlay').addEventListener('click', () => { if(typeof closeSidebar === 'function') closeSidebar(); });
+            this.querySelector('.sidebar-close-btn').addEventListener('click', () => { if(typeof closeSidebar === 'function') closeSidebar(); });
+            this.querySelector('.sidebar-back-btn').addEventListener('click', () => { if(typeof volverAGrupos === 'function') volverAGrupos(); });
+        }
     }
 }
 customElements.define('app-sidebar', AppSidebar);
