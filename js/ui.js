@@ -567,9 +567,7 @@ async function cargarSubcategoriasAPI(nombreCategoria) {
     if (codGrupo) {
         try {
             const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy'
-                : (isLocalhost || window.location.hostname.includes('github.io')) ? 'https://gran-catador.pages.dev/api/proxy'
-                    : 'functions/api/proxy.php';
+            const proxyBaseUrl = (isLocalhost || window.location.hostname.includes('github.io')) ? 'https://gran-catador.pages.dev/api/proxy' : '/api/proxy';
             const res = await fetch(`${proxyBaseUrl}?endpoint=gruposinvsub/grupo/${encodeURIComponent(codGrupo)}`);
             if (res.ok) {
                 const data = await res.json();

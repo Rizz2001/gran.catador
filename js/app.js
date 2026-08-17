@@ -546,9 +546,7 @@ async function cargarInventarioDesdeAPI() {
     // si estamos en local usamos el proxy subido a Cloudflare,
     // de lo contrario (Laragon, XAMPP, cPanel, Hostinger) usamos el proxy en PHP.
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
-    const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy'
-        : (isLocalhost || window.location.hostname.includes('github.io')) ? 'https://gran-catador.pages.dev/api/proxy'
-            : 'functions/api/proxy.php';
+    const proxyBaseUrl = (isLocalhost || window.location.hostname.includes('github.io')) ? 'https://gran-catador.pages.dev/api/proxy' : '/api/proxy';
 
     updateApiProgress(10);
 
@@ -711,9 +709,7 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
     if (appState.gruposCargados && appState.gruposCargados.includes(codGrupo)) return false; // Ya fue cargado
 
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
-    const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy'
-        : (isLocalhost || window.location.hostname.includes('github.io')) ? 'https://gran-catador.pages.dev/api/proxy'
-            : 'functions/api/proxy.php';
+    const proxyBaseUrl = (isLocalhost || window.location.hostname.includes('github.io')) ? 'https://gran-catador.pages.dev/api/proxy' : '/api/proxy';
 
     try {
         const endpointUrl = `articulos/grupo/${encodeURIComponent(codGrupo)}`;
@@ -774,9 +770,7 @@ async function cargarProductosPorSubgrupo(codGrupo, codSubgrupo, nombreGrupo, no
     // Si ya estaba cacheado pero sin SubCatId (cargado a nivel de grupo), lo sobreescribimos.
 
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
-    const proxyBaseUrl = window.location.hostname.includes('pages.dev') ? '/api/proxy'
-        : isLocalhost ? 'https://gran-catador.pages.dev/api/proxy'
-            : 'functions/api/proxy.php';
+    const proxyBaseUrl = (isLocalhost || window.location.hostname.includes('github.io')) ? 'https://gran-catador.pages.dev/api/proxy' : '/api/proxy';
 
     // ─── CONSTRUCCIÓN CORRECTA DE LA URL ────────────────────────────────────────
     // El codSubgrupo va DENTRO del endpoint para que ambos proxys (PHP y Cloudflare)

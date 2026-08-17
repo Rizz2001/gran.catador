@@ -101,7 +101,7 @@ function mostrarToastError(titulo: any, detalle: any) {
 
     const t = document.createElement('div');
     t.className = 'toast toast-error';
-    (<HTMLElement>t)?.style?.cssText = [
+    (<HTMLElement>t).style.cssText = [
         'background: linear-gradient(135deg, #ff4b4b, #c0392b)',
         'border-left: 4px solid #ff1a1a',
         'min-width: 240px',
@@ -139,22 +139,22 @@ function animarAlCarrito(btnElement: any, imgSrc: any) {
 
     flyingImg.src = imgSrc;
     flyingImg.className = 'flying-img';
-    (<HTMLElement>flyingImg)?.style?.left = `${btnRect.left}px`;
-    (<HTMLElement>flyingImg)?.style?.top = `${btnRect.top}px`;
+    (<HTMLElement>flyingImg).style.left = `${btnRect.left}px`;
+    (<HTMLElement>flyingImg).style.top = `${btnRect.top}px`;
     document.body.appendChild(flyingImg);
 
     setTimeout(() => {
-        (<HTMLElement>flyingImg)?.style?.left = `${cartRect.left + (cartRect.width / 2) - 7.5}px`;
-        (<HTMLElement>flyingImg)?.style?.top = `${cartRect.top + (cartRect.height / 2) - 7.5}px`;
-        (<HTMLElement>flyingImg)?.style?.width = '15px';
-        (<HTMLElement>flyingImg)?.style?.height = '15px';
-        (<HTMLElement>flyingImg)?.style?.opacity = '0.3';
+        (<HTMLElement>flyingImg).style.left = `${cartRect.left + (cartRect.width / 2) - 7.5}px`;
+        (<HTMLElement>flyingImg).style.top = `${cartRect.top + (cartRect.height / 2) - 7.5}px`;
+        (<HTMLElement>flyingImg).style.width = '15px';
+        (<HTMLElement>flyingImg).style.height = '15px';
+        (<HTMLElement>flyingImg).style.opacity = '0.3';
     }, 10);
 
     setTimeout(() => {
         flyingImg.remove();
-        (<HTMLElement>cartIcon)?.style?.transform = 'scale(1.2)';
-        setTimeout(() => (<HTMLElement>cartIcon)?.style?.transform = 'scale(1)', 200);
+        (<HTMLElement>cartIcon).style.transform = 'scale(1.2)';
+        setTimeout(() => (<HTMLElement>cartIcon).style.transform = 'scale(1)', 200);
     }, 600);
 }
 
@@ -219,12 +219,12 @@ function agregarAlCarrito(nombre: any, precio: any, btnElement: any, isCross = f
     if (btnElement) {
         let iconoOriginal = btnElement.innerHTML;
         btnElement.innerHTML = '<i class="fa-solid fa-check"></i>';
-        (<HTMLElement>btnElement)?.style?.background = "#fff";
-        (<HTMLElement>btnElement)?.style?.color = "var(--verde-btn)";
+        (<HTMLElement>btnElement).style.background = "#fff";
+        (<HTMLElement>btnElement).style.color = "var(--verde-btn)";
 
         // --- NUEVO: Texto de confirmación "¡Agregado al carrito!" debajo del botón ---
         let parent = btnElement.parentElement;
-        (<HTMLElement>parent)?.style?.position = 'relative'; // Convertir al padre en el punto de anclaje
+        (<HTMLElement>parent).style.position = 'relative'; // Convertir al padre en el punto de anclaje
 
         // Limpiar mensaje anterior si el usuario hace clics muy rápidos
         let oldMsg = parent.querySelector('.cart-msg-toast');
@@ -233,43 +233,43 @@ function agregarAlCarrito(nombre: any, precio: any, btnElement: any, isCross = f
         let msgConf = document.createElement('div');
         msgConf.className = 'cart-msg-toast';
         msgConf.innerText = "¡Agregado al carrito!";
-        (<HTMLElement>msgConf)?.style?.position = 'absolute';
-        (<HTMLElement>msgConf)?.style?.background = 'var(--color-success, #10B981)';
-        (<HTMLElement>msgConf)?.style?.color = 'white';
-        (<HTMLElement>msgConf)?.style?.fontSize = '10px';
-        (<HTMLElement>msgConf)?.style?.fontWeight = '700';
-        (<HTMLElement>msgConf)?.style?.padding = '4px 8px';
-        (<HTMLElement>msgConf)?.style?.borderRadius = '6px';
-        (<HTMLElement>msgConf)?.style?.whiteSpace = 'nowrap';
-        (<HTMLElement>msgConf)?.style?.pointerEvents = 'none'; // Para que no bloquee clics accidentales
-        (<HTMLElement>msgConf)?.style?.zIndex = '100';
-        (<HTMLElement>msgConf)?.style?.opacity = '0';
-        (<HTMLElement>msgConf)?.style?.transform = 'translateY(-5px)';
-        (<HTMLElement>msgConf)?.style?.transition = 'all 0.3s ease';
-        (<HTMLElement>msgConf)?.style?.boxShadow = 'var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.1))';
+        (<HTMLElement>msgConf).style.position = 'absolute';
+        (<HTMLElement>msgConf).style.background = 'var(--color-success, #10B981)';
+        (<HTMLElement>msgConf).style.color = 'white';
+        (<HTMLElement>msgConf).style.fontSize = '10px';
+        (<HTMLElement>msgConf).style.fontWeight = '700';
+        (<HTMLElement>msgConf).style.padding = '4px 8px';
+        (<HTMLElement>msgConf).style.borderRadius = '6px';
+        (<HTMLElement>msgConf).style.whiteSpace = 'nowrap';
+        (<HTMLElement>msgConf).style.pointerEvents = 'none'; // Para que no bloquee clics accidentales
+        (<HTMLElement>msgConf).style.zIndex = '100';
+        (<HTMLElement>msgConf).style.opacity = '0';
+        (<HTMLElement>msgConf).style.transform = 'translateY(-5px)';
+        (<HTMLElement>msgConf).style.transition = 'all 0.3s ease';
+        (<HTMLElement>msgConf).style.boxShadow = 'var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.1))';
 
         // Posicionamiento dinámico: A la derecha y justo debajo del botón
-        (<HTMLElement>msgConf)?.style?.right = '0';
-        (<HTMLElement>msgConf)?.style?.top = (btnElement.offsetTop + btnElement.offsetHeight + 6) + 'px';
+        (<HTMLElement>msgConf).style.right = '0';
+        (<HTMLElement>msgConf).style.top = (btnElement.offsetTop + btnElement.offsetHeight + 6) + 'px';
 
         parent.appendChild(msgConf);
 
         // Desencadenar animación de entrada fluida
         requestAnimationFrame(() => {
-            (<HTMLElement>msgConf)?.style?.opacity = '1';
-            (<HTMLElement>msgConf)?.style?.transform = 'translateY(0)';
+            (<HTMLElement>msgConf).style.opacity = '1';
+            (<HTMLElement>msgConf).style.transform = 'translateY(0)';
         });
 
         setTimeout(() => {
             btnElement.innerHTML = iconoOriginal;
-            (<HTMLElement>btnElement)?.style?.background = esCaja ? "var(--dorado)" : "var(--verde-btn)";
-            (<HTMLElement>btnElement)?.style?.color = esCaja ? "black" : "#fff";
+            (<HTMLElement>btnElement).style.background = esCaja ? "var(--dorado)" : "var(--verde-btn)";
+            (<HTMLElement>btnElement).style.color = esCaja ? "black" : "#fff";
         }, 500);
 
         // Desaparecer y remover del código luego de 2 segundos
         setTimeout(() => {
-            (<HTMLElement>msgConf)?.style?.opacity = '0';
-            (<HTMLElement>msgConf)?.style?.transform = 'translateY(-5px)';
+            (<HTMLElement>msgConf).style.opacity = '0';
+            (<HTMLElement>msgConf).style.transform = 'translateY(-5px)';
             setTimeout(() => msgConf.remove(), 300);
         }, 2000);
     }
@@ -312,14 +312,14 @@ function sugerirAcompañante() {
                     </div>`;
             }).join('');
 
-            (<HTMLElement>modal)?.style?.display = 'flex';
+            (<HTMLElement>modal).style.display = 'flex';
         }
     }
 }
 
 function cerrarCrossSell() {
     let modal = document.getElementById('modal-cross-sell');
-    if (modal) (<HTMLElement>modal)?.style?.display = 'none';
+    if (modal) (<HTMLElement>modal).style.display = 'none';
 }
 
 function actualizarCartCount() {
@@ -392,11 +392,11 @@ function renderizarCarrito() {
                 <p>Agrega tus favoritos y continúa tu pedido rápido por WhatsApp.</p>
                 <button onclick="window.location.href='../index.html'" class="btn-checkout-primary">Volver a la tienda</button>
             </div>`;
-        document.getElementById('checkout-sections')?.style.display = 'none';
+        document.getElementById('checkout-sections').style.display = 'none';
         return;
     }
 
-    document.getElementById('checkout-sections')?.style.display = 'block';
+    document.getElementById('checkout-sections').style.display = 'block';
 
     let renderHTML = '';
     for (let nombre in appState.carrito) {
@@ -473,8 +473,8 @@ function renderizarCarrito() {
     appState.totalCarrito = parseFloat(appState.totalCarrito.toFixed(2));
     appState.totalCarritoBs = parseFloat(appState.totalCarritoBs.toFixed(2));
     
-    document.getElementById('totalUsdModal')?.innerText = `$${appState.totalCarrito.toFixed(2)}`;
-    document.getElementById('totalBsModal')?.innerText = `${appState.totalCarritoBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
+    document.getElementById('totalUsdModal').innerText = `$${appState.totalCarrito.toFixed(2)}`;
+    document.getElementById('totalBsModal').innerText = `${appState.totalCarritoBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
     calcularVuelto();
     
     // Asegurar que siempre se inicie en el Paso 1 al abrir o refrescar el carrito
@@ -536,16 +536,16 @@ function toggleDireccion() {
     let btnMap = document.getElementById('btnMap');
 
     if (met === 'Delivery') {
-        if (dirInput) (<HTMLElement>dirInput)?.style?.display = 'block';
-        if (btnGeo) (<HTMLElement>btnGeo)?.style?.display = 'block';
-        if (btnMap) (<HTMLElement>btnMap)?.style?.display = 'none';
+        if (dirInput) (<HTMLElement>dirInput).style.display = 'block';
+        if (btnGeo) (<HTMLElement>btnGeo).style.display = 'block';
+        if (btnMap) (<HTMLElement>btnMap).style.display = 'none';
         if (dirInput && (safeGetItem('gc_direccion') || '') && !dirInput.value) {
             dirInput.value = (safeGetItem('gc_direccion') || '');
         }
     } else {
-        if (dirInput) (<HTMLElement>dirInput)?.style?.display = 'none';
-        if (btnGeo) (<HTMLElement>btnGeo)?.style?.display = 'none';
-        if (btnMap) (<HTMLElement>btnMap)?.style?.display = 'block';
+        if (dirInput) (<HTMLElement>dirInput).style.display = 'none';
+        if (btnGeo) (<HTMLElement>btnGeo).style.display = 'none';
+        if (btnMap) (<HTMLElement>btnMap).style.display = 'block';
     }
 }
 
@@ -584,13 +584,13 @@ function actualizarMetodoPago() {
     let val = radioElem ? radioElem.value : (selectElem ? selectElem.value : 'Efectivo');
 
     let boxE = document.getElementById('box-efectivo');
-    if (boxE) (<HTMLElement>boxE)?.style?.display = (val === 'Efectivo') ? 'block' : 'none';
+    if (boxE) (<HTMLElement>boxE).style.display = (val === 'Efectivo') ? 'block' : 'none';
 
     let boxPm = document.getElementById('box-pagomovil');
-    if (boxPm) (<HTMLElement>boxPm)?.style?.display = (val === 'Pago Movil' || val === 'PagoMovil') ? 'block' : 'none';
+    if (boxPm) (<HTMLElement>boxPm).style.display = (val === 'Pago Movil' || val === 'PagoMovil') ? 'block' : 'none';
 
     let boxZ = document.getElementById('box-zelle');
-    if (boxZ) (<HTMLElement>boxZ)?.style?.display = (val === 'Zelle') ? 'block' : 'none';
+    if (boxZ) (<HTMLElement>boxZ).style.display = (val === 'Zelle') ? 'block' : 'none';
 }
 
 function calcularVuelto() {
@@ -600,11 +600,11 @@ function calcularVuelto() {
     if (pago > 0 && pago > appState.totalCarrito) {
         let vUsd = parseFloat((pago - appState.totalCarrito).toFixed(2));
         let vBs = parseFloat((vUsd * appState.tasaOficial).toFixed(2));
-        (<HTMLElement>res)?.style?.display = 'block';
-        (<HTMLElement>res)?.style?.color = 'var(--verde-btn)';
+        (<HTMLElement>res).style.display = 'block';
+        (<HTMLElement>res).style.color = 'var(--verde-btn)';
         res.innerHTML = `Vuelto: $${vUsd.toFixed(2)} / ${vBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
     } else {
-        (<HTMLElement>res)?.style?.display = 'none';
+        (<HTMLElement>res).style.display = 'none';
     }
 }
 
@@ -725,12 +725,12 @@ function enviarPedido() {
     let originalHTML = btnEnviar.innerHTML;
     btnEnviar.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparando WhatsApp...';
     btnEnviar.classList.add('disabled');
-    (<HTMLButtonElement>btnEnviar)?.disabled = true;
+    (<HTMLButtonElement>btnEnviar).disabled = true;
 
     setTimeout(() => {
         btnEnviar.innerHTML = originalHTML;
         btnEnviar.classList.remove('disabled');
-        (<HTMLButtonElement>btnEnviar)?.disabled = false;
+        (<HTMLButtonElement>btnEnviar).disabled = false;
     }, 800);
 }
 
@@ -773,24 +773,24 @@ function setCheckoutStep(step: any) {
     }
 
     // Ocultar todos con animación (si se usa CSS para esto)
-    (<HTMLElement>step1Summary)?.style?.display = 'none';
-    (<HTMLElement>step2Delivery)?.style?.display = 'none';
-    (<HTMLElement>step3Payment)?.style?.display = 'none';
-    (<HTMLElement>step4Confirm)?.style?.display = 'none';
+    (<HTMLElement>step1Summary).style.display = 'none';
+    (<HTMLElement>step2Delivery).style.display = 'none';
+    (<HTMLElement>step3Payment).style.display = 'none';
+    (<HTMLElement>step4Confirm).style.display = 'none';
 
     if (step === 1) {
-        (<HTMLElement>step1Summary)?.style?.display = 'block';
+        (<HTMLElement>step1Summary).style.display = 'block';
     } else if (step === 2) {
-        (<HTMLElement>step2Delivery)?.style?.display = 'block';
+        (<HTMLElement>step2Delivery).style.display = 'block';
     } else if (step === 3) {
-        (<HTMLElement>step3Payment)?.style?.display = 'block';
+        (<HTMLElement>step3Payment).style.display = 'block';
         
         let totalUsdEl3 = document.getElementById('totalUsdStep3');
         let totalBsEl3 = document.getElementById('totalBsStep3');
         if (totalUsdEl3) totalUsdEl3.innerText = document.getElementById('totalUsdModal')?.innerText;
         if (totalBsEl3) totalBsEl3.innerText = document.getElementById('totalBsModal')?.innerText;
     } else if (step === 4) {
-        (<HTMLElement>step4Confirm)?.style?.display = 'block';
+        (<HTMLElement>step4Confirm).style.display = 'block';
         
         // Actualizar totales en la confirmación final por seguridad
         let totalUsdEl = document.getElementById('totalUsdModalFinal');
