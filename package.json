@@ -11,6 +11,7 @@
   "devDependencies": {
     "live-server": "^1.2.2",
     "typescript": "^7.0.2",
-    "vite": "^8.2.1"
+    "vite": "^8.2.1",
+    "vite-plugin-static-copy": "^4.1.1"
   }
 }
