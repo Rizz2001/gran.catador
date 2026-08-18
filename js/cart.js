@@ -233,6 +233,10 @@ function actualizarCartCount() {
   if (cartCountElem) cartCountElem.innerText = totalItems.toString();
   const bottomCartCountElem = document.getElementById("bottom-cart-count");
   if (bottomCartCountElem) bottomCartCountElem.innerText = totalItems.toString();
+
+  if (typeof window.sincronizarBotonesCards === 'function') {
+    window.sincronizarBotonesCards();
+  }
 }
 function vaciarCarrito() {
   if (confirm("\xBFEst\xE1s seguro de vaciar tu pedido?")) {

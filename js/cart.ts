@@ -326,6 +326,10 @@ function actualizarCartCount() {
     
     const bottomCartCountElem = document.getElementById('bottom-cart-count');
     if (bottomCartCountElem) bottomCartCountElem.innerText = totalItems.toString();
+
+    if (typeof (window as any).sincronizarBotonesCards === 'function') {
+        (window as any).sincronizarBotonesCards();
+    }
 }
 
 function vaciarCarrito() {

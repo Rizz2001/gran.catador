@@ -1,4 +1,4 @@
-﻿/* --- SKELETON LOADER PARA GRUPOS --- */
+/* --- SKELETON LOADER PARA GRUPOS --- */
 @keyframes skeleton-pulse {
     0% {
         background-color: rgba(0, 0, 0, 0.05);
@@ -115,47 +115,59 @@
     flex-grow: 1;
 }
 
-/* Badges */
+/* Badges Promocionales Estilizados */
 .product-badge {
     position: absolute;
     top: 12px;
     left: 12px;
-    padding: 4px 10px;
-    border-radius: 8px;
+    padding: 5px 12px;
+    border-radius: 20px;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.5px;
     z-index: 10;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    gap: 5px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .badge-agotado {
-    background: #ef4444;
-    color: white;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .badge-oferta {
-    background: #10b981;
-    color: white;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .badge-top {
-    background: #f59e0b;
-    color: white;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.badge-nuevo {
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
 .product-price-wrapper {
     margin-top: auto;
-    padding-top: 12px;
-    padding-bottom: 16px;
+    padding-top: 10px;
+    padding-bottom: 14px;
 }
 
 .prices-row {
     display: flex;
     align-items: baseline;
+    justify-content: space-between;
     gap: 8px;
     flex-wrap: wrap;
 }
@@ -171,58 +183,130 @@
 }
 
 .product-price {
-    font-size: 1.3rem;
+    font-size: 1.35rem;
     font-weight: 800;
-    color: #111827;
+    color: #10B981; /* Verde esmeralda fresco */
+    letter-spacing: -0.5px;
     line-height: 1;
     white-space: nowrap;
 }
 
+body.dark-mode .product-price {
+    color: #34D399; /* Tono menta fresco en modo oscuro */
+}
+
 .product-price-bs {
-    font-size: 0.9rem;
-    color: #64748b;
+    font-size: 0.85rem;
+    color: #64748b; /* Tono tenue secundario */
     font-weight: 500;
     white-space: nowrap;
 }
 
-/* BotÃ³n Comprar por WhatsApp */
+body.dark-mode .product-price-bs {
+    color: #94a3b8;
+}
+
+/* Botón Comprar / Selector Interactivo */
 .product-bottom-action {
     padding: 0 16px 16px 16px;
 }
 
 .btn-buy-whatsapp {
     width: 100%;
-    padding: 12px;
+    padding: 11px;
     border-radius: 12px;
-    background: #25D366;
+    background: linear-gradient(135deg, var(--color-primary-dark, #0B132B), var(--color-primary, #1A2642));
     color: #ffffff;
-    border: none;
-    font-size: 14px;
-    font-weight: 600;
+    border: 1.5px solid var(--color-accent, #D4AF37);
+    font-size: 13.5px;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.2);
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+}
+
+.btn-buy-whatsapp i {
+    color: var(--color-accent, #D4AF37);
 }
 
 .btn-buy-whatsapp:hover {
-    background: #128C7E;
+    background: linear-gradient(135deg, #131E3A, #223359);
+    border-color: #F0D16E;
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(37, 211, 102, 0.3);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
 }
 
 .btn-buy-whatsapp.disabled {
-    background-color: #D1D5DB;
+    background: #D1D5DB;
     color: #9CA3AF;
+    border-color: transparent;
     cursor: not-allowed;
     box-shadow: none;
     transform: none;
 }
 
 body.dark-mode .btn-buy-whatsapp.disabled {
+    background: #374151;
+    color: #6B7280;
+}
+
+/* Selector Interactivo de Cantidad [ - 1 + ] */
+.card-qty-control {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, var(--color-primary-dark, #0B132B), var(--color-primary, #1A2642));
+    border: 1.5px solid var(--color-accent, #D4AF37);
+    border-radius: 12px;
+    padding: 4px;
+    width: 100%;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25), 0 0 10px rgba(212, 175, 55, 0.15);
+    transition: all 0.3s ease;
+}
+
+body.dark-mode .card-qty-control {
+    background: linear-gradient(135deg, #090e17, #131d30);
+    border-color: var(--color-accent, #D4AF37);
+}
+
+.card-qty-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.card-qty-btn:hover {
+    background: var(--color-accent, #D4AF37);
+    color: #0B132B;
+    transform: scale(1.08);
+}
+
+.card-qty-btn.minus:hover {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.card-qty-count {
+    font-size: 15px;
+    font-weight: 800;
+    color: #ffffff;
+    padding: 0 8px;
+    min-width: 24px;
+    text-align: center;
+}
     background-color: #334155;
     color: #64748b;
 }

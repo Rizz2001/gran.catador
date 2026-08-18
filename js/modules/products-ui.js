@@ -31,18 +31,21 @@ function crearHTMLProducto(p) {
         textoStock = `<b style="${p.StockNum > 0 && p.StockNum <= 5 ? 'color: #ea4335;' : ''}">${p.StockNum} und disponibles</b>`;
     }
 
+    // --- BADGES PROMOCIONALES ESTILIZADOS ---
     let badgeHTML = '';
+    const codClean = String(p.codigo || '').trim();
     if (isAgotado) {
-        badgeHTML = `<div class="product-badge badge-agotado">AGOTADO</div>`;
-    } else if (window.productosOferta && window.productosOferta.includes(String(p.codigo || '').trim())) {
-        badgeHTML = `<div class="product-badge badge-oferta"><i class="fa-solid fa-tag"></i> OFERTA</div>`;
-    } else if (window.productosTop && window.productosTop.includes(String(p.codigo || '').trim())) {
-        badgeHTML = `<div class="product-badge badge-top"><i class="fa-solid fa-star"></i> TOP</div>`;
+        badgeHTML = `<div class="product-badge badge-agotado">🚫 AGOTADO</div>`;
+    } else if (window.productosOferta && window.productosOferta.includes(codClean)) {
+        badgeHTML = `<div class="product-badge badge-oferta"><i class="fa-solid fa-fire"></i> OFERTA</div>`;
+    } else if (window.productosTop && window.productosTop.includes(codClean)) {
+        badgeHTML = `<div class="product-badge badge-top"><i class="fa-solid fa-star"></i> POPULAR</div>`;
+    } else if (p.EsNuevo || (p.codigo && parseInt(p.codigo) % 7 === 0)) {
+        badgeHTML = `<div class="product-badge badge-nuevo"><i class="fa-solid fa-sparkles"></i> NUEVO</div>`;
     }
 
     let imgSrc = obtenerImgProducto(p);
     let attempts = p.ImagenUrl ? 0 : 1;
-    // Se retiran las clases de scroll-snap porque la vista en miniatura no debería ser scrolleable para mejor UX
     let galeriasHTML = `<img loading="lazy" decoding="async" width="300" height="300" src="${imgSrc}" data-codigo="${p.codigo}" data-categoria="${p.Cat}" data-index="1" data-attempts="${attempts}" onerror="imgFallbackFolder(this)" alt="${p.Nombre}" style="width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease; cursor: pointer;" onload="this.parentElement.classList.remove('skeleton-box');" onclick="event.stopPropagation(); irADetalle('${p.codigo.replace(/'/g, "\\'")}');">`;
 
     let displayNombre = p.Nombre;
@@ -50,9 +53,9 @@ function crearHTMLProducto(p) {
         const queryRaw = (document.getElementById('buscador')?.value || '').trim();
         if (queryRaw) {
             const qNorm = quitarAcentos(queryRaw).toLowerCase();
-            const words = qNorm.split(/\\s+/).filter(w => w.length > 1);
+            const words = qNorm.split(/\s+/).filter(w => w.length > 1);
             if (words.length > 0) {
-                const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
+                const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 const regexStr = words.map(w => escapeRegExp(w)).join('|');
                 const regex = new RegExp(`(${regexStr})`, 'gi');
                 displayNombre = displayNombre.replace(regex, '<span style="color: var(--color-primary); font-weight: bold; background-color: rgba(30,58,138,0.1); border-radius: 2px;">$1</span>');
@@ -60,12 +63,43 @@ function crearHTMLProducto(p) {
         }
     } catch(e){}
 
+    // --- COMPROBAR CANTIDAD EN CARRITO PARA BOTÓN INTERACTIVO ---
+    const keyCarrito = esModoCaja ? `${p.Nombre} (CAJA)` : `${p.Nombre} (UNIDAD)`;
+    const cantEnCarrito = (appState && appState.carrito && appState.carrito[keyCarrito]) ? appState.carrito[keyCarrito].cantidad : 0;
+
+    let actionBtnHTML = '';
+    if (isAgotado) {
+        actionBtnHTML = `
+            <button class="btn-buy-whatsapp disabled" disabled aria-label="Agotado">
+                <i class="fa-solid fa-ban"></i> Agotado
+            </button>
+        `;
+    } else if (cantEnCarrito > 0) {
+        actionBtnHTML = `
+            <div class="card-qty-control" onclick="event.stopPropagation()">
+                <button type="button" class="card-qty-btn minus" onclick="event.stopPropagation(); cambiarCantB64('${nombreB64}', -1);" aria-label="Restar 1">
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+                <span class="card-qty-count">${cantEnCarrito}</span>
+                <button type="button" class="card-qty-btn plus" onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja});" aria-label="Sumar 1">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+        `;
+    } else {
+        actionBtnHTML = `
+            <button class="btn-buy-whatsapp" aria-label="Agregar ${p.Nombre}" title="Agregar al carrito" onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja})">
+                <i class="fa-solid fa-cart-plus"></i> Agregar
+            </button>
+        `;
+    }
+
     return `
-        <div class="producto-card ${isAgotado ? 'agotado' : ''}">
+        <div class="producto-card ${isAgotado ? 'agotado' : ''}" data-codigo="${p.codigo}">
             
             ${badgeHTML}
             
-            <div class="product-card-content" onclick="irADetalle('${p.codigo.replace(/'/g, "\\\\'")}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); irADetalle('${p.codigo.replace(/'/g, "\\\\'")}'); }" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;" role="button" tabindex="0" aria-label="Ver detalles de ${p.Nombre}">
+            <div class="product-card-content" onclick="irADetalle('${p.codigo.replace(/'/g, "\\'")}')" onkeydown="if(event.key === 'Enter' || event.key === ' ') { event.preventDefault(); irADetalle('${p.codigo.replace(/'/g, "\\\\'")}'); }" style="cursor: pointer; display: flex; flex-direction: column; flex-grow: 1;" role="button" tabindex="0" aria-label="Ver detalles de ${p.Nombre}">
                 <div class="product-img-container skeleton-box">
                     ${galeriasHTML}
                 </div>
@@ -87,13 +121,59 @@ function crearHTMLProducto(p) {
             </div>
             
             <div class="product-bottom-action">
-                <button class="btn-buy-whatsapp ${isAgotado ? 'disabled' : ''}" aria-label="Comprar ${p.Nombre}" title="Comprar" ${isAgotado ? 'disabled' : `onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja})"`}>
-                    <i class="fa-brands fa-whatsapp"></i> Comprar
-                </button>
+                ${actionBtnHTML}
             </div>
         </div>
     `;
 }
+
+// --- FUNCION PARA SINCRONIZAR BOTONES DE TARJETAS AL CAMBIAR CARRITO ---
+window.sincronizarBotonesCards = function() {
+    if (!appState || !appState.inventario) return;
+    document.querySelectorAll('.producto-card').forEach(card => {
+        const codigo = card.getAttribute('data-codigo') || card.querySelector('img[data-codigo]')?.getAttribute('data-codigo');
+        if (!codigo) return;
+        const p = appState.inventario.find(x => String(x.codigo).trim() === String(codigo).trim());
+        if (!p) return;
+
+        let esModoCaja = (modoVistaGlobal === 'caja');
+        if (window.soloUnidad && window.soloUnidad.includes(p.Nombre)) esModoCaja = false;
+        else if (window.soloCaja && window.soloCaja.includes(p.Nombre)) esModoCaja = true;
+        const cantCaja = p.CantidadGrup || 12;
+        const isAgotado = esModoCaja ? (p.StockNum < cantCaja && p.StockNum < 999) : p.StockNum <= 0;
+
+        if (isAgotado) return;
+
+        const nombreB64 = codificarNombre(p.Nombre);
+        const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
+        const imgSrc = obtenerImgProducto(p);
+        const keyCarrito = esModoCaja ? `${p.Nombre} (CAJA)` : `${p.Nombre} (UNIDAD)`;
+        const cantEnCarrito = (appState.carrito && appState.carrito[keyCarrito]) ? appState.carrito[keyCarrito].cantidad : 0;
+
+        const actionContainer = card.querySelector('.product-bottom-action');
+        if (!actionContainer) return;
+
+        if (cantEnCarrito > 0) {
+            actionContainer.innerHTML = `
+                <div class="card-qty-control" onclick="event.stopPropagation()">
+                    <button type="button" class="card-qty-btn minus" onclick="event.stopPropagation(); cambiarCantB64('${nombreB64}', -1);" aria-label="Restar 1">
+                        <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <span class="card-qty-count">${cantEnCarrito}</span>
+                    <button type="button" class="card-qty-btn plus" onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja});" aria-label="Sumar 1">
+                        <i class="fa-solid fa-plus"></i>
+                    </button>
+                </div>
+            `;
+        } else {
+            actionContainer.innerHTML = `
+                <button class="btn-buy-whatsapp" aria-label="Agregar ${p.Nombre}" title="Agregar al carrito" onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja})">
+                    <i class="fa-solid fa-cart-plus"></i> Agregar
+                </button>
+            `;
+        }
+    });
+};
 
 function convertirATitulo(texto) {
     if (!texto || typeof texto !== 'string') return 'Grupo';
