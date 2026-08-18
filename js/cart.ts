@@ -518,6 +518,8 @@ function cambiarCant(n: any, delta: any) {
     appState.carrito[n].cantidad += delta;
     if (appState.carrito[n].cantidad <= 0) {
         delete appState.carrito[n];
+    } else {
+        appState.carrito[n].subtotal = appState.carrito[n].cantidad * appState.carrito[n].precio;
     }
     guardarCarritoLS();
     actualizarCartCount();

@@ -386,6 +386,8 @@ function cambiarCant(n, delta) {
   appState.carrito[n].cantidad += delta;
   if (appState.carrito[n].cantidad <= 0) {
     delete appState.carrito[n];
+  } else {
+    appState.carrito[n].subtotal = appState.carrito[n].cantidad * appState.carrito[n].precio;
   }
   guardarCarritoLS();
   actualizarCartCount();
@@ -631,7 +633,6 @@ function setCheckoutStep(step) {
 document.addEventListener("DOMContentLoaded", () => {
   actualizarCartCount();
 });
-export {};
 window.guardarCarritoLS = guardarCarritoLS;
 window.calcularStockRestante = calcularStockRestante;
 window.tieneStockSuficiente = tieneStockSuficiente;
