@@ -71,6 +71,7 @@ function crearHTMLProducto(p) {
                 </div>
                 
                 <h3 class="producto-titulo" title="${p.Nombre}">${displayNombre}</h3>
+                <span class="producto-codigo-sub" style="font-size: 11px; color: var(--color-text-muted); font-weight: 500; display: block; margin-top: -2px; margin-bottom: 4px;">Cód: ${p.codigo}</span>
                 
                 <p class="producto-stock">
                     ${textoStock}

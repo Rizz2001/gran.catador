@@ -146,6 +146,11 @@ function renderizarProducto(p) {
     document.getElementById('product-title').textContent = p.Nombre;
     document.getElementById('product-title').classList.remove('skeleton-text', 'long');
 
+    const skuEl = document.getElementById('product-sku');
+    if (skuEl) {
+        skuEl.textContent = `Código: ${p.codigo}`;
+    }
+
     // Precios
     const priceBlock = document.getElementById('product-price-usd').parentElement;
     priceBlock.classList.remove('skeleton-box');
@@ -168,7 +173,11 @@ function renderizarProducto(p) {
         <button class="btn-add-main" ${isAgotado ? 'disabled' : ''} onclick="agregarDesdeDetalle('${nombreB64}', ${precioNum}, '${imgSrc}', ${esModoCaja})">
             <i class="fa-solid fa-cart-shopping"></i> ${isAgotado ? 'Agotado' : 'Agregar al Carrito'}
         </button>
+        <button type="button" class="btn-share-main" onclick="compartirProductoDetalle('${p.codigo}', '${nombreB64}', '${precioUsdDin}')" title="Compartir producto">
+            <i class="fa-solid fa-share-nodes"></i> Compartir
+        </button>
     `;
+
 
 
 
@@ -406,3 +415,24 @@ window.scrollRelatedProducts = function(direction) {
     track.scrollBy({ left: direction * (cardWidth + 15), behavior: 'smooth' });
   }
 };
+
+window.compartirProductoDetalle = function(codigo, nombreB64, precioUsd) {
+    let nombre = 'Producto';
+    try {
+        nombre = typeof decodificarNombre === 'function' ? decodificarNombre(nombreB64) : decodeURIComponent(escape(atob(nombreB64)));
+    } catch(e){}
+
+    if (typeof compartirProducto === 'function') {
+        compartirProducto(nombre, precioUsd);
+    } else {
+        const shareUrl = window.location.origin + '/producto.html?id=' + encodeURIComponent(codigo);
+        const text = `¡Mira este producto en Gran Catador! ${nombre} a $${precioUsd}. ${shareUrl}`;
+        if (navigator.share) {
+            navigator.share({ title: 'Gran Catador', text: text, url: shareUrl }).catch(() => {});
+        } else if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                if (typeof mostrarToast === 'function') mostrarToast("Enlace del producto copiado al portapapeles.");
+            });
+        }
+    }
+};
