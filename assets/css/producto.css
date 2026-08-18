@@ -117,22 +117,38 @@ body.dark-mode .product__image-wrapper:hover {
     font-weight: 800;
     line-height: 1.06;
     color: var(--color-text);
-    margin: 0;
+    margin: 0 0 4px 0;
     letter-spacing: -0.5px;
+}
+
+.product__sku {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    background: var(--item-bg);
+    border: 1px solid var(--color-border);
+    padding: 6px 12px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    width: fit-content;
 }
 
 /* Price Box */
 .product__price-box {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
     background: linear-gradient(135deg, rgba(248, 250, 252, 0.96) 0%, rgba(255, 255, 255, 0.92) 100%);
-    padding: 28px 26px;
-    border-radius: 28px;
+    padding: 24px;
+    border-radius: 20px;
     border: 1px solid rgba(148, 163, 184, 0.16);
-    box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
     position: relative;
     overflow: hidden;
+    margin-bottom: 20px;
 }
 
 .product__price-box::before {
@@ -168,18 +184,28 @@ body.dark-mode .product__price-usd {
     margin-top: 4px;
 }
 
+/* Meta Row (Stock & Switch) */
+.product__meta-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
 /* Stock Status */
 .product__stock {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border-radius: 999px;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 12px;
     font-size: 0.95rem;
     font-weight: 700;
     background: rgba(16, 185, 129, 0.12);
     color: #047857;
     width: fit-content;
+    height: 44px;
 }
 
 .product__stock.warning {
@@ -338,12 +364,12 @@ body.dark-mode .btn-share-main:hover {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 12px 18px;
+    padding: 0 18px;
     background: var(--item-bg);
     border: 1px solid var(--color-border);
     border-radius: 12px;
     width: fit-content;
-    margin: 5px 0 10px 0;
+    height: 44px;
 }
 
 .product__switch-container .switch-label {
@@ -573,6 +599,13 @@ body.dark-mode .product__cta-icon {
 }
 
 /* =========================================
+   MOBILE BACK BUTTON
+   ========================================= */
+.mobile-back-btn {
+    display: none;
+}
+
+/* =========================================
    RESPONSIVE DESIGN PRO (Tablets & Mobile)
    ========================================= */
 
@@ -603,7 +636,28 @@ body.dark-mode .product__cta-icon {
     }
 
     .product__breadcrumb {
-        margin-bottom: 15px;
+        display: none; /* Hide breadcrumb on mobile since we have back button */
+    }
+
+    .mobile-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px 8px 0;
+        margin-bottom: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--color-primary);
+        text-decoration: none;
+        transition: transform 0.2s;
+    }
+    
+    body.dark-mode .mobile-back-btn {
+        color: var(--color-accent);
+    }
+
+    .mobile-back-btn i {
+        font-size: 16px;
     }
 
     .product__container {
