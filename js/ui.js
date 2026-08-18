@@ -84,6 +84,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+/** Muestra la alerta pop-up emergente de tienda cerrada */
+function mostrarAlertaModalTiendaCerrada(forzar = false) {
+    if (!forzar && sessionStorage.getItem('gc_closed_alert_modal_shown')) return;
+
+    let overlay = document.getElementById('closed-store-alert-modal');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'closed-store-alert-modal';
+        overlay.className = 'closed-store-alert-overlay';
+        overlay.innerHTML = `
+            <div class="closed-store-alert-card" role="dialog" aria-modal="true" aria-labelledby="closed-store-modal-title">
+                <div class="closed-store-alert-icon-wrapper">
+                    <i class="fa-solid fa-moon"></i>
+                </div>
+                <h2 id="closed-store-modal-title" class="closed-store-alert-title">¡Atención! Tienda Cerrada</h2>
+                <div class="closed-store-alert-hours">
+                    <i class="fa-solid fa-clock"></i> Horario: 8:00 AM – 9:00 PM (Todos los días)
+                </div>
+                <p class="closed-store-alert-body">
+                    Actualmente nos encontramos fuera de nuestro horario de atención. Puedes armar tu carrito; tu pedido por WhatsApp quedará agendado y será atendido a primera hora del día de mañana.
+                </p>
+                <button type="button" class="closed-store-alert-btn" onclick="cerrarAlertaModalTiendaCerrada()">
+                    Entendido, continuar navegando
+                </button>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    setTimeout(() => {
+        overlay.classList.add('active');
+    }, 100);
+}
+
+function cerrarAlertaModalTiendaCerrada() {
+    let overlay = document.getElementById('closed-store-alert-modal');
+    if (overlay) {
+        overlay.classList.remove('active');
+        sessionStorage.setItem('gc_closed_alert_modal_shown', 'true');
+        setTimeout(() => overlay.remove(), 300);
+    }
+}
+
 /** Verifica si la tienda se encuentra en horario laboral */
 function checkHorario() {
     try {
@@ -101,37 +144,17 @@ function checkHorario() {
         // Horario: 8:00 AM a 9:00 PM (8 a 21 hrs)
         let isAbierto = (horaCaracas >= 8 && horaCaracas < 21);
 
-        // Controlar el banner flotante de Tienda Cerrada
-        let bannerCerrado = document.getElementById('store-closed-notice-banner');
         if (!isAbierto) {
             try { isTiendaAbierta = false; } catch (e) { window.isTiendaAbierta = false; }
             if (typeof appState !== 'undefined') appState.isTiendaAbierta = false;
 
-            if (!bannerCerrado && !sessionStorage.getItem('gc_closed_banner_dismissed')) {
-                bannerCerrado = document.createElement('div');
-                bannerCerrado.id = 'store-closed-notice-banner';
-                bannerCerrado.className = 'store-closed-banner';
-                bannerCerrado.innerHTML = `
-                    <div class="store-closed-banner-inner">
-                        <div class="store-closed-icon"><i class="fa-solid fa-moon"></i></div>
-                        <div class="store-closed-text">
-                            <strong>🌙 Tienda actualmente cerrada (Horario: 8:00 AM – 9:00 PM)</strong>
-                            <span>Tu pedido por WhatsApp quedará agendado y será atendido a primera hora del día de mañana.</span>
-                        </div>
-                        <button type="button" class="store-closed-close" onclick="sessionStorage.setItem('gc_closed_banner_dismissed','true'); this.parentElement.parentElement.remove();" title="Cerrar aviso">&times;</button>
-                    </div>
-                `;
-                const header = document.querySelector('app-header') || document.body.firstChild;
-                if (header && header.parentNode) {
-                    header.parentNode.insertBefore(bannerCerrado, header);
-                } else {
-                    document.body.prepend(bannerCerrado);
-                }
-            }
+            // Disparar alerta modal pop-up de tienda cerrada
+            mostrarAlertaModalTiendaCerrada();
         } else {
             try { isTiendaAbierta = true; } catch (e) { window.isTiendaAbierta = true; }
             if (typeof appState !== 'undefined') appState.isTiendaAbierta = true;
-            if (bannerCerrado) bannerCerrado.remove();
+            let overlay = document.getElementById('closed-store-alert-modal');
+            if (overlay) overlay.remove();
         }
 
         if (badge) {
