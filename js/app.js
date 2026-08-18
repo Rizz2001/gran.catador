@@ -676,6 +676,8 @@ function formatearProductoApi(item, codGrupo, nombreGrupo, codSubgrupoFallback, 
         stock = parseFloat(stockRaw !== undefined && stockRaw !== null ? stockRaw : 10);
     }
 
+    if (isNaN(stock) || stock < 0) stock = 0;
+
     if (appState.siempreDisponibles && appState.siempreDisponibles.includes(codigo)) stock = 999;
 
     let nombre = item.nombre ?? item.Nombre ?? item.descripcion ?? item.Descripcion ?? "Producto sin nombre";
