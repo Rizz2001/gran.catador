@@ -1,3 +1,5 @@
+let activeSuggestionIndex = -1;
+
 // --- SUGERENCIAS E INTERACCIONES ---
 /**
  * Muestra el panel de sugerencias usando resultados ya calculados por aplicarFiltros.
@@ -9,6 +11,8 @@ function mostrarSugerencias(q, resultados) {
     const cont = document.getElementById('search-suggestions');
     const input = document.getElementById('buscador');
     if (!cont || !input) return;
+
+    activeSuggestionIndex = -1;
 
     const query = q ? q.trim() : '';
     if (query.length === 0) {
@@ -34,10 +38,11 @@ function mostrarSugerencias(q, resultados) {
 
     const lista = document.createElement('div');
     lista.className = 'search-suggestions-list';
-    resultados.slice(0, 6).forEach(producto => {
+    resultados.slice(0, 6).forEach((producto, idx) => {
         const item = document.createElement('button');
         item.type = 'button';
         item.className = 'search-suggestion-item';
+        item.dataset.index = idx;
         item.onclick = () => {
             if (typeof debounceTimer !== 'undefined') clearTimeout(debounceTimer);
             input.value = producto.Nombre || '';
@@ -65,9 +70,9 @@ function mostrarSugerencias(q, resultados) {
         
         // Aplicar resaltado también en la lista de sugerencias
         const qNorm = quitarAcentos(query).toLowerCase();
-        const words = qNorm.split(/\\s+/).filter(w => w.length > 1);
+        const words = qNorm.split(/\s+/).filter(w => w.length > 1);
         if (words.length > 0) {
-            const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');
+            const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
             const regexStr = words.map(w => escapeRegExp(w)).join('|');
             const regex = new RegExp(`(${regexStr})`, 'gi');
             titulo.innerHTML = (producto.Nombre || 'Producto').replace(regex, '<strong>$1</strong>');
@@ -76,8 +81,18 @@ function mostrarSugerencias(q, resultados) {
         const meta = document.createElement('div');
         meta.className = 'search-suggestion-meta';
         const categoria = producto.Cat || producto.SubCat || 'Producto';
-        const precio = producto.PrecioStr ? `$${producto.PrecioStr}` : '';
-        meta.textContent = `${categoria}${precio ? ' · ' + precio : ''}`;
+        const precioUsd = producto.PrecioStr ? `$${producto.PrecioStr}` : '';
+        const tasa = window.appState?.tasaOficial || window.tasaOficial || 0;
+        const precioBs = (producto.PrecioNum && tasa > 0) ? `${(producto.PrecioNum * tasa).toFixed(2)} Bs` : (producto.PrecioBsStr ? `${producto.PrecioBsStr} Bs` : '');
+        
+        let stockBadge = '';
+        if (producto.StockNum <= 0) {
+            stockBadge = ' <span style="color: #ef4444; font-weight: 600; font-size: 11px;">[AGOTADO]</span>';
+        } else if (producto.StockNum <= 5) {
+            stockBadge = ` <span style="color: #f59e0b; font-weight: 600; font-size: 11px;">[¡Últimas ${producto.StockNum}!]</span>`;
+        }
+
+        meta.innerHTML = `${categoria}${precioUsd ? ' · <strong style="color: var(--dorado, #EAB308);">' + precioUsd + '</strong>' : ''}${precioBs ? ' <small>(' + precioBs + ')</small>' : ''}${stockBadge}`;
 
         datos.appendChild(titulo);
         datos.appendChild(meta);
@@ -110,7 +125,55 @@ function mostrarSugerencias(q, resultados) {
     footer.appendChild(action);
     cont.appendChild(footer);
 }
-function cerrarSugerencias() { const cont = document.getElementById('search-suggestions'); if (cont) cont.style.display = 'none'; }
+
+function cerrarSugerencias() { 
+    const cont = document.getElementById('search-suggestions'); 
+    if (cont) cont.style.display = 'none'; 
+    activeSuggestionIndex = -1;
+}
+
+// Navegación por teclado en el buscador (Flecha Abajo / Arriba / Escape / Enter)
+document.addEventListener('keydown', (e) => {
+    const input = document.getElementById('buscador');
+    const cont = document.getElementById('search-suggestions');
+    if (!input || !cont || cont.style.display === 'none') return;
+    if (document.activeElement !== input) return;
+
+    const items = Array.from(cont.querySelectorAll('.search-suggestion-item'));
+    if (items.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        activeSuggestionIndex = (activeSuggestionIndex + 1) % items.length;
+        items.forEach((item, idx) => {
+            if (idx === activeSuggestionIndex) {
+                item.style.background = 'rgba(59, 130, 246, 0.15)';
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.style.background = 'transparent';
+            }
+        });
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        activeSuggestionIndex = (activeSuggestionIndex - 1 + items.length) % items.length;
+        items.forEach((item, idx) => {
+            if (idx === activeSuggestionIndex) {
+                item.style.background = 'rgba(59, 130, 246, 0.15)';
+                item.scrollIntoView({ block: 'nearest' });
+            } else {
+                item.style.background = 'transparent';
+            }
+        });
+    } else if (e.key === 'Enter') {
+        if (activeSuggestionIndex >= 0 && items[activeSuggestionIndex]) {
+            e.preventDefault();
+            items[activeSuggestionIndex].click();
+        }
+    } else if (e.key === 'Escape') {
+        cerrarSugerencias();
+    }
+});
+
 document.addEventListener('click', (e) => { if (!e.target.closest('.search-pill') && !e.target.closest('.search-container')) cerrarSugerencias(); });
 function compartirProducto(nombre, precio) { const text = `¡Mira esta bebida! ${nombre} a solo $${precio}. ${window.location.href}`; if (navigator.share) { navigator.share({ title: 'Gran Catador', text, url: window.location.href }).catch(e => { }); return; } if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(() => mostrarToast("Texto copiado al portapapeles."), () => fallbackCopyText(text)); return; } fallbackCopyText(text); }
 function fallbackCopyText(text) { const textarea = document.createElement('textarea'); textarea.value = text; textarea.style.position = 'fixed'; textarea.style.opacity = '0'; document.body.appendChild(textarea); textarea.focus(); textarea.select(); try { document.execCommand('copy'); mostrarToast("Texto copiado al portapapeles."); } catch (e) { mostrarToast("No se pudo copiar al portapapeles."); } document.body.removeChild(textarea); }
