@@ -1,5 +1,8 @@
 "use strict";
 function guardarCarritoLS() {
+  if (!appState.carrito || typeof appState.carrito !== "object" || Array.isArray(appState.carrito)) {
+    appState.carrito = {};
+  }
   safeSetItem("gc_cart", JSON.stringify(appState.carrito));
 }
 function calcularStockRestante(nombreBase) {

@@ -4,6 +4,9 @@
 
 /** Guarda el estado actual del carrito en LocalStorage */
 function guardarCarritoLS() {
+    if (!appState.carrito || typeof appState.carrito !== 'object' || Array.isArray(appState.carrito)) {
+        appState.carrito = {};
+    }
     safeSetItem('gc_cart', JSON.stringify(appState.carrito));
 }
 

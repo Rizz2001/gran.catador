@@ -9,6 +9,24 @@ const getItemSafe = (key: string) => {
     return null;
 };
 
+let parsedCart: any = null;
+try {
+    const rawCart = getItemSafe('gc_cart');
+    parsedCart = rawCart ? JSON.parse(rawCart) : null;
+} catch(e) {}
+if (!parsedCart || typeof parsedCart !== 'object' || Array.isArray(parsedCart)) {
+    parsedCart = {};
+}
+
+let parsedFavs: any = null;
+try {
+    const rawFavs = getItemSafe('gc_favs');
+    parsedFavs = rawFavs ? JSON.parse(rawFavs) : null;
+} catch(e) {}
+if (!Array.isArray(parsedFavs)) {
+    parsedFavs = [];
+}
+
 window.appState = {
     // Datos de Inventario
     inventario: [],
@@ -17,9 +35,9 @@ window.appState = {
     productosFiltrados: [],
 
     // Datos del Usuario
-    carrito: JSON.parse(getItemSafe('gc_cart') || 'null') || {},
+    carrito: parsedCart,
     totalCarrito: 0,
-    favoritos: JSON.parse(getItemSafe('gc_favs') || 'null') || [],
+    favoritos: parsedFavs,
 
     // Configuración y Negocio
     tasaOficial: parseFloat(getItemSafe('tasaDolar') || '0') || 0,

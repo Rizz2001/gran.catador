@@ -2,11 +2,29 @@
 window.productosMap = window.productosMap || new Map();
 
 window.agregarAlCarritoPorCodigo = function(codigo, btnElement) {
-    if (!codigo) return;
-    const codStr = String(codigo).trim();
-    let p = (typeof appState !== 'undefined' && appState.inventario) ? appState.inventario.find(x => String(x.codigo).trim() === codStr) : null;
-    if (!p && window.productosMap) {
-        p = window.productosMap.get(codStr);
+    let p = null;
+    const codStr = codigo ? String(codigo).trim() : '';
+    if (codStr) {
+        if (typeof appState !== 'undefined' && appState.inventario) {
+            p = appState.inventario.find(x => String(x.codigo).trim() === codStr);
+        }
+        if (!p && window.productosMap) {
+            p = window.productosMap.get(codStr);
+        }
+    }
+    if (!p && btnElement) {
+        const card = btnElement.closest('.producto-card');
+        if (card) {
+            const cardCode = card.getAttribute('data-codigo');
+            if (cardCode && cardCode !== codStr) {
+                return window.agregarAlCarritoPorCodigo(cardCode, btnElement);
+            }
+            const titleEl = card.querySelector('.producto-titulo');
+            const titleText = titleEl ? titleEl.textContent.trim() : '';
+            if (titleText && typeof appState !== 'undefined' && appState.inventario) {
+                p = appState.inventario.find(x => x.Nombre === titleText);
+            }
+        }
     }
     if (!p) return;
 
@@ -114,6 +132,7 @@ function crearHTMLProducto(p) {
     const cantEnCarrito = (typeof appState !== 'undefined' && appState.carrito && appState.carrito[keyCarrito]) ? appState.carrito[keyCarrito].cantidad : 0;
 
     let actionBtnHTML = '';
+    const safeCod = String(p.codigo || '').replace(/'/g, "\\'");
     if (isAgotado) {
         actionBtnHTML = `
             <button class="btn-buy-whatsapp disabled" disabled aria-label="Agotado">
@@ -123,18 +142,18 @@ function crearHTMLProducto(p) {
     } else if (cantEnCarrito > 0) {
         actionBtnHTML = `
             <div class="card-qty-control" onclick="event.stopPropagation()">
-                <button type="button" class="card-qty-btn minus" onclick="event.stopPropagation(); cambiarCantPorCodigo('${p.codigo}', -1);" aria-label="Restar 1">
+                <button type="button" class="card-qty-btn minus" onclick="event.stopPropagation(); cambiarCantPorCodigo('${safeCod}', -1);" aria-label="Restar 1">
                     <i class="fa-solid fa-minus"></i>
                 </button>
                 <span class="card-qty-count">${cantEnCarrito}</span>
-                <button type="button" class="card-qty-btn plus" onclick="event.stopPropagation(); agregarAlCarritoPorCodigo('${p.codigo}', this);" aria-label="Sumar 1">
+                <button type="button" class="card-qty-btn plus" onclick="event.stopPropagation(); agregarAlCarritoPorCodigo('${safeCod}', this);" aria-label="Sumar 1">
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
         `;
     } else {
         actionBtnHTML = `
-            <button class="btn-buy-whatsapp" aria-label="Agregar ${p.Nombre}" title="Agregar al carrito" onclick="event.stopPropagation(); agregarAlCarritoPorCodigo('${p.codigo}', this)">
+            <button class="btn-buy-whatsapp" aria-label="Agregar ${p.Nombre}" title="Agregar al carrito" onclick="event.stopPropagation(); agregarAlCarritoPorCodigo('${safeCod}', this)">
                 <i class="fa-solid fa-cart-plus"></i> Agregar
             </button>
         `;
@@ -199,21 +218,22 @@ window.sincronizarBotonesCards = function() {
         const actionContainer = card.querySelector('.product-bottom-action');
         if (!actionContainer) return;
 
+        const safeCod = String(p.codigo || '').replace(/'/g, "\\'");
         if (cantEnCarrito > 0) {
             actionContainer.innerHTML = `
                 <div class="card-qty-control" onclick="event.stopPropagation()">
-                    <button type="button" class="card-qty-btn minus" onclick="event.stopPropagation(); cambiarCantPorCodigo('${p.codigo}', -1);" aria-label="Restar 1">
+                    <button type="button" class="card-qty-btn minus" onclick="event.stopPropagation(); cambiarCantPorCodigo('${safeCod}', -1);" aria-label="Restar 1">
                         <i class="fa-solid fa-minus"></i>
                     </button>
                     <span class="card-qty-count">${cantEnCarrito}</span>
-                    <button type="button" class="card-qty-btn plus" onclick="event.stopPropagation(); agregarAlCarritoPorCodigo('${p.codigo}', this);" aria-label="Sumar 1">
+                    <button type="button" class="card-qty-btn plus" onclick="event.stopPropagation(); agregarAlCarritoPorCodigo('${safeCod}', this);" aria-label="Sumar 1">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
             `;
         } else {
             actionContainer.innerHTML = `
-                <button class="btn-buy-whatsapp" aria-label="Agregar ${p.Nombre}" title="Agregar al carrito" onclick="event.stopPropagation(); agregarAlCarritoPorCodigo('${p.codigo}', this)">
+                <button class="btn-buy-whatsapp" aria-label="Agregar ${p.Nombre}" title="Agregar al carrito" onclick="event.stopPropagation(); agregarAlCarritoPorCodigo('${safeCod}', this)">
                     <i class="fa-solid fa-cart-plus"></i> Agregar
                 </button>
             `;
