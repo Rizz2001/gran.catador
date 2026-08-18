@@ -213,7 +213,8 @@ body.dark-mode .product-price-bs {
 
 .btn-buy-whatsapp {
     width: 100%;
-    padding: 11px;
+    min-height: 44px;
+    padding: 10px 14px;
     border-radius: 12px;
     background: linear-gradient(135deg, var(--color-primary-dark, #0B132B), var(--color-primary, #1A2642));
     color: #ffffff;
@@ -227,6 +228,8 @@ body.dark-mode .product-price-bs {
     cursor: pointer;
     transition: all 0.25s ease;
     box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .btn-buy-whatsapp i {
@@ -262,8 +265,9 @@ body.dark-mode .btn-buy-whatsapp.disabled {
     background: linear-gradient(135deg, var(--color-primary-dark, #0B132B), var(--color-primary, #1A2642));
     border: 1.5px solid var(--color-accent, #D4AF37);
     border-radius: 12px;
-    padding: 4px;
+    padding: 2px 4px;
     width: 100%;
+    min-height: 44px;
     box-shadow: 0 4px 14px rgba(0,0,0,0.25), 0 0 10px rgba(212, 175, 55, 0.15);
     transition: all 0.3s ease;
 }
@@ -274,8 +278,10 @@ body.dark-mode .card-qty-control {
 }
 
 .card-qty-btn {
-    width: 34px;
-    height: 34px;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
     border-radius: 8px;
     border: none;
     background: rgba(255, 255, 255, 0.12);
