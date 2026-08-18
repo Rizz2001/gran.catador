@@ -12,7 +12,13 @@ try {
         const fullPath = path.join(ROOT, tsFile);
         if (fs.existsSync(fullPath)) {
             const outPath = fullPath.replace(/\.ts$/, '.js');
-            execSync(`npx esbuild "${fullPath}" --outfile="${outPath}" --bundle=false`, { stdio: 'inherit' });
+            execSync(`npx esbuild "${fullPath}" --outfile="${outPath}" --format=iife --bundle=false`, { stdio: 'inherit' });
+            // Ensure no trailing export statement exists
+            let content = fs.readFileSync(outPath, 'utf8');
+            if (content.includes('export {')) {
+                content = content.replace(/export\s*\{[^}]*\};?/g, '');
+                fs.writeFileSync(outPath, content, 'utf8');
+            }
         }
     }
     console.log('[TS Compiler] Archivos TypeScript compilados a JavaScript correctamente.');

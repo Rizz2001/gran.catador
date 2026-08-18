@@ -999,7 +999,6 @@ function setCheckoutStep(step: any) {
 document.addEventListener('DOMContentLoaded', () => {
     actualizarCartCount();
 });
-export {};
 
 // Exponer funciones al scope global para que los botones en HTML funcionen
 (window as any).guardarCarritoLS = guardarCarritoLS;
