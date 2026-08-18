@@ -312,16 +312,16 @@ body.dark-mode .sidebar-menu {
         min-width: 0;
     }
 
-    /* Sidebar Permanent */
+    /* Sidebar Permanent (Se desplaza naturalmente al escrolear) */
     .sidebar-menu {
-        position: sticky !important;
-        top: 100px !important;
-        height: calc(100vh - 120px) !important;
+        position: relative !important;
+        top: 0 !important;
+        height: auto !important;
         transform: translateX(0) !important;
         width: 280px !important;
         border-radius: 20px !important;
         flex-shrink: 0;
-        z-index: 100;
+        z-index: 10;
         /* En desktop, usamos el mismo azul oscuro y mantenemos la estética premium */
         box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
     }
