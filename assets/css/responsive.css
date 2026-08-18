@@ -565,9 +565,12 @@
     }
 
     .btn-add-cart {
-        width: 30px !important;
-        height: 30px !important;
-        font-size: 13px !important;
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 14px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .bottom-nav {
@@ -579,6 +582,12 @@
         max-width: 100% !important;
         height: auto !important;
     }
+}
+
+/* Prevención global de scroll horizontal */
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
 }
 
 @media (min-width: 768px) {
