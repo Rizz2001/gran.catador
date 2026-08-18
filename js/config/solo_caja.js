@@ -5,5 +5,7 @@
  * NOTA: Escribe el nombre exacto tal cual aparece en el catálogo (Sensible a mayúsculas).
  */
 export const soloCaja = [
+    "00005",
+    "000106",
     // "Ejemplo Producto 2",
 ];

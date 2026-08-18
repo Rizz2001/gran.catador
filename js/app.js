@@ -704,7 +704,8 @@ function formatearProductoApi(item, codGrupo, nombreGrupo, codSubgrupoFallback, 
         TextoBusquedaLimpio: quitarAcentos(nombre) + " " + quitarAcentos(nombreGrupo) + " " + quitarAcentos(nombreSubFinal),
         CantidadGrup: cantidadGrup, Medida: item.medida ?? item.Medida ?? "",
         UnidadGrup: item.unidadGrup ?? item.UnidadGrup ?? "CAJA", UnidadSimple: item.unidadSimple ?? item.UnidadSimple ?? "UNIDAD",
-        ImagenUrl: imagenUrl, DescAdicional: item.descExtensa ?? item.DescExtensa ?? item.comentario ?? item.Comentario ?? item.notas ?? item.Notas ?? ""
+        ImagenUrl: imagenUrl, DescAdicional: item.descExtensa ?? item.DescExtensa ?? item.comentario ?? item.Comentario ?? item.notas ?? item.Notas ?? "",
+        RandomOrder: Math.random()
     };
 }
 

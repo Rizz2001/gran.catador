@@ -26,7 +26,14 @@ function iniciarCargaProducto(productId) {
             const p = JSON.parse(cached);
             // Validar que el código coincida
             if (window.compararIDs ? window.compararIDs(p.codigo, productId) : p.codigo == productId) {
-                renderizarProducto(p);
+                if (typeof window.soloCaja === 'undefined') {
+                    Promise.all([
+                        import('./config/solo_caja.js?v=' + new Date().getTime()).then(m => { if(m.soloCaja) window.soloCaja = m.soloCaja; }).catch(()=>{}),
+                        import('./config/solo_unidad.js?v=' + new Date().getTime()).then(m => { if(m.soloUnidad) window.soloUnidad = m.soloUnidad; }).catch(()=>{})
+                    ]).then(() => renderizarProducto(p));
+                } else {
+                    renderizarProducto(p);
+                }
                 return; // Termina la inicialización sin esperar la API
             }
         }
@@ -72,8 +79,8 @@ function iniciarCargaProducto(productId) {
 
 function renderizarProducto(p) {
     let esModoCaja = (typeof modoVistaGlobal !== 'undefined' ? modoVistaGlobal : 'unidad') === 'caja';
-    if (window.soloUnidad && window.soloUnidad.includes(p.Nombre)) esModoCaja = false;
-    else if (window.soloCaja && window.soloCaja.includes(p.Nombre)) esModoCaja = true;
+    if (window.soloUnidad && (window.soloUnidad.includes(p.Nombre) || window.soloUnidad.includes(String(p.codigo).trim()))) esModoCaja = false;
+    else if (window.soloCaja && (window.soloCaja.includes(p.Nombre) || window.soloCaja.includes(String(p.codigo).trim()))) esModoCaja = true;
 
     const cantCaja = p.CantidadGrup || 12;
     const isAgotado = esModoCaja ? (p.StockNum < cantCaja && p.StockNum < 999) : p.StockNum <= 0;
@@ -117,8 +124,8 @@ function renderizarProducto(p) {
     if (toggleCaja) {
         toggleCaja.checked = esModoCaja;
         
-        const forceUnidad = window.soloUnidad && window.soloUnidad.includes(p.Nombre);
-        const forceCaja = window.soloCaja && window.soloCaja.includes(p.Nombre);
+        const forceUnidad = window.soloUnidad && (window.soloUnidad.includes(p.Nombre) || window.soloUnidad.includes(String(p.codigo).trim()));
+        const forceCaja = window.soloCaja && (window.soloCaja.includes(p.Nombre) || window.soloCaja.includes(String(p.codigo).trim()));
         
         const switchContainer = toggleCaja.closest('.product__switch-container');
         if (switchContainer) {

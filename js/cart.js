@@ -248,12 +248,13 @@
       }
     }
   }
-  function sugerirAcompa\u00F1ante() {
+  function sugerirAcompañante() {
     let sugerencias = [];
+    const isActivo = (p) => p.StockNum > 0 && String(p.StockStr || "").toLowerCase() !== "agotado" && String(p.StockStr || "").toLowerCase() !== "suspendido" && p.Suspendido !== true;
     if (appState.codigosRecomendados && appState.codigosRecomendados.length > 0) {
-      sugerencias = (appState.inventario || []).filter((p) => appState.codigosRecomendados.includes(p.codigo) && p.StockNum > 0).slice(0, 3);
+      sugerencias = (appState.inventario || []).filter((p) => appState.codigosRecomendados.includes(p.codigo) && isActivo(p)).slice(0, 3);
     } else {
-      sugerencias = (appState.inventario || []).filter((p) => (p.Nombre.includes("HIELO") || p.Nombre.includes("COLA") || p.Nombre.includes("REFRESCO")) && p.StockNum > 0).slice(0, 3);
+      sugerencias = (appState.inventario || []).filter((p) => (p.Nombre.includes("HIELO") || p.Nombre.includes("COLA") || p.Nombre.includes("REFRESCO")) && isActivo(p)).slice(0, 3);
     }
     if (sugerencias.length > 0) {
       let cont = document.getElementById("cross-sell-items");
@@ -433,6 +434,8 @@
     let inventarioFuente = appState.inventario && appState.inventario.length > 0 ? appState.inventario : fallbackItems;
     let candidatos = inventarioFuente.filter((p) => {
       if (!p || !p.Nombre) return false;
+      const isAgotado = String(p.StockStr || "").toLowerCase() === "agotado" || String(p.StockStr || "").toLowerCase() === "suspendido" || p.Suspendido === true;
+      if (isAgotado) return false;
       const yaAgregado = enCarrito.some((itemNom) => itemNom.includes(p.Nombre));
       if (yaAgregado) return false;
       const { stockDisponible, unidadesRestantes } = calcularStockRestante(p.Nombre);
@@ -613,7 +616,7 @@
       abrirPerfil();
       return;
     }
-    let historial = JSON.parse(safeGetItem("gc_historial") || "") || [];
+    let historial = JSON.parse(safeGetItem("gc_historial") || "[]") || [];
     let fechaDate = /* @__PURE__ */ new Date();
     let fechaStr = fechaDate.toLocaleDateString("es-VE") + " - " + fechaDate.toLocaleTimeString("es-VE", { hour: "2-digit", minute: "2-digit" });
     let nuevoPedido = {
@@ -648,13 +651,15 @@
     msg += `\u{1F4E6} *Entrega:* ${entrega}
 `;
     if (entrega === "Delivery") {
-      let dir = document.getElementById("direccionDelivery")?.value.trim();
+      let dirElement = document.getElementById("direccionDelivery");
+      let dir = dirElement ? dirElement.value.trim() : "";
       if (!dir) return alert("Por favor, ingresa tu direcci\xF3n para el delivery.");
       msg += `\u{1F4CD} *Direcci\xF3n:* ${dir}
 `;
       if (!(safeGetItem("gc_direccion") || "")) safeSetItem("gc_direccion", dir);
     }
-    let notas = document.getElementById("notasPedido")?.value.trim();
+    let notasElement = document.getElementById("notasPedido");
+    let notas = notasElement ? notasElement.value.trim() : "";
     if (notas) msg += `\u{1F4DD} *Notas:* ${notas}
 `;
     let selectMetodo = document.getElementById("metodoPagoSelect");

@@ -799,7 +799,7 @@ function enviarPedido() {
     }
 
     // Generar registro histórico del pedido
-    let historial = JSON.parse((safeGetItem('gc_historial') || '')) || [];
+    let historial = JSON.parse((safeGetItem('gc_historial') || '[]')) || [];
     let fechaDate = new Date();
     let fechaStr = fechaDate.toLocaleDateString('es-VE') + " - " + fechaDate.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
 
@@ -832,13 +832,15 @@ function enviarPedido() {
     msg += `📦 *Entrega:* ${entrega}\n`;
 
     if (entrega === 'Delivery') {
-        let dir = (<HTMLInputElement>document.getElementById('direccionDelivery'))?.value.trim();
+        let dirElement = document.getElementById('direccionDelivery') as HTMLInputElement;
+        let dir = dirElement ? dirElement.value.trim() : '';
         if (!dir) return alert("Por favor, ingresa tu dirección para el delivery.");
         msg += `📍 *Dirección:* ${dir}\n`;
         if (!(safeGetItem('gc_direccion') || '')) safeSetItem('gc_direccion', dir);
     }
 
-    let notas = (<HTMLInputElement>document.getElementById('notasPedido'))?.value.trim();
+    let notasElement = document.getElementById('notasPedido') as HTMLInputElement;
+    let notas = notasElement ? notasElement.value.trim() : '';
     if (notas) msg += `📝 *Notas:* ${notas}\n`;
 
     let selectMetodo = document.getElementById('metodoPagoSelect') as HTMLSelectElement | null;

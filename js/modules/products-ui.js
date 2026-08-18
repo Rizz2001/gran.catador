@@ -30,8 +30,8 @@ window.agregarAlCarritoPorCodigo = function(codigo, btnElement) {
 
     let modoVista = (typeof modoVistaGlobal !== 'undefined') ? modoVistaGlobal : 'unidad';
     let esModoCaja = (modoVista === 'caja');
-    if (window.soloUnidad && window.soloUnidad.includes(p.Nombre)) esModoCaja = false;
-    else if (window.soloCaja && window.soloCaja.includes(p.Nombre)) esModoCaja = true;
+    if (window.soloUnidad && (window.soloUnidad.includes(p.Nombre) || window.soloUnidad.includes(String(p.codigo).trim()))) esModoCaja = false;
+    else if (window.soloCaja && (window.soloCaja.includes(p.Nombre) || window.soloCaja.includes(String(p.codigo).trim()))) esModoCaja = true;
     
     const precioNum = Number(esModoCaja ? (p.PrecioCajaNum ?? p.PrecioNum) : p.PrecioNum) || 0;
     const imgSrc = (typeof obtenerImgProducto === 'function') ? obtenerImgProducto(p) : (p.ImagenUrl || 'logo.webp');
@@ -52,8 +52,8 @@ window.cambiarCantPorCodigo = function(codigo, delta) {
 
     let modoVista = (typeof modoVistaGlobal !== 'undefined') ? modoVistaGlobal : 'unidad';
     let esModoCaja = (modoVista === 'caja');
-    if (window.soloUnidad && window.soloUnidad.includes(p.Nombre)) esModoCaja = false;
-    else if (window.soloCaja && window.soloCaja.includes(p.Nombre)) esModoCaja = true;
+    if (window.soloUnidad && (window.soloUnidad.includes(p.Nombre) || window.soloUnidad.includes(String(p.codigo).trim()))) esModoCaja = false;
+    else if (window.soloCaja && (window.soloCaja.includes(p.Nombre) || window.soloCaja.includes(String(p.codigo).trim()))) esModoCaja = true;
 
     const nombreFinal = esModoCaja ? `${p.Nombre} (CAJA)` : `${p.Nombre} (UNIDAD)`;
     if (typeof cambiarCant === 'function') {
@@ -67,8 +67,8 @@ function crearHTMLProducto(p) {
     }
     let modoVista = (typeof modoVistaGlobal !== 'undefined') ? modoVistaGlobal : 'unidad';
     let esModoCaja = (modoVista === 'caja');
-    if (window.soloUnidad && window.soloUnidad.includes(p.Nombre)) esModoCaja = false;
-    else if (window.soloCaja && window.soloCaja.includes(p.Nombre)) esModoCaja = true;
+    if (window.soloUnidad && (window.soloUnidad.includes(p.Nombre) || window.soloUnidad.includes(String(p.codigo).trim()))) esModoCaja = false;
+    else if (window.soloCaja && (window.soloCaja.includes(p.Nombre) || window.soloCaja.includes(String(p.codigo).trim()))) esModoCaja = true;
     const cantCaja = p.CantidadGrup || 12;
     const isAgotado = esModoCaja ? (p.StockNum < cantCaja && p.StockNum < 999) : p.StockNum <= 0;
 
@@ -205,8 +205,8 @@ window.sincronizarBotonesCards = function() {
 
         let modoVista = (typeof modoVistaGlobal !== 'undefined') ? modoVistaGlobal : 'unidad';
         let esModoCaja = (modoVista === 'caja');
-        if (window.soloUnidad && window.soloUnidad.includes(p.Nombre)) esModoCaja = false;
-        else if (window.soloCaja && window.soloCaja.includes(p.Nombre)) esModoCaja = true;
+        if (window.soloUnidad && (window.soloUnidad.includes(p.Nombre) || window.soloUnidad.includes(String(p.codigo).trim()))) esModoCaja = false;
+        else if (window.soloCaja && (window.soloCaja.includes(p.Nombre) || window.soloCaja.includes(String(p.codigo).trim()))) esModoCaja = true;
         const cantCaja = p.CantidadGrup || 12;
         const isAgotado = esModoCaja ? (p.StockNum < cantCaja && p.StockNum < 999) : p.StockNum <= 0;
 
