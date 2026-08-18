@@ -291,6 +291,42 @@ body.dark-mode .btn-add-main:disabled {
     color: #6b7280;
 }
 
+/* Botón Compartir */
+.btn-share-main {
+    height: 56px;
+    padding: 0 24px;
+    border-radius: 20px;
+    background: rgba(30, 58, 138, 0.08);
+    color: var(--color-primary, #1e3a8a);
+    border: 1px solid rgba(30, 58, 138, 0.2);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.btn-share-main:hover {
+    background: rgba(30, 58, 138, 0.16);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(30, 58, 138, 0.12);
+}
+
+body.dark-mode .btn-share-main {
+    background: rgba(245, 158, 11, 0.12);
+    color: var(--color-accent, #f59e0b);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+body.dark-mode .btn-share-main:hover {
+    background: rgba(245, 158, 11, 0.22);
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15);
+}
+
+
 .product__header-section {
     display: flex;
     flex-direction: column;
@@ -681,4 +717,12 @@ body.dark-mode .product__cta-icon {
         flex: 1; 
         min-width: 0;
     }
+
+    .btn-share-main {
+        height: 54px;
+        font-size: 15px;
+        border-radius: 16px;
+        padding: 0 18px;
+    }
 }
+
