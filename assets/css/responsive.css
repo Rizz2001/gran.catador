@@ -621,8 +621,35 @@ html, body {
     }
 }
 
+/* --- OPTIMIZACIÓN DE ESPACIO EN PANTALLAS ANCHAS Y MONITORES DE PC --- */
 @media (min-width: 1024px) {
+    .container,
+    .store-closed-banner-inner,
+    .site-header-inner,
+    .footer-container,
+    .hero-wrapper {
+        max-width: 1600px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
     .productos-grid {
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(5, 1fr) !important;
+        gap: 20px !important;
+        padding: 24px 28px !important;
+    }
+}
+
+@media (min-width: 1400px) {
+    .productos-grid {
+        grid-template-columns: repeat(6, 1fr) !important;
+        gap: 22px !important;
+    }
+}
+
+@media (min-width: 1680px) {
+    .productos-grid {
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 24px !important;
     }
 }
