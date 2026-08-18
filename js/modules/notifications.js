@@ -98,9 +98,21 @@ async function solicitarPermisoNotificaciones() {
   localStorage.setItem("gc_push_optin_asked", "true");
 
   try {
-    if (window.OneSignalDeferred && window.OneSignal) {
-      await window.OneSignal.Notifications.requestPermission();
-    } else if (typeof Notification !== "undefined" && Notification.requestPermission) {
+    if (window.OneSignalDeferred) {
+      window.OneSignalDeferred.push(async function(OneSignal) {
+        try {
+          if (OneSignal.Notifications && OneSignal.Notifications.requestPermission) {
+            await OneSignal.Notifications.requestPermission();
+          }
+          if (OneSignal.Slidedown && OneSignal.Slidedown.promptPush) {
+            await OneSignal.Slidedown.promptPush({ force: true });
+          }
+        } catch (err) {
+          console.warn("OneSignal prompt error:", err);
+        }
+      });
+    }
+    if (typeof Notification !== "undefined" && Notification.requestPermission) {
       const res = await Notification.requestPermission();
       if (res === "granted" && typeof window.mostrarToast === 'function') {
         window.mostrarToast("¡Notificaciones activadas!");
