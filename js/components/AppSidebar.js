@@ -3,6 +3,12 @@ sidebarTemplate.innerHTML = `
     <!-- Overlay para Menú Lateral -->
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
+    <!-- Botón Flotante (Icono suspendido en el aire para PC y Móvil) -->
+    <button id="floating-sidebar-btn" class="floating-sidebar-btn" aria-label="Explorar Grupos">
+        <i class="fa-solid fa-shapes"></i>
+        <span class="floating-sidebar-text">Explorar Grupos</span>
+    </button>
+
     <!-- Menú Lateral (Sidebar) de Categorías -->
     <aside id="sidebar-menu" class="sidebar-menu" aria-label="Filtros y Categorías">
         <div class="sidebar-header">
@@ -54,6 +60,17 @@ class AppSidebar extends HTMLElement {
             this.querySelector('#sidebar-overlay').addEventListener('click', () => { if(typeof closeSidebar === 'function') closeSidebar(); });
             this.querySelector('.sidebar-close-btn').addEventListener('click', () => { if(typeof closeSidebar === 'function') closeSidebar(); });
             this.querySelector('.sidebar-back-btn').addEventListener('click', () => { if(typeof volverAGrupos === 'function') volverAGrupos(); });
+
+            const floatBtn = this.querySelector('#floating-sidebar-btn');
+            if (floatBtn) {
+                floatBtn.addEventListener('click', () => { if(typeof toggleSidebar === 'function') toggleSidebar(); });
+            }
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && typeof closeSidebar === 'function') {
+                    closeSidebar();
+                }
+            });
         }
     }
 }

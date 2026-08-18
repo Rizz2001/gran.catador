@@ -293,53 +293,126 @@ body.dark-mode .sidebar-menu {
     transform: translateX(4px);
 }
 
+/* --- BOTÓN FLOTANTE SIDEBAR (SUSPENDIDO EN EL AIRE) --- */
+.floating-sidebar-btn {
+    position: fixed;
+    bottom: 35px;
+    left: 25px;
+    z-index: 2500;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--color-primary-dark, #0B132B), var(--color-primary, #1A2642));
+    color: var(--color-white, #ffffff);
+    border: 1.5px solid var(--color-accent, #D4AF37);
+    padding: 12px 22px;
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 15px rgba(212, 175, 55, 0.25);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    user-select: none;
+}
+
+.floating-sidebar-btn i {
+    font-size: 18px;
+    color: var(--color-accent, #D4AF37);
+    transition: transform 0.3s ease;
+}
+
+.floating-sidebar-btn .floating-sidebar-text {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.floating-sidebar-btn:hover {
+    transform: translateY(-4px) scale(1.06);
+    box-shadow: 0 15px 35px rgba(212, 175, 55, 0.4), 0 0 20px rgba(212, 175, 55, 0.35);
+    background: linear-gradient(135deg, #131E3A, #223359);
+}
+
+.floating-sidebar-btn:hover i {
+    transform: rotate(15deg) scale(1.1);
+}
+
+body.dark-mode .floating-sidebar-btn {
+    background: linear-gradient(135deg, #090e17, #131d30);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+@media (max-width: 768px) {
+    .floating-sidebar-btn {
+        bottom: 90px;
+        left: 16px;
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+}
+
 /* =========================================
-   PC LAYOUT: PERMANENT SIDEBAR (>1024px)
+   PC LAYOUT: OFF-CANVAS SIDEBAR DRAWER (>1024px)
    ========================================= */
 @media (min-width: 1024px) {
     .main-layout-container {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
+        display: block;
         max-width: 1300px;
         margin: 0 auto;
         padding: 0 10px;
-        gap: 20px;
     }
 
     .main-products-wrapper {
-        flex: 1;
+        width: 100%;
         min-width: 0;
     }
 
-    /* Sidebar Permanent (Se desplaza naturalmente al escrolear) */
+    /* Off-canvas sidebar en PC abierto por el botón flotante / header */
     .sidebar-menu {
+        position: fixed !important;
+        inset: 0 auto 0 0 !important;
+        width: 340px !important;
+        max-width: 85vw !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        transform: translate3d(-100%, 0, 0) !important;
+        transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+        z-index: 3000 !important;
+        border-radius: 0 24px 24px 0 !important;
+        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.4) !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .sidebar-menu.open {
+        transform: translate3d(0, 0, 0) !important;
+    }
+
+    .sidebar-menu .sidebar-content {
+        flex: 1 !important;
+        min-height: 0 !important;
         position: relative !important;
-        top: 0 !important;
-        height: auto !important;
-        transform: translateX(0) !important;
-        width: 280px !important;
-        border-radius: 20px !important;
-        flex-shrink: 0;
-        z-index: 10;
-        /* En desktop, usamos el mismo azul oscuro y mantenemos la estética premium */
-        box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+        height: 100% !important;
     }
 
     .sidebar-menu .sidebar-header {
-        display: flex !important; /* Mantenemos el header para el logo */
-        padding: 20px 24px;
+        display: flex !important;
+        padding: 24px;
+        flex-shrink: 0;
+    }
+
+    .sidebar-menu .sidebar-footer {
+        flex-shrink: 0;
     }
 
     .sidebar-menu .sidebar-close-btn {
-        display: none !important;
+        display: flex !important;
     }
 
     .sidebar-overlay {
-        display: none !important;
+        display: block !important;
     }
 
-    /* Eliminar offsets previos del header (vuelven a 100%) */
     body {
         padding-left: 0 !important;
     }
@@ -355,6 +428,6 @@ body.dark-mode .sidebar-menu {
     }
     
     .btn-menu-sidebar {
-        display: none !important;
+        display: inline-flex !important;
     }
 }
