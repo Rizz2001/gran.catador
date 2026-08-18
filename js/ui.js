@@ -98,28 +98,58 @@ function checkHorario() {
         let btnWs = document.getElementById('btn-whatsapp');
         let msgCerrado = document.getElementById('msg-cerrado');
 
-        if (!badge) return;
+        // Horario: 8:00 AM a 9:00 PM (8 a 21 hrs)
+        let isAbierto = (horaCaracas >= 8 && horaCaracas < 21);
 
-        let isAbierto = (horaCaracas >= 8 && horaCaracas < 20) || (horaCaracas === 20 && minutoCaracas <= 30);
-
-        if (isAbierto) {
-            try { isTiendaAbierta = true; } catch (e) { window.isTiendaAbierta = true; }
-            if (typeof appState !== 'undefined') appState.isTiendaAbierta = true;
-            badge.innerHTML = "🟢 ABIERTO";
-            badge.style.background = "rgba(37, 211, 102, 0.2)";
-            badge.style.color = "#25D366";
-            badge.style.borderColor = "rgba(37, 211, 102, 0.4)";
-            if (btnWs) btnWs.classList.remove('disabled');
-            if (msgCerrado) msgCerrado.style.display = "none";
-        } else {
+        // Controlar el banner flotante de Tienda Cerrada
+        let bannerCerrado = document.getElementById('store-closed-notice-banner');
+        if (!isAbierto) {
             try { isTiendaAbierta = false; } catch (e) { window.isTiendaAbierta = false; }
             if (typeof appState !== 'undefined') appState.isTiendaAbierta = false;
-            badge.innerHTML = "🔴 CERRADO";
-            badge.style.background = "rgba(234, 67, 53, 0.2)";
-            badge.style.color = "#ea4335";
-            badge.style.borderColor = "rgba(234, 67, 53, 0.4)";
-            if (btnWs) btnWs.classList.add('disabled');
-            if (msgCerrado) msgCerrado.style.display = "block";
+
+            if (!bannerCerrado && !sessionStorage.getItem('gc_closed_banner_dismissed')) {
+                bannerCerrado = document.createElement('div');
+                bannerCerrado.id = 'store-closed-notice-banner';
+                bannerCerrado.className = 'store-closed-banner';
+                bannerCerrado.innerHTML = `
+                    <div class="store-closed-banner-inner">
+                        <div class="store-closed-icon"><i class="fa-solid fa-moon"></i></div>
+                        <div class="store-closed-text">
+                            <strong>🌙 Tienda actualmente cerrada (Horario: 8:00 AM – 9:00 PM)</strong>
+                            <span>Tu pedido por WhatsApp quedará agendado y será atendido a primera hora del día de mañana.</span>
+                        </div>
+                        <button type="button" class="store-closed-close" onclick="sessionStorage.setItem('gc_closed_banner_dismissed','true'); this.parentElement.parentElement.remove();" title="Cerrar aviso">&times;</button>
+                    </div>
+                `;
+                const header = document.querySelector('app-header') || document.body.firstChild;
+                if (header && header.parentNode) {
+                    header.parentNode.insertBefore(bannerCerrado, header);
+                } else {
+                    document.body.prepend(bannerCerrado);
+                }
+            }
+        } else {
+            try { isTiendaAbierta = true; } catch (e) { window.isTiendaAbierta = true; }
+            if (typeof appState !== 'undefined') appState.isTiendaAbierta = true;
+            if (bannerCerrado) bannerCerrado.remove();
+        }
+
+        if (badge) {
+            if (isAbierto) {
+                badge.innerHTML = "🟢 ABIERTO";
+                badge.style.background = "rgba(37, 211, 102, 0.2)";
+                badge.style.color = "#25D366";
+                badge.style.borderColor = "rgba(37, 211, 102, 0.4)";
+                if (btnWs) btnWs.classList.remove('disabled');
+                if (msgCerrado) msgCerrado.style.display = "none";
+            } else {
+                badge.innerHTML = "🔴 CERRADO";
+                badge.style.background = "rgba(234, 67, 53, 0.2)";
+                badge.style.color = "#ea4335";
+                badge.style.borderColor = "rgba(234, 67, 53, 0.4)";
+                if (btnWs) btnWs.classList.add('disabled');
+                if (msgCerrado) msgCerrado.style.display = "block";
+            }
         }
     } catch (e) { }
 }
