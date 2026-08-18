@@ -108,18 +108,12 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = 
     let formatter = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "numeric", hour12: false, timeZone: "America/Caracas" });
     let parts = formatter.format(d).split(":");
     let horaCaracas = parseInt(parts[0]);
-    let minutoCaracas = parseInt(parts[1]);
     if (horaCaracas === 24) horaCaracas = 0;
-    let isAbierto = horaCaracas >= 8 && horaCaracas < 20 || horaCaracas === 20 && minutoCaracas <= 30;
-    if (!isAbierto) {
-      mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
-      return;
+    let isAbierto = horaCaracas >= 8 && horaCaracas < 21;
+    if (!isAbierto && typeof window.mostrarAlertaModalTiendaCerrada === "function") {
+      window.mostrarAlertaModalTiendaCerrada();
     }
   } catch (e) {
-    if (typeof window.isTiendaAbierta !== "undefined" && window.isTiendaAbierta === false) {
-      mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
-      return;
-    }
   }
   if (!tieneStockSuficiente(nombre, esCaja)) {
     return;
@@ -366,18 +360,12 @@ function cambiarCant(n, delta) {
       let formatter = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "numeric", hour12: false, timeZone: "America/Caracas" });
       let parts = formatter.format(d).split(":");
       let horaCaracas = parseInt(parts[0]);
-      let minutoCaracas = parseInt(parts[1]);
       if (horaCaracas === 24) horaCaracas = 0;
-      let isAbierto = horaCaracas >= 8 && horaCaracas < 20 || horaCaracas === 20 && minutoCaracas <= 30;
-      if (!isAbierto) {
-        mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
-        return;
+      let isAbierto = horaCaracas >= 8 && horaCaracas < 21;
+      if (!isAbierto && typeof window.mostrarAlertaModalTiendaCerrada === "function") {
+        window.mostrarAlertaModalTiendaCerrada();
       }
     } catch (e) {
-      if (typeof window.isTiendaAbierta !== "undefined" && window.isTiendaAbierta === false) {
-        mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
-        return;
-      }
     }
     const esCaja = n.includes("(CAJA)");
     const nombreBase = n.replace(/ \((CAJA|UNIDAD)\)$/, "");
@@ -465,7 +453,6 @@ function calcularVuelto() {
 }
 function enviarPedido() {
   if (Object.keys(appState.carrito).length === 0) return alert("Tu carrito est\xE1 vac\xEDo.");
-  if (!appState.isTiendaAbierta) return alert("Lo sentimos, Gran Catador est\xE1 cerrado en este momento.");
   let nombreUser = (safeGetItem("gc_nombre") || "" || "").trim();
   let cedulaUser = (safeGetItem("gc_cedula") || "" || "").trim();
   let telefonoUser = (safeGetItem("gc_telefono") || "" || "").trim();

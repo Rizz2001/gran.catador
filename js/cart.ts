@@ -159,28 +159,20 @@ function animarAlCarrito(btnElement: any, imgSrc: any) {
 
 /** Añade un producto al estado del carrito y lanza efectos visuales */
 function agregarAlCarrito(nombre: any, precio: any, btnElement: any, isCross = false, imgSrc = '', esCaja = false) {
-    // --- VALIDACIÓN HORARIO EN TIEMPO REAL ---
+    // --- AVISO DE HORARIO (NO BLOQUEA LA COMPRA) ---
     try {
         let d = new Date();
         let formatter = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', hour12: false, timeZone: 'America/Caracas' });
         let parts = formatter.format(d).split(':');
         let horaCaracas = parseInt(parts[0]);
-        let minutoCaracas = parseInt(parts[1]);
         if (horaCaracas === 24) horaCaracas = 0;
-        let isAbierto = (horaCaracas >= 8 && horaCaracas < 20) || (horaCaracas === 20 && minutoCaracas <= 30);
+        let isAbierto = (horaCaracas >= 8 && horaCaracas < 21);
         
-        if (!isAbierto) {
-            mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
-            return;
+        if (!isAbierto && typeof (window as any).mostrarAlertaModalTiendaCerrada === 'function') {
+            (window as any).mostrarAlertaModalTiendaCerrada();
         }
-    } catch (e) {
-        // Fallback al estado global si falla la zona horaria
-        if (typeof window.isTiendaAbierta !== 'undefined' && window.isTiendaAbierta === false) {
-            mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
-            return;
-        }
-    }
-    // --- FIN VALIDACIÓN HORARIO ---
+    } catch (e) {}
+    // --- FIN AVISO HORARIO ---
 
     // --- VALIDACIÓN DE STOCK ---
     if (!tieneStockSuficiente(nombre, esCaja)) {
@@ -489,26 +481,19 @@ function renderizarCarrito() {
 function cambiarCant(n: any, delta: any) {
     if (delta > 0) {
         // --- VALIDACIÓN HORARIO EN TIEMPO REAL ---
+        // --- VERIFICACIÓN DE HORARIO EN MODIFICAR CANTIDAD ---
         try {
             let d = new Date();
             let formatter = new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: 'numeric', hour12: false, timeZone: 'America/Caracas' });
             let parts = formatter.format(d).split(':');
             let horaCaracas = parseInt(parts[0]);
-            let minutoCaracas = parseInt(parts[1]);
             if (horaCaracas === 24) horaCaracas = 0;
-            let isAbierto = (horaCaracas >= 8 && horaCaracas < 20) || (horaCaracas === 20 && minutoCaracas <= 30);
-            
-            if (!isAbierto) {
-                mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
-                return;
+            let isAbierto = (horaCaracas >= 8 && horaCaracas < 21);
+            if (!isAbierto && typeof (window as any).mostrarAlertaModalTiendaCerrada === 'function') {
+                (window as any).mostrarAlertaModalTiendaCerrada();
             }
-        } catch (e) {
-            if (typeof window.isTiendaAbierta !== 'undefined' && window.isTiendaAbierta === false) {
-                mostrarToastError("Tienda Cerrada", "Lo sentimos, estamos fuera del horario laboral (8:00 AM - 8:30 PM).");
-                return;
-            }
-        }
-        // --- FIN VALIDACIÓN HORARIO ---
+        } catch (e) {}
+        // --- FIN VERIFICACIÓN ---
 
         const esCaja = n.includes('(CAJA)');
         const nombreBase = n.replace(/ \((CAJA|UNIDAD)\)$/, '');
@@ -616,7 +601,6 @@ function calcularVuelto() {
 /** Finaliza la compra y procesa el texto hacia WhatsApp */
 function enviarPedido() {
     if (Object.keys(appState.carrito).length === 0) return alert("Tu carrito está vacío.");
-    if (!appState.isTiendaAbierta) return alert("Lo sentimos, Gran Catador está cerrado en este momento.");
 
     // Validación de datos de perfil obligatorios
     let nombreUser = ((safeGetItem('gc_nombre') || '') || '').trim();
