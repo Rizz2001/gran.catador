@@ -47,6 +47,7 @@ const EXCLUDE = new Set([
 
 function copyRecursive(src, dest) {
     if (!fs.existsSync(src)) return;
+    if (src.endsWith('.ts')) return; // No copiar archivos TypeScript a producción
 
     const stat = fs.statSync(src);
     if (stat.isDirectory()) {
