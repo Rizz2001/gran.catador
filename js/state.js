@@ -1,4 +1,12 @@
 "use strict";
+const getItemSafe = (key) => {
+  try {
+    if (typeof safeGetItem === "function") return safeGetItem(key);
+    if (typeof localStorage !== "undefined") return localStorage.getItem(key);
+  } catch (e) {
+  }
+  return null;
+};
 window.appState = {
   // Datos de Inventario
   inventario: [],
@@ -7,11 +15,11 @@ window.appState = {
   // Registro de grupos ya descargados desde la API
   productosFiltrados: [],
   // Datos del Usuario
-  carrito: JSON.parse(safeGetItem("gc_cart") || "null") || {},
+  carrito: JSON.parse(getItemSafe("gc_cart") || "null") || {},
   totalCarrito: 0,
-  favoritos: JSON.parse(safeGetItem("gc_favs") || "null") || [],
+  favoritos: JSON.parse(getItemSafe("gc_favs") || "null") || [],
   // Configuración y Negocio
-  tasaOficial: parseFloat(safeGetItem("tasaDolar") || "0") || 0,
+  tasaOficial: parseFloat(getItemSafe("tasaDolar") || "0") || 0,
   isTiendaAbierta: true,
   // Estado de la Interfaz (UI)
   filtros: { categoriaActual: "LICORES", subcategoriaActual: null, modoVistaGlobal: "unidad" },

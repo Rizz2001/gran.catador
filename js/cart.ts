@@ -14,28 +14,30 @@ function guardarCarritoLS() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Calcula el stock real restante para un producto, descontando
- * las unidades y cajas que ya están en el carrito.
- * @param {string} nombreBase - Nombre del producto SIN sufijo (UNIDAD/CAJA).
- * @returns {{ prodObj: Object|null, stockDisponible: number, unidadesEnCarrito: number, unidadesRestantes: number, unidadesPorCaja: number }}
+ * Calcula el stock real restante para un producto.
  */
 function calcularStockRestante(nombreBase: any) {
-    const prodObj = appState.inventario.find(( x: any ) => x.Nombre === nombreBase);
+    if (!nombreBase) {
+        return { prodObj: null, stockDisponible: 999, unidadesEnCarrito: 0, unidadesRestantes: 999, unidadesPorCaja: 12 };
+    }
+    const cleanName = String(nombreBase).replace(/ \((CAJA|UNIDAD)\)$/, "").trim();
+    const prodObj = (appState && appState.inventario && appState.inventario.length > 0)
+        ? appState.inventario.find((x: any) => x.Nombre === cleanName || x.Nombre === nombreBase || x.codigo === nombreBase)
+        : null;
 
     if (!prodObj) {
         return { prodObj: null, stockDisponible: 999, unidadesEnCarrito: 0, unidadesRestantes: 999, unidadesPorCaja: 12 };
     }
 
-    const stockDisponible = prodObj.StockNum;
-    const unidadesPorCaja = (prodObj.CantidadGrup && prodObj.CantidadGrup > 0) ? prodObj.CantidadGrup : 12;
+    const stockDisponible = Number.isFinite(Number(prodObj.StockNum)) ? Number(prodObj.StockNum) : 999;
+    const unidadesPorCaja = (prodObj.CantidadGrup && Number(prodObj.CantidadGrup) > 0) ? Number(prodObj.CantidadGrup) : 12;
 
-    // Stock ilimitado: devolver directamente sin calcular carrito
     if (stockDisponible >= 999) {
         return { prodObj, stockDisponible: 999, unidadesEnCarrito: 0, unidadesRestantes: 999, unidadesPorCaja };
     }
 
-    const cantUnidades = appState.carrito[`${nombreBase} (UNIDAD)`]?.cantidad || 0;
-    const cantCajas = appState.carrito[`${nombreBase} (CAJA)`]?.cantidad || 0;
+    const cantUnidades = (appState.carrito && appState.carrito[`${cleanName} (UNIDAD)`]) ? appState.carrito[`${cleanName} (UNIDAD)`].cantidad || 0 : 0;
+    const cantCajas = (appState.carrito && appState.carrito[`${cleanName} (CAJA)`]) ? appState.carrito[`${cleanName} (CAJA)`].cantidad || 0 : 0;
     const unidadesEnCarrito = cantUnidades + (cantCajas * unidadesPorCaja);
     const unidadesRestantes = Math.max(0, stockDisponible - unidadesEnCarrito);
 
@@ -44,12 +46,10 @@ function calcularStockRestante(nombreBase: any) {
 
 /**
  * Valida si hay stock suficiente para agregar un producto (unidad o caja).
- * Muestra un mensaje claro y contextual si no se puede agregar.
- * @param {string} nombreBase - Nombre base del producto (sin sufijo).
- * @param {boolean} esCaja - True si se intenta agregar una caja completa.
- * @returns {boolean}
  */
 function tieneStockSuficiente(nombreBase: any, esCaja: any) {
+    if (!appState || !appState.inventario || appState.inventario.length === 0) return true;
+
     const { prodObj, stockDisponible, unidadesEnCarrito, unidadesRestantes, unidadesPorCaja } =
         calcularStockRestante(nombreBase);
 
@@ -59,7 +59,6 @@ function tieneStockSuficiente(nombreBase: any, esCaja: any) {
     const unidadesPorAgregar = esCaja ? unidadesPorCaja : 1;
 
     if (unidadesRestantes <= 0) {
-        // Ya se agotó todo el stock disponible
         mostrarToastError(
             `🚫 Límite de stock alcanzado`,
             `Solo hay <b>${stockDisponible}</b> unidad${stockDisponible !== 1 ? 'es' : ''} y ya las tienes todas en el carrito.`
@@ -69,7 +68,6 @@ function tieneStockSuficiente(nombreBase: any, esCaja: any) {
 
     if (unidadesPorAgregar > unidadesRestantes) {
         if (esCaja) {
-            // No alcanza el stock para una caja completa
             mostrarToastError(
                 `📦 Stock insuficiente para una caja`,
                 `Solo quedan <b>${unidadesRestantes}</b> unidad${unidadesRestantes !== 1 ? 'es' : ''} disponible${unidadesRestantes !== 1 ? 's' : ''}. Una caja requiere <b>${unidadesPorCaja}</b>.`
@@ -82,7 +80,6 @@ function tieneStockSuficiente(nombreBase: any, esCaja: any) {
         }
         return false;
     }
-
     return true;
 }
 
@@ -118,8 +115,9 @@ function mostrarToastError(titulo: any, detalle: any) {
 }
 
 /** Anima un producto volando hacia el icono del carrito */
-function animarAlCarrito(btnElement: any, imgSrc: any) {
-    if (!btnElement || !imgSrc) return;
+/** Anima un producto volando hacia el icono del carrito */
+function animarAlCarrito(btnElement: any, imgSrc: any, cachedRect: any = null) {
+    if (!imgSrc) return;
 
     // Buscar el icono del carrito activo (header en PC, nav en móvil)
     let cartIcon = document.querySelector('.header-right .icon-btn[aria-label="Carrito"]');
@@ -132,7 +130,15 @@ function animarAlCarrito(btnElement: any, imgSrc: any) {
 
     if (!cartIcon) return;
 
-    const btnRect = btnElement.getBoundingClientRect();
+    let btnRect = cachedRect;
+    if (!btnRect && btnElement && typeof btnElement.getBoundingClientRect === 'function') {
+        btnRect = btnElement.getBoundingClientRect();
+    }
+
+    if (!btnRect || (btnRect.width === 0 && btnRect.height === 0 && btnRect.top === 0 && btnRect.left === 0)) {
+        return; // Detener animación si no hay coordenadas válidas
+    }
+
     const cartRect = cartIcon.getBoundingClientRect();
     const flyingImg = document.createElement('img');
 
@@ -180,6 +186,19 @@ function animarContadorCarrito() {
 
 /** Añade un producto al estado del carrito y lanza efectos visuales */
 function agregarAlCarrito(nombre: any, precio: any, btnElement: any, isCross = false, imgSrc = '', esCaja = false) {
+    if (!nombre) return;
+
+    // Guardar coordenadas de botón ANTES de manipular o refrescar el DOM
+    let cachedRect: any = null;
+    if (btnElement && typeof btnElement.getBoundingClientRect === 'function') {
+        const r = btnElement.getBoundingClientRect();
+        if (r.width > 0 || r.height > 0 || r.top > 0 || r.left > 0) {
+            cachedRect = r;
+        }
+    }
+
+    const nombreBase = String(nombre).replace(/ \((CAJA|UNIDAD)\)$/, "").trim();
+
     // --- AVISO DE HORARIO (NO BLOQUEA LA COMPRA) ---
     try {
         let d = new Date();
@@ -196,26 +215,30 @@ function agregarAlCarrito(nombre: any, precio: any, btnElement: any, isCross = f
     // --- FIN AVISO HORARIO ---
 
     // --- VALIDACIÓN DE STOCK ---
-    if (!tieneStockSuficiente(nombre, esCaja)) {
+    if (!tieneStockSuficiente(nombreBase, esCaja)) {
         return; // Detener si no hay stock
     }
     // --- FIN VALIDACIÓN ---
 
-    let nombreFinal = esCaja ? `${nombre} (CAJA)` : `${nombre} (UNIDAD)`;
+    let nombreFinal = esCaja ? `${nombreBase} (CAJA)` : `${nombreBase} (UNIDAD)`;
+    let precioNum = Number(precio) || 0;
 
-    // Buscar el código para guardar la imagen en el carrito
-    let prodObj = appState.inventario.find(( x: any ) => x.Nombre === nombre);
+    if (!appState.carrito) appState.carrito = {};
+
+    let prodObj = (appState && appState.inventario && appState.inventario.length > 0)
+        ? appState.inventario.find(( x: any ) => x.Nombre === nombreBase || x.Nombre === nombre)
+        : null;
 
     if (appState.carrito[nombreFinal]) {
         appState.carrito[nombreFinal].cantidad++;
         appState.carrito[nombreFinal].subtotal = appState.carrito[nombreFinal].cantidad * appState.carrito[nombreFinal].precio;
     } else {
         appState.carrito[nombreFinal] = {
-            precio: precio,
+            precio: precioNum,
             cantidad: 1,
-            subtotal: precio,
+            subtotal: precioNum,
             codigo: prodObj ? prodObj.codigo : '',
-            categoria: prodObj ? (prodObj.Grupo || prodObj.Subgrupo) : '',
+            categoria: prodObj ? (prodObj.Grupo || prodObj.Subgrupo || prodObj.Cat || '') : '',
             esCaja: esCaja
         };
     }
@@ -227,18 +250,16 @@ function agregarAlCarrito(nombre: any, precio: any, btnElement: any, isCross = f
     if (typeof navigator !== 'undefined' && navigator.vibrate) { navigator.vibrate(50); }
 
     if (typeof (window as any).mostrarToastAgregarCarrito === 'function') {
-        (window as any).mostrarToastAgregarCarrito(nombre, imgSrc, esCaja);
+        (window as any).mostrarToastAgregarCarrito(nombreBase, imgSrc, esCaja);
     }
-    if (typeof (window as any).animarContadorCarrito === 'function') {
-        (window as any).animarContadorCarrito();
-    }
+    animarContadorCarrito();
 
     if (document.getElementById('lista-carrito')) {
         renderizarCarrito();
     }
 
-    if (btnElement && imgSrc) {
-        animarAlCarrito(btnElement, imgSrc);
+    if (imgSrc) {
+        animarAlCarrito(btnElement, imgSrc, cachedRect);
     }
 
     // Cambio visual de confirmación en el botón

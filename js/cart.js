@@ -3,22 +3,27 @@ function guardarCarritoLS() {
   safeSetItem("gc_cart", JSON.stringify(appState.carrito));
 }
 function calcularStockRestante(nombreBase) {
-  const prodObj = appState.inventario.find((x) => x.Nombre === nombreBase);
+  if (!nombreBase) {
+    return { prodObj: null, stockDisponible: 999, unidadesEnCarrito: 0, unidadesRestantes: 999, unidadesPorCaja: 12 };
+  }
+  const cleanName = String(nombreBase).replace(/ \((CAJA|UNIDAD)\)$/, "").trim();
+  const prodObj = appState && appState.inventario && appState.inventario.length > 0 ? appState.inventario.find((x) => x.Nombre === cleanName || x.Nombre === nombreBase || x.codigo === nombreBase) : null;
   if (!prodObj) {
     return { prodObj: null, stockDisponible: 999, unidadesEnCarrito: 0, unidadesRestantes: 999, unidadesPorCaja: 12 };
   }
-  const stockDisponible = prodObj.StockNum;
-  const unidadesPorCaja = prodObj.CantidadGrup && prodObj.CantidadGrup > 0 ? prodObj.CantidadGrup : 12;
+  const stockDisponible = Number.isFinite(Number(prodObj.StockNum)) ? Number(prodObj.StockNum) : 999;
+  const unidadesPorCaja = prodObj.CantidadGrup && Number(prodObj.CantidadGrup) > 0 ? Number(prodObj.CantidadGrup) : 12;
   if (stockDisponible >= 999) {
     return { prodObj, stockDisponible: 999, unidadesEnCarrito: 0, unidadesRestantes: 999, unidadesPorCaja };
   }
-  const cantUnidades = appState.carrito[`${nombreBase} (UNIDAD)`]?.cantidad || 0;
-  const cantCajas = appState.carrito[`${nombreBase} (CAJA)`]?.cantidad || 0;
+  const cantUnidades = appState.carrito && appState.carrito[`${cleanName} (UNIDAD)`] ? appState.carrito[`${cleanName} (UNIDAD)`].cantidad || 0 : 0;
+  const cantCajas = appState.carrito && appState.carrito[`${cleanName} (CAJA)`] ? appState.carrito[`${cleanName} (CAJA)`].cantidad || 0 : 0;
   const unidadesEnCarrito = cantUnidades + cantCajas * unidadesPorCaja;
   const unidadesRestantes = Math.max(0, stockDisponible - unidadesEnCarrito);
   return { prodObj, stockDisponible, unidadesEnCarrito, unidadesRestantes, unidadesPorCaja };
 }
 function tieneStockSuficiente(nombreBase, esCaja) {
+  if (!appState || !appState.inventario || appState.inventario.length === 0) return true;
   const { prodObj, stockDisponible, unidadesEnCarrito, unidadesRestantes, unidadesPorCaja } = calcularStockRestante(nombreBase);
   if (!prodObj) return true;
   if (stockDisponible >= 999) return true;
@@ -72,8 +77,8 @@ function mostrarToastError(titulo, detalle) {
   cont.appendChild(t);
   setTimeout(() => t.remove(), 3500);
 }
-function animarAlCarrito(btnElement, imgSrc) {
-  if (!btnElement || !imgSrc) return;
+function animarAlCarrito(btnElement, imgSrc, cachedRect = null) {
+  if (!imgSrc) return;
   let cartIcon = document.querySelector('.header-right .icon-btn[aria-label="Carrito"]');
   const navCart = document.getElementById("nav-cart-bottom") || document.getElementById("nav-cart");
   const bottomNav = document.querySelector(".bottom-nav");
@@ -81,7 +86,13 @@ function animarAlCarrito(btnElement, imgSrc) {
     cartIcon = navCart;
   }
   if (!cartIcon) return;
-  const btnRect = btnElement.getBoundingClientRect();
+  let btnRect = cachedRect;
+  if (!btnRect && btnElement && typeof btnElement.getBoundingClientRect === "function") {
+    btnRect = btnElement.getBoundingClientRect();
+  }
+  if (!btnRect || btnRect.width === 0 && btnRect.height === 0 && btnRect.top === 0 && btnRect.left === 0) {
+    return;
+  }
   const cartRect = cartIcon.getBoundingClientRect();
   const flyingImg = document.createElement("img");
   flyingImg.src = imgSrc;
@@ -121,6 +132,15 @@ function animarContadorCarrito() {
   });
 }
 function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = "", esCaja = false) {
+  if (!nombre) return;
+  let cachedRect = null;
+  if (btnElement && typeof btnElement.getBoundingClientRect === "function") {
+    const r = btnElement.getBoundingClientRect();
+    if (r.width > 0 || r.height > 0 || r.top > 0 || r.left > 0) {
+      cachedRect = r;
+    }
+  }
+  const nombreBase = String(nombre).replace(/ \((CAJA|UNIDAD)\)$/, "").trim();
   try {
     let d = /* @__PURE__ */ new Date();
     let formatter = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "numeric", hour12: false, timeZone: "America/Caracas" });
@@ -133,21 +153,23 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = 
     }
   } catch (e) {
   }
-  if (!tieneStockSuficiente(nombre, esCaja)) {
+  if (!tieneStockSuficiente(nombreBase, esCaja)) {
     return;
   }
-  let nombreFinal = esCaja ? `${nombre} (CAJA)` : `${nombre} (UNIDAD)`;
-  let prodObj = appState.inventario.find((x) => x.Nombre === nombre);
+  let nombreFinal = esCaja ? `${nombreBase} (CAJA)` : `${nombreBase} (UNIDAD)`;
+  let precioNum = Number(precio) || 0;
+  if (!appState.carrito) appState.carrito = {};
+  let prodObj = appState && appState.inventario && appState.inventario.length > 0 ? appState.inventario.find((x) => x.Nombre === nombreBase || x.Nombre === nombre) : null;
   if (appState.carrito[nombreFinal]) {
     appState.carrito[nombreFinal].cantidad++;
     appState.carrito[nombreFinal].subtotal = appState.carrito[nombreFinal].cantidad * appState.carrito[nombreFinal].precio;
   } else {
     appState.carrito[nombreFinal] = {
-      precio,
+      precio: precioNum,
       cantidad: 1,
-      subtotal: precio,
+      subtotal: precioNum,
       codigo: prodObj ? prodObj.codigo : "",
-      categoria: prodObj ? prodObj.Grupo || prodObj.Subgrupo : "",
+      categoria: prodObj ? prodObj.Grupo || prodObj.Subgrupo || prodObj.Cat || "" : "",
       esCaja
     };
   }
@@ -157,16 +179,14 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = 
     navigator.vibrate(50);
   }
   if (typeof window.mostrarToastAgregarCarrito === "function") {
-    window.mostrarToastAgregarCarrito(nombre, imgSrc, esCaja);
+    window.mostrarToastAgregarCarrito(nombreBase, imgSrc, esCaja);
   }
-  if (typeof window.animarContadorCarrito === "function") {
-    window.animarContadorCarrito();
-  }
+  animarContadorCarrito();
   if (document.getElementById("lista-carrito")) {
     renderizarCarrito();
   }
-  if (btnElement && imgSrc) {
-    animarAlCarrito(btnElement, imgSrc);
+  if (imgSrc) {
+    animarAlCarrito(btnElement, imgSrc, cachedRect);
   }
   if (btnElement && btnElement.parentElement) {
     let parent = btnElement.parentElement;
