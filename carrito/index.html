@@ -337,6 +337,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
         </div>
      <div id="modal-cart" class="modal-fullscreen">
         <div class="modal-content-wrapper premium-cart-container">
+            
+            <!-- STEPPER VISUAL ELEGANTE DE 4 PASOS (POSICIONADO AL INICIO DE LA VISTA) -->
+            <div id="checkout-stepper" class="checkout-stepper-container">
+                <div class="stepper-track">
+                    <div class="stepper-line">
+                        <div id="stepper-progress-fill" class="stepper-line-fill" style="width: 0%;"></div>
+                    </div>
+                    <div class="stepper-step active" data-step="1" onclick="setCheckoutStep(1)" title="1. Mi Pedido">
+                        <div class="step-circle"><span class="step-num">1</span><i class="fa-solid fa-check step-check"></i></div>
+                        <span class="step-label">Pedido</span>
+                    </div>
+                    <div class="stepper-step" data-step="2" onclick="setCheckoutStep(2)" title="2. Opciones de Entrega">
+                        <div class="step-circle"><span class="step-num">2</span><i class="fa-solid fa-check step-check"></i></div>
+                        <span class="step-label">Entrega</span>
+                    </div>
+                    <div class="stepper-step" data-step="3" onclick="setCheckoutStep(3)" title="3. Método de Pago">
+                        <div class="step-circle"><span class="step-num">3</span><i class="fa-solid fa-check step-check"></i></div>
+                        <span class="step-label">Pago</span>
+                    </div>
+                    <div class="stepper-step" data-step="4" onclick="setCheckoutStep(4)" title="4. Confirmación">
+                        <div class="step-circle"><span class="step-num">4</span><i class="fa-solid fa-check step-check"></i></div>
+                        <span class="step-label">Confirmar</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="premium-cart-layout">
                 <!-- Columna Izquierda: Productos -->
                 <div class="premium-cart-left">
@@ -363,31 +389,6 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <!-- Columna Derecha: Checkout / Subtotal -->
                 <div class="premium-cart-right">
                     <div id="checkout-sections" style="display:none;">
-                        
-                        <!-- STEPPER VISUAL ELEGANTE DE 4 PASOS -->
-                        <div id="checkout-stepper" class="checkout-stepper-container">
-                            <div class="stepper-track">
-                                <div class="stepper-line">
-                                    <div id="stepper-progress-fill" class="stepper-line-fill" style="width: 0%;"></div>
-                                </div>
-                                <div class="stepper-step active" data-step="1" onclick="setCheckoutStep(1)" title="1. Mi Pedido">
-                                    <div class="step-circle"><span class="step-num">1</span><i class="fa-solid fa-check step-check"></i></div>
-                                    <span class="step-label">Pedido</span>
-                                </div>
-                                <div class="stepper-step" data-step="2" onclick="setCheckoutStep(2)" title="2. Opciones de Entrega">
-                                    <div class="step-circle"><span class="step-num">2</span><i class="fa-solid fa-check step-check"></i></div>
-                                    <span class="step-label">Entrega</span>
-                                </div>
-                                <div class="stepper-step" data-step="3" onclick="setCheckoutStep(3)" title="3. Método de Pago">
-                                    <div class="step-circle"><span class="step-num">3</span><i class="fa-solid fa-check step-check"></i></div>
-                                    <span class="step-label">Pago</span>
-                                </div>
-                                <div class="stepper-step" data-step="4" onclick="setCheckoutStep(4)" title="4. Confirmación">
-                                    <div class="step-circle"><span class="step-num">4</span><i class="fa-solid fa-check step-check"></i></div>
-                                    <span class="step-label">Confirmar</span>
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- STEP 1: Resumen y Procesar Compra -->
                         <div id="step-1-summary" class="premium-checkout-box order-summary-card">
@@ -412,12 +413,14 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                         <!-- STEP 2: Opciones de Entrega -->
                         <div id="step-2-delivery" class="checkout-step-container" style="display:none;">
-                            <button type="button" class="btn-checkout-secondary" onclick="setCheckoutStep(1)" style="margin-bottom: 15px; width: 100%; background: var(--item-bg); border: 1px solid var(--color-border); padding: 12px; border-radius: var(--radius-md); color: var(--color-text); cursor: pointer; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                <i class="fa-solid fa-arrow-left"></i> Volver a la lista
-                            </button>
-
                             <div class="premium-checkout-box">
-                                <p class="box-title"><i class="fa-solid fa-motorcycle"></i> Opciones de Entrega</p>
+                                <button type="button" class="btn-checkout-back" onclick="setCheckoutStep(1)">
+                                    <i class="fa-solid fa-chevron-left"></i> Volver a la lista de productos
+                                </button>
+
+                                <p class="box-title" style="margin-bottom: 14px; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                    <i class="fa-solid fa-motorcycle" style="color: var(--color-accent, #D4AF37);"></i> Opciones de Entrega
+                                </p>
                                 <div class="premium-toggles">
                                     <input type="radio" id="ret" name="metodoEntrega" value="Retiro" checked onchange="toggleDireccion()">
                                     <label for="ret" class="premium-toggle-btn">
@@ -433,32 +436,32 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                         <span class="toggle-btn-sub">Envío a tu puerta</span>
                                     </label>
                                 </div>
-                                <div style="display:flex; gap: 8px; margin-top: 10px;">
+                                <div style="display:flex; gap: 8px; margin-top: 10px; width: 100%; box-sizing: border-box;">
                                     <input type="text" id="direccionDelivery" class="premium-input" placeholder="Ingresa tu dirección exacta..." style="display:none; flex-grow: 1;">
                                     <button id="btn-geo" onclick="obtenerUbicacion()" style="display:none; background: var(--item-bg); border: 1px solid var(--color-border); border-radius: 10px; padding: 0 15px; cursor: pointer; color: var(--color-primary); font-size: 18px; transition: 0.2s;" title="Usar mi ubicación actual">
                                         <i class="fa-solid fa-location-crosshairs"></i>
                                     </button>
                                 </div>
-                                <button id="btnMap" class="btn-maps" onclick="abrirMapa()">
+                                <button id="btnMap" class="btn-maps" onclick="abrirMapa()" style="margin-top: 12px; width: 100%; box-sizing: border-box;">
                                     <i class="fa-solid fa-location-dot"></i> Ver ruta a la tienda
                                 </button>
-                                <textarea id="notasPedido" class="premium-input" placeholder="Añadir opciones de regalo o notas..." style="margin-top:15px; height: 60px; resize: none;"></textarea>
-                            </div>
+                                <textarea id="notasPedido" class="premium-input" placeholder="Añadir opciones de regalo o notas..." style="margin-top:12px; height: 60px; resize: none; width: 100%; box-sizing: border-box;"></textarea>
 
-                            <button type="button" class="btn-checkout-primary" onclick="setCheckoutStep(3)" style="margin-top: 15px;">
-                                Continuar a Método de Pago
-                            </button>
+                                <button type="button" class="btn-checkout-primary" onclick="setCheckoutStep(3)" style="margin-top: 18px; width: 100%; box-sizing: border-box;">
+                                    Continuar a Método de Pago
+                                </button>
+                            </div>
                         </div>
 
                         <!-- STEP 3: Método de Pago -->
                         <div id="step-3-payment" class="checkout-step-container" style="display:none;">
-                            <button type="button" class="btn-checkout-secondary" onclick="setCheckoutStep(2)" style="margin-bottom: 15px; width: 100%; background: var(--item-bg); border: 1px solid var(--color-border); padding: 12px; border-radius: var(--radius-md); color: var(--color-text); cursor: pointer; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                <i class="fa-solid fa-arrow-left"></i> Volver a Opciones de Entrega
-                            </button>
-
                             <div class="premium-checkout-box">
+                                <button type="button" class="btn-checkout-back" onclick="setCheckoutStep(2)">
+                                    <i class="fa-solid fa-chevron-left"></i> Volver a Opciones de Entrega
+                                </button>
+
                                 <div class="box-title" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                    <span><i class="fa-solid fa-wallet"></i> Método de Pago</span>
+                                    <span><i class="fa-solid fa-wallet" style="color: var(--color-accent, #D4AF37);"></i> Método de Pago</span>
                                     <span style="font-size: 14px; font-weight: 800; color: var(--color-primary); background: rgba(30,58,138,0.05); padding: 4px 10px; border-radius: 8px;">
                                         <span id="totalUsdStep3">$0.00</span> <span style="font-size: 12px; font-weight: 600; color: var(--color-text-muted); margin-left: 4px;">(<span id="totalBsStep3">0,00 Bs</span>)</span>
                                     </span>
@@ -488,10 +491,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
                                 <!-- Panel: Efectivo -->
                                 <div id="box-efectivo" style="margin-top: 15px; text-align: center;">
-                                    <p style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 8px;">¿Con cuánto vas a pagar?</p>
-                                    <div style="display:flex; align-items:center; justify-content:center; gap:5px; width: 100%; box-sizing: border-box;">
-                                        <span style="font-size:22px; color:var(--color-primary); font-weight:bold;">$</span>
-                                        <input type="number" id="montoPago" class="premium-input" placeholder="0.00" onkeyup="calcularVuelto()" style="flex-grow: 1; width: 100%;">
+                                    <p style="font-size: 13px; color: var(--color-text-muted); margin-bottom: 8px; font-weight: 600;">¿Con cuánto vas a pagar?</p>
+                                    <div style="position: relative; display: flex; align-items: center; width: 100%; box-sizing: border-box;">
+                                        <span style="position: absolute; left: 16px; font-size: 18px; font-weight: 800; color: var(--color-primary); pointer-events: none;">$</span>
+                                        <input type="number" id="montoPago" class="premium-input" placeholder="0.00" onkeyup="calcularVuelto()" style="padding-left: 34px; width: 100%; box-sizing: border-box; font-size: 16px; font-weight: 700;">
                                     </div>
                                     <p id="res-vuelto" style="font-size:13px; margin-top:8px; display:none; font-weight:bold;"></p>
                                 </div>
@@ -531,20 +534,20 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     <input type="text" id="refZelle" class="premium-input" placeholder="Nombre del Titular Zelle (Opcional)">
                                     <p class="payment-card__hint"><i class="fa-solid fa-camera"></i> Adjunta el capture en WhatsApp</p>
                                 </div>
+
+                                <button type="button" class="btn-checkout-primary" onclick="setCheckoutStep(4)" style="margin-top: 18px; width: 100%; box-sizing: border-box;">
+                                    Continuar a Confirmación
+                                </button>
                             </div>
-                            
-                            <button type="button" class="btn-checkout-primary" onclick="setCheckoutStep(4)" style="margin-top: 15px;">
-                                Continuar a Confirmación
-                            </button>
                         </div>
 
                         <!-- STEP 4: Confirmación Final -->
                         <div id="step-4-confirm" class="checkout-step-container" style="display:none;">
-                            <button type="button" class="btn-checkout-secondary" onclick="setCheckoutStep(3)" style="margin-bottom: 15px; width: 100%; background: var(--item-bg); border: 1px solid var(--color-border); padding: 12px; border-radius: var(--radius-md); color: var(--color-text); cursor: pointer; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                                <i class="fa-solid fa-arrow-left"></i> Volver a Método de Pago
-                            </button>
-
                             <div class="premium-checkout-box order-summary-card">
+                                <button type="button" class="btn-checkout-back" onclick="setCheckoutStep(3)">
+                                    <i class="fa-solid fa-chevron-left"></i> Volver a Método de Pago
+                                </button>
+
                                 <div class="summary-heading">
                                     <span class="summary-title">Confirmación Final</span>
                                     <span class="summary-note">Revisa antes de enviar por WhatsApp</span>
@@ -557,7 +560,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     <span>Equivalente</span>
                                     <span class="total-bs" id="totalBsModalFinal">0,00 Bs</span>
                                 </div>
-                                <button type="button" id="btn-whatsapp" class="btn-checkout-primary btn-whatsapp-shimmer" onclick="enviarPedido()">
+                                <button type="button" id="btn-whatsapp" class="btn-checkout-primary btn-whatsapp-shimmer" onclick="enviarPedido()" style="margin-top: 18px; width: 100%; box-sizing: border-box;">
                                     <i class="fa-brands fa-whatsapp btn-wa-icon-pulse"></i> <span>Enviar Pedido por WhatsApp</span>
                                 </button>
                             </div>

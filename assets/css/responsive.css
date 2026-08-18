@@ -231,7 +231,13 @@
     .producto-titulo {
         font-size: 12.5px !important;
         line-height: 1.35 !important;
-        height: 34px !important;
+        height: auto !important;
+        min-height: 34px !important;
+        display: -webkit-box !important;
+        -webkit-line-clamp: 2 !important;
+        line-clamp: 2 !important;
+        -webkit-box-orient: vertical !important;
+        overflow: hidden !important;
         margin-bottom: 4px !important;
         word-break: break-word !important;
         font-weight: 600 !important;
@@ -269,7 +275,12 @@
     .product-price-bs {
         font-size: 0.78rem !important;
         font-weight: 500 !important;
-        opacity: 0.85 !important;
+        opacity: 0.95 !important;
+    }
+
+    body.dark-mode .product-price-bs {
+        opacity: 1 !important;
+        color: #cbd5e1 !important;
     }
 
     .product-bottom-action {
@@ -453,7 +464,7 @@
         flex: 0 1 auto !important;
         justify-content: flex-end !important;
         align-items: center !important;
-        flex-wrap: wrap !important;
+        flex-wrap: nowrap !important;
         gap: 6px !important;
         margin-top: 0 !important;
         max-width: calc(100% - 120px) !important;
@@ -469,9 +480,10 @@
     .horizontal-filters,
     #contenedorCategorias,
     #contenedorSubcategorias {
-        margin: 0 -12px !important;
-        padding: 5px 12px !important;
-        width: auto !important;
+        margin: 0 !important;
+        padding: 8px 16px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     /* --- OPTIMIZACIÓN DE SIDEBAR DE CATEGORÍAS EN MÓVIL (ELIMINADO PARA USAR EL ASPECTO DE PC) --- */
@@ -575,23 +587,27 @@
 /* --- OPTIMIZACIÓN EXTREMA PARA DISPOSITIVOS MUY PEQUEÑOS (ej. iPhone SE, Galaxy Fold) < 400px --- */
 @media (max-width: 400px) {
     .header-main-container {
-        gap: 5px !important;
-        padding: 5px 8px !important;
+        gap: 6px !important;
+        padding: 8px 12px !important;
     }
 
     .search-pill {
         padding: 5px 10px !important;
+        position: relative !important;
     }
 
     .icon-btn {
-        width: 28px !important;
-        height: 28px !important;
-        font-size: 13px !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+        font-size: 14px !important;
     }
 
     .btn-menu-sidebar {
-        padding: 5px 8px !important;
-        font-size: 11px !important;
+        padding: 6px 10px !important;
+        font-size: 12px !important;
+        min-height: 40px !important;
     }
 
     .productos-grid {
@@ -676,5 +692,12 @@ html, body {
 @media (min-width: 1024px) {
     .productos-grid {
         grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* --- ADAPTACIÓN ULTRA ESTRECHA (<340px ej. Galaxy Fold) --- */
+@media (max-width: 340px) {
+    .productos-grid {
+        grid-template-columns: 1fr !important;
     }
 }

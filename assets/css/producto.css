@@ -447,46 +447,54 @@ body.dark-mode .product__section-title i {
 }
 
 .product__specs-grid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
 }
 
 .spec-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-    transition: background 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    background: rgba(248, 250, 252, 0.8);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.spec-row:nth-child(even) {
-    background: rgba(0, 0, 0, 0.02);
-}
-
-body.dark-mode .spec-row:nth-child(even) {
-    background: rgba(255, 255, 255, 0.02);
+body.dark-mode .spec-row {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .spec-row:hover {
-    background: rgba(30, 58, 138, 0.04);
+    background: #ffffff;
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 20px rgba(30, 58, 138, 0.08);
+    transform: translateY(-2px);
 }
 
-.spec-row:last-child {
-    border-bottom: none;
+body.dark-mode .spec-row:hover {
+    background: rgba(15, 23, 42, 0.8);
+    border-color: var(--color-accent);
+    box-shadow: 0 4px 20px rgba(245, 158, 11, 0.08);
 }
 
 .spec-name {
     font-weight: 600;
     color: var(--color-text-muted);
-    font-size: 14px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
 }
 
 .spec-value {
     font-weight: 700;
     color: var(--color-text);
-    font-size: 14px;
-    text-align: right;
+    font-size: 15px;
+    text-align: left;
+    word-break: break-word;
 }
 
 /* CTA Final */
@@ -657,20 +665,28 @@ body.dark-mode .product__cta-icon {
         line-height: 1.6;
     }
 
-    .spec-row {
-        padding: 12px 10px;
+    .product__specs-grid {
         grid-template-columns: 1fr 1fr;
         gap: 10px;
     }
+
+    .spec-row {
+        padding: 14px 12px;
+        border-radius: 12px;
+    }
     
     .spec-name {
-        font-size: 14px;
+        font-size: 11px;
+        margin-bottom: 4px;
     }
 
     .spec-value {
-        text-align: right;
         font-size: 14px;
-        color: var(--color-text);
+        text-align: left;
+    }
+
+    .product-page-container {
+        padding-bottom: 120px !important;
     }
 
     /* Acciones: Normales, NO STICKY, para no saturar la pantalla */
@@ -678,12 +694,12 @@ body.dark-mode .product__cta-icon {
         position: static;
         background: transparent;
         padding: 0;
-        margin-top: 5px;
+        margin-top: 8px;
         box-shadow: none;
         z-index: auto;
         display: flex;
-        flex-direction: row; 
-        gap: 12px;
+        flex-wrap: wrap; 
+        gap: 10px;
         animation: none;
     }
 
@@ -693,36 +709,48 @@ body.dark-mode .product__cta-icon {
     }
 
     .qty-selector {
-        height: 54px;
-        border-radius: 16px;
-        flex: 0 0 130px;
+        height: 50px;
+        border-radius: 14px;
+        flex: 0 0 120px;
         justify-content: space-between;
     }
 
     .qty-btn {
-        width: 45px; 
-        height: 54px;
+        width: 38px; 
+        height: 50px;
     }
 
     .qty-input {
-        width: 40px;
-        height: 54px;
-        font-size: 16px; 
+        width: 36px;
+        height: 50px;
+        font-size: 15px; 
     }
 
     .btn-add-main {
-        height: 54px;
-        font-size: 16px;
-        border-radius: 16px;
-        flex: 1; 
-        min-width: 0;
+        height: 50px;
+        font-size: 14px;
+        font-weight: 700;
+        border-radius: 14px;
+        flex: 1 1 calc(100% - 135px); 
+        min-width: 140px;
+        white-space: nowrap;
+        padding: 0 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
     }
 
     .btn-share-main {
-        height: 54px;
-        font-size: 15px;
-        border-radius: 16px;
-        padding: 0 18px;
+        height: 48px;
+        font-size: 14px;
+        border-radius: 14px;
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 2px;
     }
 }
 
