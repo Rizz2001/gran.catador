@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/generate-manifest.js && vite",
-    "build": "node scripts/generate-manifest.js && vite build",
+    "build": "node scripts/build.js",
     "preview": "vite preview"
   },
   "devDependencies": {
