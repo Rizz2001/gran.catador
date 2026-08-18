@@ -1,8 +1,24 @@
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const ROOT = path.join(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
+
+// --- 0. Compilar TypeScript a JavaScript automáticamente ---
+try {
+    const tsFiles = ['js/cart.ts', 'js/state.ts'];
+    for (const tsFile of tsFiles) {
+        const fullPath = path.join(ROOT, tsFile);
+        if (fs.existsSync(fullPath)) {
+            const outPath = fullPath.replace(/\.ts$/, '.js');
+            execSync(`npx esbuild "${fullPath}" --outfile="${outPath}" --bundle=false`, { stdio: 'inherit' });
+        }
+    }
+    console.log('[TS Compiler] Archivos TypeScript compilados a JavaScript correctamente.');
+} catch (error) {
+    console.warn('[TS Compiler Warning] No se pudo ejecutar esbuild automático, usando JS existente.', error.message);
+}
 
 // --- 1. Generar manifest de imágenes de productos ---
 const imgDir = path.join(ROOT, 'assets/img/productos');
