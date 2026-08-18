@@ -205,6 +205,17 @@ function agregarAlCarrito(nombre: any, precio: any, btnElement: any, isCross = f
     // Haptic Feedback (Vibración nativa en móviles compatibles)
     if (typeof navigator !== 'undefined' && navigator.vibrate) { navigator.vibrate(50); }
 
+    if (typeof (window as any).mostrarToastAgregarCarrito === 'function') {
+        (window as any).mostrarToastAgregarCarrito(nombre, imgSrc, esCaja);
+    }
+    if (typeof (window as any).animarContadorCarrito === 'function') {
+        (window as any).animarContadorCarrito();
+    }
+
+    if (document.getElementById('lista-carrito')) {
+        renderizarCarrito();
+    }
+
     if (btnElement && imgSrc) {
         animarAlCarrito(btnElement, imgSrc);
     }
@@ -454,19 +465,22 @@ function renderizarCarrito() {
                 <div class="cart-item-left">
                     ${imgHTML}
                     <div class="cart-item-info">
-                        <p class="cart-item-title">${nombre}</p>
-                        <p class="cart-item-unit">$${item.precio.toFixed(2)} <span class="cart-item-price-bs">/ ${(item.precio * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs</span></p>
+                        <h4 class="cart-item-title" title="${nombre}">${nombre}</h4>
+                        <p class="cart-item-unit">Unit: $${item.precio.toFixed(2)} <span class="cart-item-price-bs">(${(item.precio * appState.tasaOficial).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs)</span></p>
                         ${stockBadge}
                     </div>
                 </div>
                 <div class="cart-item-right">
-                    <div class="cart-item-total">$${subTotalItem.toFixed(2)}<br><span style="font-size:12px; color:var(--color-text-muted); font-weight:normal; display:block;">${subTotalItemBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs</span></div>
+                    <div class="cart-item-total">
+                        <span class="subtotal-usd">$${subTotalItem.toFixed(2)}</span>
+                        <span class="subtotal-bs">Bs. ${subTotalItemBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
                     <div class="cart-controls" aria-label="Controles de cantidad">
                         <button type="button" class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
                         <span class="cart-item-qty">${item.cantidad}</span>
                         <button type="button" ${btnSumarAttrs}><i class="fa-solid ${bloquearSumar ? 'fa-lock' : 'fa-plus'}"></i></button>
                     </div>
-                    <button type="button" class="cart-item-delete" onclick="cambiarCantB64('${nombreB64}', -${item.cantidad})" aria-label="Eliminar ${nombre}">
+                    <button type="button" class="cart-item-delete" onclick="cambiarCantB64('${nombreB64}', -${item.cantidad})" aria-label="Eliminar ${nombre}" title="Eliminar producto">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </div>
@@ -484,6 +498,104 @@ function renderizarCarrito() {
     
     // Asegurar que siempre se inicie en el Paso 1 al abrir o refrescar el carrito
     setCheckoutStep(1);
+    renderizarSugerenciasRapidasCarrito();
+}
+
+function renderizarSugerenciasRapidasCarrito() {
+    const container = document.getElementById("cart-suggestions-container");
+    if (!container) return;
+
+    const enCarrito = Object.keys(appState.carrito || {});
+    
+    // Fallback garantizado de productos si el inventario no se ha cargado aún
+    const fallbackItems = [
+        { codigo: "HIELO_5K", Nombre: "BOLSA DE HIELO 5KG", PrecioNum: 2.5, Cat: "HIELO" },
+        { codigo: "SNACK_PRINGLES", Nombre: "PAPITAS PRINGLES", PrecioNum: 3.0, Cat: "SNACKS" },
+        { codigo: "REFRESCO_COCA", Nombre: "COCA-COLA 2.25L", PrecioNum: 2.2, Cat: "REFRESCO" },
+        { codigo: "LIMON_MALLA", Nombre: "LIMONES FRESCOS 1KG", PrecioNum: 1.5, Cat: "FRUTAS" },
+        { codigo: "SNACK_MANI", Nombre: "MANI SALADO 200G", PrecioNum: 1.8, Cat: "SNACKS" }
+    ];
+
+    let inventarioFuente = (appState.inventario && appState.inventario.length > 0) 
+        ? appState.inventario 
+        : fallbackItems;
+
+    // Filtrar ítems que tengan existencias en stock y no estén en el carrito
+    let candidatos = inventarioFuente.filter((p: any) => {
+        if (!p || !p.Nombre) return false;
+        const yaAgregado = enCarrito.some((itemNom) => itemNom.includes(p.Nombre));
+        if (yaAgregado) return false;
+
+        const { stockDisponible, unidadesRestantes } = calcularStockRestante(p.Nombre);
+        const tieneStock = (p.StockNum === undefined || p.StockNum > 0) && (stockDisponible >= 999 || unidadesRestantes > 0);
+
+        return tieneStock;
+    });
+
+    // Priorizar Hielos y Snacks
+    let hielosYSnacks = candidatos.filter((p: any) => {
+        const cat = (p.Cat || p.Categoria || "").toUpperCase();
+        const nom = p.Nombre.toUpperCase();
+        return ["HIELO", "SNACK", "PAPITA", "DORITOS", "MANI", "CHIP", "CHUCHERIA", "LIMON", "REFRESCO", "COCA", "AGUA", "TONICA"].some(
+            (k) => cat.includes(k) || nom.includes(k)
+        );
+    });
+
+    // Aleatorizar (shuffle) para recomendar variedad fresca en cada apertura
+    hielosYSnacks.sort(() => Math.random() - 0.5);
+
+    let sugerencias = hielosYSnacks.slice(0, 5);
+
+    // Completar con otros productos aleatorios si faltan
+    if (sugerencias.length < 3) {
+        let otros = candidatos.filter((p: any) => !sugerencias.includes(p)).sort(() => Math.random() - 0.5);
+        sugerencias = [...sugerencias, ...otros].slice(0, 5);
+    }
+
+    if (sugerencias.length === 0) {
+        sugerencias = fallbackItems.filter((p) => !enCarrito.some((itemNom) => itemNom.includes(p.Nombre))).slice(0, 5);
+    }
+
+    let html = `
+    <div class="cart-suggestions-widget">
+      <div class="suggestions-header">
+        <h4><i class="fa-solid fa-wand-magic-sparkles"></i> Añade a tu pedido con 1 clic</h4>
+        <span class="suggestions-sub">🧊 Hielos, 🍿 Snacks y Mezcladores recomendados</span>
+      </div>
+      <div class="suggestions-grid">
+    `;
+
+    sugerencias.forEach((p: any) => {
+        const nombreUnidad = `${p.Nombre} (UNIDAD)`;
+        const nombreB64 = codificarNombre(nombreUnidad);
+        const imgSrc = obtenerImgProducto(p);
+        const precioUsd = (p.PrecioNum || 0).toFixed(2);
+        const tasa = appState.tasaOficial || 36;
+        const precioBs = ((p.PrecioNum || 0) * tasa).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        html += `
+      <div class="suggestion-card">
+        <div class="suggestion-img-wrap">
+          <img src="${imgSrc}" class="suggestion-img" alt="${p.Nombre}" onerror="imgFallbackFolder(this)" data-codigo="${p.codigo || ''}">
+        </div>
+        <div class="suggestion-info">
+          <h5 class="suggestion-title" title="${p.Nombre}">${p.Nombre}</h5>
+          <p class="suggestion-price">$${precioUsd} <span class="suggestion-bs">(${precioBs} Bs)</span></p>
+        </div>
+        <button type="button" class="btn-fast-add" onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, '${imgSrc}', false)">
+          <i class="fa-solid fa-plus"></i> Añadir
+        </button>
+      </div>
+        `;
+    });
+
+    html += `
+      </div>
+    </div>
+    `;
+
+    container.innerHTML = html;
+    container.style.display = "block";
 }
 
 function cambiarCant(n: any, delta: any) {
@@ -747,8 +859,27 @@ function cambiarCantB64(b64: any, d: any) {
  * Maneja el flujo de checkout en pasos (Local State)
  * @param {number} step - Paso actual (1, 2, 3, 4)
  */
+function actualizarStepperCheckout(step: number) {
+    const lineFill = document.getElementById("stepper-progress-fill");
+    if (lineFill) {
+        const percentages: Record<number, string> = { 1: "0%", 2: "33%", 3: "66%", 4: "100%" };
+        lineFill.style.width = percentages[step] || "0%";
+    }
+    const steps = document.querySelectorAll(".stepper-step");
+    steps.forEach((el) => {
+        const s = parseInt(el.getAttribute("data-step") || "1");
+        el.classList.remove("active", "completed");
+        if (s === step) {
+            el.classList.add("active");
+        } else if (s < step) {
+            el.classList.add("completed");
+        }
+    });
+}
+
 function setCheckoutStep(step: any) {
     appState.checkoutStep = step;
+    actualizarStepperCheckout(step);
     
     let step1Summary = document.getElementById('step-1-summary');
     let step2Delivery = document.getElementById('step-2-delivery');
@@ -767,6 +898,7 @@ function setCheckoutStep(step: any) {
             if (dir && !dir.value.trim()) {
                 alert("Por favor, ingresa tu dirección para el delivery antes de continuar.");
                 appState.checkoutStep = 2; // Revertir estado
+                actualizarStepperCheckout(2);
                 return;
             }
         }
@@ -839,3 +971,5 @@ export {};
 (window as any).agregarAlCarritoB64 = agregarAlCarritoB64;
 (window as any).cambiarCantB64 = cambiarCantB64;
 (window as any).setCheckoutStep = setCheckoutStep;
+(window as any).actualizarStepperCheckout = actualizarStepperCheckout;
+(window as any).renderizarSugerenciasRapidasCarrito = renderizarSugerenciasRapidasCarrito;

@@ -138,6 +138,13 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = 
   if (typeof navigator !== "undefined" && navigator.vibrate) {
     navigator.vibrate(50);
   }
+  mostrarToastAgregarCarrito(nombre, imgSrc, esCaja);
+  animarContadorCarrito();
+
+  if (document.getElementById("lista-carrito")) {
+    renderizarCarrito();
+  }
+
   if (btnElement && imgSrc) {
     animarAlCarrito(btnElement, imgSrc);
   }
@@ -335,19 +342,22 @@ function renderizarCarrito() {
                 <div class="cart-item-left">
                     ${imgHTML}
                     <div class="cart-item-info">
-                        <p class="cart-item-title">${nombre}</p>
-                        <p class="cart-item-unit">$${item.precio.toFixed(2)} <span class="cart-item-price-bs">/ ${(item.precio * appState.tasaOficial).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs</span></p>
+                        <h4 class="cart-item-title" title="${nombre}">${nombre}</h4>
+                        <p class="cart-item-unit">Unit: $${item.precio.toFixed(2)} <span class="cart-item-price-bs">(${(item.precio * appState.tasaOficial).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs)</span></p>
                         ${stockBadge}
                     </div>
                 </div>
                 <div class="cart-item-right">
-                    <div class="cart-item-total">$${subTotalItem.toFixed(2)}<br><span style="font-size:12px; color:var(--color-text-muted); font-weight:normal; display:block;">${subTotalItemBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs</span></div>
+                    <div class="cart-item-total">
+                        <span class="subtotal-usd">$${subTotalItem.toFixed(2)}</span>
+                        <span class="subtotal-bs">Bs. ${subTotalItemBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </div>
                     <div class="cart-controls" aria-label="Controles de cantidad">
                         <button type="button" class="cart-btn" onclick="cambiarCantB64('${nombreB64}', -1)">${btnMinus}</button>
                         <span class="cart-item-qty">${item.cantidad}</span>
                         <button type="button" ${btnSumarAttrs}><i class="fa-solid ${bloquearSumar ? "fa-lock" : "fa-plus"}"></i></button>
                     </div>
-                    <button type="button" class="cart-item-delete" onclick="cambiarCantB64('${nombreB64}', -${item.cantidad})" aria-label="Eliminar ${nombre}">
+                    <button type="button" class="cart-item-delete" onclick="cambiarCantB64('${nombreB64}', -${item.cantidad})" aria-label="Eliminar ${nombre}" title="Eliminar producto">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </div>
@@ -360,6 +370,104 @@ function renderizarCarrito() {
   document.getElementById("totalBsModal").innerText = `${appState.totalCarritoBs.toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
   calcularVuelto();
   setCheckoutStep(1);
+  renderizarSugerenciasRapidasCarrito();
+}
+
+function renderizarSugerenciasRapidasCarrito() {
+  const container = document.getElementById("cart-suggestions-container");
+  if (!container) return;
+
+  const enCarrito = Object.keys(appState.carrito || {});
+  
+  // Fallback garantizado de productos si el inventario no se ha cargado aún
+  const fallbackItems = [
+    { codigo: "HIELO_5K", Nombre: "BOLSA DE HIELO 5KG", PrecioNum: 2.5, Cat: "HIELO" },
+    { codigo: "SNACK_PRINGLES", Nombre: "PAPITAS PRINGLES", PrecioNum: 3.0, Cat: "SNACKS" },
+    { codigo: "REFRESCO_COCA", Nombre: "COCA-COLA 2.25L", PrecioNum: 2.2, Cat: "REFRESCO" },
+    { codigo: "LIMON_MALLA", Nombre: "LIMONES FRESCOS 1KG", PrecioNum: 1.5, Cat: "FRUTAS" },
+    { codigo: "SNACK_MANI", Nombre: "MANI SALADO 200G", PrecioNum: 1.8, Cat: "SNACKS" }
+  ];
+
+  let inventarioFuente = (appState.inventario && appState.inventario.length > 0) 
+    ? appState.inventario 
+    : fallbackItems;
+
+  // Filtrar ítems que tengan existencias en stock y no estén en el carrito
+  let candidatos = inventarioFuente.filter((p) => {
+    if (!p || !p.Nombre) return false;
+    const yaAgregado = enCarrito.some((itemNom) => itemNom.includes(p.Nombre));
+    if (yaAgregado) return false;
+
+    const { stockDisponible, unidadesRestantes } = calcularStockRestante(p.Nombre);
+    const tieneStock = (p.StockNum === undefined || p.StockNum > 0) && (stockDisponible >= 999 || unidadesRestantes > 0);
+
+    return tieneStock;
+  });
+
+  // Priorizar Hielos y Snacks
+  let hielosYSnacks = candidatos.filter((p) => {
+    const cat = (p.Cat || p.Categoria || "").toUpperCase();
+    const nom = p.Nombre.toUpperCase();
+    return ["HIELO", "SNACK", "PAPITA", "DORITOS", "MANI", "CHIP", "CHUCHERIA", "LIMON", "REFRESCO", "COCA", "AGUA", "TONICA"].some(
+      (k) => cat.includes(k) || nom.includes(k)
+    );
+  });
+
+  // Aleatorizar (shuffle) para recomendar variedad fresca en cada apertura
+  hielosYSnacks.sort(() => Math.random() - 0.5);
+
+  let sugerencias = hielosYSnacks.slice(0, 5);
+
+  // Completar con otros productos aleatorios si faltan
+  if (sugerencias.length < 3) {
+    let otros = candidatos.filter((p) => !sugerencias.includes(p)).sort(() => Math.random() - 0.5);
+    sugerencias = [...sugerencias, ...otros].slice(0, 5);
+  }
+
+  if (sugerencias.length === 0) {
+    sugerencias = fallbackItems.filter((p) => !enCarrito.some((itemNom) => itemNom.includes(p.Nombre))).slice(0, 5);
+  }
+
+  let html = `
+    <div class="cart-suggestions-widget">
+      <div class="suggestions-header">
+        <h4><i class="fa-solid fa-wand-magic-sparkles"></i> Añade a tu pedido con 1 clic</h4>
+        <span class="suggestions-sub">🧊 Hielos, 🍿 Snacks y Mezcladores recomendados</span>
+      </div>
+      <div class="suggestions-grid">
+  `;
+
+  sugerencias.forEach((p) => {
+    const nombreUnidad = `${p.Nombre} (UNIDAD)`;
+    const nombreB64 = codificarNombre(nombreUnidad);
+    const imgSrc = obtenerImgProducto(p);
+    const precioUsd = (p.PrecioNum || 0).toFixed(2);
+    const tasa = appState.tasaOficial || 36;
+    const precioBs = ((p.PrecioNum || 0) * tasa).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    html += `
+      <div class="suggestion-card">
+        <div class="suggestion-img-wrap">
+          <img src="${imgSrc}" class="suggestion-img" alt="${p.Nombre}" onerror="imgFallbackFolder(this)" data-codigo="${p.codigo || ''}">
+        </div>
+        <div class="suggestion-info">
+          <h5 class="suggestion-title" title="${p.Nombre}">${p.Nombre}</h5>
+          <p class="suggestion-price">$${precioUsd} <span class="suggestion-bs">(${precioBs} Bs)</span></p>
+        </div>
+        <button type="button" class="btn-fast-add" onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, '${imgSrc}', false)">
+          <i class="fa-solid fa-plus"></i> Añadir
+        </button>
+      </div>
+    `;
+  });
+
+  html += `
+      </div>
+    </div>
+  `;
+
+  container.innerHTML = html;
+  container.style.display = "block";
 }
 function cambiarCant(n, delta) {
   if (delta > 0) {
@@ -581,8 +689,27 @@ function agregarAlCarritoB64(b64, p, btn, c = false, img = "", esCaja = false) {
 function cambiarCantB64(b64, d) {
   cambiarCant(decodificarNombre(b64), d);
 }
+function actualizarStepperCheckout(step) {
+  const lineFill = document.getElementById("stepper-progress-fill");
+  if (lineFill) {
+    const percentages = { 1: "0%", 2: "33%", 3: "66%", 4: "100%" };
+    lineFill.style.width = percentages[step] || "0%";
+  }
+  const steps = document.querySelectorAll(".stepper-step");
+  steps.forEach((el) => {
+    const s = parseInt(el.getAttribute("data-step") || "1");
+    el.classList.remove("active", "completed");
+    if (s === step) {
+      el.classList.add("active");
+    } else if (s < step) {
+      el.classList.add("completed");
+    }
+  });
+}
+
 function setCheckoutStep(step) {
   appState.checkoutStep = step;
+  actualizarStepperCheckout(step);
   let step1Summary = document.getElementById("step-1-summary");
   let step2Delivery = document.getElementById("step-2-delivery");
   let step3Payment = document.getElementById("step-3-payment");
@@ -596,6 +723,7 @@ function setCheckoutStep(step) {
       if (dir && !dir.value.trim()) {
         alert("Por favor, ingresa tu direcci\xF3n para el delivery antes de continuar.");
         appState.checkoutStep = 2;
+        actualizarStepperCheckout(2);
         return;
       }
     }
@@ -630,9 +758,72 @@ function setCheckoutStep(step) {
     }
   }
 }
+
+function animarContadorCarrito() {
+  const elements = [
+    document.getElementById("cart-count"),
+    document.getElementById("bottom-cart-count"),
+    document.getElementById("btn-cart-header"),
+    document.getElementById("nav-cart")
+  ];
+
+  elements.forEach((elem) => {
+    if (!elem || !elem.classList) return;
+    elem.classList.remove("cart-count-bounce");
+    void elem.offsetWidth;
+    elem.classList.add("cart-count-bounce");
+    setTimeout(() => {
+      if (elem && elem.classList) elem.classList.remove("cart-count-bounce");
+    }, 600);
+  });
+}
+
+function mostrarToastAgregarCarrito(nombre, imgSrc, esCaja = false) {
+  let container = document.getElementById("top-right-toast-container");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "top-right-toast-container";
+    const parentElem = document.body || document.documentElement;
+    if (parentElem) parentElem.appendChild(container);
+  }
+
+  const toast = document.createElement("div");
+  toast.className = "top-right-toast";
+
+  const imgTag = imgSrc ? `<img src="${imgSrc}" class="top-right-toast-img" alt="${nombre}">` : "";
+  const modoTag = esCaja ? " (CAJA)" : "";
+
+  toast.innerHTML = `
+    ${imgTag}
+    <div class="top-right-toast-body">
+      <div class="top-right-toast-title">
+        <i class="fa-solid fa-circle-check"></i> ¡Añadido al carrito!
+      </div>
+      <div class="top-right-toast-subtitle">${nombre}${modoTag}</div>
+    </div>
+    <div class="top-right-toast-badge">
+      <i class="fa-solid fa-bag-shopping"></i>
+    </div>
+  `;
+
+  container.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.add("show");
+  });
+
+  setTimeout(() => {
+    toast.classList.remove("show");
+    toast.classList.add("hide");
+    setTimeout(() => toast.remove(), 400);
+  }, 3200);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   actualizarCartCount();
 });
+window.animarContadorCarrito = animarContadorCarrito;
+window.mostrarToastAgregarCarrito = mostrarToastAgregarCarrito;
 window.guardarCarritoLS = guardarCarritoLS;
 window.calcularStockRestante = calcularStockRestante;
 window.tieneStockSuficiente = tieneStockSuficiente;
@@ -655,3 +846,5 @@ window.enviarPedido = enviarPedido;
 window.agregarAlCarritoB64 = agregarAlCarritoB64;
 window.cambiarCantB64 = cambiarCantB64;
 window.setCheckoutStep = setCheckoutStep;
+window.actualizarStepperCheckout = actualizarStepperCheckout;
+window.renderizarSugerenciasRapidasCarrito = renderizarSugerenciasRapidasCarrito;

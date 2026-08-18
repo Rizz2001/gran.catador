@@ -58,7 +58,12 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <link rel="stylesheet" href="assets/css/modules/sidebar.css">
     <link rel="stylesheet" href="assets/css/modules/products.css?v=2.1">
     <link rel="stylesheet" href="assets/css/modules/layout.css">
-    <link rel="stylesheet" href="assets/css/modules/cart.css">
+    <link rel="stylesheet" href="../assets/css/modules/cart.css">
+    <link rel="stylesheet" href="../assets/css/modules/notifications.css">
+
+    <!-- OneSignal Web Push SDK & Notifications Module -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script src="../js/modules/notifications.js" defer></script>
 
         <!-- Componentes Web -->
     <script src="js/components/AppAgeGate.js" defer></script>
@@ -352,12 +357,38 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                     </div>
                     <p class="desktop-only" style="text-align: right; font-size: 13px; color: var(--color-text-muted); margin-bottom: 5px; padding-right: 15px;">Precio</p>
                     <div id="lista-carrito"></div>
+                    <div id="cart-suggestions-container" style="display:none; margin-top: 24px;"></div>
                 </div>
 
                 <!-- Columna Derecha: Checkout / Subtotal -->
                 <div class="premium-cart-right">
                     <div id="checkout-sections" style="display:none;">
                         
+                        <!-- STEPPER VISUAL ELEGANTE DE 4 PASOS -->
+                        <div id="checkout-stepper" class="checkout-stepper-container">
+                            <div class="stepper-track">
+                                <div class="stepper-line">
+                                    <div id="stepper-progress-fill" class="stepper-line-fill" style="width: 0%;"></div>
+                                </div>
+                                <div class="stepper-step active" data-step="1" onclick="setCheckoutStep(1)" title="1. Mi Pedido">
+                                    <div class="step-circle"><span class="step-num">1</span><i class="fa-solid fa-check step-check"></i></div>
+                                    <span class="step-label">Pedido</span>
+                                </div>
+                                <div class="stepper-step" data-step="2" onclick="setCheckoutStep(2)" title="2. Opciones de Entrega">
+                                    <div class="step-circle"><span class="step-num">2</span><i class="fa-solid fa-check step-check"></i></div>
+                                    <span class="step-label">Entrega</span>
+                                </div>
+                                <div class="stepper-step" data-step="3" onclick="setCheckoutStep(3)" title="3. Método de Pago">
+                                    <div class="step-circle"><span class="step-num">3</span><i class="fa-solid fa-check step-check"></i></div>
+                                    <span class="step-label">Pago</span>
+                                </div>
+                                <div class="stepper-step" data-step="4" onclick="setCheckoutStep(4)" title="4. Confirmación">
+                                    <div class="step-circle"><span class="step-num">4</span><i class="fa-solid fa-check step-check"></i></div>
+                                    <span class="step-label">Confirmar</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- STEP 1: Resumen y Procesar Compra -->
                         <div id="step-1-summary" class="premium-checkout-box order-summary-card">
                             <div class="summary-heading">
@@ -389,9 +420,18 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                 <p class="box-title"><i class="fa-solid fa-motorcycle"></i> Opciones de Entrega</p>
                                 <div class="premium-toggles">
                                     <input type="radio" id="ret" name="metodoEntrega" value="Retiro" checked onchange="toggleDireccion()">
-                                    <label for="ret" class="premium-toggle-btn"><i class="fa-solid fa-store"></i> Tienda</label>
+                                    <label for="ret" class="premium-toggle-btn">
+                                        <div class="toggle-btn-icon"><i class="fa-solid fa-store"></i></div>
+                                        <span class="toggle-btn-title">Retiro en Tienda</span>
+                                        <span class="toggle-btn-sub">Sin costo adicional</span>
+                                    </label>
+
                                     <input type="radio" id="del" name="metodoEntrega" value="Delivery" onchange="toggleDireccion()">
-                                    <label for="del" class="premium-toggle-btn"><i class="fa-solid fa-motorcycle"></i> Delivery</label>
+                                    <label for="del" class="premium-toggle-btn">
+                                        <div class="toggle-btn-icon"><i class="fa-solid fa-motorcycle"></i></div>
+                                        <span class="toggle-btn-title">Delivery Express</span>
+                                        <span class="toggle-btn-sub">Envío a tu puerta</span>
+                                    </label>
                                 </div>
                                 <div style="display:flex; gap: 8px; margin-top: 10px;">
                                     <input type="text" id="direccionDelivery" class="premium-input" placeholder="Ingresa tu dirección exacta..." style="display:none; flex-grow: 1;">
@@ -425,11 +465,25 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                 </div>
                                 <div class="premium-toggles three-cols">
                                     <input type="radio" id="pago-efectivo" name="metodoPago" value="Efectivo" onchange="actualizarMetodoPago()" checked>
-                                    <label for="pago-efectivo" class="premium-toggle-btn"><i class="fa-solid fa-money-bill-wave"></i> Efectivo</label>
+                                    <label for="pago-efectivo" class="premium-toggle-btn">
+                                        <div class="toggle-btn-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+                                        <span class="toggle-btn-title">Efectivo</span>
+                                        <span class="toggle-btn-sub">USD / Bs</span>
+                                    </label>
+
                                     <input type="radio" id="pago-movil" name="metodoPago" value="Pago Movil" onchange="actualizarMetodoPago()">
-                                    <label for="pago-movil" class="premium-toggle-btn"><i class="fa-solid fa-mobile-screen"></i> P. Móvil</label>
+                                    <label for="pago-movil" class="premium-toggle-btn">
+                                        <div class="toggle-btn-icon"><i class="fa-solid fa-mobile-screen"></i></div>
+                                        <span class="toggle-btn-title">Pago Móvil</span>
+                                        <span class="toggle-btn-sub">Bolívares</span>
+                                    </label>
+
                                     <input type="radio" id="pago-zelle" name="metodoPago" value="Zelle" onchange="actualizarMetodoPago()">
-                                    <label for="pago-zelle" class="premium-toggle-btn"><i class="fa-brands fa-stripe-s"></i> Zelle</label>
+                                    <label for="pago-zelle" class="premium-toggle-btn">
+                                        <div class="toggle-btn-icon"><i class="fa-brands fa-stripe-s"></i></div>
+                                        <span class="toggle-btn-title">Zelle</span>
+                                        <span class="toggle-btn-sub">Dólares</span>
+                                    </label>
                                 </div>
 
                                 <!-- Panel: Efectivo -->
@@ -503,8 +557,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                     <span>Equivalente</span>
                                     <span class="total-bs" id="totalBsModalFinal">0,00 Bs</span>
                                 </div>
-                                <button type="button" id="btn-whatsapp" class="btn-checkout-primary" onclick="enviarPedido()">
-                                    <i class="fa-brands fa-whatsapp"></i> Enviar Pedido por WhatsApp
+                                <button type="button" id="btn-whatsapp" class="btn-checkout-primary btn-whatsapp-shimmer" onclick="enviarPedido()">
+                                    <i class="fa-brands fa-whatsapp btn-wa-icon-pulse"></i> <span>Enviar Pedido por WhatsApp</span>
                                 </button>
                             </div>
                         </div>

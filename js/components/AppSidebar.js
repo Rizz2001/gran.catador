@@ -64,6 +64,28 @@ class AppSidebar extends HTMLElement {
             const floatBtn = this.querySelector('#floating-sidebar-btn');
             if (floatBtn) {
                 floatBtn.addEventListener('click', () => { if(typeof toggleSidebar === 'function') toggleSidebar(); });
+
+                // Lógica de colapso inteligente al hacer scroll
+                let lastScrollY = window.scrollY;
+                let scrollTimer = null;
+
+                window.addEventListener('scroll', () => {
+                    const currentScrollY = window.scrollY;
+                    const isScrollingDown = currentScrollY > lastScrollY && currentScrollY > 80;
+
+                    if (isScrollingDown) {
+                        floatBtn.classList.add('collapsed');
+                    } else {
+                        floatBtn.classList.remove('collapsed');
+                    }
+
+                    lastScrollY = currentScrollY;
+
+                    clearTimeout(scrollTimer);
+                    scrollTimer = setTimeout(() => {
+                        floatBtn.classList.remove('collapsed');
+                    }, 1200);
+                }, { passive: true });
             }
 
             document.addEventListener('keydown', (e) => {
