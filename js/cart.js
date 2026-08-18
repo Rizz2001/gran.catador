@@ -141,49 +141,53 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = 
   if (btnElement && imgSrc) {
     animarAlCarrito(btnElement, imgSrc);
   }
-  if (btnElement) {
-    let iconoOriginal = btnElement.innerHTML;
-    btnElement.innerHTML = '<i class="fa-solid fa-check"></i>';
-    btnElement.style.background = "#fff";
-    btnElement.style.color = "var(--verde-btn)";
+  if (btnElement && btnElement.parentElement) {
     let parent = btnElement.parentElement;
-    parent.style.position = "relative";
-    let oldMsg = parent.querySelector(".cart-msg-toast");
-    if (oldMsg) oldMsg.remove();
-    let msgConf = document.createElement("div");
-    msgConf.className = "cart-msg-toast";
-    msgConf.innerText = "\xA1Agregado al carrito!";
-    msgConf.style.position = "absolute";
-    msgConf.style.background = "var(--color-success, #10B981)";
-    msgConf.style.color = "white";
-    msgConf.style.fontSize = "10px";
-    msgConf.style.fontWeight = "700";
-    msgConf.style.padding = "4px 8px";
-    msgConf.style.borderRadius = "6px";
-    msgConf.style.whiteSpace = "nowrap";
-    msgConf.style.pointerEvents = "none";
-    msgConf.style.zIndex = "100";
-    msgConf.style.opacity = "0";
-    msgConf.style.transform = "translateY(-5px)";
-    msgConf.style.transition = "all 0.3s ease";
-    msgConf.style.boxShadow = "var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.1))";
-    msgConf.style.right = "0";
-    msgConf.style.top = btnElement.offsetTop + btnElement.offsetHeight + 6 + "px";
-    parent.appendChild(msgConf);
-    requestAnimationFrame(() => {
-      msgConf.style.opacity = "1";
-      msgConf.style.transform = "translateY(0)";
-    });
-    setTimeout(() => {
-      btnElement.innerHTML = iconoOriginal;
-      btnElement.style.background = esCaja ? "var(--dorado)" : "var(--verde-btn)";
-      btnElement.style.color = esCaja ? "black" : "#fff";
-    }, 500);
-    setTimeout(() => {
+    if (parent) {
+      let iconoOriginal = btnElement.innerHTML;
+      btnElement.innerHTML = '<i class="fa-solid fa-check"></i>';
+      btnElement.style.background = "#fff";
+      btnElement.style.color = "var(--verde-btn)";
+      parent.style.position = "relative";
+      let oldMsg = parent.querySelector(".cart-msg-toast");
+      if (oldMsg) oldMsg.remove();
+      let msgConf = document.createElement("div");
+      msgConf.className = "cart-msg-toast";
+      msgConf.innerText = "\xA1Agregado al carrito!";
+      msgConf.style.position = "absolute";
+      msgConf.style.background = "var(--color-success, #10B981)";
+      msgConf.style.color = "white";
+      msgConf.style.fontSize = "10px";
+      msgConf.style.fontWeight = "700";
+      msgConf.style.padding = "4px 8px";
+      msgConf.style.borderRadius = "6px";
+      msgConf.style.whiteSpace = "nowrap";
+      msgConf.style.pointerEvents = "none";
+      msgConf.style.zIndex = "100";
       msgConf.style.opacity = "0";
       msgConf.style.transform = "translateY(-5px)";
-      setTimeout(() => msgConf.remove(), 300);
-    }, 2e3);
+      msgConf.style.transition = "all 0.3s ease";
+      msgConf.style.boxShadow = "var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.1))";
+      msgConf.style.right = "0";
+      msgConf.style.top = btnElement.offsetTop + btnElement.offsetHeight + 6 + "px";
+      parent.appendChild(msgConf);
+      requestAnimationFrame(() => {
+        msgConf.style.opacity = "1";
+        msgConf.style.transform = "translateY(0)";
+      });
+      setTimeout(() => {
+        if (btnElement) {
+          btnElement.innerHTML = iconoOriginal;
+          btnElement.style.background = esCaja ? "var(--dorado)" : "var(--verde-btn)";
+          btnElement.style.color = esCaja ? "black" : "#fff";
+        }
+      }, 500);
+      setTimeout(() => {
+        msgConf.style.opacity = "0";
+        msgConf.style.transform = "translateY(-5px)";
+        setTimeout(() => msgConf.remove(), 300);
+      }, 2e3);
+    }
   }
   if (!isCross && !esCaja && prodObj) {
     let catMayus = (prodObj.Cat || "").toUpperCase();

@@ -210,62 +210,66 @@ function agregarAlCarrito(nombre: any, precio: any, btnElement: any, isCross = f
     }
 
     // Cambio visual de confirmación en el botón
-    if (btnElement) {
-        let iconoOriginal = btnElement.innerHTML;
-        btnElement.innerHTML = '<i class="fa-solid fa-check"></i>';
-        (<HTMLElement>btnElement).style.background = "#fff";
-        (<HTMLElement>btnElement).style.color = "var(--verde-btn)";
-
-        // --- NUEVO: Texto de confirmación "¡Agregado al carrito!" debajo del botón ---
+    if (btnElement && btnElement.parentElement) {
         let parent = btnElement.parentElement;
-        (<HTMLElement>parent).style.position = 'relative'; // Convertir al padre en el punto de anclaje
+        if (parent) {
+            let iconoOriginal = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fa-solid fa-check"></i>';
+            (<HTMLElement>btnElement).style.background = "#fff";
+            (<HTMLElement>btnElement).style.color = "var(--verde-btn)";
 
-        // Limpiar mensaje anterior si el usuario hace clics muy rápidos
-        let oldMsg = parent.querySelector('.cart-msg-toast');
-        if (oldMsg) oldMsg.remove();
+            // --- NUEVO: Texto de confirmación "¡Agregado al carrito!" debajo del botón ---
+            (<HTMLElement>parent).style.position = 'relative'; // Convertir al padre en el punto de anclaje
 
-        let msgConf = document.createElement('div');
-        msgConf.className = 'cart-msg-toast';
-        msgConf.innerText = "¡Agregado al carrito!";
-        (<HTMLElement>msgConf).style.position = 'absolute';
-        (<HTMLElement>msgConf).style.background = 'var(--color-success, #10B981)';
-        (<HTMLElement>msgConf).style.color = 'white';
-        (<HTMLElement>msgConf).style.fontSize = '10px';
-        (<HTMLElement>msgConf).style.fontWeight = '700';
-        (<HTMLElement>msgConf).style.padding = '4px 8px';
-        (<HTMLElement>msgConf).style.borderRadius = '6px';
-        (<HTMLElement>msgConf).style.whiteSpace = 'nowrap';
-        (<HTMLElement>msgConf).style.pointerEvents = 'none'; // Para que no bloquee clics accidentales
-        (<HTMLElement>msgConf).style.zIndex = '100';
-        (<HTMLElement>msgConf).style.opacity = '0';
-        (<HTMLElement>msgConf).style.transform = 'translateY(-5px)';
-        (<HTMLElement>msgConf).style.transition = 'all 0.3s ease';
-        (<HTMLElement>msgConf).style.boxShadow = 'var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.1))';
+            // Limpiar mensaje anterior si el usuario hace clics muy rápidos
+            let oldMsg = parent.querySelector('.cart-msg-toast');
+            if (oldMsg) oldMsg.remove();
 
-        // Posicionamiento dinámico: A la derecha y justo debajo del botón
-        (<HTMLElement>msgConf).style.right = '0';
-        (<HTMLElement>msgConf).style.top = (btnElement.offsetTop + btnElement.offsetHeight + 6) + 'px';
-
-        parent.appendChild(msgConf);
-
-        // Desencadenar animación de entrada fluida
-        requestAnimationFrame(() => {
-            (<HTMLElement>msgConf).style.opacity = '1';
-            (<HTMLElement>msgConf).style.transform = 'translateY(0)';
-        });
-
-        setTimeout(() => {
-            btnElement.innerHTML = iconoOriginal;
-            (<HTMLElement>btnElement).style.background = esCaja ? "var(--dorado)" : "var(--verde-btn)";
-            (<HTMLElement>btnElement).style.color = esCaja ? "black" : "#fff";
-        }, 500);
-
-        // Desaparecer y remover del código luego de 2 segundos
-        setTimeout(() => {
+            let msgConf = document.createElement('div');
+            msgConf.className = 'cart-msg-toast';
+            msgConf.innerText = "¡Agregado al carrito!";
+            (<HTMLElement>msgConf).style.position = 'absolute';
+            (<HTMLElement>msgConf).style.background = 'var(--color-success, #10B981)';
+            (<HTMLElement>msgConf).style.color = 'white';
+            (<HTMLElement>msgConf).style.fontSize = '10px';
+            (<HTMLElement>msgConf).style.fontWeight = '700';
+            (<HTMLElement>msgConf).style.padding = '4px 8px';
+            (<HTMLElement>msgConf).style.borderRadius = '6px';
+            (<HTMLElement>msgConf).style.whiteSpace = 'nowrap';
+            (<HTMLElement>msgConf).style.pointerEvents = 'none'; // Para que no bloquee clics accidentales
+            (<HTMLElement>msgConf).style.zIndex = '100';
             (<HTMLElement>msgConf).style.opacity = '0';
             (<HTMLElement>msgConf).style.transform = 'translateY(-5px)';
-            setTimeout(() => msgConf.remove(), 300);
-        }, 2000);
+            (<HTMLElement>msgConf).style.transition = 'all 0.3s ease';
+            (<HTMLElement>msgConf).style.boxShadow = 'var(--shadow-sm, 0 2px 4px rgba(0,0,0,0.1))';
+
+            // Posicionamiento dinámico: A la derecha y justo debajo del botón
+            (<HTMLElement>msgConf).style.right = '0';
+            (<HTMLElement>msgConf).style.top = (btnElement.offsetTop + btnElement.offsetHeight + 6) + 'px';
+
+            parent.appendChild(msgConf);
+
+            // Desencadenar animación de entrada fluida
+            requestAnimationFrame(() => {
+                (<HTMLElement>msgConf).style.opacity = '1';
+                (<HTMLElement>msgConf).style.transform = 'translateY(0)';
+            });
+
+            setTimeout(() => {
+                if (btnElement) {
+                    btnElement.innerHTML = iconoOriginal;
+                    (<HTMLElement>btnElement).style.background = esCaja ? "var(--dorado)" : "var(--verde-btn)";
+                    (<HTMLElement>btnElement).style.color = esCaja ? "black" : "#fff";
+                }
+            }, 500);
+
+            // Desaparecer y remover del código luego de 2 segundos
+            setTimeout(() => {
+                (<HTMLElement>msgConf).style.opacity = '0';
+                (<HTMLElement>msgConf).style.transform = 'translateY(-5px)';
+                setTimeout(() => msgConf.remove(), 300);
+            }, 2000);
+        }
     }
 
     // Lógica de Cross-Selling (Sugerencias Automáticas)

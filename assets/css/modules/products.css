@@ -307,9 +307,6 @@ body.dark-mode .card-qty-control {
     min-width: 24px;
     text-align: center;
 }
-    background-color: #334155;
-    color: #64748b;
-}
 
 body.dark-mode .product-price {
     color: #F9FAFB;
@@ -1068,6 +1065,7 @@ body.dark-mode .tools-container .chk-agotados:hover {
 .related-carousel-track .producto-card .producto-titulo {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;

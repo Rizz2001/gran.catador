@@ -1,15 +1,61 @@
 // --- RENDERIZADO DE PRODUCTOS (Fase 5: Mejora de Rendimiento) ---
+window.productosMap = window.productosMap || new Map();
+
+window.agregarAlCarritoPorCodigo = function(codigo, btnElement) {
+    if (!codigo) return;
+    const codStr = String(codigo).trim();
+    let p = (typeof appState !== 'undefined' && appState.inventario) ? appState.inventario.find(x => String(x.codigo).trim() === codStr) : null;
+    if (!p && window.productosMap) {
+        p = window.productosMap.get(codStr);
+    }
+    if (!p) return;
+
+    let modoVista = (typeof modoVistaGlobal !== 'undefined') ? modoVistaGlobal : 'unidad';
+    let esModoCaja = (modoVista === 'caja');
+    if (window.soloUnidad && window.soloUnidad.includes(p.Nombre)) esModoCaja = false;
+    else if (window.soloCaja && window.soloCaja.includes(p.Nombre)) esModoCaja = true;
+    
+    const precioNum = Number(esModoCaja ? (p.PrecioCajaNum ?? p.PrecioNum) : p.PrecioNum) || 0;
+    const imgSrc = (typeof obtenerImgProducto === 'function') ? obtenerImgProducto(p) : (p.ImagenUrl || 'logo.webp');
+
+    if (typeof agregarAlCarrito === 'function') {
+        agregarAlCarrito(p.Nombre, precioNum, btnElement, false, imgSrc, esModoCaja);
+    }
+};
+
+window.cambiarCantPorCodigo = function(codigo, delta) {
+    if (!codigo) return;
+    const codStr = String(codigo).trim();
+    let p = (typeof appState !== 'undefined' && appState.inventario) ? appState.inventario.find(x => String(x.codigo).trim() === codStr) : null;
+    if (!p && window.productosMap) {
+        p = window.productosMap.get(codStr);
+    }
+    if (!p) return;
+
+    let modoVista = (typeof modoVistaGlobal !== 'undefined') ? modoVistaGlobal : 'unidad';
+    let esModoCaja = (modoVista === 'caja');
+    if (window.soloUnidad && window.soloUnidad.includes(p.Nombre)) esModoCaja = false;
+    else if (window.soloCaja && window.soloCaja.includes(p.Nombre)) esModoCaja = true;
+
+    const nombreFinal = esModoCaja ? `${p.Nombre} (CAJA)` : `${p.Nombre} (UNIDAD)`;
+    if (typeof cambiarCant === 'function') {
+        cambiarCant(nombreFinal, delta);
+    }
+};
+
 function crearHTMLProducto(p) {
-    let esModoCaja = (modoVistaGlobal === 'caja');
+    if (p && p.codigo) {
+        window.productosMap.set(String(p.codigo).trim(), p);
+    }
+    let modoVista = (typeof modoVistaGlobal !== 'undefined') ? modoVistaGlobal : 'unidad';
+    let esModoCaja = (modoVista === 'caja');
     if (window.soloUnidad && window.soloUnidad.includes(p.Nombre)) esModoCaja = false;
     else if (window.soloCaja && window.soloCaja.includes(p.Nombre)) esModoCaja = true;
     const cantCaja = p.CantidadGrup || 12;
     const isAgotado = esModoCaja ? (p.StockNum < cantCaja && p.StockNum < 999) : p.StockNum <= 0;
-    const nombreB64 = codificarNombre(p.Nombre);
 
     const precioUsdDin = esModoCaja ? p.PrecioCajaUsd : p.PrecioStr;
     const precioBsDin = esModoCaja ? p.PrecioCajaBsStr : p.PrecioBsStr;
-    const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
 
     // --- LÓGICA DINÁMICA DE TEXTO DE UNIDAD ---
     let textoUnidad = '';
@@ -65,7 +111,7 @@ function crearHTMLProducto(p) {
 
     // --- COMPROBAR CANTIDAD EN CARRITO PARA BOTÓN INTERACTIVO ---
     const keyCarrito = esModoCaja ? `${p.Nombre} (CAJA)` : `${p.Nombre} (UNIDAD)`;
-    const cantEnCarrito = (appState && appState.carrito && appState.carrito[keyCarrito]) ? appState.carrito[keyCarrito].cantidad : 0;
+    const cantEnCarrito = (typeof appState !== 'undefined' && appState.carrito && appState.carrito[keyCarrito]) ? appState.carrito[keyCarrito].cantidad : 0;
 
     let actionBtnHTML = '';
     if (isAgotado) {
@@ -77,18 +123,18 @@ function crearHTMLProducto(p) {
     } else if (cantEnCarrito > 0) {
         actionBtnHTML = `
             <div class="card-qty-control" onclick="event.stopPropagation()">
-                <button type="button" class="card-qty-btn minus" onclick="event.stopPropagation(); cambiarCantB64('${nombreB64}', -1);" aria-label="Restar 1">
+                <button type="button" class="card-qty-btn minus" onclick="event.stopPropagation(); cambiarCantPorCodigo('${p.codigo}', -1);" aria-label="Restar 1">
                     <i class="fa-solid fa-minus"></i>
                 </button>
                 <span class="card-qty-count">${cantEnCarrito}</span>
-                <button type="button" class="card-qty-btn plus" onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja});" aria-label="Sumar 1">
+                <button type="button" class="card-qty-btn plus" onclick="event.stopPropagation(); agregarAlCarritoPorCodigo('${p.codigo}', this);" aria-label="Sumar 1">
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </div>
         `;
     } else {
         actionBtnHTML = `
-            <button class="btn-buy-whatsapp" aria-label="Agregar ${p.Nombre}" title="Agregar al carrito" onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja})">
+            <button class="btn-buy-whatsapp" aria-label="Agregar ${p.Nombre}" title="Agregar al carrito" onclick="event.stopPropagation(); agregarAlCarritoPorCodigo('${p.codigo}', this)">
                 <i class="fa-solid fa-cart-plus"></i> Agregar
             </button>
         `;
@@ -129,14 +175,17 @@ function crearHTMLProducto(p) {
 
 // --- FUNCION PARA SINCRONIZAR BOTONES DE TARJETAS AL CAMBIAR CARRITO ---
 window.sincronizarBotonesCards = function() {
-    if (!appState || !appState.inventario) return;
+    if (typeof appState === 'undefined' || !appState.inventario) return;
     document.querySelectorAll('.producto-card').forEach(card => {
         const codigo = card.getAttribute('data-codigo') || card.querySelector('img[data-codigo]')?.getAttribute('data-codigo');
         if (!codigo) return;
-        const p = appState.inventario.find(x => String(x.codigo).trim() === String(codigo).trim());
+        const codStr = String(codigo).trim();
+        let p = appState.inventario.find(x => String(x.codigo).trim() === codStr);
+        if (!p && window.productosMap) p = window.productosMap.get(codStr);
         if (!p) return;
 
-        let esModoCaja = (modoVistaGlobal === 'caja');
+        let modoVista = (typeof modoVistaGlobal !== 'undefined') ? modoVistaGlobal : 'unidad';
+        let esModoCaja = (modoVista === 'caja');
         if (window.soloUnidad && window.soloUnidad.includes(p.Nombre)) esModoCaja = false;
         else if (window.soloCaja && window.soloCaja.includes(p.Nombre)) esModoCaja = true;
         const cantCaja = p.CantidadGrup || 12;
@@ -144,9 +193,6 @@ window.sincronizarBotonesCards = function() {
 
         if (isAgotado) return;
 
-        const nombreB64 = codificarNombre(p.Nombre);
-        const precioNum = esModoCaja ? p.PrecioCajaNum : p.PrecioNum;
-        const imgSrc = obtenerImgProducto(p);
         const keyCarrito = esModoCaja ? `${p.Nombre} (CAJA)` : `${p.Nombre} (UNIDAD)`;
         const cantEnCarrito = (appState.carrito && appState.carrito[keyCarrito]) ? appState.carrito[keyCarrito].cantidad : 0;
 
@@ -156,18 +202,18 @@ window.sincronizarBotonesCards = function() {
         if (cantEnCarrito > 0) {
             actionContainer.innerHTML = `
                 <div class="card-qty-control" onclick="event.stopPropagation()">
-                    <button type="button" class="card-qty-btn minus" onclick="event.stopPropagation(); cambiarCantB64('${nombreB64}', -1);" aria-label="Restar 1">
+                    <button type="button" class="card-qty-btn minus" onclick="event.stopPropagation(); cambiarCantPorCodigo('${p.codigo}', -1);" aria-label="Restar 1">
                         <i class="fa-solid fa-minus"></i>
                     </button>
                     <span class="card-qty-count">${cantEnCarrito}</span>
-                    <button type="button" class="card-qty-btn plus" onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja});" aria-label="Sumar 1">
+                    <button type="button" class="card-qty-btn plus" onclick="event.stopPropagation(); agregarAlCarritoPorCodigo('${p.codigo}', this);" aria-label="Sumar 1">
                         <i class="fa-solid fa-plus"></i>
                     </button>
                 </div>
             `;
         } else {
             actionContainer.innerHTML = `
-                <button class="btn-buy-whatsapp" aria-label="Agregar ${p.Nombre}" title="Agregar al carrito" onclick="event.stopPropagation(); agregarAlCarritoB64('${nombreB64}', ${precioNum}, this, false, '${imgSrc}', ${esModoCaja})">
+                <button class="btn-buy-whatsapp" aria-label="Agregar ${p.Nombre}" title="Agregar al carrito" onclick="event.stopPropagation(); agregarAlCarritoPorCodigo('${p.codigo}', this)">
                     <i class="fa-solid fa-cart-plus"></i> Agregar
                 </button>
             `;
