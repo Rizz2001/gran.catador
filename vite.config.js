@@ -5,15 +5,15 @@ export default defineConfig({
   plugins: [
     viteStaticCopy({
       targets: [
-        {
-          src: 'assets/img',
-          dest: ''
-        },
-        {
-          src: 'assets/banners',
-          dest: ''
-        }
+        { src: 'assets/img', dest: 'assets' },
+        { src: 'assets/banners', dest: 'assets' },
+        { src: 'data', dest: '' },
+        { src: 'logo.webp', dest: '' },
+        { src: 'sw.js', dest: '' },
+        { src: 'robots.txt', dest: '' },
+        { src: '_headers', dest: '' }
       ]
     })
   ]
 });
+
