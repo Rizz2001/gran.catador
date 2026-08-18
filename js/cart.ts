@@ -123,7 +123,7 @@ function animarAlCarrito(btnElement: any, imgSrc: any) {
 
     // Buscar el icono del carrito activo (header en PC, nav en móvil)
     let cartIcon = document.querySelector('.header-right .icon-btn[aria-label="Carrito"]');
-    const navCart = document.getElementById('nav-cart');
+    const navCart = document.getElementById('nav-cart-bottom') || document.getElementById('nav-cart');
     const bottomNav = document.querySelector('.bottom-nav');
 
     if (navCart && bottomNav && getComputedStyle(bottomNav).display !== 'none') {
@@ -155,6 +155,27 @@ function animarAlCarrito(btnElement: any, imgSrc: any) {
         (<HTMLElement>cartIcon).style.transform = 'scale(1.2)';
         setTimeout(() => (<HTMLElement>cartIcon).style.transform = 'scale(1)', 200);
     }, 600);
+}
+
+/** Anima el rebote del contador visual del carrito */
+function animarContadorCarrito() {
+    const elements = [
+        document.getElementById('cart-count'),
+        document.getElementById('bottom-cart-count'),
+        document.getElementById('btn-cart-header'),
+        document.getElementById('nav-cart-bottom'),
+        document.getElementById('nav-cart')
+    ];
+
+    elements.forEach((elem) => {
+        if (!elem || !elem.classList) return;
+        elem.classList.remove('cart-count-bounce');
+        void elem.offsetWidth; // trigger reflow
+        elem.classList.add('cart-count-bounce');
+        setTimeout(() => {
+            if (elem && elem.classList) elem.classList.remove('cart-count-bounce');
+        }, 500);
+    });
 }
 
 /** Añade un producto al estado del carrito y lanza efectos visuales */
@@ -362,8 +383,12 @@ function vaciarCarrito() {
 }
 
 function abrirCarrito() {
-    if (window.location.href.includes('carrito')) {
-        renderizarCarrito();
+    const currentPath = window.location.pathname.toLowerCase();
+    if (currentPath.includes('/carrito') || currentPath.includes('/carrito/')) {
+        if (typeof renderizarCarrito === 'function') {
+            renderizarCarrito();
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
     }
     window.location.href = 'carrito/';
@@ -940,6 +965,10 @@ function setCheckoutStep(step: any) {
             layout.classList.remove('checkout-active');
         }
     }
+
+    if (window.innerWidth <= 768) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 }
 
 // Inicializar el contador visual del carrito cuando el DOM esté listo
@@ -954,6 +983,7 @@ export {};
 (window as any).tieneStockSuficiente = tieneStockSuficiente;
 (window as any).mostrarToastError = mostrarToastError;
 (window as any).animarAlCarrito = animarAlCarrito;
+(window as any).animarContadorCarrito = animarContadorCarrito;
 (window as any).agregarAlCarrito = agregarAlCarrito;
 (window as any).cerrarCrossSell = cerrarCrossSell;
 (window as any).actualizarCartCount = actualizarCartCount;

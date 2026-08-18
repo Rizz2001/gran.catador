@@ -3,15 +3,15 @@ class AppBottomNav extends HTMLElement {
         this.innerHTML = `
     <!-- Bottom Navigation (Mobile Only) -->
     <nav class="bottom-nav">
-        <a href="#" onclick="event.preventDefault(); window.location.href='index.html';" class="nav-item">
+        <a href="#" onclick="event.preventDefault(); if(typeof irInicio === 'function') irInicio(); else window.location.href='index.html';" class="nav-item">
             <i class="fa-solid fa-house"></i>
             <span>Inicio</span>
         </a>
-        <a href="#" onclick="event.preventDefault(); document.getElementById('buscador').focus();" class="nav-item">
+        <a href="#" onclick="event.preventDefault(); const b = document.getElementById('buscador'); if(b) b.focus(); else if(typeof irInicio==='function') irInicio();" class="nav-item">
             <i class="fa-solid fa-magnifying-glass"></i>
             <span>Buscar</span>
         </a>
-        <a href="#" onclick="event.preventDefault(); window.location.href='carrito/';" class="nav-item" id="nav-cart-bottom">
+        <a href="#" onclick="event.preventDefault(); if(typeof abrirCarrito === 'function') abrirCarrito(); else window.location.href='carrito/';" class="nav-item" id="nav-cart-bottom">
             <div class="nav-icon-badge">
                 <i class="fa-solid fa-cart-shopping"></i>
                 <span class="cart-badge" id="bottom-cart-count">0</span>

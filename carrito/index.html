@@ -341,11 +341,11 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                 <!-- Columna Izquierda: Productos -->
                 <div class="premium-cart-left">
                     <div class="cart-mobile-top-bar mobile-only">
-                        <a href="../" class="btn-volver-tienda"><i class="fa-solid fa-arrow-left"></i> Volver a la tienda</a>
+                        <a href="#" onclick="event.preventDefault(); irInicio();" class="btn-volver-tienda"><i class="fa-solid fa-arrow-left"></i> Volver a la tienda</a>
                         <button type="button" class="btn-trash-mobile" onclick="vaciarCarrito()"><i class="fa-solid fa-trash-can"></i> Descartar</button>
                     </div>
                     <div class="desktop-only">
-                        <a href="../" style="display: inline-block; margin-bottom: 15px; color: #007185; text-decoration: none; font-size: 14px;">
+                        <a href="#" onclick="event.preventDefault(); irInicio();" style="display: inline-block; margin-bottom: 15px; color: #007185; text-decoration: none; font-size: 14px;">
                             <i class="fa-solid fa-arrow-left"></i> Volver a la tienda
                         </a>
                     </div>
@@ -599,7 +599,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             document.querySelectorAll('.modal-close-btn').forEach(btn => {
                 if (btn.getAttribute('aria-label') === 'Cerrar carrito') {
                     btn.style.display = 'block';
-                    btn.setAttribute('onclick', "window.location.href='../'");
+                    btn.setAttribute('onclick', "if(typeof irInicio === 'function') irInicio(); else window.location.href='../';");
                 }
             });
             

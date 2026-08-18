@@ -75,7 +75,7 @@ function mostrarToastError(titulo, detalle) {
 function animarAlCarrito(btnElement, imgSrc) {
   if (!btnElement || !imgSrc) return;
   let cartIcon = document.querySelector('.header-right .icon-btn[aria-label="Carrito"]');
-  const navCart = document.getElementById("nav-cart");
+  const navCart = document.getElementById("nav-cart-bottom") || document.getElementById("nav-cart");
   const bottomNav = document.querySelector(".bottom-nav");
   if (navCart && bottomNav && getComputedStyle(bottomNav).display !== "none") {
     cartIcon = navCart;
@@ -101,6 +101,24 @@ function animarAlCarrito(btnElement, imgSrc) {
     cartIcon.style.transform = "scale(1.2)";
     setTimeout(() => cartIcon.style.transform = "scale(1)", 200);
   }, 600);
+}
+function animarContadorCarrito() {
+  const elements = [
+    document.getElementById("cart-count"),
+    document.getElementById("bottom-cart-count"),
+    document.getElementById("btn-cart-header"),
+    document.getElementById("nav-cart-bottom"),
+    document.getElementById("nav-cart")
+  ];
+  elements.forEach((elem) => {
+    if (!elem || !elem.classList) return;
+    elem.classList.remove("cart-count-bounce");
+    void elem.offsetWidth;
+    elem.classList.add("cart-count-bounce");
+    setTimeout(() => {
+      if (elem && elem.classList) elem.classList.remove("cart-count-bounce");
+    }, 500);
+  });
 }
 function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = "", esCaja = false) {
   try {
@@ -138,13 +156,15 @@ function agregarAlCarrito(nombre, precio, btnElement, isCross = false, imgSrc = 
   if (typeof navigator !== "undefined" && navigator.vibrate) {
     navigator.vibrate(50);
   }
-  mostrarToastAgregarCarrito(nombre, imgSrc, esCaja);
-  animarContadorCarrito();
-
+  if (typeof window.mostrarToastAgregarCarrito === "function") {
+    window.mostrarToastAgregarCarrito(nombre, imgSrc, esCaja);
+  }
+  if (typeof window.animarContadorCarrito === "function") {
+    window.animarContadorCarrito();
+  }
   if (document.getElementById("lista-carrito")) {
     renderizarCarrito();
   }
-
   if (btnElement && imgSrc) {
     animarAlCarrito(btnElement, imgSrc);
   }
@@ -244,8 +264,7 @@ function actualizarCartCount() {
   if (cartCountElem) cartCountElem.innerText = totalItems.toString();
   const bottomCartCountElem = document.getElementById("bottom-cart-count");
   if (bottomCartCountElem) bottomCartCountElem.innerText = totalItems.toString();
-
-  if (typeof window.sincronizarBotonesCards === 'function') {
+  if (typeof window.sincronizarBotonesCards === "function") {
     window.sincronizarBotonesCards();
   }
 }
@@ -263,8 +282,12 @@ function vaciarCarrito() {
   }
 }
 function abrirCarrito() {
-  if (window.location.href.includes("carrito")) {
-    renderizarCarrito();
+  const currentPath = window.location.pathname.toLowerCase();
+  if (currentPath.includes("/carrito") || currentPath.includes("/carrito/")) {
+    if (typeof renderizarCarrito === "function") {
+      renderizarCarrito();
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
     return;
   }
   window.location.href = "carrito/";
@@ -372,39 +395,26 @@ function renderizarCarrito() {
   setCheckoutStep(1);
   renderizarSugerenciasRapidasCarrito();
 }
-
 function renderizarSugerenciasRapidasCarrito() {
   const container = document.getElementById("cart-suggestions-container");
   if (!container) return;
-
   const enCarrito = Object.keys(appState.carrito || {});
-  
-  // Fallback garantizado de productos si el inventario no se ha cargado aún
   const fallbackItems = [
     { codigo: "HIELO_5K", Nombre: "BOLSA DE HIELO 5KG", PrecioNum: 2.5, Cat: "HIELO" },
-    { codigo: "SNACK_PRINGLES", Nombre: "PAPITAS PRINGLES", PrecioNum: 3.0, Cat: "SNACKS" },
+    { codigo: "SNACK_PRINGLES", Nombre: "PAPITAS PRINGLES", PrecioNum: 3, Cat: "SNACKS" },
     { codigo: "REFRESCO_COCA", Nombre: "COCA-COLA 2.25L", PrecioNum: 2.2, Cat: "REFRESCO" },
     { codigo: "LIMON_MALLA", Nombre: "LIMONES FRESCOS 1KG", PrecioNum: 1.5, Cat: "FRUTAS" },
     { codigo: "SNACK_MANI", Nombre: "MANI SALADO 200G", PrecioNum: 1.8, Cat: "SNACKS" }
   ];
-
-  let inventarioFuente = (appState.inventario && appState.inventario.length > 0) 
-    ? appState.inventario 
-    : fallbackItems;
-
-  // Filtrar ítems que tengan existencias en stock y no estén en el carrito
+  let inventarioFuente = appState.inventario && appState.inventario.length > 0 ? appState.inventario : fallbackItems;
   let candidatos = inventarioFuente.filter((p) => {
     if (!p || !p.Nombre) return false;
     const yaAgregado = enCarrito.some((itemNom) => itemNom.includes(p.Nombre));
     if (yaAgregado) return false;
-
     const { stockDisponible, unidadesRestantes } = calcularStockRestante(p.Nombre);
-    const tieneStock = (p.StockNum === undefined || p.StockNum > 0) && (stockDisponible >= 999 || unidadesRestantes > 0);
-
+    const tieneStock = (p.StockNum === void 0 || p.StockNum > 0) && (stockDisponible >= 999 || unidadesRestantes > 0);
     return tieneStock;
   });
-
-  // Priorizar Hielos y Snacks
   let hielosYSnacks = candidatos.filter((p) => {
     const cat = (p.Cat || p.Categoria || "").toUpperCase();
     const nom = p.Nombre.toUpperCase();
@@ -412,31 +422,23 @@ function renderizarSugerenciasRapidasCarrito() {
       (k) => cat.includes(k) || nom.includes(k)
     );
   });
-
-  // Aleatorizar (shuffle) para recomendar variedad fresca en cada apertura
   hielosYSnacks.sort(() => Math.random() - 0.5);
-
   let sugerencias = hielosYSnacks.slice(0, 5);
-
-  // Completar con otros productos aleatorios si faltan
   if (sugerencias.length < 3) {
     let otros = candidatos.filter((p) => !sugerencias.includes(p)).sort(() => Math.random() - 0.5);
     sugerencias = [...sugerencias, ...otros].slice(0, 5);
   }
-
   if (sugerencias.length === 0) {
     sugerencias = fallbackItems.filter((p) => !enCarrito.some((itemNom) => itemNom.includes(p.Nombre))).slice(0, 5);
   }
-
   let html = `
     <div class="cart-suggestions-widget">
       <div class="suggestions-header">
-        <h4><i class="fa-solid fa-wand-magic-sparkles"></i> Añade a tu pedido con 1 clic</h4>
-        <span class="suggestions-sub">🧊 Hielos, 🍿 Snacks y Mezcladores recomendados</span>
+        <h4><i class="fa-solid fa-wand-magic-sparkles"></i> A\xF1ade a tu pedido con 1 clic</h4>
+        <span class="suggestions-sub">\u{1F9CA} Hielos, \u{1F37F} Snacks y Mezcladores recomendados</span>
       </div>
       <div class="suggestions-grid">
-  `;
-
+    `;
   sugerencias.forEach((p) => {
     const nombreUnidad = `${p.Nombre} (UNIDAD)`;
     const nombreB64 = codificarNombre(nombreUnidad);
@@ -444,28 +446,25 @@ function renderizarSugerenciasRapidasCarrito() {
     const precioUsd = (p.PrecioNum || 0).toFixed(2);
     const tasa = appState.tasaOficial || 36;
     const precioBs = ((p.PrecioNum || 0) * tasa).toLocaleString("es-VE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
     html += `
       <div class="suggestion-card">
         <div class="suggestion-img-wrap">
-          <img src="${imgSrc}" class="suggestion-img" alt="${p.Nombre}" onerror="imgFallbackFolder(this)" data-codigo="${p.codigo || ''}">
+          <img src="${imgSrc}" class="suggestion-img" alt="${p.Nombre}" onerror="imgFallbackFolder(this)" data-codigo="${p.codigo || ""}">
         </div>
         <div class="suggestion-info">
           <h5 class="suggestion-title" title="${p.Nombre}">${p.Nombre}</h5>
           <p class="suggestion-price">$${precioUsd} <span class="suggestion-bs">(${precioBs} Bs)</span></p>
         </div>
         <button type="button" class="btn-fast-add" onclick="agregarAlCarritoB64('${nombreB64}', ${p.PrecioNum}, this, true, '${imgSrc}', false)">
-          <i class="fa-solid fa-plus"></i> Añadir
+          <i class="fa-solid fa-plus"></i> A\xF1adir
         </button>
       </div>
-    `;
+        `;
   });
-
   html += `
       </div>
     </div>
-  `;
-
+    `;
   container.innerHTML = html;
   container.style.display = "block";
 }
@@ -706,7 +705,6 @@ function actualizarStepperCheckout(step) {
     }
   });
 }
-
 function setCheckoutStep(step) {
   appState.checkoutStep = step;
   actualizarStepperCheckout(step);
@@ -757,78 +755,20 @@ function setCheckoutStep(step) {
       layout.classList.remove("checkout-active");
     }
   }
-}
-
-function animarContadorCarrito() {
-  const elements = [
-    document.getElementById("cart-count"),
-    document.getElementById("bottom-cart-count"),
-    document.getElementById("btn-cart-header"),
-    document.getElementById("nav-cart")
-  ];
-
-  elements.forEach((elem) => {
-    if (!elem || !elem.classList) return;
-    elem.classList.remove("cart-count-bounce");
-    void elem.offsetWidth;
-    elem.classList.add("cart-count-bounce");
-    setTimeout(() => {
-      if (elem && elem.classList) elem.classList.remove("cart-count-bounce");
-    }, 600);
-  });
-}
-
-function mostrarToastAgregarCarrito(nombre, imgSrc, esCaja = false) {
-  let container = document.getElementById("top-right-toast-container");
-  if (!container) {
-    container = document.createElement("div");
-    container.id = "top-right-toast-container";
-    const parentElem = document.body || document.documentElement;
-    if (parentElem) parentElem.appendChild(container);
+  if (window.innerWidth <= 768) {
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
-
-  const toast = document.createElement("div");
-  toast.className = "top-right-toast";
-
-  const imgTag = imgSrc ? `<img src="${imgSrc}" class="top-right-toast-img" alt="${nombre}">` : "";
-  const modoTag = esCaja ? " (CAJA)" : "";
-
-  toast.innerHTML = `
-    ${imgTag}
-    <div class="top-right-toast-body">
-      <div class="top-right-toast-title">
-        <i class="fa-solid fa-circle-check"></i> ¡Añadido al carrito!
-      </div>
-      <div class="top-right-toast-subtitle">${nombre}${modoTag}</div>
-    </div>
-    <div class="top-right-toast-badge">
-      <i class="fa-solid fa-bag-shopping"></i>
-    </div>
-  `;
-
-  container.appendChild(toast);
-
-  requestAnimationFrame(() => {
-    toast.classList.add("show");
-  });
-
-  setTimeout(() => {
-    toast.classList.remove("show");
-    toast.classList.add("hide");
-    setTimeout(() => toast.remove(), 400);
-  }, 3200);
 }
-
 document.addEventListener("DOMContentLoaded", () => {
   actualizarCartCount();
 });
-window.animarContadorCarrito = animarContadorCarrito;
-window.mostrarToastAgregarCarrito = mostrarToastAgregarCarrito;
+export {};
 window.guardarCarritoLS = guardarCarritoLS;
 window.calcularStockRestante = calcularStockRestante;
 window.tieneStockSuficiente = tieneStockSuficiente;
 window.mostrarToastError = mostrarToastError;
 window.animarAlCarrito = animarAlCarrito;
+window.animarContadorCarrito = animarContadorCarrito;
 window.agregarAlCarrito = agregarAlCarrito;
 window.cerrarCrossSell = cerrarCrossSell;
 window.actualizarCartCount = actualizarCartCount;

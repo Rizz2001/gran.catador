@@ -84,12 +84,12 @@ class AppHeader extends HTMLElement {
             
             // Attach event listeners
             this.querySelector('.btn-menu-sidebar').addEventListener('click', () => { if(typeof toggleSidebar === 'function') toggleSidebar(); });
-            this.querySelector('.header-brand').addEventListener('click', () => { window.location.href='index.html'; });
-            this.querySelector('.header-btn-inicio').addEventListener('click', () => { window.location.href='index.html'; });
+            this.querySelector('.header-brand').addEventListener('click', () => { if(typeof irInicio === 'function') irInicio(); else window.location.href='index.html'; });
+            this.querySelector('.header-btn-inicio').addEventListener('click', () => { if(typeof irInicio === 'function') irInicio(); else window.location.href='index.html'; });
             this.querySelector('#buscador').addEventListener('keyup', (e) => { if(typeof debounceBusqueda === 'function') debounceBusqueda(e); });
             this.querySelector('#clear-search').addEventListener('click', () => { if(typeof limpiarBuscador === 'function') limpiarBuscador(); });
             this.querySelector('#btn-whatsapp-header').addEventListener('click', () => { if(typeof abrirSoporteWhatsApp === 'function') abrirSoporteWhatsApp(); });
-            this.querySelector('#btn-cart-header').addEventListener('click', () => { window.location.href='carrito/'; });
+            this.querySelector('#btn-cart-header').addEventListener('click', () => { if(typeof abrirCarrito === 'function') abrirCarrito(); else window.location.href='carrito/'; });
             this.querySelector('#btn-profile-header').addEventListener('click', () => { if(typeof abrirPerfil === 'function') abrirPerfil(); });
             this.querySelector('#btn-settings-header').addEventListener('click', () => { if(typeof abrirAjustes === 'function') abrirAjustes(); });
         }

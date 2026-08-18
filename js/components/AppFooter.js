@@ -50,8 +50,8 @@ class AppFooter extends HTMLElement {
             this.appendChild(footerTemplate.content.cloneNode(true));
             
             // Attach event listeners
-            this.querySelector('.footer-link-inicio').addEventListener('click', (e) => { e.preventDefault(); window.location.href='index.html'; });
-            this.querySelector('.footer-link-carrito').addEventListener('click', (e) => { e.preventDefault(); window.location.href='carrito/'; });
+            this.querySelector('.footer-link-inicio').addEventListener('click', (e) => { e.preventDefault(); if(typeof irInicio === 'function') irInicio(); else window.location.href='index.html'; });
+            this.querySelector('.footer-link-carrito').addEventListener('click', (e) => { e.preventDefault(); if(typeof abrirCarrito === 'function') abrirCarrito(); else window.location.href='carrito/'; });
             this.querySelector('.footer-link-perfil').addEventListener('click', (e) => { e.preventDefault(); if(typeof abrirPerfil === 'function') abrirPerfil(); });
             this.querySelector('.footer-link-legales').addEventListener('click', (e) => { e.preventDefault(); if(typeof abrirLegales === 'function') abrirLegales(); });
             this.querySelector('.footer-link-soporte').addEventListener('click', (e) => { e.preventDefault(); if(typeof abrirSoporteWhatsApp === 'function') abrirSoporteWhatsApp(); });

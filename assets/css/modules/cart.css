@@ -50,6 +50,16 @@ body.dark-mode #modal-cart.modal-fullscreen {
     max-height: none; /* Fix for overlap with footer */
 }
 
+@media (max-width: 768px) {
+    .premium-cart-layout {
+        padding-bottom: 110px !important;
+    }
+    .modal-content-wrapper.premium-cart-container {
+        margin: 15px auto 80px auto !important;
+        padding: 0 12px 100px 12px !important;
+    }
+}
+
 /* Columna Izquierda (Productos) */
 .premium-cart-left {
     width: 100%;
