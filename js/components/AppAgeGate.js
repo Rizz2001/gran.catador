@@ -1,7 +1,13 @@
 class AppAgeGate extends HTMLElement {
     connectedCallback() {
+        let isVerified = false;
+        try {
+            const isBot = /bot|google|baidu|bing|msn|duckduckbot|teoma|slurp|yandex|spider|crawler|robot/i.test(navigator.userAgent);
+            isVerified = (localStorage.getItem('gc_ageVerified') === 'true') || isBot;
+        } catch(e){}
+
         this.innerHTML = `
-    <div id="age-gate">
+    <div id="age-gate" style="display: ${isVerified ? 'none' : 'flex'};">
         <div class="age-box">
             <h2 class="premium-title" style="color:var(--dorado); margin-bottom: 5px; font-size:26px;">GRAN CATADOR</h2>
             <p style="font-size: 12px; margin-bottom: 20px; color: var(--texto-claro);">Ingresa tu fecha de nacimiento</p>

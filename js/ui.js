@@ -7,16 +7,14 @@
 const isBot = /bot|google|baidu|bing|msn|duckduckbot|teoma|slurp|yandex|spider|crawler|robot/i.test(navigator.userAgent);
 
 try {
-    if (safeGetItem('ageVerified') === 'true' || isBot) {
-        let ag = document.getElementById('age-gate');
-        if (ag) ag.style.display = 'none';
+    const isVerified = (safeGetItem('ageVerified') === 'true') || isBot;
+    let ag = document.getElementById('age-gate');
+    if (ag) {
+        ag.style.display = isVerified ? 'none' : 'flex';
     }
 } catch (e) {
-    console.warn("localStorage no disponible", e);
-    if (isBot) {
-        let ag = document.getElementById('age-gate');
-        if (ag) ag.style.display = 'none';
-    }
+    let ag = document.getElementById('age-gate');
+    if (ag && !isBot) ag.style.display = 'flex';
 }
 
 /** Valida si el usuario cumple con la edad m�nima (18 a�os) */
