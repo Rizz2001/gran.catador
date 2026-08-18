@@ -380,6 +380,33 @@ function renderMarcasAliadas() {
     root.innerHTML = crearHTMLMarcasAliadas();
 }
 
+function renderizarSkeletons(cantidad = 8) {
+    const cont = document.getElementById('lista-productos');
+    if (!cont) return;
+
+    let html = '';
+    for (let i = 0; i < cantidad; i++) {
+        html += `
+            <div class="producto-card skeleton-card" style="pointer-events:none; border: 1px solid var(--color-border); box-shadow: none;">
+                <div class="product-card-content">
+                    <div class="skeleton-box" style="width: 100%; aspect-ratio: 1/1; border-radius: 20px; margin-bottom: 12px;"></div>
+                    <div class="skeleton-box" style="width: 85%; height: 16px; border-radius: 6px; margin-bottom: 8px;"></div>
+                    <div class="skeleton-box" style="width: 45%; height: 12px; border-radius: 4px; margin-bottom: 14px;"></div>
+                    <div class="product-price-wrapper">
+                        <div class="skeleton-box" style="width: 50%; height: 22px; border-radius: 6px; margin-bottom: 4px;"></div>
+                        <div class="skeleton-box" style="width: 40%; height: 14px; border-radius: 4px;"></div>
+                    </div>
+                </div>
+                <div class="product-bottom-action" style="margin-top: 10px;">
+                    <div class="skeleton-box" style="width: 100%; height: 44px; border-radius: 12px;"></div>
+                </div>
+            </div>
+        `;
+    }
+    cont.innerHTML = html;
+}
+window.renderizarSkeletons = renderizarSkeletons;
+
 function renderizarPagina() {
     const cont = document.getElementById('lista-productos');
     if (!cont) return; // Si no estamos en index.html, salir

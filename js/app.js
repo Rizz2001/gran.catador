@@ -613,6 +613,7 @@ async function cargarInventarioDesdeAPI() {
     // --- 2. DESCARGAR PRODUCTOS (ARTÍCULOS) ---
     appState.gruposCargados = appState.gruposCargados || [];
     inventario = []; // Reiniciamos si estamos refrescando
+    if (typeof window.renderizarSkeletons === 'function') window.renderizarSkeletons(8);
 
     let grupoInicial = null;
 
