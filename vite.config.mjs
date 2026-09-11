@@ -29,7 +29,8 @@ export default defineConfig({
         { src: 'sw.js', dest: '' },
         { src: 'robots.txt', dest: '' },
         { src: 'sitemap.xml', dest: '' },
-        { src: '_headers', dest: '' }
+        { src: '_headers', dest: '' },
+        { src: 'functions', dest: '' }
       ]
     })
   ]

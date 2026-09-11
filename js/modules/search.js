@@ -175,9 +175,26 @@ document.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('click', (e) => { if (!e.target.closest('.search-pill') && !e.target.closest('.search-container')) cerrarSugerencias(); });
-function compartirProducto(nombre, precio) { const text = `¡Mira esta bebida! ${nombre} a solo $${precio}. ${window.location.href}`; if (navigator.share) { navigator.share({ title: 'Gran Catador', text, url: window.location.href }).catch(e => { }); return; } if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(text).then(() => mostrarToast("Texto copiado al portapapeles."), () => fallbackCopyText(text)); return; } fallbackCopyText(text); }
+function compartirProducto(nombre, precio, codigo) {
+    const productId = codigo || (new URLSearchParams(window.location.search)).get('id');
+    const shareUrl = productId 
+        ? `${window.location.origin}/producto.html?id=${encodeURIComponent(productId)}`
+        : window.location.href;
+    const text = `¡Mira este producto en Gran Catador! ${nombre ? nombre : ''}${precio ? ' a solo $' + precio : ''}.`;
+
+    if (navigator.share) {
+        navigator.share({ title: nombre ? `${nombre} | Gran Catador` : 'Gran Catador', text: text, url: shareUrl }).catch(e => { });
+        return;
+    }
+    const fullText = `${text} ${shareUrl}`;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(fullText).then(() => mostrarToast("Enlace del producto copiado al portapapeles."), () => fallbackCopyText(fullText));
+        return;
+    }
+    fallbackCopyText(fullText);
+}
 function fallbackCopyText(text) { const textarea = document.createElement('textarea'); textarea.value = text; textarea.style.position = 'fixed'; textarea.style.opacity = '0'; document.body.appendChild(textarea); textarea.focus(); textarea.select(); try { document.execCommand('copy'); mostrarToast("Texto copiado al portapapeles."); } catch (e) { mostrarToast("No se pudo copiar al portapapeles."); } document.body.removeChild(textarea); }
-function compartirProductoB64(b64, p) { compartirProducto(decodificarNombre(b64), p); }
+function compartirProductoB64(b64, p, codigo) { compartirProducto(decodificarNombre(b64), p, codigo); }
 
 /** Copia un texto al portapapeles (Ej: Datos de Pago) y da feedback visual en el botón */
 function copiarDatoPago(texto, btnElement) {

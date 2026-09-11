@@ -248,13 +248,12 @@
       }
     }
   }
-  function sugerirAcompañante() {
+  function sugerirAcompa\u00F1ante() {
     let sugerencias = [];
-    const isActivo = (p) => p.StockNum > 0 && String(p.StockStr || "").toLowerCase() !== "agotado" && String(p.StockStr || "").toLowerCase() !== "suspendido" && p.Suspendido !== true;
     if (appState.codigosRecomendados && appState.codigosRecomendados.length > 0) {
-      sugerencias = (appState.inventario || []).filter((p) => appState.codigosRecomendados.includes(p.codigo) && isActivo(p)).slice(0, 3);
+      sugerencias = (appState.inventario || []).filter((p) => appState.codigosRecomendados.includes(p.codigo) && p.StockNum > 0).slice(0, 3);
     } else {
-      sugerencias = (appState.inventario || []).filter((p) => (p.Nombre.includes("HIELO") || p.Nombre.includes("COLA") || p.Nombre.includes("REFRESCO")) && isActivo(p)).slice(0, 3);
+      sugerencias = (appState.inventario || []).filter((p) => (p.Nombre.includes("HIELO") || p.Nombre.includes("COLA") || p.Nombre.includes("REFRESCO")) && p.StockNum > 0).slice(0, 3);
     }
     if (sugerencias.length > 0) {
       let cont = document.getElementById("cross-sell-items");
@@ -434,8 +433,6 @@
     let inventarioFuente = appState.inventario && appState.inventario.length > 0 ? appState.inventario : fallbackItems;
     let candidatos = inventarioFuente.filter((p) => {
       if (!p || !p.Nombre) return false;
-      const isAgotado = String(p.StockStr || "").toLowerCase() === "agotado" || String(p.StockStr || "").toLowerCase() === "suspendido" || p.Suspendido === true;
-      if (isAgotado) return false;
       const yaAgregado = enCarrito.some((itemNom) => itemNom.includes(p.Nombre));
       if (yaAgregado) return false;
       const { stockDisponible, unidadesRestantes } = calcularStockRestante(p.Nombre);

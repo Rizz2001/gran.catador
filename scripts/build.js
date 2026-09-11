@@ -48,7 +48,7 @@ try {
 const EXCLUDE = new Set([
     'node_modules', '.git', 'dist', 'scripts', '.gitignore', 
     'package.json', 'package-lock.json', 'vite.config.mjs', 'vite.config.js',
-    'tsconfig.json', '.vscode', '.nvmrc', '.agents', 'functions'
+    'tsconfig.json', '.vscode', '.nvmrc', '.agents'
 ]);
 
 function copyRecursive(src, dest) {

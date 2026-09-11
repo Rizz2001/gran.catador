@@ -430,7 +430,7 @@ window.compartirProductoDetalle = function(codigo, nombreB64, precioUsd) {
     } catch(e){}
 
     if (typeof compartirProducto === 'function') {
-        compartirProducto(nombre, precioUsd);
+        compartirProducto(nombre, precioUsd, codigo);
     } else {
         const shareUrl = window.location.origin + '/producto.html?id=' + encodeURIComponent(codigo);
         const text = `¡Mira este producto en Gran Catador! ${nombre} a $${precioUsd}. ${shareUrl}`;

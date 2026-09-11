@@ -8,7 +8,7 @@ export async function onRequest(context) {
     }
 
     const cleanedId = String(productId).trim();
-    const origin = url.origin;
+    const origin = url.origin.replace(/^http:/, 'https:');
     const imageUrl = `${origin}/assets/img/productos/${cleanedId}.jpg`;
     const canonicalUrl = `${origin}/producto.html?id=${encodeURIComponent(cleanedId)}`;
 
@@ -35,6 +35,16 @@ export async function onRequest(context) {
         .on('meta[property="og:image"]', {
             element(element) {
                 element.setAttribute('content', imageUrl);
+            }
+        })
+        .on('meta[property="og:image:secure_url"]', {
+            element(element) {
+                element.setAttribute('content', imageUrl);
+            }
+        })
+        .on('meta[property="og:image:type"]', {
+            element(element) {
+                element.setAttribute('content', 'image/jpeg');
             }
         })
         .on('meta[property="og:url"]', {
