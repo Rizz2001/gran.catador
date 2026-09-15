@@ -509,21 +509,71 @@ async function cargarInventario() {
         updateApiProgress(100, true);
         let listado = document.getElementById('lista-productos');
         if (listado) {
-            listado.innerHTML = `<div class="api-error-card"><h3>Error de Conexión</h3><p>${e.message || 'Verifica la configuración de la API.'}</p></div>`;
+            listado.innerHTML = `
+                <div class="api-error-card" style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: var(--color-card, #fff); border-radius: 16px; border: 1px solid var(--color-border, #e5e7eb); margin: 20px 0;">
+                    <div style="font-size: 42px; margin-bottom: 12px;">📡</div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 8px; color: var(--color-text);">No pudimos conectar con el catálogo</h3>
+                    <p style="font-size: 14px; color: var(--color-text-muted); margin-bottom: 20px;">${e.message || 'Verifica tu conexión a internet o intenta de nuevo.'}</p>
+                    <button onclick="cargarInventario()" class="btn-checkout-primary" style="max-width: 220px; margin: 0 auto; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <i class="fa-solid fa-rotate-right"></i> Reintentar conexión
+                    </button>
+                </div>`;
         }
+    }
+}
+
+// --- FETCH CON TIMEOUT Y CACHÉ CLIENTE (sessionStorage con TTL de 5 min) ---
+async function fetchApiWithTimeoutAndCache(url, timeoutMs = 8000, ttlMs = 5 * 60 * 1000) {
+    const cacheKey = 'gc_api_' + encodeURIComponent(url).replace(/[^a-zA-Z0-9]/g, '_').slice(-60);
+    try {
+        const cachedRaw = sessionStorage.getItem(cacheKey);
+        if (cachedRaw) {
+            const cached = JSON.parse(cachedRaw);
+            if (cached && cached.timestamp && (Date.now() - cached.timestamp < ttlMs)) {
+                return cached.data;
+            }
+        }
+    } catch(e) {}
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        const res = await fetch(url, { signal: controller.signal });
+        clearTimeout(timer);
+        if (!res.ok) {
+            let errorMsg = `Error servidor: ${res.status}`;
+            try {
+                const errData = await res.json();
+                if (errData.error) errorMsg += ` - ${errData.error}`;
+            } catch(e) {}
+            throw new Error(errorMsg);
+        }
+        const data = await res.json();
+        try {
+            sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), data }));
+        } catch(e) {}
+        return data;
+    } catch(err) {
+        clearTimeout(timer);
+        if (err.name === 'AbortError') {
+            throw new Error('La conexión con Smartventas tardó demasiado (Timeout).');
+        }
+        throw err;
     }
 }
 
 async function cargarExistenciasGlobales(proxyBaseUrl) {
     try {
-        const [res01, res03] = await Promise.all([
-            fetch(`${proxyBaseUrl}?endpoint=${encodeURIComponent('existencias/deposito/01')}`),
-            fetch(`${proxyBaseUrl}?endpoint=${encodeURIComponent('existencias/deposito/03')}`)
+        const [data01, data03] = await Promise.all([
+            fetchApiWithTimeoutAndCache(`${proxyBaseUrl}?endpoint=${encodeURIComponent('existencias/deposito/01')}`, 6000).catch(() => null),
+            fetchApiWithTimeoutAndCache(`${proxyBaseUrl}?endpoint=${encodeURIComponent('existencias/deposito/03')}`, 6000).catch(() => null)
         ]);
 
         let stockMap = new Map();
 
         const procesarData = (data) => {
+            if (!data) return;
             let items = Array.isArray(data) ? data : (data.data || data.result || []);
             items.forEach(item => {
                 let cod = (item.codArticulo ?? item.codigo ?? item.id ?? item.CodArticulo ?? item.Codigo ?? "").toString().trim();
@@ -534,40 +584,23 @@ async function cargarExistenciasGlobales(proxyBaseUrl) {
             });
         };
 
-        if (res01.ok) procesarData(await res01.json());
-        if (res03.ok) procesarData(await res03.json());
+        procesarData(data01);
+        procesarData(data03);
 
         appState.stockMap = stockMap;
     } catch (e) { }
 }
 
 async function cargarInventarioDesdeAPI() {
-    // Ruta inteligente: Si estamos en Cloudflare Pages usamos el worker,
-    // si estamos en local usamos el proxy subido a Cloudflare,
-    // de lo contrario (Laragon, XAMPP, cPanel, Hostinger) usamos el proxy en PHP.
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname.startsWith('192.168.');
     const proxyBaseUrl = (isLocalhost || window.location.hostname.includes('github.io')) ? 'https://gran-catador.pages.dev/api/proxy' : '/api/proxy';
 
     updateApiProgress(10);
 
-    // --- 0 Y 1. DESCARGAR EXISTENCIAS Y GRUPOS EN PARALELO ---
-    // Esto mejora el performance evitando que una petición bloquee a la otra
+    // --- 0 Y 1. DESCARGAR EXISTENCIAS Y GRUPOS EN PARALELO CON CACHÉ ---
     const existenciasPromise = cargarExistenciasGlobales(proxyBaseUrl);
-    let gruposPromise = fetch(`${proxyBaseUrl}?endpoint=gruposinv`).then(async res => {
-        if (!res.ok && res.status >= 500) {
-            return fetch(`${proxyBaseUrl}?endpoint=grupos`);
-        }
-        return res;
-    }).then(async res => {
-        if (!res.ok) {
-            let errorMsg = `Error servidor grupos: ${res.status}`;
-            try {
-                const errorData = await res.json();
-                if (errorData.error) errorMsg += ` - ${errorData.error}`;
-            } catch (e) { }
-            throw new Error(errorMsg);
-        }
-        return res.json();
+    let gruposPromise = fetchApiWithTimeoutAndCache(`${proxyBaseUrl}?endpoint=gruposinv`, 8000).catch(async () => {
+        return fetchApiWithTimeoutAndCache(`${proxyBaseUrl}?endpoint=grupos`, 8000);
     });
 
     const [_, dataGrupos] = await Promise.all([existenciasPromise, gruposPromise]);
@@ -717,13 +750,7 @@ async function cargarProductosPorGrupo(codGrupo, nombreGrupo) {
 
     try {
         const endpointUrl = `articulos/grupo/${encodeURIComponent(codGrupo)}`;
-        const res = await fetch(`${proxyBaseUrl}?endpoint=${encodeURIComponent(endpointUrl)}`);
-
-        let data = [];
-        if (res.ok) {
-            data = await res.json();
-        }
-
+        const data = await fetchApiWithTimeoutAndCache(`${proxyBaseUrl}?endpoint=${encodeURIComponent(endpointUrl)}`, 8000).catch(() => []);
         let articulos = Array.isArray(data) ? data : (data.data || data.articulos || data.result || []);
 
         if (articulos.length > 0) {

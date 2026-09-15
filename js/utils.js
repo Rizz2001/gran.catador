@@ -40,18 +40,6 @@ const STOP_WORDS = new Set([
 // --- FUNCIONES DE TEXTO Y BÚSQUEDA ---
 function limpiarCategoria(texto) { if (!texto) return "Otros"; return texto.trim().replace(/\s+/g, ' ').toUpperCase(); }
 function quitarAcentos(texto) { return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
-function parseNumber(texto) { if (texto == null) return 0; let str = texto.toString().trim().replace(/\./g, '').replace(',', '.'); let num = parseFloat(str); return Number.isFinite(num) ? num : 0; }
-
-// Determinar la carpeta principal según la categoría
-function getCategoriaFolder(cat) {
-    if (!cat) return 'otros';
-    let c = cat.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
-    if (c.includes('LICOR') || c.includes('VINO') || c.includes('CERVEZA') || c.includes('RON') || c.includes('WHISKY') || c.includes('VODKA') || c.includes('GINEBRA') || c.includes('ANIS') || c.includes('TEQUILA') || c.includes('COCUY') || c.includes('AGUARDIENTE') || c.includes('COGNAC') || c.includes('BRANDY')) return 'licores';
-    if (c.includes('SNACK') || c.includes('CHUCHERIA') || c.includes('ALIMENTO') || c.includes('PASAPALO') || c.includes('GALLETA') || c.includes('CHOCOLATE') || c.includes('DULCE')) return 'alimentos';
-    if (c.includes('REFRESCO') || c.includes('AGUA') || c.includes('SODA') || c.includes('BEBIDA') || c.includes('MALTIN') || c.includes('MALTA') || c.includes('ENERGIZANTE')) return 'refrescos';
-    if (c.includes('JUGO') || c.includes('NECTAR') || c.includes('FRUTA')) return 'jugos';
-    return 'otros';
-}
 
 // Algoritmo de distancia de Levenshtein (para búsquedas con errores ortográficos)
 function levenshtein(a, b) { const m = []; for (let i = 0; i <= b.length; i++)m[i] = [i]; for (let j = 0; j <= a.length; j++)m[0][j] = j; for (let i = 1; i <= b.length; i++) { for (let j = 1; j <= a.length; j++) { if (b.charAt(i - 1) === a.charAt(j - 1)) { m[i][j] = m[i - 1][j - 1]; } else { m[i][j] = Math.min(m[i - 1][j - 1] + 1, Math.min(m[i][j - 1] + 1, m[i - 1][j] + 1)); } } } return m[b.length][a.length]; }
@@ -261,21 +249,16 @@ function decodificarNombre(b64) { try { return decodeURIComponent(escape(atob(b6
 
 // --- REDES Y DOM HELPERS GENÉRICOS ---
 
-function imgFallback(imgElement) {
-    imgElement.src = 'logo.webp';
-    imgElement.onerror = null;
-}
-
 function obtenerImgProducto(producto) {
     const codigo = producto.codigo || producto.Codigo || producto.codArticulo || producto.CodArticulo || producto.id || producto.Id || '';
     let imagenUrl = producto.ImagenUrl || producto.imagenUrl || '';
     if (imagenUrl) return imagenUrl;
     if (!codigo) return 'logo.webp';
     if (window.productoImagenesDisponibles && window.productoImagenesDisponibles.has(String(codigo).trim())) {
-        return `assets/img/productos/${codigo}.jpg`;
+        return `assets/img/productos/${codigo}.webp`;
     }
     // Auto-descubrimiento: Inicia la búsqueda automática forzando el intento de carga local
-    return `assets/img/productos/${codigo}.jpg`;
+    return `assets/img/productos/${codigo}.webp`;
 }
 
 function imgFallbackFolder(imgElement) {
@@ -284,8 +267,8 @@ function imgFallbackFolder(imgElement) {
     let codigo = imgElement.dataset.codigo;
 
     if (attempts === 0 && codigo) {
-        // Intento 1: Cargar imagen local .jpg
-        imgElement.src = `assets/img/productos/${codigo}.jpg`;
+        // Intento 1: Cargar imagen local .webp
+        imgElement.src = `assets/img/productos/${codigo}.webp`;
         imgElement.dataset.attempts = "1";
     } else {
         // Fallo final: mostrar logo por defecto

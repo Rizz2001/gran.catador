@@ -6,14 +6,14 @@
 
 window.bannersGrid = [
     {
-        imagen: 'assets/banners/caroreña1.jpg', // Ruta de la imagen
+        imagen: 'assets/banners/caroreña1.webp', // Ruta de la imagen
         url: '#', // Link tradicional (déjalo en '#' si usarás codigoProducto)
         codigoProducto: '7591446009601', // ¡NUEVO! Coloca aquí el código de barras para abrir el popup del producto
         alt: 'Publicidad 1',
         activo: true // Cambia a false si quieres ocultarlo temporalmente
     },
     {
-        imagen: 'assets/banners/caroreña2.jpg', // Ruta de la imagen
+        imagen: 'assets/banners/caroreña2.webp', // Ruta de la imagen
         url: '#', // Link tradicional (déjalo en '#' si usarás codigoProducto)
         codigoProducto: '7591446009601', // ¡NUEVO! Coloca aquí el código de barras para abrir el popup del producto
         alt: 'Publicidad 2',

@@ -3,14 +3,14 @@
 // Si usas rutas relativas, se buscarán en assets/img/marcas-aliadas/
 
 export const marcasAliadas = [
-  "dusa1.jpg",
-  "aurora.jpg",
-  "caroreña.jpg",
-  "melo.jpg",
-  "laquemanda.jpg",
-  "pan.jpg",
-  "pepsi.jpg",
-  "polar1.jpg",
-  "singluten.jpg",
-  "solera1.jpg"
+  "dusa1.webp",
+  "aurora.webp",
+  "caroreña.webp",
+  "melo.webp",
+  "laquemanda.webp",
+  "pan.webp",
+  "pepsi.webp",
+  "polar1.webp",
+  "singluten.webp",
+  "solera1.webp"
 ];

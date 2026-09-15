@@ -45,4 +45,58 @@
     paginacion: { itemsPorPagina: 30, paginaActual: 1 },
     debounceTimer: null
   };
+  let cartModulePromise = null;
+  window.loadCartModule = function() {
+    if (!cartModulePromise) {
+      cartModulePromise = new Promise((resolve, reject) => {
+        if (typeof window.guardarCarritoLS === "function" && !window.guardarCarritoLS._isStub) {
+          resolve();
+          return;
+        }
+        const script = document.createElement("script");
+        const isSubdir = window.location.pathname.toLowerCase().includes("/carrito");
+        const basePath = isSubdir ? "../" : "";
+        script.src = `${basePath}js/cart.js?v=4.1`;
+        script.onload = () => resolve();
+        script.onerror = (err) => reject(err);
+        document.head.appendChild(script);
+      });
+    }
+    return cartModulePromise;
+  };
+  window.actualizarCartCountBase = function() {
+    if (!window.appState || !window.appState.carrito) return;
+    let count = 0;
+    for (let k in window.appState.carrito) {
+      count += window.appState.carrito[k].cantidad || 0;
+    }
+    const c1 = document.getElementById("cart-count");
+    if (c1) c1.innerText = count.toString();
+    const c2 = document.getElementById("bottom-cart-count");
+    if (c2) c2.innerText = count.toString();
+  };
+  const stubNames = ["guardarCarritoLS", "agregarAlCarrito", "agregarAlCarritoB64", "cambiarCant", "cambiarCantB64", "vaciarCarrito", "abrirCarrito", "renderizarCarrito", "enviarPedido", "setCheckoutStep"];
+  stubNames.forEach((fnName) => {
+    if (!window[fnName]) {
+      const stubFn = function(...args) {
+        return window.loadCartModule().then(() => {
+          if (typeof window[fnName] === "function" && !window[fnName]._isStub) {
+            return window[fnName](...args);
+          }
+        });
+      };
+      stubFn._isStub = true;
+      window[fnName] = stubFn;
+    }
+  });
+  if (typeof document !== "undefined") {
+    document.addEventListener("DOMContentLoaded", () => {
+      window.actualizarCartCountBase();
+      if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(() => window.loadCartModule());
+      } else {
+        setTimeout(() => window.loadCartModule(), 1500);
+      }
+    });
+  }
 })();
