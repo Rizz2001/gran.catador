@@ -41,6 +41,58 @@ const STOP_WORDS = new Set([
 function limpiarCategoria(texto) { if (!texto) return "Otros"; return texto.trim().replace(/\s+/g, ' ').toUpperCase(); }
 function quitarAcentos(texto) { return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
 
+window.formatCategoryName = function(str) {
+    if (!str) return '';
+    let formatted = String(str).trim();
+    
+    const correcciones = {
+        'LICORES': 'Licores',
+        'CERVEZAS': 'Cervezas',
+        'CERVEZAS Y MALTAS': 'Cervezas y Maltas',
+        'VINO': 'Vinos',
+        'VINOS': 'Vinos',
+        'VINOS Y ESPUMANTES': 'Vinos y Espumantes',
+        'RONES': 'Rones',
+        'RONES Y ANIS': 'Rones y Anís',
+        'RON Y ANIS': 'Ron y Anís',
+        'WHISKY': 'Whisky',
+        'VODKA': 'Vodka',
+        'VIVERES': 'Víveres',
+        'VIVERES Y ALIMENTOS': 'Víveres y Alimentos',
+        'CHARCUTERIA': 'Charcutería',
+        'CHARCUTERIA Y LACTEOS': 'Charcutería y Lácteos',
+        'SNACKS': 'Snacks',
+        'SNACKS Y DULCES': 'Snacks y Dulces',
+        'CONFITERIA': 'Confitería',
+        'CONFITERIA Y GALLETAS': 'Confitería y Galletas',
+        'BEBIDAS': 'Bebidas',
+        'BEBIDAS Y REFRESCOS': 'Bebidas y Refrescos',
+        'REFRESCOS Y JUGOS': 'Refrescos y Jugos',
+        'HIELO': 'Hielo',
+        'HIELO Y CIGARRILLOS': 'Hielo y Cigarros',
+        'HIGIENE': 'Higiene y Cuidado',
+        'HIGIENE Y LIMPIEZA': 'Higiene y Limpieza',
+        'CARNES': 'Carnes y Parrilla',
+        'FRUTAS Y VERDURAS': 'Frutas y Verduras'
+    };
+
+    const upper = formatted.toUpperCase();
+    if (correcciones[upper]) {
+        return correcciones[upper];
+    }
+
+    const lowercaseWords = new Set(['y', 'e', 'de', 'del', 'la', 'los', 'las', 'en', 'para', 'con']);
+    return formatted
+        .toLowerCase()
+        .split(' ')
+        .map((word, index) => {
+            if (!word) return '';
+            if (index > 0 && lowercaseWords.has(word)) return word;
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        })
+        .join(' ');
+};
+
 // Algoritmo de distancia de Levenshtein (para búsquedas con errores ortográficos)
 function levenshtein(a, b) { const m = []; for (let i = 0; i <= b.length; i++)m[i] = [i]; for (let j = 0; j <= a.length; j++)m[0][j] = j; for (let i = 1; i <= b.length; i++) { for (let j = 1; j <= a.length; j++) { if (b.charAt(i - 1) === a.charAt(j - 1)) { m[i][j] = m[i - 1][j - 1]; } else { m[i][j] = Math.min(m[i - 1][j - 1] + 1, Math.min(m[i][j - 1] + 1, m[i - 1][j] + 1)); } } } return m[b.length][a.length]; }
 

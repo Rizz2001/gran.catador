@@ -1,14 +1,21 @@
-// --- FUNCIONES DEL SIDEBAR ---
+// --- FUNCIONES DEL SIDEBAR Y CONTROL DE SCROLL MOBIL ---
+window.lockBodyScroll = function () {
+    document.documentElement.classList.add('no-scroll');
+    document.body.classList.add('no-scroll');
+};
+
+window.unlockBodyScroll = function () {
+    document.documentElement.classList.remove('no-scroll');
+    document.body.classList.remove('no-scroll');
+};
+
 window.toggleSidebar = function () {
     const sidebar = document.getElementById('sidebar-menu');
     const overlay = document.getElementById('sidebar-overlay');
     if (sidebar && overlay) {
         sidebar.classList.add('open');
         overlay.classList.add('active');
-        // Prevent body scroll on mobile
-        if (window.innerWidth < 1024) {
-            document.body.style.overflow = 'hidden';
-        }
+        window.lockBodyScroll();
     }
 };
 
@@ -18,7 +25,7 @@ window.closeSidebar = function () {
     
     if (sidebar) sidebar.classList.remove('open');
     if (overlay) overlay.classList.remove('active');
-    document.body.style.overflow = '';
+    window.unlockBodyScroll();
 };
 
 window.mostrarPanelGrupos = function () {
@@ -35,6 +42,6 @@ window.mostrarPanelGrupos = function () {
 window.volverAGrupos = function () {
     mostrarPanelGrupos();
     if (!window.location.pathname.includes('producto')) {
-        irInicio(); // Reset to "Todos" filter gracefully
+        irInicio();
     }
 };

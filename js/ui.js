@@ -194,6 +194,7 @@ function cerrarModal(modalId, navId) {
         let modal = document.getElementById(modalId);
         if (modal) modal.style.display = 'none';
     }
+    if (typeof unlockBodyScroll === 'function') unlockBodyScroll();
     if (navId) setActiveNav(navId);
 }
 
@@ -281,6 +282,7 @@ function abrirSoporteWhatsApp() {
 /** Abre la vista de perfil y dibuja el historial de pedidos */
 function abrirPerfil() {
     cerrarModal('all');
+    if (typeof lockBodyScroll === 'function') lockBodyScroll();
     setActiveNav('nav-user');
     document.getElementById('modal-perfil').style.display = 'flex';
     document.getElementById('perfilNombre').value = safeGetItem('gc_nombre') || '';
@@ -542,6 +544,7 @@ function generarCategorias() {
         appState.gruposInventario.forEach(g => {
             let nombre = g.Nombre || g.nombre || g.Descripcion || g.descripcion || g.NombreGrupo || g.desc_grupo || g.DescGrupo;
             if (nombre) {
+                let displayNombre = typeof formatCategoryName === 'function' ? formatCategoryName(nombre) : nombre;
                 let catIdLimpio = limpiarCategoria(nombre).replace(/[^a-z0-9]/gi, '-').toLowerCase();
                 let iconClass = getIconForCategory(nombre);
                 let div = document.createElement('div');
@@ -551,7 +554,7 @@ function generarCategorias() {
                         <input type="checkbox" id="cat-${catIdLimpio}" ${limpiarCategoria(nombre) === limpiarCategoria(categoriaActual) ? 'checked' : ''} onchange="filtrarCategoria('${nombre}', this)">
                         <label for="cat-${catIdLimpio}">
                             <i class="fa-solid ${iconClass}"></i>
-                            <span style="flex:1;">${nombre}</span>
+                            <span style="flex:1;">${displayNombre}</span>
                             <i class="fa-solid fa-xmark close-cat-icon" style="display:none; opacity: 0.8; font-size: 14px;"></i>
                         </label>
                     </div>
@@ -572,6 +575,17 @@ function generarCategorias() {
         cargarSubcategoriasAPI(categoriaActual);
     } else {
         if (typeof mostrarPanelGrupos === 'function') mostrarPanelGrupos();
+    }
+
+    // Sincronizar botones superiores en AppHeader y AppFeaturedCategories
+    const appHeader = document.querySelector('app-header');
+    if (appHeader && typeof appHeader.renderQuickCategories === 'function') {
+        appHeader.renderQuickCategories();
+    }
+    const featuredCats = document.querySelector('app-featured-categories');
+    if (featuredCats && typeof featuredCats.render === 'function') {
+        featuredCats.rendered = false;
+        featuredCats.render();
     }
 
     setTimeout(() => {
@@ -863,6 +877,50 @@ window.getIconForCategory = function(cat) {
     if (c.includes('CARRITO') || c.includes('FAVORITO')) return 'fa-star';
     return 'fa-tags';
 };
+
+/** Selecciona y filtra una categoría desde los botones superiores */
+window.seleccionarCategoria = function(catName) {
+    if (!catName) return;
+
+    const targetUpper = catName.trim().toUpperCase();
+    const targetLimpio = typeof limpiarCategoria === 'function' ? limpiarCategoria(catName) : targetUpper;
+
+    const quickBtns = document.querySelectorAll('.quick-cat-btn');
+    quickBtns.forEach(btn => {
+        const dataCat = (btn.getAttribute('data-cat') || '').trim().toUpperCase();
+        const dataLimpio = typeof limpiarCategoria === 'function' ? limpiarCategoria(dataCat) : dataCat;
+        const btnText = btn.innerText.trim().toUpperCase();
+
+        if (targetLimpio === 'TODOS' && (dataLimpio === 'TODOS' || btnText.includes('TODOS'))) {
+            btn.classList.add('active');
+        } else if (dataLimpio === targetLimpio || dataCat === targetUpper || btnText.includes(targetUpper)) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    let checkbox = null;
+    const labels = document.querySelectorAll('#contenedorCategorias label');
+    for (let label of labels) {
+        let labelText = (label.textContent || label.innerText || '').trim().toUpperCase();
+        let labelLimpio = typeof limpiarCategoria === 'function' ? limpiarCategoria(labelText) : labelText;
+        if (labelLimpio === targetLimpio || labelText.includes(targetUpper) || (targetLimpio === 'TODOS' && labelText.includes('TODOS'))) {
+            checkbox = label.previousElementSibling || document.getElementById(label.getAttribute('for'));
+            break;
+        }
+    }
+
+    if (typeof filtrarCategoria === 'function') {
+        filtrarCategoria(catName, checkbox);
+    }
+
+    const prodSec = document.getElementById('productos') || document.getElementById('lista-productos');
+    if (prodSec && !window.location.pathname.includes('producto')) {
+        prodSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+};
+
 
 
 // --- FUNCIÓN PARA FLECHAS DE SCROLL EN PC ---
