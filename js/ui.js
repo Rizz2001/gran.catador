@@ -845,6 +845,26 @@ async function filtrarCategoria(cat, checkboxElement) {
 function toggleCategorias() { const panel = document.getElementById('categoria-panel'); const overlay = document.getElementById('categoria-overlay'); if (!panel || !overlay) return; const isOpen = panel.classList.toggle('open'); overlay.style.display = isOpen ? 'block' : 'none'; }
 function closeCategorias() { const panel = document.getElementById('categoria-panel'); const overlay = document.getElementById('categoria-overlay'); if (panel) panel.classList.remove('open'); if (overlay) overlay.style.display = 'none'; }
 
+/** Mapeo de íconos para categorías principales */
+window.getIconForCategory = function(cat) {
+    if (!cat) return 'fa-boxes-stacked';
+    const c = String(cat).toUpperCase();
+    if (c.includes('LICOR') || c.includes('RON') || c.includes('WHISKY') || c.includes('VODKA') || c.includes('TEQUILA') || c.includes('GINEBRA')) return 'fa-wine-bottle';
+    if (c.includes('VINO') || c.includes('CHAMPAGNE') || c.includes('SANGRIA')) return 'fa-wine-glass-empty';
+    if (c.includes('CERVEZA') || c.includes('MALTA')) return 'fa-beer-mug-empty';
+    if (c.includes('VÍVERE') || c.includes('VIVERE') || c.includes('ALIMENT')) return 'fa-basket-shopping';
+    if (c.includes('BEBIDA') || c.includes('REFRESCO') || c.includes('JUGO') || c.includes('AGUA')) return 'fa-bottle-water';
+    if (c.includes('CHARCUTER') || c.includes('QUESO') || c.includes('JAMON')) return 'fa-cheese';
+    if (c.includes('SNACK') || c.includes('DULCE') || c.includes('GALLETA') || c.includes('CONFITER')) return 'fa-cookie-bite';
+    if (c.includes('HIELO')) return 'fa-cube';
+    if (c.includes('HIGIENE') || c.includes('LIMPIEZA') || c.includes('CUIDADO')) return 'fa-pump-soap';
+    if (c.includes('CARNE') || c.includes('POLLO') || c.includes('PARRILLA')) return 'fa-drumstick-bite';
+    if (c.includes('FRUTA') || c.includes('VERDURA')) return 'fa-apple-whole';
+    if (c.includes('CARRITO') || c.includes('FAVORITO')) return 'fa-star';
+    return 'fa-tags';
+};
+
+
 // --- FUNCIÓN PARA FLECHAS DE SCROLL EN PC ---
 window.scrollHorizontal = function (containerId, amount) {
     const container = document.getElementById(containerId);

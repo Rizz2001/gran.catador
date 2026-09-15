@@ -87,12 +87,12 @@ function crearHTMLProducto(p) {
     }
 
     let textoStock = '';
-    if ((p.StockStr || '').toString().toLowerCase() === 'disponible' || p.StockNum >= 999) {
-        textoStock = '<b>Stock Disponible</b>';
-    } else if (isAgotado && p.StockNum > 0) {
-        textoStock = `<b style="color: #ea4335;">Solo ${p.StockNum} und (No alcanza p/ caja)</b>`;
+    if (isAgotado) {
+        textoStock = `<span class="badge-stock stock-out"><i class="fa-solid fa-circle-xmark"></i> Agotado</span>`;
+    } else if (p.StockNum > 0 && p.StockNum <= 3) {
+        textoStock = `<span class="badge-stock stock-low"><i class="fa-solid fa-triangle-exclamation"></i> Últimas ${p.StockNum} unds.</span>`;
     } else {
-        textoStock = `<b style="${p.StockNum > 0 && p.StockNum <= 5 ? 'color: #ea4335;' : ''}">${p.StockNum} und disponibles</b>`;
+        textoStock = `<span class="badge-stock stock-in"><i class="fa-solid fa-circle-check"></i> En stock</span>`;
     }
 
     // --- BADGES PROMOCIONALES ESTILIZADOS ---

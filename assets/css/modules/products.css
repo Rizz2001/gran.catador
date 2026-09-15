@@ -158,6 +158,54 @@
     border: 1px solid rgba(255, 255, 255, 0.25);
 }
 
+/* Badges de Estado de Inventario en Tiempo Real */
+.badge-stock {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    width: fit-content;
+    margin-bottom: 6px;
+    line-height: 1.2;
+}
+
+.badge-stock.stock-in {
+    background: rgba(16, 185, 129, 0.12);
+    color: #10B981;
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.badge-stock.stock-low {
+    background: rgba(245, 158, 11, 0.12);
+    color: #D97706;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.badge-stock.stock-out {
+    background: rgba(239, 68, 68, 0.12);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+body.dark-mode .badge-stock.stock-in {
+    background: rgba(16, 185, 129, 0.2);
+    color: #34D399;
+}
+
+body.dark-mode .badge-stock.stock-low {
+    background: rgba(245, 158, 11, 0.2);
+    color: #FBBF24;
+}
+
+body.dark-mode .badge-stock.stock-out {
+    background: rgba(239, 68, 68, 0.2);
+    color: #F87171;
+}
+
+
 .product-price-wrapper {
     margin-top: auto;
     padding-top: 10px;
